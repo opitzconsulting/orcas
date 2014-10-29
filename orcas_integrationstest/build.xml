@@ -151,7 +151,7 @@
 
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
-<![CDATA[<testsuite name="${akt_verzeichnis}" tests="1" >]]></concat>
+<![CDATA[<testsuite name="${akt_verzeichnis}" >]]></concat>
     </sequential>
   </macrodef>      
 
@@ -159,10 +159,10 @@
     <sequential>
       <echo message="### Skipping ${akt_verzeichnis} due to required features: ${required_feature_list} ; available features: ${available_feature_list} ###" />
 
-      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false">
-<![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
-<![CDATA[<testsuite name="${akt_verzeichnis}" tests="0" >]]></concat>
+<![CDATA[<testsuite name="${akt_verzeichnis}" >]]></concat>
+      <log_skip testname="run"/>
     </sequential>
   </macrodef>      
 
@@ -194,6 +194,17 @@ ${akt_verzeichnis}: @{message}</concat>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
 <![CDATA[
     <testcase name="@{testname}">
+    </testcase>]]></concat>
+    </sequential>
+  </macrodef>    
+
+  <macrodef name="log_skip">
+    <attribute name="testname" />
+    <sequential>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[
+    <testcase name="@{testname}">
+      <skipped/>
     </testcase>]]></concat>
     </sequential>
   </macrodef>    
@@ -478,6 +489,9 @@ ${akt_verzeichnis}: @{message}</concat>
 
                     <check_struktur_equal user1="${zielskript}" logfile1="zielskript_extract_nodata" user2="${ueberfuehrung}" logfile2="ueberfuehrung_extract_nodata" includedata="false" testname="test_run_with_extract" />
                   </then>
+                  <else>
+                    <log_skip testname="test_run_with_extract" />
+                  </else>
                 </if>
 
                 <if>
@@ -509,6 +523,17 @@ ${akt_verzeichnis}: @{message}</concat>
                       </else>                  
                     </if>        
                   </then>
+                  <else>
+                    <if>
+                      <and>
+                        <available file="@{folder}/tabellen_sqlplus/tabelle.sql" />
+                      </and>
+                      <then>
+                        <log_skip testname="test_run_sqlplus" />
+                        <log_skip testname="second_run_does_nothing_sqlplus" />
+                      </then>                      
+                    </if>
+                  </else>                  
                 </if>
 
                 <if>
