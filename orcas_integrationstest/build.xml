@@ -546,12 +546,11 @@ ${akt_verzeichnis}: @{message}</concat>
     </if>
 
     <!-- Abfrage der fehlgeschlagenen Tests -->
-    <dirset dir="${tmpfolder}/" casesensitive="no" id="failed-tests">
-      <include name="*test*/**/error.txt" />
-    </dirset>
+    <fileset dir="${tmpfolder}" id="failed-tests">
+      <include name="**/*error.txt" />
+    </fileset>
 
     <pathconvert pathsep="&#xA;" property="tests" refid="failed-tests">
-      <mapper type="flatten" />
     </pathconvert>
 
     <orcas_delete_directory folder="${tmpfolder}/" backup-to-folder="${runfolder}/${location}/" />
