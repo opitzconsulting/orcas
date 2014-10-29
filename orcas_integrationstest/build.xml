@@ -149,8 +149,7 @@
       <echo message="                              now running test: ${akt_verzeichnis}" />
       <echo message="#############################                                      #############################" />
 
-      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false">
-<![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
 <![CDATA[<testsuite name="${akt_verzeichnis}" tests="1" >]]></concat>
     </sequential>
