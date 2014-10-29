@@ -143,16 +143,64 @@
     </sequential>
   </macrodef>
 
+  <macrodef name="log_start_test">
+    <sequential>
+      <echo message="#############################                                      #############################" />
+      <echo message="                              now running test: ${akt_verzeichnis}" />
+      <echo message="#############################                                      #############################" />
+
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[<testsuite name="${akt_verzeichnis}" tests="1" >]]></concat>
+    </sequential>
+  </macrodef>      
+
+  <macrodef name="log_skip_test">
+    <sequential>
+      <echo message="### Skipping ${akt_verzeichnis} due to required features: ${required_feature_list} ; available features: ${available_feature_list} ###" />
+
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[<testsuite name="${akt_verzeichnis}" tests="0" >]]></concat>
+    </sequential>
+  </macrodef>      
+
+  <macrodef name="log_end_test">
+    <sequential>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[</testsuite>]]></concat>
+    </sequential>
+  </macrodef>      
+
   <macrodef name="log_error">
     <attribute name="message" />
+    <attribute name="testname" />
     <sequential>
       <echo message="${akt_verzeichnis}: @{message}" />
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/error.txt" append="true">
 ${akt_verzeichnis}: @{message}</concat>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[
+    <testcase name="@{testname}">
+      <failure type="@{testname}">@{message}</failure>
+    </testcase>]]></concat>
+    </sequential>
+  </macrodef>    
+
+  <macrodef name="log_success">
+    <attribute name="testname" />
+    <sequential>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[
+    <testcase name="@{testname}">
+    </testcase>]]></concat>
     </sequential>
   </macrodef>    
 
   <macrodef name="check_struktur_equal">
+    <attribute name="testname" />
     <attribute name="user1" />
     <attribute name="logfile1" />
     <attribute name="user2" />
@@ -173,9 +221,12 @@ ${akt_verzeichnis}: @{message}</concat>
           <equals arg1="${checksumme_1}" arg2="${checksumme_2}" />                  
         </not>
         <then>                    
-          <log_error message="Diffvergleich fehlerhaft: @{user1}-@{logfile1} != @{user2}-@{logfile2}" />                      
+          <log_error message="Diffvergleich fehlerhaft: @{user1}-@{logfile1} != @{user2}-@{logfile2}" testname="@{testname}" />                      
           <diff_files datei1="struktur_@{logfile1}.log" datei2="struktur_@{logfile2}.log" logfile="diff_@{logfile1}_@{logfile2}.log" />
         </then>                                                 
+        <else>
+          <log_success testname="@{testname}" />                      
+        </else>
       </if>      
     </sequential>
   </macrodef>    
@@ -224,7 +275,7 @@ ${akt_verzeichnis}: @{message}</concat>
           <equals arg1="${failedspool}" arg2="" />
         </not>
         <then>
-          <log_error message="spool fehlgeschlagen" />
+          <log_error message="spool fehlgeschlagen" testname="no_ora_errors" />
         </then>
       </if>
     </sequential>
@@ -345,9 +396,7 @@ ${akt_verzeichnis}: @{message}</concat>
             <if>
               <equals arg1="${test_runnable}" arg2="true" />
               <then>
-                <echo message="#############################                                      #############################" />
-                <echo message="                              now running test: ${akt_verzeichnis}" />
-                <echo message="#############################                                      #############################" />
+                <log_start_test/>
 
                 <mkdir dir="${tmpfolder}/${akt_verzeichnis}" />
 
@@ -378,7 +427,12 @@ ${akt_verzeichnis}: @{message}</concat>
                 <orcas_grant user="${protokoll}" userorcas="${user_orcas}" />
                 <orcas_grant user="${zielskript}" userorcas="${user_orcas}" />
                 
-                <orcas_execute_script user="${anotherSchema}" password="${password_testuser}" script="@{folder}/erzeuge_tabelle_in_extra_schema.sql" parameter="${anotherSchema}" />
+                <if>
+                  <available file="@{folder}/erzeuge_tabelle_in_extra_schema.sql" />
+                  <then>
+                    <orcas_execute_script user="${anotherSchema}" password="${password_testuser}" script="@{folder}/erzeuge_tabelle_in_extra_schema.sql" parameter="${anotherSchema}" />
+                  </then>
+                </if>
                 <orcas_grant user="${anotherSchema}" userorcas="${user_orcas}" />
                 <orcas_grant_ref user="${ueberfuehrung}" userorcas="${anotherSchema}" />
                 <orcas_grant_ref user="${zielskript}" userorcas="${anotherSchema}" />
@@ -408,11 +462,11 @@ ${akt_verzeichnis}: @{message}</concat>
                   createmissingfkindexes="${createMissingFkIndexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test"
                   logname="protokoll" excludewheresequence="${excludewheresequence}" />
 
-                <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${ueberfuehrung}" logfile2="ueberfuehrung" />
+                <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${ueberfuehrung}" logfile2="ueberfuehrung" testname="test_run" />
 
                 <orcas_execute_script executiondir="${tmpfolder}/${akt_verzeichnis}/Protokoll" user="${protokoll}" script="master_install.sql" userorcas="${user_orcas}" logname="ausfuehren_protokoll" />
       
-                <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${protokoll}" logfile2="protokoll" />
+                <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${protokoll}" logfile2="protokoll" testname="test_run_with_log" />
 
                 <if>
                   <equals arg1="${test_extract}" arg2="true" />
@@ -423,7 +477,7 @@ ${akt_verzeichnis}: @{message}</concat>
                       dropmode="${dropmode}" indexparallelcreate="${indexParallelCreate}" indexmovetablespace="${indexMoveTablespace}" tablemovetablespace="${tableMoveTablespace}" 
                       createmissingfkindexes="${createMissingFkIndexes}" logname="extract_output" excludewheresequence="${excludewheresequence}" />                
 
-                    <check_struktur_equal user1="${zielskript}" logfile1="zielskript_extract_nodata" user2="${ueberfuehrung}" logfile2="ueberfuehrung_extract_nodata" includedata="false" />
+                    <check_struktur_equal user1="${zielskript}" logfile1="zielskript_extract_nodata" user2="${ueberfuehrung}" logfile2="ueberfuehrung_extract_nodata" includedata="false" testname="test_run_with_extract" />
                   </then>
                 </if>
 
@@ -444,47 +498,42 @@ ${akt_verzeichnis}: @{message}</concat>
                       dropmode="${dropmode}" indexparallelcreate="${indexParallelCreate}" indexmovetablespace="${indexMoveTablespace}" tablemovetablespace="${tableMoveTablespace}" createmissingfkindexes="${createMissingFkIndexes}" 
                       logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test" />                
 
-                    <check_struktur_equal user1="${zielskript}" logfile1="zielskript_sqlplus" user2="${ueberfuehrung}" logfile2="ueberfuehrung_sqlplus" />
+                    <check_struktur_equal user1="${zielskript}" logfile1="zielskript_sqlplus" user2="${ueberfuehrung}" logfile2="ueberfuehrung_sqlplus" testname="test_run_sqlplus" />
+
+                    <if>
+                      <available file="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test/master_install.sql" />
+                      <then>
+                        <log_error message="Zweiter Lauf der Tabellenskripte (sqlplus) fehlgeschlagen (Abweichung zum ersten Lauf der SVW)" testname="second_run_does_nothing_sqlplus" />  
+                      </then>
+                      <else>
+                        <log_success testname="second_run_does_nothing_sqlplus" />  
+                      </else>                  
+                    </if>        
                   </then>
                 </if>
 
                 <if>
                   <available file="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test/master_install.sql" />
                   <then>
-                    <log_error message="Zweiter Lauf der Tabellenskripte fehlgeschlagen (Abweichung zum ersten Lauf der SVW)" />  
+                    <log_error message="Zweiter Lauf der Tabellenskripte fehlgeschlagen (Abweichung zum ersten Lauf der SVW)" testname="second_run_does_nothing" />  
                   </then>
+                  <else>
+                    <log_success testname="second_run_does_nothing" />  
+                  </else>                  
                 </if>                                              
-
-                <if>
-                  <available file="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test/master_install.sql" />
-                  <then>
-                    <log_error message="Zweiter Lauf der Tabellenskripte (sqlplus) fehlgeschlagen (Abweichung zum ersten Lauf der SVW)" />  
-                  </then>
-                </if>        
 
                 <check_no_ora_errors/>
               </then>
               <else>
-                <echo message="### Skipping ${akt_verzeichnis} due to required features: ${required_feature_list} ; available features: ${available_feature_list} ###" />
+                <log_skip_test/>
               </else>
             </if>            
           </try>
           <catch>
-            <log_error message="exception fehlgeschlagen ${single_run_exception}" />            
+            <log_error message="exception fehlgeschlagen ${single_run_exception}" testname="exception" />            
           </catch>
         </trycatch>
-
-        <if>
-          <and>
-            <equals arg1="${keep_files_on_success}" arg2="false" />
-            <not>
-              <available file="${tmpfolder}/${akt_verzeichnis}/error.txt" />
-            </not>              
-          </and>
-          <then>
-            <delete dir="${tmpfolder}/${akt_verzeichnis}" />
-          </then>
-        </if>  
+        <log_end_test/>                
       </sequential>
     </for>
 
@@ -499,35 +548,20 @@ ${akt_verzeichnis}: @{message}</concat>
 
     <!-- Abfrage der fehlgeschlagenen Tests -->
     <dirset dir="${tmpfolder}/" casesensitive="no" id="failed-tests">
-      <include name="test*" />
-      <include name="*test" />
-      <include name="*test*" />
+      <include name="*test*/**/error.txt" />
     </dirset>
 
     <pathconvert pathsep="&#xA;" property="tests" refid="failed-tests">
       <mapper type="flatten" />
     </pathconvert>
 
-    <if>
-      <equals arg1="${keep_files_on_success}" arg2="false" />
-      <then>
-        <delete dir="${runfolder}/${location}/" />
-      </then>
-    </if>
+    <orcas_delete_directory folder="${tmpfolder}/" backup-to-folder="${runfolder}/${location}/" />
 
     <!-- Distribution-Testergebnis erstellen -->
     <if>
       <equals arg1="${tests}" arg2="" />
       <then>
         <echo message="${location} erfolgreich" />
-        <if>
-          <equals arg1="${keep_files_on_success}" arg2="false" />
-          <then>        
-            <orcas_delete_directory folder="${tmpfolder}" backup-to-folder="${runfolder}/${location}" />
-            <move file="${runfolder}/${location}/${location}_Ergebnis.log" tofile="${runfolder}/${location}_erfolgreich.log" />
-            <delete dir="${runfolder}/${location}/" />
-          </then>
-        </if>            
       </then>
       <else>
         <echo message="#############################                                      #############################" />
@@ -536,7 +570,6 @@ ${akt_verzeichnis}: @{message}</concat>
         <echo message="#############################                                      #############################" />
         <echo file="${tmpfolder}/${location}_Ergebnis.log" append="yes" message="${line.separator}Fehlgeschlagene Tests:${line.separator}" />
         <echo file="${tmpfolder}/${location}_Ergebnis.log" append="yes" message="${tests}" />
-        <orcas_delete_directory folder="${tmpfolder}/" backup-to-folder="${runfolder}/${location}/" />
         <move file="${runfolder}/${location}/${location}_Ergebnis.log" tofile="${runfolder}/${location}_fehlgeschlagen.log" />
       </else>
     </if>
