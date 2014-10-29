@@ -1,0 +1,171 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<project name="orcas_dbdoc">
+
+  <macrodef name="orcas_dbdoc_internal_check">
+    <attribute name="destfolder" />
+    <attribute name="tmpfolder" />
+    <attribute name="fileending" />
+    <sequential>
+      <mkdir dir="@{tmpfolder}/check"/>      
+      <copy todir="@{tmpfolder}/check" overwrite="true">
+        <fileset dir="@{tmpfolder}/dotfiles" includes="*.dot">
+        </fileset>
+        <globmapper from="*.dot" to="*.@{fileending}"/>
+      </copy>        
+      <for param="file">
+        <path>
+          <fileset dir="@{tmpfolder}/check" includes="*.@{fileending}">
+            <not>
+              <present targetdir="@{destfolder}"/>
+            </not>
+          </fileset>
+        </path>
+        <sequential>      
+          <var name="orcas_internal_dbdoc_missing_file" unset="true"/>          
+          <basename property="orcas_internal_dbdoc_missing_file" file="@{file}"/>       
+          <echo message="############### file could not be created: ${orcas_internal_dbdoc_missing_file} ###############"/>
+        </sequential>
+      </for>
+      <for param="file">
+        <path>
+          <fileset dir="@{destfolder}" includes="*.@{fileending}">
+            <size value="0" units="K" when="equal"/>
+          </fileset>
+        </path>
+        <sequential>      
+          <var name="orcas_internal_dbdoc_missing_file" unset="true"/>          
+          <basename property="orcas_internal_dbdoc_missing_file" file="@{file}"/>       
+          <echo message="############### file is empty: ${orcas_internal_dbdoc_missing_file} ###############"/>
+        </sequential>
+      </for>      
+    </sequential>
+  </macrodef>      
+
+  <macrodef name="orcas_dbdoc_internal_dotexec">
+    <attribute name="dotexecutable"/>
+    <attribute name="dotfile"/>
+    <attribute name="outfolder" />
+    <attribute name="tmpfolder" />
+    <sequential>
+      <var name="@{dotfile}" unset="true"/>          
+      <basename property="@{dotfile}" file="@{dotfile}" suffix=".dot"/>
+      <echo message="generating for: ${@{dotfile}}"/>
+      <exec executable="@{dotexecutable}">
+        <arg value="-Tpng"/>
+        <arg value="-o@{outfolder}/${@{dotfile}}.png"/>
+        <arg value="@{dotfile}"/>
+      </exec>
+      <exec executable="@{dotexecutable}">
+        <arg value="-Tsvg"/>
+        <arg value="-o@{outfolder}/${@{dotfile}}.svg"/>
+        <arg value="@{dotfile}"/>
+      </exec>    
+      <exec executable="@{dotexecutable}">
+        <arg value="-Tcmapx"/>
+        <arg value="-o@{tmpfolder}/mapfiles/${@{dotfile}}.map"/>
+        <arg value="@{dotfile}"/>
+      </exec>
+    </sequential>
+  </macrodef>      
+
+  <macrodef name="orcas_dbdoc_internal_dotfileloop">
+    <attribute name="dotbinfolder"/>
+    <attribute name="dotfileextension"/>
+    <attribute name="outfolder" />
+    <attribute name="tmpfolder" />
+    <sequential>
+      <delete dir="@{tmpfolder}/dotfilesfor_@{dotfileextension}"/>
+      <mkdir dir="@{tmpfolder}/dotfilesfor_@{dotfileextension}"/>
+      <move todir="@{tmpfolder}/dotfilesfor_@{dotfileextension}">
+        <fileset dir="@{tmpfolder}/dotfiles" includes="*.@{dotfileextension}"/>
+        <globmapper from="*.@{dotfileextension}" to="*.dot"/>        
+      </move>
+      <for param="file" parallel="true" threadCount="8">
+        <path>
+          <fileset dir="@{tmpfolder}/dotfilesfor_@{dotfileextension}" includes="*.dot"/>
+        </path>
+        <sequential>
+          <orcas_dbdoc_internal_dotexec dotexecutable="@{dotbinfolder}@{dotfileextension}" dotfile="@{file}" outfolder="@{outfolder}" tmpfolder="@{tmpfolder}"/>
+        </sequential>
+      </for>    
+    </sequential>
+  </macrodef>        
+
+  <macrodef name="orcas_internal_gradle_build_dbdoc">
+    <attribute name="tmpfolder" />
+    <sequential>
+      <property environment="orcas_internal_environment" />
+      <condition property="orcas_internal_gradle_path" value="${orcas_internal_environment.GRADLE_HOME}/bin/" else="">
+        <isset property="orcas_internal_environment.GRADLE_HOME"/>             
+      </condition>
+      <condition property="orcas_internal_gradle_executable" value="${orcas_internal_gradle_path}gradle.bat" else="${orcas_internal_gradle_path}gradle">
+        <os family="windows" />
+      </condition>              
+
+      <var name="orcas_internal_tmpfolder" unset="true" />
+      <property name="orcas_internal_tmpfolder" location="@{tmpfolder}"/>
+      
+      <exec executable="${orcas_internal_gradle_executable}" dir="${orcas_dbdoc_dir}" failonerror="true">
+        <arg value="installDist" />
+        <arg value="-Porcas_tmp_folder=${orcas_internal_tmpfolder}/gradle_build" />
+      </exec>
+    </sequential>
+  </macrodef>       
+
+  <macrodef name="orcas_dbdoc">
+    <attribute name="jdbcurl" />
+    <attribute name="user" />
+    <attribute name="password" />
+    <attribute name="outfolder" />
+    <attribute name="tmpfolder" />
+    <element name="config"/>    
+    <attribute name="dotbinfolder" default=""/>
+    <sequential>
+      <mkdir dir="@{tmpfolder}"/>
+      <mkdir dir="@{outfolder}"/>
+      <delete includeemptydirs="true">
+        <fileset dir="@{tmpfolder}" includes="**/*" defaultexcludes="false"/>
+        <fileset dir="@{outfolder}" includes="**/*" defaultexcludes="false"/>        
+      </delete>
+      <orcas_internal_gradle_build_dbdoc tmpfolder="@{tmpfolder}" />
+      <mkdir dir="@{tmpfolder}/mapfiles"/>
+      <mkdir dir="@{outfolder}"/>
+      <mkdir dir="@{tmpfolder}/dotfiles"/>      
+
+      <path id="orcas_internal_dbdoc_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_orcas_dbdoc/install/orcas_dbdoc">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <taskdef name="orcas_internal_dbdoc" classname="de.oc.dbdoc.ant.OrcasDbDoc" classpathref="orcas_internal_dbdoc_classpath"/>
+      <orcas_internal_dbdoc jdbcurl="@{jdbcurl}" user="@{user}" password="@{password}" outfolder="@{outfolder}" tmpfolder="@{tmpfolder}" velocitytemplatepath="${orcas_dbdoc_dir}/java/src/htmltemplates">
+        <config/>
+      </orcas_internal_dbdoc>  
+
+      <for param="dotfileextension" list="dot,neato,twopi,circo,fdp,sfdp">
+        <sequential>
+          <orcas_dbdoc_internal_dotfileloop dotfileextension="@{dotfileextension}" dotbinfolder="@{dotbinfolder}" outfolder="@{outfolder}" tmpfolder="@{tmpfolder}"/>
+        </sequential>
+      </for>
+
+      <for param="file">
+        <path>
+          <fileset dir="@{tmpfolder}/dotfiles" includes="*.*"/>
+        </path>
+        <sequential>
+          <fail message="@{file} extension unknown"/>
+        </sequential>
+      </for>    
+
+      <java classname="de.oc.dbdoc.postprocessing.Main" failonerror="true" classpathref="orcas_internal_dbdoc_classpath">
+        <arg value="@{outfolder}"/>
+        <arg value="@{tmpfolder}/mapfiles"/>
+      </java>
+      <orcas_dbdoc_internal_check destfolder="@{outfolder}" tmpfolder="@{tmpfolder}" fileending="png" />
+      <orcas_dbdoc_internal_check destfolder="@{outfolder}" tmpfolder="@{tmpfolder}" fileending="svg" />
+      <orcas_dbdoc_internal_check destfolder="@{tmpfolder}/mapfiles" tmpfolder="@{tmpfolder}" fileending="map" />
+    </sequential>
+  </macrodef>
+</project>
+

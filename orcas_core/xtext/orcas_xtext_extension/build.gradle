@@ -1,0 +1,8 @@
+
+project.ext.mwe2_file_name     = "src/de/opitzconsulting/GenerateOrcasXtextExtension.mwe2"
+project.ext.project_dir        = "."
+project.ext.postfix            = ""
+project.ext.xtext_project_name = "orcas_xtext_extension"
+
+apply from: '../xtext_generator_build_plugin.gradle'
+

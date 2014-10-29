@@ -1,0 +1,32 @@
+apply plugin: 'distribution'
+
+configurations 
+{
+  xtextDistribution 
+  {
+  }
+}
+
+dependencies 
+{
+  xtextDistribution project(path: ':orcas', configuration: 'sqlplusJarConfig')
+  xtextDistribution project(':orcas_syex')
+  xtextDistribution project(':orcas_extensions')
+  xtextDistribution project(':orcas_db_objects')
+}
+
+distributions 
+{
+  main 
+  {
+    contents 
+    {
+      from { configurations.xtextDistribution }
+      //from { "${project(':orcas').buildDir}/sqlplus" }
+      //from { "${project(':orcas_syex').buildDir}/sqlplus" }
+      //from { "${project(':orcas_extensions').buildDir}/sqlplus" }
+    }
+  }
+}
+
+

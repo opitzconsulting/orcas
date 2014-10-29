@@ -1,0 +1,62 @@
+repositories 
+{
+  mavenCentral()
+}
+
+project.ext.tmp_folder = orcas_tmp_folder
+
+project.version = "1.0"
+project.buildDir = project.ext.tmp_folder + "/_" + project.name
+
+apply plugin: 'java'
+apply plugin: 'distribution'
+
+configurations 
+{
+  libBase 
+  distributionConfig 
+}
+
+configurations.compile.extendsFrom(configurations.libBase)
+configurations.distributionConfig.extendsFrom(configurations.libBase)
+
+sourceSets 
+{
+  main 
+  {
+    java 
+    {
+      srcDir 'java/src'
+    }
+  }
+  test
+  {
+    java 
+    {
+      srcDir 'java/test'
+    }
+  }
+}
+
+
+dependencies 
+{
+  libBase "org.apache.velocity:velocity:1.7"
+  libBase fileTree(dir: System.getenv("ORACLE_HOME")+"/jdbc/lib", include: '*.jar')
+  compile gradleApi()
+  distributionConfig files( jar.archivePath )
+}
+
+distributions 
+{
+  main 
+  {
+    contents 
+    {
+      from { configurations.distributionConfig }
+    }
+  }
+}
+
+installDist.dependsOn(build)
+

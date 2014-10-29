@@ -1,0 +1,10 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<project default="ci_jenkins" basedir=".">
+  <target name="ci_jenkins" >
+    <ant dir="domain_extension_demo/db" target="ci_jenkins"/>  
+    <ant dir="extension_demo/db" target="ci_jenkins"/>  
+    <ant dir="orderentry/db" target="ci_jenkins"/>  
+    <ant dir="sqlplus/db" target="ci_jenkins"/>  
+  </target>
+</project>
+

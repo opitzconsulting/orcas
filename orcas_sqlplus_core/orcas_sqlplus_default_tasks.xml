@@ -1,0 +1,140 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<project name="ant_default_include">
+  <property name="orcas_dir" value="${orcas_sqlplus_dir}/../orcas_core"/>
+  <property name="orcas_domain_extension_dir" value="${orcas_sqlplus_dir}/../orcas_domain_extension"/>
+  <import file="${orcas_dir}/orcas_default_tasks.xml"/>
+
+  <macrodef name="orcas_sqlplus_grant">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <sequential>
+      <orcas_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+    </sequential>
+  </macrodef>    
+
+  <macrodef name="orcas_sqlplus_initialize">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="extensionfolder" default="" />
+    <attribute name="extensionparameter" default="" />
+    <sequential>
+      <delete dir="@{tmpfolder}/orcas_sqlplus_core" />
+      <mkdir dir="@{tmpfolder}/orcas_sqlplus_core/extensions" />
+      <copy todir="@{tmpfolder}/orcas_sqlplus_core/extensions" >
+        <fileset dir="${orcas_domain_extension_dir}/extensions">
+          <include name="**/*" />
+        </fileset>
+      </copy>      
+      <if>
+        <not>
+          <equals arg1="@{extensionfolder}" arg2="" />
+        </not>
+        <then>
+          <copy todir="@{tmpfolder}/orcas_sqlplus_core/extensions">
+            <fileset dir="@{extensionfolder}">
+              <include name="**/*" />
+            </fileset>
+          </copy>      
+        </then>
+      </if>             
+      <orcas_initialize user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" autotimestamp="@{autotimestamp}" extensionfolder="@{tmpfolder}/orcas_sqlplus_core/extensions" extensionparameter="@{extensionparameter}"/>
+      <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/h_pa_orcas_sqlplus_model_holder.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+      <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/b_pa_orcas_sqlplus_model_holder.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+      <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/h_pa_orcas_sqlplus_utils.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+      <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/b_pa_orcas_sqlplus_utils.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+      <orcas_sqlplus_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_sqlplus_execute_statics">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="logonly" default="false" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="scriptfolder" />
+    <attribute name="scriptprefix" default="" />
+    <attribute name="scriptpostfix" default=".sql" />
+    <attribute name="scriptfolderrecursive" default="false" />
+    <attribute name="dropmode" default="false" />
+    <attribute name="indexparallelcreate" default="true" />
+    <attribute name="indexmovetablespace" default="true" />
+    <attribute name="tablemovetablespace" default="true" />
+    <attribute name="createmissingfkindexes" default="true" />
+    <attribute name="excludewheretable" default="object_name like ''%$%''" />
+    <attribute name="excludewheresequence" default="object_name like ''%$%''" />
+    <attribute name="loglevel" default="nologging" />
+    <attribute name="targetplsql" default="" />
+    <sequential>
+      <orcas_internal_log_action_start message="orcas_sqlplus_execute_statics" logname="@{logname}" />
+      <orcas_internal_set_internal_dir_depth scriptfolderrecursive="@{scriptfolderrecursive}" />
+
+      <var name="orcas_internal_table_scripts_exist" unset="true" />
+      <resourcecount property="orcas_internal_table_scripts_exist">
+        <fileset dir="@{scriptfolder}">
+          <include name="**/@{scriptprefix}*@{scriptpostfix}"/>
+        </fileset>
+      </resourcecount>
+      <if>
+        <not>
+          <equals arg1="${orcas_internal_table_scripts_exist}" arg2="0"/>
+        </not>
+        <then>
+          <delete dir="@{tmpfolder}/sqlplus/statics_concat"/>  
+          <mkdir dir="@{tmpfolder}/sqlplus/statics_concat"/>  
+          <concat destfile="@{tmpfolder}/sqlplus/statics_concat/statics_concat.sql" append="false" eol="crlf">
+            <fileset dir="@{scriptfolder}" includes="**/@{scriptprefix}*@{scriptpostfix}">
+              <depth max="${orcas_internal_dir_depth}" />
+            </fileset>
+          </concat>
+
+          <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="@{dropmode}" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="@{createmissingfkindexes}" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" logonly="@{logonly}"/>
+          <if>
+            <equals arg1="@{targetplsql}" arg2=""/>
+            <then>
+              <concat destfile="@{tmpfolder}/sqlplus/statics_concat/statics_concat.sql" append="true" eol="crlf">
+                <fileset dir="${orcas_sqlplus_dir}/sql_util_scripts" includes="call_orcas_sqlplus.sql" />
+              </concat>
+            </then>
+            <else>
+              <concat destfile="@{tmpfolder}/sqlplus/statics_concat/statics_concat.sql" append="true" eol="crlf">
+                <fileset dir="${orcas_sqlplus_dir}/sql_util_scripts" includes="call_orcas_sqlplus_target_plsql.sql" />
+              </concat>
+            </else>
+          </if>
+
+          <fixcrlf srcdir="@{tmpfolder}/sqlplus/statics_concat" includes="statics_concat.sql" eol="crlf" />
+
+          <copy todir="@{tmpfolder}/sqlplus/statics_concat">
+            <fileset dir="${orcas_sqlplus_dir}/sqlplus_api/sql">
+              <include name="**/*" />
+            </fileset>
+          </copy>      
+
+          <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/sqlplus/statics_concat/statics_concat.sql" parameter="@{targetplsql}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
+
+          <orcas_internal_spool_from_db user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" />
+        </then>
+        <else>
+          <echo message="Es wurden keine Tabellendaten gefunden"/>
+        </else>
+      </if>
+    </sequential>
+  </macrodef>
+</project>
+
+

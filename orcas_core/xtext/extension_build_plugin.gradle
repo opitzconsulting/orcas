@@ -1,0 +1,84 @@
+apply plugin: 'java'
+
+build.dependsOn.remove("check")
+
+dependencies 
+{
+  compile "org.eclipse.xtext:org.eclipse.xtext.builder.standalone:${project.ext.xtext_version}"
+  compile "org.eclipse.xtext:org.eclipse.xtext.xtext:${project.ext.xtext_version}"
+}
+
+class SyncWithDeleteTask extends DefaultTask 
+{
+  @InputDirectory
+  File fromDir
+
+  @OutputDirectory
+  File intoDir
+
+  String excludeDef
+  String excludeDef2
+  String includeDef
+
+  @TaskAction
+  def doIt() 
+  {
+    ant.delete(dir: intoDir)
+    ant.copy(todir: intoDir) 
+    {
+      fileset(dir: fromDir) 
+      {
+        include(name: includeDef)
+        exclude(name: excludeDef)
+        exclude(name: excludeDef2)
+      }
+    }
+  }
+}
+
+task(copyExtensions, type: SyncWithDeleteTask) 
+{
+  fromDir = file(project.ext.extension_folder)
+  intoDir = file("${buildDir}/extensions")
+
+  excludeDef = project.ext.extension_folder_exclude
+  includeDef = project.ext.extension_folder_include
+}
+
+task(generateAll, dependsOn: copyExtensions)
+{
+  inputs.property("extensionparameter",project.ext.extensionparameter)
+  inputs.dir "${buildDir}/extensions"
+  outputs.dir new File("${buildDir}/all_extension")
+
+  doLast 
+  {
+    new File("${buildDir}/all_extension").mkdirs();
+    def allFile = new File("${buildDir}/all_extension/All${project.ext.extension_interface_name}s.java");
+    allFile.delete();
+    allFile << """
+package de.opitzconsulting.orcas.${project.ext.extension_package_name};
+
+public class All${project.ext.extension_interface_name}s extends BaseMulti${project.ext.extension_interface_name}s
+{
+  public All${project.ext.extension_interface_name}s()
+  {
+"""
+ 
+    new File("${buildDir}/extensions").mkdirs();
+    new File("${buildDir}/extensions").listFiles().sort{ it.name }.each
+    { 
+      allFile << """    addExtension( new ${it.getName().split('\\.')[0]}() ); """
+    }
+
+    allFile << """
+    setParameter( "${project.ext.extensionparameter}" );
+  }
+}
+"""
+  }
+}
+
+compileJava.source new File("${buildDir}/extensions"), new File("${buildDir}/all_extension")
+compileJava.dependsOn generateAll, generateAll
+

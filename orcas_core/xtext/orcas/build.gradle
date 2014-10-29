@@ -1,0 +1,30 @@
+project.ext.project_dir        = "."
+project.ext.mwe2_file_name     = "src/de/opitzconsulting/GenerateOrcasDsl.mwe2"
+project.ext.postfix            = "orig"
+project.ext.xtext_project_name = "orcas"
+
+apply from: '../xtext_generator_build_with_plsql_plugin.gradle'
+
+task(generateTransformerPackage, dependsOn: createSqlplusDir, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath
+
+  main = "de.opitzconsulting.orcas.ot.OtTransformerPackageGenerator"
+  args "${buildDir}/sqlplus/db/packages/transformer.sql"
+  args "orig"
+
+  outputs.file args[0]
+}
+
+sqlplusJar.dependsOn generateTransformerPackage
+
+configurations
+{
+  sqlplusJarConfig
+}
+
+artifacts
+{
+  sqlplusJarConfig sqlplusJar
+}
+

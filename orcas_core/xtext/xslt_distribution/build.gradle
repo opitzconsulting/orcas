@@ -1,0 +1,26 @@
+apply plugin: 'distribution'
+
+configurations 
+{
+  xsltDistribution 
+  {
+  }
+}
+
+dependencies 
+{
+  xsltDistribution "xalan:xalan:2.7.2"
+}
+
+distributions 
+{
+  main 
+  {
+    contents 
+    {
+      from { configurations.xsltDistribution }
+    }
+  }
+}
+
+

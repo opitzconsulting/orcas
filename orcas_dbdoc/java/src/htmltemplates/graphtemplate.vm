@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>$pTitle</title>
+  </head>
+
+  <body>
+    <h1>$pTitle</h1>
+#if( $pParentGraphLink )    
+    Parent: $pParentGraphLink 
+#end
+#if( $pGraphChangeLink )    
+    Change view: $pGraphChangeLink
+#end
+#if( $pParentGraphLink || $pGraphChangeLink )   
+    <br/>
+#end    
+#if( $pParentGraphLinks ) 
+    <h2>Diagrams:</h2>
+#foreach( $lGraphLink in $pParentGraphLinks )
+    $lGraphLink<br />
+#end    
+#end    
+#if( $pSubGraphLinks )    
+    <h2>Details:</h2>
+#foreach( $lSubGraphLink in $pSubGraphLinks )
+    $lSubGraphLink<br />
+#end
+#end
+    <br/>    
+    <a href="$pSvgName">open SVG</a>
+    <br/>
+    <img src="$pImageName" alt="$pTitle" title="$pTitle" usemap="#G" />
+    <!-- MAPCODE -->
+    <br/>    
+#if( $pSubTableLinks )    
+    <p>
+      <h2>Tables:</h2>
+      #foreach( $lSubTableLink in $pSubTableLinks )
+        $lSubTableLink<br />
+      #end
+    </p>
+#end
+#if( $pTableSource )    
+    <p>
+      <h2>Source:</h2>
+      <pre><code><strong>$pTableSource</code></strong></pre>              
+    </p>
+#end
+  </body>
+</html>
