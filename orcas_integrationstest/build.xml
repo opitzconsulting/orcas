@@ -261,8 +261,8 @@ ${akt_verzeichnis}: @{message}</concat>
         <else>																<!-- Unix Diffvergleich -->
           <exec dir="@{executiondir}" executable="diff" failonerror="false" resultproperty="diff_files_result" output="@{executiondir}@{logfile}">
             <arg line="-b " />
-            <arg line="@{executiondir}@{datei1}" />
-            <arg line="@{executiondir}@{datei2}" />
+            <arg line="@{datei1}" />
+            <arg line="@{datei2}" />
           </exec>
         </else>
       </if>
