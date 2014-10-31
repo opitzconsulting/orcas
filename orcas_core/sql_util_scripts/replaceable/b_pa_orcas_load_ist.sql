@@ -1177,7 +1177,7 @@ $END
           v_orig_mviewlog.i_purge := 'purge';
           if (cur_mviewlogs.purge_deferred = 'YES')
           then
-            v_orig_mviewlog.i_startwith := cur_mviewlogs.purge_start;
+            v_orig_mviewlog.i_startwith := replace(cur_mviewlogs.purge_start,'-OCT-','.10.');
             v_orig_mviewlog.i_repeatInterval := cur_mviewlogs.purge_interval;
             v_orig_mviewlog.i_next := cur_mviewlogs.purge_next;
           else 
