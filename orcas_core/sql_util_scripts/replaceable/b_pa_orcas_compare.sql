@@ -2099,7 +2099,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
             )
           then
             stmt_set( 'alter materialized view log on' );
-            stmt_add( v_orig_table_ist.i_name );       
+            stmt_add( p_orig_table_soll.i_name );       
             
             if( ot_orig_newvaluestype.is_equal( v_orig_mviewlog_soll.i_newvalues, ot_orig_newvaluestype.c_including, ot_orig_newvaluestype.c_excluding ) = 1 )
             then
@@ -2119,7 +2119,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
               )
             then
                 stmt_add( 'alter materialized view log on' ); 
-                stmt_add( v_orig_table_ist.i_name );    
+                stmt_add( p_orig_table_soll.i_name );    
                 stmt_add( 'purge' );   
                 if (    is_equal(v_orig_mviewlog_soll.i_startwith, v_orig_mviewlog_ist.i_startwith) != 1 )
                 then
@@ -2145,7 +2145,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
               if(  ot_orig_synchronoustype.is_equal( v_orig_mviewlog_ist.i_synchronous,  v_orig_mviewlog_soll.i_synchronous,  ot_orig_synchronoustype.c_synchronous  ) != 1 )
               then
                 stmt_add( 'alter materialized view log on' ); 
-                stmt_add( v_orig_table_ist.i_name );       
+                stmt_add( p_orig_table_soll.i_name );       
                 if( ot_orig_synchronoustype.is_equal( v_orig_mviewlog_soll.i_synchronous, ot_orig_synchronoustype.c_asynchronous, ot_orig_synchronoustype.c_synchronous ) = 1 )
                 then
                     stmt_add( 'purge immediate asynchronous' ); 
