@@ -1177,9 +1177,13 @@ $END
           v_orig_mviewlog.i_purge := 'purge';
           if (cur_mviewlogs.purge_deferred = 'YES')
           then
-            v_orig_mviewlog.i_startwith := replace(cur_mviewlogs.purge_start,'-OCT-','.10.');
+            v_orig_mviewlog.i_startwith := replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(
+              cur_mviewlogs.purge_start,'-OCT-','.10.'),'-NOV-','.11.'),'-DEC-','.12.'),'-JAN-','.01.'),'-FEB-','.02.'),'-MAR-','.03.'),'-APR-','.04.')
+                ,'-MAY-','.05.'),'-JUN-','.06.'),'-JUL-','.07.'),'-AUG-','.08.'),'-SEP-','.09.');
             v_orig_mviewlog.i_repeatInterval := cur_mviewlogs.purge_interval;
-            v_orig_mviewlog.i_next := cur_mviewlogs.purge_next;
+            v_orig_mviewlog.i_next := replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(
+              cur_mviewlogs.purge_next,'-OCT-','.10.'),'-NOV-','.11.'),'-DEC-','.12.'),'-JAN-','.01.'),'-FEB-','.02.'),'-MAR-','.03.'),'-APR-','.04.')
+                ,'-MAY-','.05.'),'-JUN-','.06.'),'-JUL-','.07.'),'-AUG-','.08.'),'-SEP-','.09.');
           else 
             if ( cur_mviewlogs.purge_asynchronous = 'YES')
               then
