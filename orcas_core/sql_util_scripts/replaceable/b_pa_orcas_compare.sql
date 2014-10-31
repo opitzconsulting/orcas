@@ -2114,8 +2114,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
           
           if (   is_equal(v_orig_mviewlog_soll.i_startwith, v_orig_mviewlog_ist.i_startwith) != 1 
               or is_equal(v_orig_mviewlog_soll.i_next, v_orig_mviewlog_ist.i_next) != 1 
-              or (    is_equal(v_orig_mviewlog_soll.i_repeatInterval, v_orig_mviewlog_ist.i_repeatInterval) != 1
-                  and v_orig_mviewlog_soll.i_repeatInterval != 0)
+              or (is_equal(nvl(v_orig_mviewlog_soll.i_repeatInterval,0), nvl(v_orig_mviewlog_ist.i_repeatInterval,0)) != 1)
               )
             then
                 stmt_add( 'alter materialized view log on' ); 

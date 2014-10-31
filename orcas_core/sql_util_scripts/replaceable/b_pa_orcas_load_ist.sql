@@ -1136,7 +1136,7 @@ $END
                include_new_values,
                purge_asynchronous,
                purge_deferred,
-               to_date(purge_start,'dd.mm.yy') purge_start,
+               purge_start,
                case when instr(purge_interval, 'sysdate') > 0 then substr(purge_interval, 11) end purge_interval,
                case when purge_interval is not null and instr(purge_interval, 'to_date') > 0 
                then to_date(substr(purge_interval, instr(purge_interval, '''',1,1)+1, instr(purge_interval, '''',1,2)-instr(purge_interval, '''',1,1)-1),substr(purge_interval, instr(purge_interval, '''',1,3)+1, instr(purge_interval, '''',1,4)-instr(purge_interval, '''',1,3)-1))
