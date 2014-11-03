@@ -193,6 +193,7 @@
     <apply-templates select="name" />
     <apply-templates select="data_type" />
     <apply-templates select="precision" />
+    <apply-templates select="with_time_zone" />
     <apply-templates select="object_type" />
     <apply-templates select="identity" />
     <apply-templates select="default_value" />
@@ -235,6 +236,10 @@
       <text>,</text>
       <value-of select="." />
     </if>
+  </template>
+  
+  <template match="with_time_zone">
+      <text> with time zone</text>
   </template>
 
   <template match="byteorchar">

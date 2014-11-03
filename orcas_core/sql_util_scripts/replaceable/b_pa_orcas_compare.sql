@@ -22,42 +22,6 @@ CREATE OR REPLACE package body pa_orcas_compare is
     return v_return;
   end;
   
-  function get_column_datatype( p_column in ot_orig_column ) return varchar2
-  is
-    v_datatype       varchar2(100);    
-  begin
-    if ( ot_orig_datatype.is_equal( p_column.i_data_type, ot_orig_datatype.c_object ) = 1 ) 
-    then
-      v_datatype := p_column.i_object_type;
-    else
-      if( ot_orig_datatype.is_equal( p_column.i_data_type, ot_orig_datatype.c_long_raw ) = 1 )
-      then
-        v_datatype := 'long raw';
-      else
-        v_datatype := upper(p_column.i_data_type.i_name);    
-      end if;
-      
-      if( p_column.i_precision != 0 )
-      then
-        v_datatype := v_datatype || '(' || p_column.i_precision;
-  
-        if( p_column.i_scale != 0 )
-        then
-          v_datatype := v_datatype || ',' || p_column.i_scale;            
-        end if;
-        
-        if( p_column.i_byteorchar is not null )
-        then
-          v_datatype := v_datatype || ' ' || upper(p_column.i_byteorchar.i_name);            
-        end if;      
-        
-        v_datatype := v_datatype || ')';      
-      end if;
-    end if;
-    
-    return v_datatype;
-  end;  
-  
   function is_equal( p_val1 number, p_val2 number ) return number
   is
   begin
@@ -156,6 +120,47 @@ CREATE OR REPLACE package body pa_orcas_compare is
       return 1;
     end if;
   end;  
+  
+  function get_column_datatype( p_column in ot_orig_column ) return varchar2
+  is
+    v_datatype       varchar2(100);    
+  begin
+    if ( ot_orig_datatype.is_equal( p_column.i_data_type, ot_orig_datatype.c_object ) = 1 ) 
+    then
+      v_datatype := p_column.i_object_type;
+    else
+      if( ot_orig_datatype.is_equal( p_column.i_data_type, ot_orig_datatype.c_long_raw ) = 1 )
+      then
+        v_datatype := 'long raw';
+      else
+        v_datatype := upper(p_column.i_data_type.i_name);    
+      end if;
+      
+      if( p_column.i_precision != 0 )
+      then
+        v_datatype := v_datatype || '(' || p_column.i_precision;
+  
+        if( p_column.i_scale != 0 )
+        then
+          v_datatype := v_datatype || ',' || p_column.i_scale;            
+        end if;
+        
+        if( p_column.i_byteorchar is not null )
+        then
+          v_datatype := v_datatype || ' ' || upper(p_column.i_byteorchar.i_name);            
+        end if;      
+        
+        v_datatype := v_datatype || ')';      
+      end if;
+      
+      if ( is_equal_ignore_case( p_column.i_with_time_zone, 'with time zone' ) = 1 )
+      then
+        v_datatype := v_datatype || ' with time zone';
+      end if;  
+    end if;
+    
+    return v_datatype;
+  end;    
   
   function get_fk_for_ref_partitioning( p_orig_table in ot_orig_table ) return ot_orig_foreignkey
   is

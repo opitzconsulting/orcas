@@ -411,7 +411,12 @@ $END
               v_orig_column.i_data_type := ot_orig_datatype.c_date();                
           elsif  (cur_tab_cols.data_type = 'XMLTYPE') 
           then
-              v_orig_column.i_data_type := ot_orig_datatype.c_xmltype();   
+              v_orig_column.i_data_type := ot_orig_datatype.c_xmltype();  
+          elsif  ( instr(cur_tab_cols.data_type,'TIMESTAMP') = 1 and instr(cur_tab_cols.data_type,'WITH TIME ZONE') > 1) 
+          then
+              v_orig_column.i_data_type := ot_orig_datatype.c_timestamp();   
+              v_orig_column.i_precision := cur_tab_cols.data_scale;
+              v_orig_column.i_with_time_zone  := 'with time zone';
           elsif  ( instr(cur_tab_cols.data_type,'TIMESTAMP') = 1 ) 
           then
               v_orig_column.i_data_type := ot_orig_datatype.c_timestamp();   

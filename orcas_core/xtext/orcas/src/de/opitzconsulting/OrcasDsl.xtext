@@ -78,7 +78,7 @@ LobStorage :
   "lob" "(" column_name=DBNAME ")" "store" "as" "(" ("tablespace" tablespace=DBNAME)? ")" (",")?; 
   
 Column :
-  name=DBNAME data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")")? ("type" object_type=STRING)? ("default" default_value=STRING)? (identity=ColumnIdentity)? (notnull="not" "null")? (",")?;
+  name=DBNAME data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (with_time_zone="with" "time" "zone")? ("type" object_type=STRING)? ("default" default_value=STRING)? (identity=ColumnIdentity)? (notnull="not" "null")? (",")?;
   
 enum DataType :
   number="number"|blob="blob"|clob="clob"|nclob="nclob"|varchar2="varchar2"|nvarchar2="nvarchar2"|char="char"|date="date"|xmltype="xmltype"|timestamp="timestamp"|rowid="rowid"|raw="raw"|long_raw="long_raw"|float="float"|long="long"|object="object";  
@@ -108,7 +108,10 @@ enum FkDeleteRuleType :
   cascade="cascade"|no_action="no_action"|set_null="set_null";  
 
 enum DeferrType :
-  immediate="immediate"|deferred="deferred";  
+  immediate="immediate"|deferred="deferred"; 
+   
+enum TimezoneType :
+  with_time_zone="with_time_zone";  
 
 enum CharType :
   byte="BYTE"|char="CHAR";  

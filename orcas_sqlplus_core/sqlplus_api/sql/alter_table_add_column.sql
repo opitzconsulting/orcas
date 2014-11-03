@@ -16,7 +16,8 @@ declare
   v_column             ot_syex_column;
   v_byteorchar         ot_syex_chartype;
   v_column_datatype    ot_syex_datatype;
-
+  
+  v_timezone           varchar2(30);
   v_not_null_string    varchar2(30);
   
   v_column_type        varchar2(30);
@@ -95,6 +96,10 @@ begin
     if v_column_type = 'FLOAT' then v_column_datatype := ot_syex_datatype.c_float; end if;
     if v_column_type = 'LONG' then v_column_datatype := ot_syex_datatype.c_long; end if;
     if v_column_type = 'LONG RAW' then v_column_datatype := ot_syex_datatype.c_long_raw; end if;
+    if v_column_type = 'TIMESTAMP_WITH_TIME_ZONE' then 
+      v_column_datatype := ot_syex_datatype.c_timestamp; 
+      v_timezone        := 'with time zone';
+    end if;
      
     
  -- NOT NULL        
@@ -118,6 +123,7 @@ begin
     v_column.i_notnull := v_not_null_string;
     v_column.i_precision := v_column_precision;
     v_column.i_scale := v_column_scale;
+    v_column.i_with_time_zone := v_timezone;
     if v_column_datatype is null then
       v_column.i_object_type := v_column_type; 
     end if;
