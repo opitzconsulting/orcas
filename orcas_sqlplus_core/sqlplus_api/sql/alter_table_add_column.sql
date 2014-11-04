@@ -98,7 +98,7 @@ begin
     if v_column_type = 'LONG RAW' then v_column_datatype := ot_syex_datatype.c_long_raw; end if;
     if v_column_type = 'TIMESTAMP_WITH_TIME_ZONE' then 
       v_column_datatype := ot_syex_datatype.c_timestamp; 
-      v_timezone        := 'with time zone';
+      v_timezone        := 'with_time_zone';
     end if;
      
     

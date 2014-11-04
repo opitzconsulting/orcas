@@ -416,7 +416,7 @@ $END
           then
               v_orig_column.i_data_type := ot_orig_datatype.c_timestamp();   
               v_orig_column.i_precision := cur_tab_cols.data_scale;
-              v_orig_column.i_with_time_zone  := 'with time zone';
+              v_orig_column.i_with_time_zone  := 'with_time_zone';
           elsif  ( instr(cur_tab_cols.data_type,'TIMESTAMP') = 1 ) 
           then
               v_orig_column.i_data_type := ot_orig_datatype.c_timestamp();   

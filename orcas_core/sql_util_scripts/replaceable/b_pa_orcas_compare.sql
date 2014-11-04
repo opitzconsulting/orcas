@@ -153,7 +153,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
         v_datatype := v_datatype || ')';      
       end if;
       
-      if ( is_equal_ignore_case( p_column.i_with_time_zone, 'with time zone' ) = 1 )
+      if ( is_equal_ignore_case( p_column.i_with_time_zone, 'with_time_zone' ) = 1 )
       then
         v_datatype := v_datatype || ' with time zone';
       end if;  

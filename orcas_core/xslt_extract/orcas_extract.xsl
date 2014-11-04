@@ -224,11 +224,11 @@
   </template>
 
   <template match="precision">
-    <text>(</text>
-    <value-of select="." />
-    <apply-templates select="../scale" />
-    <apply-templates select="../byteorchar" />
-    <text>)</text>
+      <text>(</text>
+      <value-of select="." />
+      <apply-templates select="../scale" />
+      <apply-templates select="../byteorchar" />
+      <text>)</text>
   </template>
 
   <template match="scale">
@@ -239,7 +239,7 @@
   </template>
   
   <template match="with_time_zone">
-      <text> with time zone</text>
+      <text> with_time_zone</text>
   </template>
 
   <template match="byteorchar">
