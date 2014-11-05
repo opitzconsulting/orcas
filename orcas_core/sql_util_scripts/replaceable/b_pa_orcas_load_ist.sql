@@ -411,7 +411,12 @@ $END
               v_orig_column.i_data_type := ot_orig_datatype.c_date();                
           elsif  (cur_tab_cols.data_type = 'XMLTYPE') 
           then
-              v_orig_column.i_data_type := ot_orig_datatype.c_xmltype();   
+              v_orig_column.i_data_type := ot_orig_datatype.c_xmltype();  
+          elsif  ( instr(cur_tab_cols.data_type,'TIMESTAMP') = 1 and instr(cur_tab_cols.data_type,'WITH TIME ZONE') > 1) 
+          then
+              v_orig_column.i_data_type := ot_orig_datatype.c_timestamp();   
+              v_orig_column.i_precision := cur_tab_cols.data_scale;
+              v_orig_column.i_with_time_zone  := 'with_time_zone';
           elsif  ( instr(cur_tab_cols.data_type,'TIMESTAMP') = 1 ) 
           then
               v_orig_column.i_data_type := ot_orig_datatype.c_timestamp();   
@@ -1125,7 +1130,9 @@ $END
     procedure load_mviewlogs
     is
       v_orig_mviewlog ot_orig_mviewlog;
-    begin            
+      c_date_format constant varchar2(30) := 'DD.MM.YY';
+    begin    
+      --select value into v_date_format from v$nls_paramters where parameter = 'NLS_DATE_FORMAT';
       for cur_mviewlogs in
         (
         select master,
@@ -1136,7 +1143,7 @@ $END
                include_new_values,
                purge_asynchronous,
                purge_deferred,
-               to_date(purge_start,'dd.mm.yy') purge_start,
+               purge_start,
                case when instr(purge_interval, 'sysdate') > 0 then substr(purge_interval, 11) end purge_interval,
                case when purge_interval is not null and instr(purge_interval, 'to_date') > 0 
                then to_date(substr(purge_interval, instr(purge_interval, '''',1,1)+1, instr(purge_interval, '''',1,2)-instr(purge_interval, '''',1,1)-1),substr(purge_interval, instr(purge_interval, '''',1,3)+1, instr(purge_interval, '''',1,4)-instr(purge_interval, '''',1,3)-1))
@@ -1177,9 +1184,15 @@ $END
           v_orig_mviewlog.i_purge := 'purge';
           if (cur_mviewlogs.purge_deferred = 'YES')
           then
-            v_orig_mviewlog.i_startwith := cur_mviewlogs.purge_start;
+            v_orig_mviewlog.i_startwith := to_char(cur_mviewlogs.purge_start, c_date_format);
+            --v_orig_mviewlog.i_startwith := replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(
+            --  cur_mviewlogs.purge_start,'-OCT-','.10.'),'-NOV-','.11.'),'-DEC-','.12.'),'-JAN-','.01.'),'-FEB-','.02.'),'-MAR-','.03.'),'-APR-','.04.')
+            --    ,'-MAY-','.05.'),'-JUN-','.06.'),'-JUL-','.07.'),'-AUG-','.08.'),'-SEP-','.09.');
             v_orig_mviewlog.i_repeatInterval := cur_mviewlogs.purge_interval;
-            v_orig_mviewlog.i_next := cur_mviewlogs.purge_next;
+            v_orig_mviewlog.i_next := to_char(cur_mviewlogs.purge_next, c_date_format);
+            --v_orig_mviewlog.i_next := replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(
+            --  cur_mviewlogs.purge_next,'-OCT-','.10.'),'-NOV-','.11.'),'-DEC-','.12.'),'-JAN-','.01.'),'-FEB-','.02.'),'-MAR-','.03.'),'-APR-','.04.')
+            --    ,'-MAY-','.05.'),'-JUN-','.06.'),'-JUL-','.07.'),'-AUG-','.08.'),'-SEP-','.09.');
           else 
             if ( cur_mviewlogs.purge_asynchronous = 'YES')
               then

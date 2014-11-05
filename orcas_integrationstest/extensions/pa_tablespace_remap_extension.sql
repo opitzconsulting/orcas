@@ -2,10 +2,10 @@ create or replace package body pa_tablespace_remap_extension is
 
   function replace_tablespace( p_tablespace in varchar2 ) return varchar2 is
   begin
-    if( 'replaceme1' = lower(p_tablespace) )
+    if( 'replaceme1' = lower(trim(p_tablespace)) )
     then
       return pa_orcas_extension_parameter.get_extension_parameter_entry('tablespace1');
-    elsif ( 'replaceme2' = lower(p_tablespace) )
+    elsif ( 'replaceme2' = lower(trim(p_tablespace)) )
     then
       return pa_orcas_extension_parameter.get_extension_parameter_entry('tablespace2');
     else
