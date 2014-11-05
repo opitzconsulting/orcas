@@ -2,7 +2,7 @@ create or replace package body pa_orcas_ddl_call is
 
   procedure update_schema( p_model in ot_orig_model ) is
   begin
-    delete table_script_source;
+    delete orcas_table_script_source;
     commit;
   
     if( pa_orcas_run_parameter.is_createmissingfkindexes = 1 )

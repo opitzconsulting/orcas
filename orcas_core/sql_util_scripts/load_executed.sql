@@ -7,7 +7,7 @@ begin
   for cur_scripts in 
     (
     select scup_script_name 
-      from scs_updates
+      from orcas_updates
      where scup_logname = '&1'
     )
   loop

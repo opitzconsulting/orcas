@@ -26,7 +26,7 @@
     <sequential>
       <delete dir="@{tmpfolder}/xtext/generator/orcas.generator"/>
       <copy todir="@{tmpfolder}/xtext/generator/orcas.generator">
-        <fileset dir="${orcas_dir}/xtext/orcas.generator" excludes="**/*.java"/>
+        <fileset dir="${orcas_dir}/build_source/orcas.generator" excludes="**/*.java"/>
       </copy>
       <mkdir dir="@{tmpfolder}/xtext/generator/orcas.generator/src/model"/>
       <copy todir="@{tmpfolder}/xtext/generator/orcas.generator/src/model">
@@ -592,7 +592,7 @@ ${orcas_sql_output}
     <attribute name="excludewheretable" />
     <attribute name="excludewheresequence" />
     <sequential>
-      <copy file="${orcas_util_scripts}/replaceable/b_pa_orcas_run_parameter.sql" tofile="@{tmpfolder}/b_pa_orcas_run_parameter.sql" overwrite="true" >
+      <copy file="@{tmpfolder}/gradle_sqlplus/db/b_pa_orcas_run_parameter.sql" tofile="@{tmpfolder}/b_pa_orcas_run_parameter.sql" overwrite="true" >
         <filterchain>
           <replacetokens>
             <token key="excludewheresequence" value="@{excludewheresequence}"/>
@@ -1254,13 +1254,8 @@ ${orcas_sql_output}
     <attribute name="tmpfolder" />
     <attribute name="extensionparameter" />
     <sequential>
-      <copy file="${orcas_initialze_scripts}/b_pa_orcas_extension_parameter.sql" tofile="@{tmpfolder}/b_pa_orcas_extension_parameter.sql" overwrite="true" >
-        <filterchain>
-          <replacetokens>
-            <token key="extensionparameter" value="@{extensionparameter}"/>
-          </replacetokens>
-        </filterchain>
-      </copy>    
+      <concat destfile="@{tmpfolder}/b_pa_orcas_extension_parameter.sql" append="false">"@{extensionparameter}
+      </concat>    
     </sequential>
   </macrodef>    
 
@@ -1291,7 +1286,7 @@ ${orcas_sql_output}
         </else>
       </if>
       
-      <exec executable="${orcas_internal_gradle_executable}" dir="${orcas_dir}/xtext" failonerror="true">
+      <exec executable="${orcas_internal_gradle_executable}" dir="${orcas_dir}/build_source" failonerror="true">
         <arg value="installDist" />
         <arg value="-Porcas_tmp_folder=${orcas_internal_tmpfolder}/gradle_build" />
         <arg value="-Porcas_extension_folder=${orcas_internal_extensionfolder}" />

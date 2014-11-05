@@ -1,6 +1,6 @@
 orcas
 =====
-At this place, we will shortly open-source our schema management framework orcas.
+At this place, we have released our open-source schema management framework orcas.
 
 Introduction
 ============
