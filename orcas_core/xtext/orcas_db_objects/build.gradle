@@ -2,31 +2,22 @@ task(createSqlplusDir)
 {
   doFirst
   {
-    new File("${buildDir}/sqlplus/db/packages").mkdirs();
-    new File("${buildDir}/sqlplus/db/types").mkdirs();
+    new File("${buildDir}/sqlplus/db").mkdirs();
   }
-  outputs.file "${buildDir}/sqlplus/db/packages"
-  outputs.file "${buildDir}/sqlplus/db/types"
+  outputs.file "${buildDir}/sqlplus/db"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
-task(copyPackages, dependsOn: createSqlplusDir, type: Copy) 
+task(copyFiles, dependsOn: createSqlplusDir, type: Copy) 
 {
   inputs.property("extensionparameter",project.ext.extensionparameter)
-  from "../../sql_util_scripts/replaceable"
-  into "${buildDir}/sqlplus/db/packages"
+  from "tables"
+  from "types"
+  from "packages"
+  into "${buildDir}/sqlplus/db"
 
   filter(ReplaceTokens, tokens: [extensionparameter: project.ext.extensionparameter])
-  exclude "*_ot*"
-}
-
-task(copyTypes, dependsOn: createSqlplusDir, type: Copy) 
-{
-  from "../../sql_util_scripts/replaceable"
-  into "${buildDir}/sqlplus/db/types"
-
-  include "*_ot*"
 }
 
 task sqlplusJar( type: Zip ) {
@@ -41,8 +32,7 @@ configurations.create( "default" )
 
 artifacts.add( "default", sqlplusJar )
 
-sqlplusJar.dependsOn copyPackages, copyTypes
-
+sqlplusJar.dependsOn copyFiles
 
 task(build, dependsOn: sqlplusJar) 
 {

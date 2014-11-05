@@ -570,7 +570,7 @@ is
     end loop;
   end;
 begin
-  delete table_script_source;
+  delete orcas_table_script_source;
   commit;
   
   fill_fk_ordered_metadata_list();
@@ -585,7 +585,7 @@ begin
   for cur_dummy in
   (
     select 1
-      from table_script_source
+      from orcas_table_script_source
   )
   loop
     pa_orcas_exec_log.exec_stmt( 'commit' );                        
@@ -654,7 +654,7 @@ is
     end loop;
   end;
 begin
-  delete table_script_source;
+  delete orcas_table_script_source;
   commit;
   
   pa_orcas_exec_log.log_exec_stmt( 'SET SERVEROUTPUT     ON' );            

@@ -9,7 +9,7 @@ is
   procedure write_to_table
   is
   begin
-    insert into TABLE_SCRIPT_SOURCE(SCRIPT,id) values(v_stmt, nvl((select count(1) from TABLE_SCRIPT_SOURCE),0));    
+    insert into orcas_table_script_source(SCRIPT,id) values(v_stmt, nvl((select count(1) from orcas_table_script_source),0));    
   end;
 begin
   if(length(pi_stmt)>c_max_line_length)
