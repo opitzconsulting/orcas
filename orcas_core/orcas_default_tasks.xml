@@ -592,7 +592,7 @@ ${orcas_sql_output}
     <attribute name="excludewheretable" />
     <attribute name="excludewheresequence" />
     <sequential>
-      <copy file="@{tmpfolder}/gradle_sqlplus/db/b_pa_orcas_run_parameter.sql" tofile="@{tmpfolder}/b_pa_orcas_run_parameter.sql" overwrite="true" force="true" >
+      <copy file="@{tmpfolder}/gradle_sqlplus/db/b_pa_orcas_run_parameter.sql" todir="@{tmpfolder}" overwrite="true" >
         <filterchain>
           <replacetokens>
             <token key="excludewheresequence" value="@{excludewheresequence}"/>
