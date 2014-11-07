@@ -591,8 +591,9 @@ ${orcas_sql_output}
     <attribute name="createmissingfkindexes" />
     <attribute name="excludewheretable" />
     <attribute name="excludewheresequence" />
+    <attribute name="dateformat" />
     <sequential>
-      <copy file="@{tmpfolder}/gradle_sqlplus/db/b_pa_orcas_run_parameter.sql" tofile="@{tmpfolder}/b_pa_orcas_run_parameter.sql" overwrite="true" >
+      <copy file="@{tmpfolder}/gradle_build/_orcas_db_objects/sqlplus/db/b_pa_orcas_run_parameter.sql" tofile="@{tmpfolder}/b_pa_orcas_run_parameter.sql" overwrite="true" >
         <filterchain>
           <replacetokens>
             <token key="excludewheresequence" value="@{excludewheresequence}"/>
@@ -603,6 +604,7 @@ ${orcas_sql_output}
             <token key="indexmovetablespace" value="@{indexmovetablespace}"/>
             <token key="tablemovetablespace" value="@{tablemovetablespace}"/>
             <token key="createmissingfkindexes" value="@{createmissingfkindexes}"/>
+            <token key="dateformat" value="@{dateformat}"/>
           </replacetokens>
         </filterchain>
       </copy>
@@ -741,6 +743,7 @@ ${orcas_sql_output}
     <attribute name="excludewheresequence" default="object_name like ''%$%''" />
     <attribute name="loglevel" default="nologging" />
     <attribute name="targetplsql" default="" />
+    <attribute name="dateformat" default="dd.mm.yy" />
     <sequential>
       <orcas_internal_log_action_start message="orcas_execute_statics" logname="@{logname}" />
       <orcas_internal_set_internal_dir_depth scriptfolderrecursive="@{scriptfolderrecursive}" />
@@ -767,7 +770,7 @@ ${orcas_sql_output}
           <orcas_internal_xtext_statics tmpfolder="@{tmpfolder}" dslfilefolder="@{tmpfolder}/statics_concat" outfolder="@{tmpfolder}/statics"/>
           
           <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/statics/all.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true"/>
-          <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="@{dropmode}" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="@{createmissingfkindexes}" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" logonly="@{logonly}"/>
+          <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="@{dropmode}" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="@{createmissingfkindexes}" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" logonly="@{logonly}" dateformat="@{dateformat}"/>
           <if>
             <equals arg1="@{targetplsql}" arg2=""/>
             <then>
@@ -1169,11 +1172,12 @@ ${orcas_sql_output}
     <attribute name="scriptpostfix" default=".sql" />
     <attribute name="scriptfolderrecursive" default="true" />
     <attribute name="loglevel" default="nologging" />
+    <attribute name="dateformat" default="dd.mm.yy" />
     <sequential>
       <orcas_internal_log_action_start message="orcas_upate_data" logname="@{logname}" />
       <orcas_internal_set_internal_dir_depth scriptfolderrecursive="@{scriptfolderrecursive}" />
 
-      <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="false" indexparallelcreate="" indexmovetablespace="" tablemovetablespace="" createmissingfkindexes="" excludewheretable="" excludewheresequence="" logonly="@{logonly}"/>
+      <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="false" indexparallelcreate="" indexmovetablespace="" tablemovetablespace="" createmissingfkindexes="" excludewheretable="" excludewheresequence="" logonly="@{logonly}" dateformat="@{dateformat}"/>
 
       <delete dir="@{tmpfolder}/data_concat"/>  
       <mkdir dir="@{tmpfolder}/data_concat"/>  
@@ -1635,8 +1639,9 @@ ${orcas_sql_output}
     <attribute name="excludewheretable" default="object_name like ''%$%''" />
     <attribute name="excludewheresequence" default="object_name like ''%$%''" />
     <attribute name="orcasinternalloadxmlsql" default="load_extract.sql" />
+    <attribute name="dateformat" default="dd.mm.yy" />
     <sequential>
-      <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="false" indexparallelcreate="false" indexmovetablespace="false" tablemovetablespace="false" createmissingfkindexes="false" logonly="false" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" />
+      <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="false" indexparallelcreate="false" indexmovetablespace="false" tablemovetablespace="false" createmissingfkindexes="false" logonly="false" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" dateformat="@{dateformat}"/>
       <delete dir="@{outputfolder}"/>
       <delete dir="@{tmpfolder}/load_extract"/>  
       <mkdir dir="@{outputfolder}"/>  

@@ -1955,6 +1955,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
       v_orig_mviewlog_ist ot_orig_mviewlog;
       v_orig_mviewlog_soll ot_orig_mviewlog;
       v_default_tablespace varchar2(30);
+      c_date_format constant varchar2(30) := pa_orcas_run_parameter.get_dateformat();
       
       procedure create_mviewlog
       is
@@ -2028,12 +2029,12 @@ CREATE OR REPLACE package body pa_orcas_compare is
             if (v_orig_mviewlog_soll.i_startwith is not null)
               then
                 stmt_add( 'start with' );
-                stmt_add( 'to_date(''' || v_orig_mviewlog_soll.i_startwith || ''',''dd.mm.yy'')' );
+                stmt_add( 'to_date(''' || v_orig_mviewlog_soll.i_startwith || ''',''' || c_date_format || ''')' );
             end if;
             if (v_orig_mviewlog_soll.i_next is not null)
               then
                 stmt_add( 'next' );
-                stmt_add( 'to_date(''' || v_orig_mviewlog_soll.i_next || ''',''dd.mm.yy'')' );
+                stmt_add( 'to_date(''' || v_orig_mviewlog_soll.i_next || ''',''' || c_date_format || ''')' );
               else 
                 if (v_orig_mviewlog_soll.i_repeatInterval is not null and v_orig_mviewlog_soll.i_repeatInterval != 0)
                 then
@@ -2128,12 +2129,12 @@ CREATE OR REPLACE package body pa_orcas_compare is
                 if (    is_equal(v_orig_mviewlog_soll.i_startwith, v_orig_mviewlog_ist.i_startwith) != 1 )
                 then
                     stmt_add( 'start with' );
-                    stmt_add( 'to_date(''' || v_orig_mviewlog_soll.i_startwith || ''',''dd.mm.yy'')' );
+                    stmt_add( 'to_date(''' || v_orig_mviewlog_soll.i_startwith || ''',''' || c_date_format || ''')' );
                 end if;
                 if (is_equal(v_orig_mviewlog_soll.i_next, v_orig_mviewlog_ist.i_next) != 1)
                 then
                     stmt_add( 'next' );
-                    stmt_add( 'to_date(''' || v_orig_mviewlog_soll.i_next || ''',''dd.mm.yy'')' );
+                    stmt_add( 'to_date(''' || v_orig_mviewlog_soll.i_next || ''',''' || c_date_format ||''')' );
                 else 
                     if (is_equal(v_orig_mviewlog_soll.i_repeatInterval, v_orig_mviewlog_ist.i_repeatInterval) != 1
                         and v_orig_mviewlog_soll.i_repeatInterval != 0)
