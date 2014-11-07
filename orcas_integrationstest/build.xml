@@ -143,15 +143,44 @@
     </sequential>
   </macrodef>
 
+  <macrodef name="set_timestamp">
+    <attribute name="property" />
+    <sequential>
+      <var name="property" unset="true" />
+      <var name="oc_svw_internal_script_value_property" unset="true" />
+      <property name="oc_svw_internal_script_value_property" value="@{property}" />
+      <script language="javascript">
+        project.setProperty(project.getProperty("oc_svw_internal_script_value_property"), new Date().getTime());
+      </script>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="set_duration">
+    <attribute name="startproperty" />
+    <attribute name="durationproperty" />
+    <sequential>
+      <var name="durationproperty" unset="true" />
+      <var name="oc_svw_internal_script_value_startproperty" unset="true" />
+      <var name="oc_svw_internal_script_value_durationproperty" unset="true" />
+      <property name="oc_svw_internal_script_value_startproperty" value="@{startproperty}" />
+      <property name="oc_svw_internal_script_value_durationproperty" value="@{durationproperty}" />
+      <script language="javascript">
+        project.setProperty(project.getProperty("oc_svw_internal_script_value_durationproperty"), (new Date().getTime() - project.getProperty(project.getProperty("oc_svw_internal_script_value_startproperty"))) / 1000 )
+      </script>
+    </sequential>
+  </macrodef>
+
   <macrodef name="log_start_test">
     <sequential>
+      <set_timestamp property="ts_testsuite_start" />
+      <set_timestamp property="ts_test_start" />
       <echo message="#############################                                      #############################" />
       <echo message="                              now running test: ${akt_verzeichnis}" />
       <echo message="#############################                                      #############################" />
 
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
-<![CDATA[<testsuite name="${akt_verzeichnis}" >]]></concat>
+<![CDATA[<testsuite name="${akt_verzeichnis}" time="REPLACE_TIME" >]]></concat>
     </sequential>
   </macrodef>      
 
@@ -161,7 +190,7 @@
 
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
-<![CDATA[<testsuite name="${akt_verzeichnis}" >]]></concat>
+<![CDATA[<testsuite name="${akt_verzeichnis}" time="0">]]></concat>
       <log_skip testname="run"/>
     </sequential>
   </macrodef>      
@@ -170,6 +199,8 @@
     <sequential>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
 <![CDATA[</testsuite>]]></concat>
+      <set_duration startproperty="ts_testsuite_start" durationproperty="duration_testsuite" />	 
+      <replace file="${tmpfolder}/${akt_verzeichnis}/testresult.xml" token="REPLACE_TIME" value="${duration_testsuite}" />
     </sequential>
   </macrodef>      
 
@@ -177,12 +208,14 @@
     <attribute name="message" />
     <attribute name="testname" />
     <sequential>
+      <set_duration startproperty="ts_test_start" durationproperty="duration_test" />	 
+      <set_timestamp property="ts_test_start" />
       <echo message="${akt_verzeichnis}: @{message}" />
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/error.txt" append="true">
 ${akt_verzeichnis}: @{message}</concat>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
 <![CDATA[
-    <testcase name="@{testname}">
+    <testcase name="@{testname}" time="${duration_test}" >
       <failure type="@{testname}">@{message}</failure>
     </testcase>]]></concat>
     </sequential>
@@ -191,9 +224,11 @@ ${akt_verzeichnis}: @{message}</concat>
   <macrodef name="log_success">
     <attribute name="testname" />
     <sequential>
+      <set_duration startproperty="ts_test_start" durationproperty="duration_test" />	 
+      <set_timestamp property="ts_test_start" />
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
 <![CDATA[
-    <testcase name="@{testname}">
+    <testcase name="@{testname}" time="${duration_test}" >
     </testcase>]]></concat>
     </sequential>
   </macrodef>    
@@ -203,7 +238,7 @@ ${akt_verzeichnis}: @{message}</concat>
     <sequential>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
 <![CDATA[
-    <testcase name="@{testname}">
+    <testcase name="@{testname}" time="0" >
       <skipped/>
     </testcase>]]></concat>
     </sequential>
