@@ -12,7 +12,7 @@ create or replace package body pa_add_pk_extension is
     v_syex_column.i_name := p_syex_table.i_alias || '_id';
     v_syex_column.i_data_type := ot_syex_datatype.c_number;
     v_syex_column.i_precision := 22;
-    v_syex_column.i_notnull := 'not null';
+    v_syex_column.i_notnull_flg := 1;
   
     p_syex_table.i_columns.extend;
     p_syex_table.i_columns(p_syex_table.i_columns.count) := v_syex_column;

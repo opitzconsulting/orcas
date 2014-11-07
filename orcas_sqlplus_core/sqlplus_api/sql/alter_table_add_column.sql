@@ -17,7 +17,7 @@ declare
   v_byteorchar         ot_syex_chartype;
   v_column_datatype    ot_syex_datatype;
 
-  v_not_null_string    varchar2(30);
+  v_not_null_flg       number(1);
   
   v_column_type        varchar2(30);
   v_column_precision   number;
@@ -99,7 +99,9 @@ begin
     
  -- NOT NULL        
     if v_mandatory = 'MANDATORY' then 
-        v_not_null_string := 'not';
+        v_not_null_flg := 1;
+    else
+        v_not_null_flg := 0;
     end if;
 
  -- DEFAULT
@@ -115,7 +117,7 @@ begin
     v_column.i_data_type := v_column_datatype;
     v_column.i_default_value := v_default;
     v_column.i_name := v_column_name;
-    v_column.i_notnull := v_not_null_string;
+    v_column.i_notnull_flg := v_not_null_flg;
     v_column.i_precision := v_column_precision;
     v_column.i_scale := v_column_scale;
     if v_column_datatype is null then

@@ -29,12 +29,12 @@ public class FieldData
     return _isList;
   }
 
-  public FieldData( String pJavaName, Class pJavaType, boolean pIsList, Method pGtterMethod )
+  public FieldData( Class pJavaType, boolean pIsList, Method pGtterMethod )
   {
-    _javaName = pJavaName;
     _javaType = pJavaType;
     _isList = pIsList;
     _getterMethod = pGtterMethod;
+    _javaName = _getFiledNameFromMethod();    
   }
 
   @Override
@@ -44,9 +44,33 @@ public class FieldData
 
     return lReturn;
   }
+  
+  public boolean isFlag()
+  {
+    return _getterMethod.getName().startsWith("is");
+  }  
 
   public String getSqlName()
   {
-    return "i_" + _javaName.toLowerCase();
+    if(isFlag())
+    {
+      return "i_" + _javaName.toLowerCase() + "_flg";
+    }
+    else
+    {
+      return "i_" + _javaName.toLowerCase();
+    }
   }
+  
+  private String _getFiledNameFromMethod()
+  {
+    String lMethodName = _getterMethod.getName();
+    
+    if(lMethodName.startsWith("is"))
+    {
+      return lMethodName.substring( 2, 3 ).toLowerCase() + lMethodName.substring( 3 );    	
+    }
+
+    return lMethodName.substring( 3, 4 ).toLowerCase() + lMethodName.substring( 4 );
+  }  
 }

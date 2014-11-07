@@ -851,7 +851,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
       v_return := v_return || ' )';            
     end if;    
     
-    if( p_orig_column.i_notnull is not null )      
+    if( p_orig_column.i_notnull_flg = 1 )      
     then
       v_return := v_return || ' not null';
     end if;      
@@ -1659,7 +1659,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
           add_stmt();
         end if;
         
-        if( p_orig_column_soll.i_notnull is not null )
+        if( p_orig_column_soll.i_notnull_flg = 1 )
         then
           pv_stmt := 'alter table ' || v_orig_table_ist.i_name || ' modify ( ' || p_orig_column_soll.i_name;
           pv_stmt := pv_stmt || ' ' || 'not null';
@@ -1706,10 +1706,10 @@ CREATE OR REPLACE package body pa_orcas_compare is
             add_stmt();
           end if;
           
-          if( is_equal_ignore_case( v_orig_column_ist.i_notnull, p_orig_column_soll.i_notnull ) != 1 )
+          if( is_equal( v_orig_column_ist.i_notnull_flg, p_orig_column_soll.i_notnull_flg ) != 1 )
           then
             pv_stmt := 'alter table ' || v_orig_table_ist.i_name || ' modify ( ' || v_orig_column_ist.i_name;
-            if( p_orig_column_soll.i_notnull is null )
+            if( p_orig_column_soll.i_notnull_flg = 0 )
             then
               pv_stmt := pv_stmt || ' ' || 'null';
             else

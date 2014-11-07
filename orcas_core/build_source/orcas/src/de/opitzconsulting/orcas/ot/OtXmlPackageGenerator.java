@@ -103,12 +103,23 @@ public class OtXmlPackageGenerator
     pPrintStream.println( "  end;" );
     pPrintStream.println( "" );
     pPrintStream.println( "" );
+    pPrintStream.println( "  procedure add_boolean( p_input in number, p_indent in number )" );
+    pPrintStream.println( "  is" );
+    pPrintStream.println( "  begin" );
+    pPrintStream.println( "    if( p_input = 1 )" );
+    pPrintStream.println( "    then" );    
+    pPrintStream.println( "      add_text( 'true', p_indent );" );
+    pPrintStream.println( "    else" );
+    pPrintStream.println( "      add_text( 'false', p_indent );" );
+    pPrintStream.println( "    end if;" );    
+    pPrintStream.println( "  end;" );
+    pPrintStream.println( "" );
     pPrintStream.println( "  procedure add_text_escaped( p_input in varchar2, p_indent in number )" );
     pPrintStream.println( "  is" );
     pPrintStream.println( "  begin" );
     pPrintStream.println( "    add_text( dbms_xmlgen.convert( p_input ), p_indent );" );
     pPrintStream.println( "  end;" );
-    pPrintStream.println( "" );
+    pPrintStream.println( "" );    
     pPrintStream.println( "  procedure add_newline( p_indent in number )" );
     pPrintStream.println( "  is" );
     pPrintStream.println( "  begin" );
@@ -197,7 +208,7 @@ public class OtXmlPackageGenerator
               pPrintStream.println( "  if( p_input." + lFieldData.getSqlName() + " is not null )" );
             }
             pPrintStream.println( "  then" );
-
+            
             pPrintStream.println( "  add_text( '<" + lFieldData.getJavaName() + ">', p_indent + 2 );" );
 
             boolean lIsSingleLine = lFieldClassDataType == null || lFieldClassDataType.isEnum();
@@ -209,7 +220,14 @@ public class OtXmlPackageGenerator
 
             if( lFieldClassDataType == null )
             {
-              pPrintStream.println( "  add_text_escaped( p_input." + lFieldData.getSqlName() + ", 0 );" );
+			  if( lFieldData.isFlag() )
+              {
+            	pPrintStream.println( "  add_boolean( p_input." + lFieldData.getSqlName() + ", 0 );" );
+              }
+              else
+              {
+                pPrintStream.println( "  add_text_escaped( p_input." + lFieldData.getSqlName() + ", 0 );" );
+              }
             }
             else
             {

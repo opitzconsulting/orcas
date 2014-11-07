@@ -251,7 +251,9 @@
   </template>
 
   <template match="notnull">
-    <text> not null</text>
+    <if test=". = 'true'">
+      <text> not null</text>
+    </if>  
   </template>
 
   <template match="default_value">

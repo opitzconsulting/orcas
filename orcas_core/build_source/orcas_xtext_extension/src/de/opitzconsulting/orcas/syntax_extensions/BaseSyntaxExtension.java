@@ -103,7 +103,7 @@ public abstract class BaseSyntaxExtension implements OrcasSyntaxExtensionWithPar
 
   private static class _NewFieldDataSimpleField extends NewFieldData
   {
-    private String _typeName;
+	private String _typeName;
     private boolean _useConstantKeyword;
 
     protected String getTypeName()
@@ -145,7 +145,7 @@ public abstract class BaseSyntaxExtension implements OrcasSyntaxExtensionWithPar
         lRuleEntries.add( pBaseSyntaxExtension.createConstantRuleEntry( getFieldName() ) );
       }
 
-      lRuleEntries.add( pBaseSyntaxExtension.createValueRuleEntry( getFieldName(), _typeName ) );
+      lRuleEntries.add( createValueRuleEntry(pBaseSyntaxExtension) );
 
       if( isOptional() )
       {
@@ -153,6 +153,11 @@ public abstract class BaseSyntaxExtension implements OrcasSyntaxExtensionWithPar
       }
       return lRuleEntries;
     }
+
+	protected RuleEntry createValueRuleEntry(BaseSyntaxExtension pBaseSyntaxExtension) 
+	{
+	  return pBaseSyntaxExtension.createValueRuleEntry( getFieldName(), _typeName );
+	}
 
     @Override
     void addField( RuleNormal pRuleNormal, BaseSyntaxExtension pBaseSyntaxExtension )
@@ -203,10 +208,20 @@ public abstract class BaseSyntaxExtension implements OrcasSyntaxExtensionWithPar
 
   public static class NewFieldConstant extends _NewFieldDataSimpleField
   {
+	private String _constantValue; 
+	  
     public NewFieldConstant( String pFieldName, String pConstantValue )
     {
       super( pFieldName, false, "\"" + pConstantValue + "\"", false );
+      
+      _constantValue = pConstantValue;
     }
+
+	@Override
+	protected RuleEntry createValueRuleEntry( BaseSyntaxExtension pBaseSyntaxExtension ) 
+	{
+		return pBaseSyntaxExtension.createRuleConstantFlagEntry( getFieldName(), _constantValue );
+	}
   }
 
   public static class NewFieldDataEnumeration extends _NewFieldDataSimpleField
@@ -342,9 +357,21 @@ public abstract class BaseSyntaxExtension implements OrcasSyntaxExtensionWithPar
     {
     };
     lRuleConstnatEntry.setValue_name( pValueName );
+    lRuleConstnatEntry.setAssignmnet_type( "=" );
     lRuleConstnatEntry.setRule_constant( pConstant );
     return lRuleConstnatEntry;
-  }
+  }  
+
+  protected RuleEntry createRuleConstantFlagEntry( String pValueName, String pConstant )
+  {
+    RuleConstnatEntry lRuleConstnatEntry = new RuleConstnatEntryImpl()
+    {
+    };
+    lRuleConstnatEntry.setValue_name( pValueName );
+    lRuleConstnatEntry.setAssignmnet_type( "?=" );
+    lRuleConstnatEntry.setRule_constant( pConstant );
+    return lRuleConstnatEntry;
+  }  
 
   private RuleValueEntry findRuleValueEntry( FieldReference pFieldReference )
   {
@@ -434,6 +461,7 @@ public abstract class BaseSyntaxExtension implements OrcasSyntaxExtensionWithPar
     };
 
     lRuleConstnatEntry.setValue_name( "null" );
+    lRuleConstnatEntry.setAssignmnet_type( "=" );
     lRuleConstnatEntry.setRule_constant( "null_" + pRuleNormal.getName() );
     return lRuleConstnatEntry;
   }

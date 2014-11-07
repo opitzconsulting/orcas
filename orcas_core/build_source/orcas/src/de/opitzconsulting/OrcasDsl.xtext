@@ -78,7 +78,7 @@ LobStorage :
   "lob" "(" column_name=DBNAME ")" "store" "as" "(" ("tablespace" tablespace=DBNAME)? ")" (",")?; 
   
 Column :
-  name=DBNAME data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")")? ("type" object_type=STRING)? ("default" default_value=STRING)? (identity=ColumnIdentity)? (notnull="not" "null")? (",")?;
+  name=DBNAME data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")")? ("type" object_type=STRING)? ("default" default_value=STRING)? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
   
 enum DataType :
   number="number"|blob="blob"|clob="clob"|nclob="nclob"|varchar2="varchar2"|nvarchar2="nvarchar2"|char="char"|date="date"|xmltype="xmltype"|timestamp="timestamp"|rowid="rowid"|raw="raw"|long_raw="long_raw"|float="float"|long="long"|object="object";  

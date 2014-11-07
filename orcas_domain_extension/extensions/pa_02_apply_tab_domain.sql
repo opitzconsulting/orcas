@@ -56,7 +56,7 @@ create or replace package body pa_02_apply_tab_domain is
       loop
         v_syex_domaincolumn := p_syex_domain.i_columns(i);
         
-        if( v_syex_domaincolumn.i_append_last is null )
+        if( v_syex_domaincolumn.i_append_last_flg = 0 )
         then
           v_move_column_count := v_move_column_count + 1;
         end if;
@@ -75,7 +75,7 @@ create or replace package body pa_02_apply_tab_domain is
         
         v_syex_domaincolumn.i_column.i_name := pa_domain_extension_helper.get_generated_name_column( v_syex_domaincolumn.i_columnnamerules, v_syex_domaincolumn.i_column.i_name, p_syex_table.i_name, p_syex_table.i_alias );        
         
-        if( v_syex_domaincolumn.i_append_last is null )
+        if( v_syex_domaincolumn.i_append_last_flg = 0 )
         then
           p_syex_table.i_columns(v_append_first_index) := v_syex_domaincolumn.i_column;
           v_append_first_index := v_append_first_index + 1;
@@ -128,7 +128,7 @@ create or replace package body pa_02_apply_tab_domain is
         loop
           if( is_pk_column( v_history_table.i_columns(i).i_name ) = 0 )
           then        
-            v_history_table.i_columns(i).i_notnull := null;
+            v_history_table.i_columns(i).i_notnull_flg := 0;
           end if;
           v_history_table.i_columns(i).i_default_value := null;          
           
