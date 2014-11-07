@@ -593,7 +593,18 @@ ${orcas_sql_output}
     <attribute name="excludewheresequence" />
     <attribute name="dateformat" />
     <sequential>
-      <copy file="@{tmpfolder}/gradle_build/_orcas_db_objects/sqlplus/db/b_pa_orcas_run_parameter.sql" tofile="@{tmpfolder}/b_pa_orcas_run_parameter.sql" overwrite="true" >
+      <unzip dest="@{tmpfolder}/db_temp" overwrite="true">
+        <fileset dir="@{tmpfolder}/gradle_build" >
+          <include name="**/orcas_db_objects-*-sqlplus.zip"/>
+        </fileset>
+        <patternset>
+          <include name="**/b_pa_orcas_run_parameter.sql"/>
+        </patternset>
+      </unzip>
+      <copy tofile="@{tmpfolder}/b_pa_orcas_run_parameter.sql" overwrite="true" >
+        <fileset dir="@{tmpfolder}/db_temp">
+          <include name="**/b_pa_orcas_run_parameter.sql"/>
+        </fileset>
         <filterchain>
           <replacetokens>
             <token key="excludewheresequence" value="@{excludewheresequence}"/>
