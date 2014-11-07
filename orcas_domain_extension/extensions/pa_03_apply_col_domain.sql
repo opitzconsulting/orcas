@@ -47,9 +47,9 @@ create or replace package body pa_03_apply_col_domain is
           v_syex_column.i_default_value := v_syex_columndomain.i_default_value;        
         end if;
         
-        if( v_syex_columndomain.i_notnull is not null )
+        if( v_syex_columndomain.i_notnull_flg = 1 )
         then
-          v_syex_column.i_notnull := v_syex_columndomain.i_notnull;        
+          v_syex_column.i_notnull_flg := v_syex_columndomain.i_notnull_flg;        
         end if;        
         
         p_syex_table.i_columns(i) := v_syex_column;

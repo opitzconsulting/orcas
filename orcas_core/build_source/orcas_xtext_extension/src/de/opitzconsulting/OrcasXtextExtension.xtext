@@ -27,7 +27,7 @@ RuleValueEntry:
 	(value_name=ID2 (assignmnet_type="=" | assignmnet_type="+="))? rule_name=ID2;
 
 RuleConstnatEntry:
-	value_name=ID2 "=" rule_constant=STRING;
+	value_name=ID2 (assignmnet_type="=" | assignmnet_type="?=") rule_constant=STRING;
 
 enum RuleMarker:
 	left_parenthesis="(" | right_parenthesis_with_question_mark=")?" | right_parenthesis_with_plus_sign=")+" |

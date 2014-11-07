@@ -367,7 +367,9 @@ $END
           
           if( cur_tab_cols.nullable = 'N' )
           then
-            v_orig_column.i_notnull := 'not';
+            v_orig_column.i_notnull_flg := 1;
+          else
+            v_orig_column.i_notnull_flg := 0;          
           end if;
           
           if (cur_tab_cols.char_used = 'B')

@@ -14,7 +14,7 @@ public class AddPkFromAlias extends TableVisitorExtension
       lColumn.setName( pTable.getAlias() + "_ID" );
       lColumn.setData_type( DataType.NUMBER );
       lColumn.setPrecision( 22 );
-      lColumn.setNotnull( "not" );
+      lColumn.setNotnull( true );
       pTable.getColumns().add( 0, lColumn );
       _addPKColumns( pTable );
     }

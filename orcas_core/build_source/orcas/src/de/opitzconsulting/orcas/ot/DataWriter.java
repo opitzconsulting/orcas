@@ -210,6 +210,10 @@ public class DataWriter
     {
       return "" + pValue;
     }
+    if( pValue instanceof Boolean )
+    {
+      return ((Boolean)pValue) ? "1" : "0";
+    }    
 
     throw new RuntimeException( "Value unbekannt: " + pValue + " " + pValue.getClass() );
   }
@@ -248,6 +252,11 @@ public class DataWriter
     {
       return pImplementingClass;
     }
+    
+    if( pImplementingClass == Boolean.class )
+    {
+      return pImplementingClass;
+    }    
 
     throw new RuntimeException( "Class nicht gefunden: " + pImplementingClass );
   }

@@ -8,7 +8,7 @@ public class Benutzerstempel extends TableVisitorExtension
   @Override
   protected void handleTable( Table pTable )
   {
-    if( pTable.getBenutzerstempel() != null )
+    if( pTable.isBenutzerstempel() )
     {
       {
         Column lColumn = new ColumnImpl();

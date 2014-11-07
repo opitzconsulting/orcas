@@ -13,7 +13,7 @@ create or replace package body pa_domain_reverse_extension is
         v_syex_column.i_data_type := null;
         v_syex_column.i_precision := null;        
         v_syex_column.i_scale := null;                
-        v_syex_column.i_notnull := null;        
+        v_syex_column.i_notnull_flg := 0;        
         p_syex_table.i_columns(i) := v_syex_column;
       end if;
     end loop;

@@ -50,7 +50,7 @@ generate «header.name» "«header.this_generate»"
 «ENDDEFINE»
 
 «DEFINE write_rule_constant_entry FOR RuleConstnatEntry-»
-«value_name»="«rule_constant»"«ENDDEFINE»
+«value_name»«assignmnet_type-»"«rule_constant»"«ENDDEFINE»
 
 «DEFINE write_rule_terminal FOR RuleTerminal-»
 terminal «name» : 

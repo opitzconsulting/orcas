@@ -130,6 +130,10 @@ public class TypeDataContainer
       {
         lSqlName = "number";
       }
+      if( lClass == boolean.class )
+      {
+        lSqlName = "number(1)";
+      }      
 
       if( lSqlName != null )
       {

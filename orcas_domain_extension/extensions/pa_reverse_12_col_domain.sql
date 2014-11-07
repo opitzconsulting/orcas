@@ -137,9 +137,9 @@ create or replace package body pa_reverse_12_col_domain is
     then
       v_return := 0;
     
-      if( v_columndomain.i_notnull is not null )
+      if( v_columndomain.i_notnull_flg = 1 )
       then
-        if( p_column.i_notnull is not null )
+        if( p_column.i_notnull_flg = 1 )
         then
           v_return := v_return + 1;
         else
@@ -301,9 +301,9 @@ create or replace package body pa_reverse_12_col_domain is
     v_column.i_scale := null;    
     v_column.i_byteorchar := null;        
     
-    if( v_columndomain.i_notnull is not null )
+    if( v_columndomain.i_notnull_flg = 1 )
     then
-      v_column.i_notnull := null;            
+      v_column.i_notnull_flg := 0;
     end if;
     
     if( v_columndomain.i_default_value is not null )

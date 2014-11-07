@@ -19,7 +19,7 @@ public class ColumnDomainExtension extends TableVisitorExtension
 
         if( lColumn.getDomain() == EnumColumnDomain.PK_COLUMN )
         {
-          lColumn.setNotnull( "not null" ); 
+          lColumn.setNotnull( true ); 
           _addPKColumns( pTable, lColumn );          
         }
 	else

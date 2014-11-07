@@ -122,7 +122,7 @@ public class ClassDataParser
 
     for( Method lMethod : pClass.getDeclaredMethods() )
     {
-      if( !lMethod.getName().startsWith( "get" ) || lMethod.getParameterTypes().length != 0 )
+      if( (!lMethod.getName().startsWith( "get" ) && !lMethod.getName().startsWith( "is" )) || lMethod.getParameterTypes().length != 0 )
       {
         continue;
       }
@@ -142,7 +142,7 @@ public class ClassDataParser
         lType = lMethod.getReturnType();
       }
 
-      lClassDataType.addFiledDataList( new FieldData( _getFiledNameFromMethod( lMethod ), lType, lIsList, lMethod ) );
+      lClassDataType.addFiledDataList( new FieldData( lType, lIsList, lMethod ) );
     }
 
     if( pClass.isEnum() )
@@ -174,12 +174,4 @@ public class ClassDataParser
       throw new RuntimeException( e );
     }
   }
-
-  private String _getFiledNameFromMethod( Method pMethod )
-  {
-    String lMethodName = pMethod.getName();
-
-    return lMethodName.substring( 3, 4 ).toLowerCase() + lMethodName.substring( 4 );
-  }
-
 }
