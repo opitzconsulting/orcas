@@ -9,4 +9,4 @@ alter table tab_a add (
   constraint abcd_pk
   primary key
   (abcd_id));
-
+  
