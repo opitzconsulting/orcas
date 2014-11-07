@@ -1131,10 +1131,9 @@ $END
     
     procedure load_mviewlogs
     is
+      c_date_format constant varchar2(30) := pa_orcas_run_parameter.get_dateformat();
       v_orig_mviewlog ot_orig_mviewlog;
-      c_date_format constant varchar2(30) := 'DD.MM.YY';
     begin    
-      --select value into v_date_format from v$nls_paramters where parameter = 'NLS_DATE_FORMAT';
       for cur_mviewlogs in
         (
         select master,

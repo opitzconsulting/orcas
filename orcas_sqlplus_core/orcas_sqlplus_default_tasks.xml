@@ -79,6 +79,7 @@
     <attribute name="excludewheresequence" default="object_name like ''%$%''" />
     <attribute name="loglevel" default="nologging" />
     <attribute name="targetplsql" default="" />
+    <attribute name="dateformat" default="dd.mm.yy" />
     <sequential>
       <orcas_internal_log_action_start message="orcas_sqlplus_execute_statics" logname="@{logname}" />
       <orcas_internal_set_internal_dir_depth scriptfolderrecursive="@{scriptfolderrecursive}" />
@@ -102,7 +103,7 @@
             </fileset>
           </concat>
 
-          <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="@{dropmode}" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="@{createmissingfkindexes}" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" logonly="@{logonly}"/>
+          <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="@{dropmode}" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="@{createmissingfkindexes}" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" logonly="@{logonly}" dateformat="@{dateformat}"/>
           <if>
             <equals arg1="@{targetplsql}" arg2=""/>
             <then>

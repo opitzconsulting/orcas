@@ -13,6 +13,11 @@ create or replace package body pa_orcas_run_parameter is
   begin
     return '@excludewheremview@';
   end;    
+  
+  function get_dateformat return varchar2 is
+  begin
+    return '@dateformat@';
+  end;
 
   function is_logonly return number is
   begin
