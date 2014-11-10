@@ -9,8 +9,6 @@ alter table tab_a add (
   constraint abcd_pk
   primary key
   (abcd_id));
-  
-create index abcde_abcd_fk_gen_ix on tab_a (abcd_id) logging;  
 
 create table tab_b
 (
@@ -27,3 +25,5 @@ alter table tab_b add (
   (abcd_id)
   references tab_a (abcd_id)
 );
+
+create index abcde_abcd_fk_gen_ix on tab_b (abcd_id) logging;  
