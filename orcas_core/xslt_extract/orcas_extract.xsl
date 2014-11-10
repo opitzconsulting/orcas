@@ -299,6 +299,7 @@
     <apply-templates select="uk_columns" />
     <apply-templates select="deferrtype" />
     <apply-templates select="tablespace" />
+    <apply-templates select="indexname" />
     <if test="position() != last()">
       <text>,</text>
     </if>
@@ -436,6 +437,11 @@
     <text> using index tablespace </text>
     <value-of select="myfunc:format-dbname(.)" />
   </template>
+  
+  <template match="indexname[parent::UniqueKey]">
+    <text> using index </text>
+    <value-of select="myfunc:format-dbname(.)" />
+  </template>  
 
   <template match="tablespace">
     <text> tablespace </text>

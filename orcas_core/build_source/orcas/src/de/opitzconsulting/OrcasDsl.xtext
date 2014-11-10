@@ -96,7 +96,7 @@ PrimaryKey :
   ("constraint" consName=DBNAME)? "primary" "key" "(" (pk_columns+=ColumnRef)+ ")" (status=EnableType)? ("using" "index" (reverse="reverse")? ("tablespace" tablespace=DBNAME)?)? (",")?;  
 
 UniqueKey :
-  "constraint" consName=DBNAME "unique" "(" (uk_columns+=ColumnRef)+ ")" ("using" "index" "tablespace" tablespace=DBNAME)? (status=EnableType)? (",")?;  
+  "constraint" consName=DBNAME "unique" "(" (uk_columns+=ColumnRef)+ ")" ("using" "index" ("tablespace" tablespace=DBNAME)? (indexname=DBNAME)?)? (status=EnableType)? (",")?;  
   
 Index :
   "index" consName=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? (",")?;  

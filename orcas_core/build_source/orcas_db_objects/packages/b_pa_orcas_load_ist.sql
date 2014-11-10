@@ -745,6 +745,7 @@ $END
                deferred, 
                user_constraints.status,
                user_constraints.generated,
+               user_constraints.index_name,
                user_indexes.tablespace_name,
                user_indexes.index_type
           from user_constraints
@@ -807,7 +808,8 @@ $END
             v_orig_uniquekey.i_consname := cur_constraints.constraint_name;
             v_orig_uniquekey.i_status := v_orig_enabletype;
             v_orig_uniquekey.i_uk_columns := new ct_orig_columnref_list();                  
-            v_orig_uniquekey.i_tablespace := cur_constraints.tablespace_name;            
+            v_orig_uniquekey.i_tablespace := cur_constraints.tablespace_name;
+            v_orig_uniquekey.i_indexname := cur_constraints.index_name;
 
             v_unique_key_to_table_name_map( cur_constraints.constraint_name ) := cur_constraints.table_name;
             

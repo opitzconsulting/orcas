@@ -1497,6 +1497,30 @@ CREATE OR REPLACE package body pa_orcas_compare is
     return null;
   end;     
   
+  function find_table_uniquekey_by_index( p_indexname varchar2, p_orig_table ot_orig_table ) return ot_orig_uniquekey
+  is
+    v_uniquekey ot_orig_uniquekey;
+  begin
+    if( p_orig_table is null or p_orig_table.i_ind_uks is null )
+    then
+      return null;
+    end if;
+  
+    for i in 1 .. p_orig_table.i_ind_uks.count
+    loop
+      if( p_orig_table.i_ind_uks(i) is of (ot_orig_uniquekey) )
+      then
+        v_uniquekey := treat( p_orig_table.i_ind_uks(i) as ot_orig_uniquekey );
+        if( is_equal_ignore_case( v_uniquekey.i_indexname, p_indexname ) = 1 )
+        then        
+          return v_uniquekey;
+        end if;
+      end if;
+    end loop;
+
+    return null;
+  end;  
+  
   function find_table_index( p_orig_index ot_orig_index, p_orig_table ot_orig_table ) return ot_orig_index
   is
   begin
@@ -1775,6 +1799,11 @@ CREATE OR REPLACE package body pa_orcas_compare is
         if( p_orig_uniquekey_soll.i_tablespace is not null )
         then
             stmt_add( 'using index tablespace ' || p_orig_uniquekey_soll.i_tablespace );
+        else 
+          if( p_orig_uniquekey_soll.i_indexname is not null and is_equal_ignore_case(p_orig_uniquekey_soll.i_indexname, p_orig_uniquekey_soll.i_consname) != 1 )
+          then
+            stmt_add( 'using index ' || p_orig_uniquekey_soll.i_indexname );
+          end if;  
         end if;
         if( p_orig_uniquekey_soll.i_status is not null )
         then
@@ -1790,7 +1819,9 @@ CREATE OR REPLACE package body pa_orcas_compare is
       then
         create_uniquekey();
       else
-        if(   is_equal( v_orig_uniquekey_ist.i_uk_columns, p_orig_uniquekey_soll.i_uk_columns ) != 1 
+        if( is_equal( v_orig_uniquekey_ist.i_uk_columns, p_orig_uniquekey_soll.i_uk_columns ) != 1 
+            or ( is_equal_ignore_case(v_orig_uniquekey_ist.i_indexname, nvl(p_orig_uniquekey_soll.i_indexname, v_orig_uniquekey_ist.i_indexname)) != 1 
+              and is_equal_ignore_case(v_orig_uniquekey_ist.i_indexname, v_orig_uniquekey_ist.i_consname) != 1 )
             or ( is_equal_ignore_case(v_orig_uniquekey_ist.i_tablespace, nvl(p_orig_uniquekey_soll.i_tablespace, v_default_tablespace)) != 1 
              and not (v_orig_uniquekey_ist.i_tablespace is null and p_orig_uniquekey_soll.i_tablespace is null) 
              and pa_orcas_run_parameter.is_indexmovetablespace = 1 ) )
@@ -2453,7 +2484,8 @@ CREATE OR REPLACE package body pa_orcas_compare is
               then
                 v_orig_index := treat( v_orig_table_ist.i_ind_uks(i) as ot_orig_index );
                 
-                if( find_table_index( v_orig_index, v_orig_table_soll ) is null )
+                if( find_table_index( v_orig_index, v_orig_table_soll ) is null and
+                    find_table_uniquekey_by_index( v_orig_index.i_consname, v_orig_table_ist ) is null )
                 then
                   add_stmt( 'drop index ' || v_orig_index.i_consname );                                  
                 end if; 
