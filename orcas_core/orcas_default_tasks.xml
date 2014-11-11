@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="windows-1250"?>
 <project name="OC_Schemaverwaltung_Default_Tasks">
-
+   
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
     ~~~~ Properties fuer den SCS User
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~** -->
@@ -32,12 +32,20 @@
       <copy todir="@{tmpfolder}/xtext/generator/orcas.generator/src/model">
         <fileset dir="@{dslfilefolder}" includes="*.orcasdsl"/>
       </copy>
+      <unjar dest="@{tmpfolder}/syex_tmp" overwrite="true">
+        <fileset dir="@{tmpfolder}/gradle_build" >
+          <include name="**/orcas_syex-*.jar"/>
+        </fileset>
+        <patternset>
+          <include name="**/*.class"/>
+        </patternset>
+      </unjar>
       <path id="orcas_internal_xtext_classpath_generator">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
           <include name="*.jar" />
         </fileset>  
         <pathelement location="@{tmpfolder}/xtext/generator/orcas.generator/src"/>   
-        <pathelement location="@{tmpfolder}/gradle_build/_orcas_syex/classes/main"/>   
+        <pathelement location="@{tmpfolder}/syex_tmp"/>   
       </path>
       <java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="orcas_internal_xtext_classpath_generator" fork="true" failonerror="true" dir="@{tmpfolder}/xtext/generator/orcas.generator" maxmemory="512m">
         <arg value="src/workflow/OrcasDslGenerator.mwe2"/>
