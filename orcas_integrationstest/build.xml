@@ -494,7 +494,7 @@ ${akt_verzeichnis}: @{message}</concat>
                 <if>
                   <equals arg1="${test_extract}" arg2="true" />
                   <then>
-                    <orcas_extract user="${zielskript}" userorcas="${user_orcas}" outputfolder="${tmpfolder}/${akt_verzeichnis}/extract_output"/>
+                    <orcas_extract user="${zielskript}" userorcas="${user_orcas}" outputfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" dateformat="${dateformat}"/>
                   </then>
                 </if>
 

@@ -298,7 +298,11 @@
     <text> unique</text>
     <apply-templates select="uk_columns" />
     <apply-templates select="deferrtype" />
-    <apply-templates select="tablespace" />
+    <if test="tablespace != '' or indexname != ''">
+      <text> using index </text>
+      <apply-templates select="tablespace" />
+      <apply-templates select="indexname" />
+    </if>
     <if test="position() != last()">
       <text>,</text>
     </if>
@@ -433,9 +437,14 @@
   </template>
 
   <template match="tablespace[parent::UniqueKey]">
-    <text> using index tablespace </text>
+    <text>tablespace </text>
     <value-of select="myfunc:format-dbname(.)" />
   </template>
+  
+  <template match="indexname[parent::UniqueKey]">
+    <text> </text>
+    <value-of select="myfunc:format-dbname(.)" />
+  </template>  
 
   <template match="tablespace">
     <text> tablespace </text>
