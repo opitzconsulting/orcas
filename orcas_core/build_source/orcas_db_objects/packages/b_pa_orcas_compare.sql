@@ -645,7 +645,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
       end if;  
         
       stmt_add( 'as' ); 
-      stmt_add( p_orig_mview_soll.i_viewselect );   
+      stmt_add( p_orig_mview_soll.i_viewselectclob );   
       add_stmt(); 
     end;
 
@@ -660,7 +660,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
       if(    
         ( is_equal_ignore_case(v_orig_mview_ist.i_tablespace, nvl(p_orig_mview_soll.i_tablespace, v_default_tablespace)) != 1
           and not ( v_orig_mview_ist.i_tablespace is null and p_orig_mview_soll.i_tablespace is null ) )
-        or is_equal_ignore_case(replace(v_orig_mview_ist.i_viewselect, '"', ''), p_orig_mview_soll.i_viewselect) != 1                             
+        or is_equal_ignore_case(replace(v_orig_mview_ist.i_viewselectclob, '"', ''), p_orig_mview_soll.i_viewselectclob) != 1                             
         or ot_orig_buildmodetype.is_equal(  v_orig_mview_ist.i_buildmode,  p_orig_mview_soll.i_buildmode, ot_orig_buildmodetype.c_immediate ) != 1
         )                                        
       then

@@ -150,7 +150,7 @@ create or replace package body pa_orcas_load_ist is
         v_orig_mview := ot_orig_mview();
         
         v_orig_mview.i_mview_name := cur_mview.mview_name;
-        v_orig_mview.i_viewselect := '"' || cur_mview.query || '"';     
+        v_orig_mview.i_viewselectclob := '"' || cur_mview.query || '"';     
         
         if (cur_mview.build_mode is not null)
         then

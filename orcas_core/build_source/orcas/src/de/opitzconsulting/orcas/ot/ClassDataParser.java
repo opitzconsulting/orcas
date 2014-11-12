@@ -36,7 +36,7 @@ public class ClassDataParser
       {
         if( lFieldData.isList() )
         {
-          ((ClassDataType)_typeDataContainer.getClassData( lFieldData.getJavaType() )).setListNeeded( true );
+          ((ClassDataType) lFieldData.getClassData( lFieldData.getJavaType(), _typeDataContainer )).setListNeeded( true );
         }
       }
     }

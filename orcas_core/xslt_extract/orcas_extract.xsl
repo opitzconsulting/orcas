@@ -774,7 +774,7 @@
     <apply-templates select="refreshMethod" />
     <apply-templates select="refreshMode" />
     <apply-templates select="queryRewrite" />
-    <apply-templates select="viewSelect" />
+    <apply-templates select="viewSelectCLOB" />
     <text>;
 
     </text>
@@ -827,7 +827,7 @@
     </if>
   </template>    
   
-  <template match="viewSelect">
+  <template match="viewSelectCLOB">
     <text> as </text> 
     <value-of select="." />
   </template>      
