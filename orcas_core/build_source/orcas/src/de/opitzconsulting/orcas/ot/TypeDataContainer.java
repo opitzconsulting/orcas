@@ -3,10 +3,13 @@ package de.opitzconsulting.orcas.ot;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import org.reflections.*;
+import org.reflections.scanners.SubTypesScanner;
 
 import de.opitzconsulting.orcasDsl.Model;
 
@@ -24,56 +27,36 @@ public class TypeDataContainer
     try
     {
       ClassLoader lClassLoader = Thread.currentThread().getContextClassLoader();
-      String lPath = pPackage.getName().replace( '.', '/' );
-      Enumeration<URL> lResources = lClassLoader.getResources( lPath );
-      List<File> lDirectories = new ArrayList<File>();
-      while( lResources.hasMoreElements() )
-      {
-        lDirectories.add( new File( lResources.nextElement().getFile() ) );
-      }
+      Reflections reflections = new Reflections(pPackage.getName(), new SubTypesScanner(false));
+      Iterator<String> allClasses = reflections.getStore().getSubTypesOf(Object.class.getName()).iterator();
       List<Class> lReturn = new ArrayList<Class>();
-      for( File lDirectory : lDirectories )
-      {
-        lReturn.addAll( _findClasses( lDirectory, pPackage.getName(), pUsedInterfaces ) );
+
+      while (allClasses.hasNext()){
+        Class lClass = Class.forName( allClasses.next() );
+        if (lClass.isInterface()){
+            boolean lUse = false;
+
+            for( Class lInterface : lClass.getInterfaces() )
+            {
+              if( pUsedInterfaces.contains( lInterface ) )
+              {
+                  lUse = true;
+              }
+            }
+
+            if( lUse )
+            {
+              lReturn.add( lClass );
+            }
+        }
       }
+
       return lReturn;
     }
     catch( Exception e )
     {
       throw new RuntimeException();
     }
-  }
-
-  private List<Class> _findClasses( File pDirectory, String pPackageName, List<Class> pUsedInterfaces ) throws Exception
-  {
-    List<Class> lReturn = new ArrayList<Class>();
-    if( !pDirectory.exists() )
-    {
-      return lReturn;
-    }
-    for( File lFile : pDirectory.listFiles() )
-    {
-      if( lFile.getName().endsWith( ".class" ) )
-      {
-        Class lClass = Class.forName( pPackageName + '.' + lFile.getName().substring( 0, lFile.getName().length() - 6 ) );
-
-        boolean lUse = false;
-
-        for( Class lInterface : lClass.getInterfaces() )
-        {
-          if( pUsedInterfaces.contains( lInterface ) )
-          {
-            lUse = true;
-          }
-        }
-
-        if( lUse )
-        {
-          lReturn.add( lClass );
-        }
-      }
-    }
-    return lReturn;
   }
 
   List<Class> getMissingClasses()

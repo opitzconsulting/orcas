@@ -32,20 +32,11 @@
       <copy todir="@{tmpfolder}/xtext/generator/orcas.generator/src/model">
         <fileset dir="@{dslfilefolder}" includes="*.orcasdsl"/>
       </copy>
-      <unjar dest="@{tmpfolder}/syex_tmp" overwrite="true">
-        <fileset dir="@{tmpfolder}/gradle_build" >
-          <include name="**/orcas_syex-*.jar"/>
-        </fileset>
-        <patternset>
-          <include name="**/*.class"/>
-        </patternset>
-      </unjar>
       <path id="orcas_internal_xtext_classpath_generator">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
           <include name="*.jar" />
         </fileset>  
-        <pathelement location="@{tmpfolder}/xtext/generator/orcas.generator/src"/>   
-        <pathelement location="@{tmpfolder}/syex_tmp"/>   
+        <pathelement location="@{tmpfolder}/xtext/generator/orcas.generator/src"/>     
       </path>
       <java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="orcas_internal_xtext_classpath_generator" fork="true" failonerror="true" dir="@{tmpfolder}/xtext/generator/orcas.generator" maxmemory="512m">
         <arg value="src/workflow/OrcasDslGenerator.mwe2"/>
