@@ -11,7 +11,7 @@ configurations
 dependencies 
 {
   generatorRunPath files("${buildDir}/libs/${jar.archiveName}")
-  generatorRunPath files("${buildDir}/classes/main")
+  compile "org.reflections:reflections:0.9.9-RC1" 
 }
 
 task(createSqlplusDir, dependsOn: jar) 
