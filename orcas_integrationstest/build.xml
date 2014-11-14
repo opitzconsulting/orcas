@@ -190,7 +190,7 @@
 
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
       <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
-<![CDATA[<testsuite name="${akt_verzeichnis}" time="0">]]></concat>
+<![CDATA[<testsuite name="${location}.${akt_verzeichnis}" time="0">]]></concat>
       <log_skip testname="run"/>
     </sequential>
   </macrodef>      
