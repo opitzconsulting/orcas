@@ -491,32 +491,42 @@ ${akt_verzeichnis}: @{message}</concat>
                 <orcas_execute_script user="${zielskript}" script="@{folder}/erzeuge_zielzustand.sql" parameter="${alternate_tablespace_1} ${alternate_tablespace_2}" logname="tabellen_anlegen_zielskript"
                   failonerror="true" />
 
-                <if>
-                  <equals arg1="${test_extract}" arg2="true" />
-                  <then>
-                    <orcas_extract user="${zielskript}" userorcas="${user_orcas}" outputfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" dateformat="${dateformat}"/>
-                  </then>
-                </if>
+                <log_success testname="test_initialized" />  
 
-                <!-- Ausf�hren der Schemaverwaltung -->
+                <!-- test_run -->
                 <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                   dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
                   createmissingfkindexes="${createmissingfkindexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll"
                   logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}"/>
+                <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${ueberfuehrung}" logfile2="ueberfuehrung" testname="test_run" />
+
+                <!-- second_run_does_nothing -->
                 <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                   dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
                   createmissingfkindexes="${createmissingfkindexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test"
-                  logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}"/>
+                  logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}"/> 
 
-                <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${ueberfuehrung}" logfile2="ueberfuehrung" testname="test_run" />
+                <if>
+                  <available file="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test/master_install.sql" />
+                  <then>
+                    <log_error message="Zweiter Lauf der Tabellenskripte fehlgeschlagen (Abweichung zum ersten Lauf der SVW)" testname="second_run_does_nothing" />  
+                  </then>
+                  <else>
+                    <log_success testname="second_run_does_nothing" />  
+                  </else>                  
+                </if>                
 
+                <!-- test_run_with_log -->
                 <orcas_execute_script executiondir="${tmpfolder}/${akt_verzeichnis}/Protokoll" user="${protokoll}" script="master_install.sql" userorcas="${user_orcas}" logname="ausfuehren_protokoll" />
       
                 <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${protokoll}" logfile2="protokoll" testname="test_run_with_log" />
 
+                <!-- test_run_with_extract -->
                 <if>
                   <equals arg1="${test_extract}" arg2="true" />
                   <then>
+                    <orcas_extract user="${zielskript}" userorcas="${user_orcas}" outputfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" dateformat="${dateformat}"/>
+
                     <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" userorcas="${user_orcas}" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
                     <orcas_grant user="${ueberfuehrung}" userorcas="${user_orcas}" />
                     <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" userorcas="${user_orcas}" scriptfolderrecursive="true"
@@ -530,6 +540,7 @@ ${akt_verzeichnis}: @{message}</concat>
                   </else>
                 </if>
 
+                <!-- test_run_sqlplus -->
                 <if>
                   <and>
                     <available file="@{folder}/tabellen_sqlplus/tabelle.sql" />
@@ -543,11 +554,13 @@ ${akt_verzeichnis}: @{message}</concat>
                     <orcas_sqlplus_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen_sqlplus/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                       dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="${createmissingfkindexes}" 
                       logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_svw_test" dateformat="${dateformat}"/>                  
+
+                    <check_struktur_equal user1="${zielskript}" logfile1="zielskript_sqlplus" user2="${ueberfuehrung}" logfile2="ueberfuehrung_sqlplus" testname="test_run_sqlplus" />
+
+                    <!-- second_run_does_nothing_sqlplus -->
                     <orcas_sqlplus_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen_sqlplus/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                       dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="${createmissingfkindexes}" 
                       logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test" dateformat="${dateformat}"/>                
-
-                    <check_struktur_equal user1="${zielskript}" logfile1="zielskript_sqlplus" user2="${ueberfuehrung}" logfile2="ueberfuehrung_sqlplus" testname="test_run_sqlplus" />
 
                     <if>
                       <available file="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test/master_install.sql" />
@@ -571,16 +584,6 @@ ${akt_verzeichnis}: @{message}</concat>
                     </if>
                   </else>                  
                 </if>
-
-                <if>
-                  <available file="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test/master_install.sql" />
-                  <then>
-                    <log_error message="Zweiter Lauf der Tabellenskripte fehlgeschlagen (Abweichung zum ersten Lauf der SVW)" testname="second_run_does_nothing" />  
-                  </then>
-                  <else>
-                    <log_success testname="second_run_does_nothing" />  
-                  </else>                  
-                </if>                                              
 
                 <check_no_ora_errors/>
               </then>
