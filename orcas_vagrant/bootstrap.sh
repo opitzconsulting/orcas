@@ -16,7 +16,7 @@ yum -y install ant
 yum -y install ant-contrib
 
 # used for reverse-engineering via xslt
-yum -y install ant-apache-trax
+yum -y install ant-trax
 
 # used by integrationtest 
 yum -y install ant-apache-regexp
