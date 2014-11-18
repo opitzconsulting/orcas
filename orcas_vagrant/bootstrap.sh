@@ -8,10 +8,18 @@ chkconfig iptables off
 sudo su
 . .bash_profile
 
+# somehow oraenv does not set LD_LIBRARY_PATH correctly (used for reverse-engineering jdbc-oci connection)
+printf "export LD_LIBRARY_PATH=$ORACLE_HOME/lib" >> .bash_profile
+
 # install ant
 yum -y install ant
-yum -y install ant-apache-regexp
 yum -y install ant-contrib
+
+# used for reverse-engineering via xslt
+yum -y install ant-trax
+
+# used by integrationtest 
+yum -y install ant-apache-regexp
 
 # install gradle
 gradle_version=2.1
