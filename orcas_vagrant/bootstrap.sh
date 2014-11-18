@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# ip-config for orcale
 service iptables save
 service iptables stop
 chkconfig iptables off
@@ -7,11 +8,11 @@ chkconfig iptables off
 sudo su
 . .bash_profile
 
+# install ant
 yum -y install ant
 yum -y install ant-contrib
-yum -y install java-1.7.0-openjdk-devel
-echo "export JAVA_HOME=/etc/alternatives/java_sdk" >> /home/vagrant/.bashrc
 
+# install gradle
 gradle_version=2.1
 wget -Nnv http://services.gradle.org/distributions/gradle-${gradle_version}-all.zip 
 unzip gradle-${gradle_version}-all.zip -d /opt/gradle
