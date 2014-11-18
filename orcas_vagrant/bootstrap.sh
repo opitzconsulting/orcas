@@ -10,6 +10,7 @@ sudo su
 
 # install ant
 yum -y install ant
+yum -y install ant-apache-regexp
 yum -y install ant-contrib
 
 # install gradle
