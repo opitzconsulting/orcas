@@ -22,7 +22,7 @@ public class OrcasLoadExtract
         ;
 
       Connection lConnection = DriverManager.getConnection( pArgs[0], pArgs[1], pArgs[2]);
-      
+
       PreparedStatement lPrepareStatement = lConnection.prepareStatement("select pa_orcas_xml_syex.get_model( pa_orcas_extensions.call_reverse_extensions( pa_orcas_trans_orig_syex.trans_orig_syex( pa_orcas_load_ist.get_ist()))) json_col from dual");
       
       lPrepareStatement .execute();

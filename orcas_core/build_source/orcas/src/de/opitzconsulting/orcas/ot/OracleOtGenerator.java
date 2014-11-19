@@ -135,7 +135,7 @@ public class OracleOtGenerator
       for( FieldData lFieldData : pClassDataType.getFiledDataList() )
       {
         lIsMemberGenerated = true;
-        ClassData lType = pTypeDataContainer.getClassData( lFieldData.getJavaType() );
+        ClassData lType = lFieldData.getClassData( lFieldData.getJavaType(), pTypeDataContainer );
 
         String lSqlTypeName = lType.getSqlName();
 

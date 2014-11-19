@@ -1,4 +1,9 @@
-set linesize 2500;
+set linesize 32000;
 set heading off;
 set feedback off;
-select script from orcas_table_script_source order by id;
+set pagesize 0;
+set trimspool on;
+set trim on;
+
+select decode(instr(script,'/'), 0, trim(replace(replace(replace(script, chr(13) || chr(10),' '), chr(10),' '), chr(13),' ')), script) from orcas_table_script_source order by id;
+

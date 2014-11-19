@@ -784,7 +784,7 @@ ${orcas_sql_output}
           <if>
             <equals arg1="@{targetplsql}" arg2=""/>
             <then>
-              <orcas_internal_sql_plus loglevel="@{loglevel}" script="${orcas_util_scripts}/call_orcas.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true"/>
+              <orcas_internal_sql_plus loglevel="@{loglevel}" script="${orcas_util_scripts}/call_orcas.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
             </then>
             <else>
               <orcas_internal_sql_plus loglevel="@{loglevel}" script="${orcas_util_scripts}/call_orcas_target_plsql.sql" parameter="@{targetplsql}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />

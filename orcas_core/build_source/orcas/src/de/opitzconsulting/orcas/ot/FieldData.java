@@ -61,7 +61,19 @@ public class FieldData
       return "i_" + _javaName.toLowerCase();
     }
   }
-  
+
+  public ClassData getClassData( Class pJavaType, TypeDataContainer pTypeDataContainer )
+  {
+    ClassData result = null;
+
+    if(_javaName.toUpperCase().contains("CLOB")) {
+      result = new ClassDataPrimitive( "clob" );
+    } else {
+      result = pTypeDataContainer.getClassData(pJavaType);
+    }
+    return result;
+  }
+
   private String _getFiledNameFromMethod()
   {
     String lMethodName = _getterMethod.getName();
