@@ -4,3 +4,5 @@ grant create session to &1;
 grant connect to 		&1;
 grant resource to 		&1;
 grant create materialized view to &1;
+grant unlimited tablespace to &1;
+
