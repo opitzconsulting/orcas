@@ -779,6 +779,12 @@ ${orcas_sql_output}
 
           <orcas_internal_xtext_statics tmpfolder="@{tmpfolder}" dslfilefolder="@{tmpfolder}/statics_concat" outfolder="@{tmpfolder}/statics"/>
           
+          <replaceregexp file="@{tmpfolder}/statics/all.sql"
+               match="(..........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................)"
+               replace="\1${line.separator}"
+               byline="false"
+               flags="g"/>   
+          
           <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/statics/all.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true"/>
           <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="@{dropmode}" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="@{createmissingfkindexes}" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" logonly="@{logonly}" dateformat="@{dateformat}"/>
           <if>
