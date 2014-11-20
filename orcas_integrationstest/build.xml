@@ -138,6 +138,8 @@
           <orcas_execute_script user="@{user}" password="@{password}" script="spool.sql" parameter="@{logfile} ${tmpfolder}/tabellen.log 1=2" failonerror="yes" logname="Struktur ermitteln" />
           <!-- max_value_select nur uebernehmen, wenn es keine Zahl ist, denn sonst ist es nur der aktuelle wert der sequence -->
           <replaceregexp file="@{logfile}" match="\&lt;max_value_select\&gt;[0-9]+\&lt;\/max_value_select\&gt;" replace="" flags="g" />
+          <!-- Leerzeichen kann durch die Ersetzung von linefeeds bei langen Zeilen verursacht sein und zu Unterschieden führen -->
+          <replaceregexp file="@{logfile}" match=" " replace="" flags="g" />
         </else>
       </if>
     </sequential>
@@ -256,7 +258,7 @@ ${akt_verzeichnis}: @{message}</concat>
       <struktur_ermitteln user="@{user2}" logfile="${tmpfolder}/${akt_verzeichnis}/struktur_@{logfile2}.log" includedata="@{includedata}" />
 
       <var name="checksumme_1" unset="true" />
-      <var name="checksumme_2" unset="true" />
+      <var name="checksumme_2" unset="true" />         
 
       <checksum file="${tmpfolder}/${akt_verzeichnis}/struktur_@{logfile1}.log" property="checksumme_1" />
       <checksum file="${tmpfolder}/${akt_verzeichnis}/struktur_@{logfile2}.log" property="checksumme_2" />
