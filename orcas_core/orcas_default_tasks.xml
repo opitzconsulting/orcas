@@ -867,18 +867,14 @@ ${orcas_sql_output}
       <if>
           <equals arg1="@{user}" arg2="@{userorcas}"/>
         <then>
-          <echo message="installing orcas in existing schema"/>
-          <!--
-          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage} or (upper(object_name) like '%ORCAS%')" token="&amp;1" />
-          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereobjecttype} or (upper(object_name) like 'OT%' or upper(object_name) like 'CT%')" token="&amp;2" />      
-          -->
-          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage}" token="&amp;1" />
+          <echo message="installing orcas in existing schema"/>        
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage} and not (upper(object_name) like '%ORCAS%')" token="&amp;1" />  
         </then>
         <else>
           <echo message="installing orcas in separate schema @{user} @{userorcas}"/>
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage}" token="&amp;1" />          
         </else>
-      </if>
+      </if>     
       <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereobjecttype}" token="&amp;2" />
       <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewheretrigger}" token="&amp;3" />
       <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereview}" token="&amp;4" />

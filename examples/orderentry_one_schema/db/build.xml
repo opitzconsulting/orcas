@@ -1,0 +1,60 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<project default="build_all" basedir="." name="orderentry">
+  <import file="../distribution/ant_default_include.xml"/>
+
+  <target name="orcas_install" depends="show_location">
+    <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${username_dba}" passwordorcas="${password_dba}"/>
+  </target>
+
+  <target name="orderentry_install" depends="show_location">
+    <if>
+      <equals arg1="${username_dba}" arg2="${username_schemaowner}"/>
+    <then>
+      <echo message="skipping create schemaowner, installing orcas in existing schema"/>
+    </then>
+    <else>
+      <orcas_execute_script user="${username_dba}" password="${password_dba}" script="create_schemaowner.sql" parameter="${username_schemaowner} ${password_schemaowner}"/>
+    </else>
+    </if>
+  </target>
+
+  <target name="drop_users" depends="show_location">
+    <if>
+      <equals arg1="${username_dba}" arg2="${username_schemaowner}"/>
+    <then>
+      <echo message="skipping drop user, installing orcas in existing schema"/>
+    </then>
+    <else>
+      <echo message="dropping user {username_schemaowner}, dba user ${username_dba}"/>
+      <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${username_schemaowner}"/>
+      <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${orcas.default_user_orcas}"/>
+    </else>
+    </if>
+  </target>
+
+  <target name="orcas_initialize" depends="show_location">
+    <orcas_initialize extensionfolder="../orcas_extensions"/>
+  </target>
+
+  <target name="build_tables" depends="show_location,orcas_initialize">
+    <orcas_execute_statics scriptfolder="tabellen" scriptfolderrecursive="true" spoolfolder="${binrundir}/log" logname="tables" dropmode="false"/>
+  </target>
+
+  <target name="pre_scripts" depends="show_location,orcas_initialize">
+    <orcas_execute_one_time_scripts scriptfolder="skripte" logname="pre_skripte"/>
+  </target>
+
+  <target name="extract" depends="show_location">
+    <orcas_extract outputfolder="${binrundir}/extract_output"/>
+  </target>
+
+  <target name="install_all" depends="show_location,orcas_install,orderentry_install">
+  </target>
+
+  <target name="build_all" depends="show_location,pre_scripts,build_tables">
+  </target>
+
+  <target name="ci_jenkins" depends="drop_users,install_all,build_all">
+  </target>
+</project>
+
