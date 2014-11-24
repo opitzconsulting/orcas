@@ -864,12 +864,23 @@ ${orcas_sql_output}
         </elseif>
       </if>
       <copy file="${orcas_util_scripts}/delete_replacable_objects.sql" tofile="@{tmpfolder}/delete_replacable_objects_tmp.sql" overwrite="true" />
-      <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage}" token="&amp;1" />
+      <if>
+          <equals arg1="@{user}" arg2="@{userorcas}"/>
+        <then>
+          <echo message="installing orcas in existing schema"/>        
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage} and not (upper(object_name) like '%ORCAS%')" token="&amp;1" />  
+        </then>
+        <else>
+          <echo message="installing orcas in separate schema @{user} @{userorcas}"/>
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage}" token="&amp;1" />          
+        </else>
+      </if>     
       <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereobjecttype}" token="&amp;2" />
       <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewheretrigger}" token="&amp;3" />
       <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereview}" token="&amp;4" />
       <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherefunction}" token="&amp;5" />
       <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereprocedure}" token="&amp;6" />
+      
       <orcas_internal_sql_plus script="@{tmpfolder}/delete_replacable_objects_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
       <if>
         <isset property="orcas_internal_logging_active" />
@@ -1241,7 +1252,16 @@ ${orcas_sql_output}
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <sequential>
-      <orcas_execute_script   script="${orcas_util_scripts}/grant_to_schemaowner.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+      <if>
+        <equals arg1="@{user}" arg2="@{userorcas}"/>
+        <then>
+            <echo message="installing orcas in existing schema"/>
+        </then>
+        <else>
+          <echo message="installing orcas in separate schema granting to @{user} by @{userorcas}"/>
+          <orcas_execute_script   script="${orcas_util_scripts}/grant_to_schemaowner.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+        </else>
+      </if>
     </sequential>
   </macrodef>    
   
@@ -1253,7 +1273,16 @@ ${orcas_sql_output}
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <sequential>
-      <orcas_execute_script   script="${orcas_util_scripts}/grant_references.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+      <if>
+        <equals arg1="@{user}" arg2="@{userorcas}"/>
+        <then>
+            <echo message="installing orcas in existing schema"/>
+        </then>
+        <else>
+          <echo message="installing orcas in separate schema granting references to @{user} by @{userorcas}"/>
+         <orcas_execute_script   script="${orcas_util_scripts}/grant_references.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+        </else>
+      </if>    
     </sequential>
   </macrodef>    
 
@@ -1318,6 +1347,7 @@ ${orcas_sql_output}
   <macrodef name="orcas_internal_update_orcas_db">
     <attribute name="userorcas" />
     <attribute name="passwordorcas" />
+    <attribute name="user" />
     <attribute name="tnsname" />
     <attribute name="tmpfolder" />
     <sequential>
@@ -1328,7 +1358,7 @@ ${orcas_sql_output}
         </fileset>
       </unzip>
 
-      <orcas_drop_replaceables user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder=""/>
+      <orcas_drop_replaceables user="@{userorcas}" password="@{passwordorcas}" userorcas="@{userorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder=""/>
       <orcas_execute_scripts  scriptfolder="@{tmpfolder}/gradle_sqlplus" scriptfolderrecursive="true" failonerror="true" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
       <orcas_compile_db_objects  user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
     </sequential>
@@ -1440,7 +1470,7 @@ ${orcas_sql_output}
               
               <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionparameter="@{extensionparameter}"/>
 
-              <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+              <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" user="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
 
               <orcas_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
 
@@ -1521,15 +1551,23 @@ ${orcas_sql_output}
       </if>
 
       <if>
-        <equals arg1="@{tblspcorcas}" arg2=""/>
+          <equals arg1="@{user}" arg2="@{userorcas}"/>
         <then>
-          <orcas_execute_script  script="${orcas_install_scripts}/create_user/create_user.sql" failonerror="true" user="@{user}" password="@{password}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="" parameter="@{userorcas} @{passwordorcas}" />
+          <echo message="skipping create user, installing orcas in existing schema"/>
         </then>
         <else>
-          <orcas_execute_script  script="${orcas_install_scripts}/create_user/create_user_with_tablespace.sql" failonerror="true" user="@{user}" password="@{password}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="" parameter="@{userorcas} @{passwordorcas} @{tblspcorcas}" />
+          <if>
+            <equals arg1="@{tblspcorcas}" arg2=""/>
+            <then>
+              <orcas_execute_script  script="${orcas_install_scripts}/create_user/create_user.sql" failonerror="true" user="@{user}" password="@{password}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="" parameter="@{userorcas} @{passwordorcas}" />
+            </then>
+            <else>
+              <orcas_execute_script  script="${orcas_install_scripts}/create_user/create_user_with_tablespace.sql" failonerror="true" user="@{user}" password="@{password}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="" parameter="@{userorcas} @{passwordorcas} @{tblspcorcas}" />
+            </else>
+          </if>
         </else>
       </if>
-
+      
       <orcas_execute_scripts  scriptfolder="${orcas_install_scripts}" failonerror="true" user="@{userorcas}" password="@{passwordorcas}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="" />
       <echo level="info" message="orcas User erfolgreich installiert" />
     </sequential>
