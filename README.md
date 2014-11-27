@@ -16,7 +16,7 @@ Wenn Sie Änderungen vornehmen möchten:
 - Änderungen durchführen
 - Pull-Request senden
 
-Detailliertere Angaben zukünftig auf der ![participate Seite](http://opitzconsulting.github.io/orcas/participate) der Dokumentation.
+Detailliertere Angaben zukünftig auf der [participate Seite](http://opitzconsulting.github.io/orcas/participate) der Dokumentation.
 
 ##Todo Liste
 
