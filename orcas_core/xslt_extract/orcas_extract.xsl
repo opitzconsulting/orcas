@@ -27,6 +27,13 @@
       <value-of select="java_string:concat('zzz_',java_string:toLowerCase(java_string:new($string_param)))" />
     </func:result>
   </func:function>  
+  
+  <func:function name="myfunc:split-by-linefeed">
+    <param name="string_param" />
+    <func:result>
+      <value-of select="java_string:replaceAll(java_string:new($string_param),'(.{1000})','$1--line.separator--')" />
+    </func:result>
+  </func:function>
 
   <func:function name="myfunc:format-dbname">
     <param name="string_param" />
@@ -829,7 +836,7 @@
   
   <template match="viewSelectCLOB">
     <text> as </text> 
-    <value-of select="." />
+    <value-of select="myfunc:split-by-linefeed(.)" />
   </template>      
 
 </stylesheet>
