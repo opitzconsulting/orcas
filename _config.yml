@@ -1,7 +1,6 @@
 # Site settings
 title: Orcas
-subtitle: "- Oracle adaptive/agile schemas"
-#email: your-email@domain.com
+subtitle: "Oracle adaptive/agile schemas"
 description: > 
  Orcas ist ein Deploymentframework mit dem ein bestehendes Datenbankschema in einen in Orcas 
  beschriebenen Soll-Zustand geführt werden kann. Orcas steht für Oracle adaptive/agile schemas und 
@@ -10,6 +9,8 @@ baseurl: "/orcas" # the subpath of your site, e.g. /blog/
 #url: "http://yourdomain.com" # the base hostname & protocol for your site
 twitter_username: OC_WIRE
 github_username:  opitzconsulting/Orcas
+github_issues: https://github.com/opitzconsulting/orcas/issues
+github_fork: https://github.com/opitzconsulting/orcas/fork
 
 # Build settings
 markdown: kramdown
