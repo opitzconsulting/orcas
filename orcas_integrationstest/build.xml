@@ -138,8 +138,8 @@
           <orcas_execute_script user="@{user}" password="@{password}" script="spool.sql" parameter="@{logfile} ${tmpfolder}/tabellen.log 1=2" failonerror="yes" logname="Struktur ermitteln" />
           <!-- max_value_select nur uebernehmen, wenn es keine Zahl ist, denn sonst ist es nur der aktuelle wert der sequence -->
           <replaceregexp file="@{logfile}" match="\&lt;max_value_select\&gt;[0-9]+\&lt;\/max_value_select\&gt;" replace="" flags="g" />
-          <!-- Leerzeichen kann durch die Ersetzung von linefeeds bei langen Zeilen verursacht sein und zu Unterschieden führen -->
-          <replaceregexp file="@{logfile}" match=" " replace="" flags="g" />
+          <!-- zusätzliche Leerzeichen können bei matviewselect durch die Ersetzung von linefeeds bei langen Zeilen verursacht sein und zu Unterschieden führen -->
+          <replaceregexp file="@{logfile}" match="viewSelectCLOB>.*[ ].*/viewSelectCLOB>" replace="viewSelectCLOB/>" flags="g" /> 
         </else>
       </if>
     </sequential>
