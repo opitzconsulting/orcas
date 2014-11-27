@@ -2,7 +2,7 @@
 title: Orcas
 subtitle: "Oracle adaptive/agile schemas"
 description: > 
- Orcas ist ein Deploymentframework mit dem ein bestehendes Datenbankschema in einen in Orcas 
+ Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes Datenbankschema in einen in Orcas 
  beschriebenen Soll-Zustand geführt werden kann. Orcas steht für Oracle adaptive/agile schemas und 
  ist nur mit Oracle RDBMS kompatibel.
 baseurl: "/orcas" # the subpath of your site, e.g. /blog/
