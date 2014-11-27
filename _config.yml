@@ -14,3 +14,4 @@ github_fork: https://github.com/opitzconsulting/orcas/fork
 
 # Build settings
 markdown: kramdown
+highlighter: pygments
