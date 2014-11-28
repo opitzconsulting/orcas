@@ -45,6 +45,8 @@ Workflow {
     		}
     
     		fragment = parser.antlr.XtextAntlrGeneratorFragment auto-inject {
+                  // this parameter is set to prevent warning(209): ...: Multiple token rules can match input such as ..
+                  antlrParam = "-Xconversiontimeout" antlrParam = "30000"
     		}
     
     		fragment = validation.JavaValidatorFragment auto-inject {

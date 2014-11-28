@@ -11,6 +11,7 @@ begin
      select 'drop TYPE "' || OBJECT_NAME || '"' text
         from user_objects 
        where object_type = 'TYPE'
+          and &1
         order by object_id desc
     )    
     loop
