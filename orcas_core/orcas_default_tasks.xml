@@ -820,7 +820,7 @@ ${orcas_sql_output}
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
     <attribute name="autotimestamp" default="false" />
-    <attribute name="ignoreorcas" default="true" />
+    <attribute name="orcasinternalinitialize" default="true" />
     <attribute name="excludewhereview" default="object_name like '%'" />
     <attribute name="excludewhereobjecttype" default="object_name like '%'" />
     <attribute name="excludewherepackage" default="object_name like '%'" />
@@ -867,10 +867,17 @@ ${orcas_sql_output}
       <copy file="${orcas_util_scripts}/delete_replacable_objects.sql" tofile="@{tmpfolder}/delete_replacable_objects_tmp.sql" overwrite="true" />
       <copy file="${orcas_util_scripts}/drop_all_types.sql" tofile="@{tmpfolder}/drop_all_types_tmp.sql" overwrite="true" />
       <if>
-          <equals arg1="@{ignoreorcas}" arg2="true"/>
+        <and>
+          <equals arg1="@{user}" arg2="@{userorcas}"/>
+          <equals arg1="@{orcasinternalinitialize}" arg2="true"/>  
+        </and>          
         <then>
           <echo message="installing orcas in existing schema"/>        
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="(@{excludewherepackage}) and not (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;2" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;3" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2}" token="&amp;4" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;5" />
           <replace file="@{tmpfolder}/drop_all_types_tmp.sql" value="(@{excludewhereobjecttype}) and not (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
         </then>
         <else>
@@ -879,7 +886,8 @@ ${orcas_sql_output}
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewheretrigger}" token="&amp;2" />
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereview}" token="&amp;3" />
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherefunction}" token="&amp;4" />
-          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereprocedure}" token="&amp;5" />        
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereprocedure}" token="&amp;5" /> 
+          <replace file="@{tmpfolder}/drop_all_types_tmp.sql" value="@{excludewhereobjecttype}" token="&amp;1" />        
         </else>
       </if>     
       
@@ -1360,7 +1368,7 @@ ${orcas_sql_output}
         </fileset>
       </unzip>
 
-      <orcas_drop_replaceables user="@{userorcas}" password="@{passwordorcas}" userorcas="@{userorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" ignoreorcas="false"/>
+      <orcas_drop_replaceables user="@{userorcas}" password="@{passwordorcas}" userorcas="@{userorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" orcasinternalinitialize="false"/>
       <orcas_execute_scripts  scriptfolder="@{tmpfolder}/gradle_sqlplus" scriptfolderrecursive="true" failonerror="true" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
       <orcas_compile_db_objects  user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
     </sequential>
