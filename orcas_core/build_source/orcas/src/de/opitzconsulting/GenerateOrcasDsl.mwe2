@@ -26,7 +26,6 @@ Workflow {
     	projectNameRt = projectName
     	srcPath = "/src"
     	srcGenPath = "/../xtext-generated"
-    	//srcGenPath = "D:/orcas/src/bin_test/_orcas/orcasorig/xtext-generated"
     	
     	language = auto-inject {
     		uri = grammarURI
