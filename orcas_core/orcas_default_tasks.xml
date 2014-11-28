@@ -1395,6 +1395,7 @@ ${orcas_sql_output}
     <attribute name="autotimestamp" default="false" />
     <attribute name="extensionfolder" default="" />
     <attribute name="extensionparameter" default="" />
+    <attribute name="setupliquibase" default="false" />
     <sequential>
       <fail message="Unsupported Java version: ${ant.java.version}. Java version 1.7 or greater required.">
         <condition>
@@ -1462,15 +1463,29 @@ ${orcas_sql_output}
               </not>
             </or>
             <then>        
-              <delete includeemptydirs="true">
-                <fileset dir="@{tmpfolder}" includes="**/*" defaultexcludes="false" excludes="orcas_sqlplus_core/**/*" />
-              </delete>
+              <if>
+                <not>
+                  <equals arg1="${orcas_internal_no_clean_initialize}" arg2="true"/>
+                </not>
+                <then>     
+                  <delete includeemptydirs="true">
+                    <fileset dir="@{tmpfolder}" includes="**/*" defaultexcludes="false" excludes="orcas_sqlplus_core/**/*" />
+                  </delete>
+                </then>     
+              </if>     
               <orcas_check_connection user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
               <orcas_check_connection user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
               
               <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionparameter="@{extensionparameter}"/>
 
               <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" user="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+
+              <if>
+                <equals arg1="@{setupliquibase}" arg2="true"/>
+                <then>        
+                  <orcas_liquibase changeLogFile="${orcas_dir}/sql_util_scripts/emptyChangeLog.xml" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" orcasinternalrundirect="true"/>  
+                </then>                  
+              </if>                
 
               <orcas_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
 
@@ -1781,6 +1796,98 @@ ${orcas_sql_output}
 
       <orcas_internal_spool_from_db user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="@{tmpfolder}/load_extract_data" logname="load_extract_data" autotimestamp="false" />
       <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/load_extract_data/load_extract_data.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" parameter="@{outputfolder}/"/>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_liquibase">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="changeLogFile" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />    
+    <attribute name="contexts" default="" />    
+    <attribute name="orcasinternalrundirect" default="false" />    
+    <attribute name="failonerror" default="true" />
+    <sequential>
+      <if>
+        <equals arg1="@{orcasinternalrundirect}" arg2="false" />
+        <then>
+          <delete file="@{tmpfolder}/liquibaselog.sql" />
+          <ant antfile="${orcas_dir}/orcas_call_liquibase.xml" target="orcas_liquibase_update" >
+            <property name="user" value="@{user}"/>
+            <property name="password" value="@{password}"/>
+            <property name="userorcas" value="@{userorcas}"/>
+            <property name="passwordorcas" value="@{passwordorcas}"/>
+            <property name="tnsname" value="@{tnsname}"/>
+            <property name="jdbcurl" value="@{jdbcurl}"/>
+            <property name="tmpfolder" value="@{tmpfolder}"/>
+            <property name="changeLogFile" value="@{changeLogFile}"/>
+            <property name="contexts" value="@{contexts}"/>
+            <property name="outputFile" value="@{tmpfolder}/liquibaselog.sql"/>
+          </ant>
+          <!-- check @{tmpfolder}/liquibaselog.sql is "empty" -->
+          <copy file="@{tmpfolder}/liquibaselog.sql" tofile="@{tmpfolder}/liquibaselog_empty_check.sql" overwrite="true" />
+          <!-- remove comment lines -->
+          <replaceregexp file="@{tmpfolder}/liquibaselog_empty_check.sql" match="^--.*$" replace="" byline="true" />
+          <!-- remove SET DEFINE OFF; line -->
+          <replaceregexp file="@{tmpfolder}/liquibaselog_empty_check.sql" match="^SET DEFINE OFF;$" replace="" byline="true" />
+          <!-- remove empty lines -->
+          <copy file="@{tmpfolder}/liquibaselog_empty_check.sql" toFile="@{tmpfolder}/liquibaselog_empty_check_no_blank_lines.sql">
+            <filterchain>
+              <ignoreblank/>
+            </filterchain>
+          </copy>          
+          <!-- only execute liquibase generated file if not empty (this is to improve logging) -->
+          <if>
+            <length file="@{tmpfolder}/liquibaselog_empty_check_no_blank_lines.sql" when="greater" length="0" />
+            <then>
+              <orcas_execute_script script="@{tmpfolder}/liquibaselog.sql" failonerror="@{failonerror}" user="@{user}" password="@{password}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+            </then>
+          </if>
+        </then>
+        <else>
+          <ant antfile="${orcas_dir}/orcas_call_liquibase.xml" target="orcas_liquibase_update" >
+            <property name="user" value="@{user}"/>
+            <property name="password" value="@{password}"/>
+            <property name="userorcas" value="@{userorcas}"/>
+            <property name="passwordorcas" value="@{passwordorcas}"/>
+            <property name="tnsname" value="@{tnsname}"/>
+            <property name="jdbcurl" value="@{jdbcurl}"/>
+            <property name="tmpfolder" value="@{tmpfolder}"/>
+            <property name="changeLogFile" value="@{changeLogFile}"/>
+            <property name="contexts" value="@{contexts}"/>
+            <property name="outputFile" value=""/>
+          </ant>
+        </else>        
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_liquibase_changelogsync">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="changeLogFile" />
+    <sequential>
+      <ant antfile="${orcas_dir}/orcas_call_liquibase.xml" target="orcas_liquibase_changelogsync" >
+        <property name="user" value="@{user}"/>
+        <property name="password" value="@{password}"/>
+        <property name="userorcas" value="@{userorcas}"/>
+        <property name="passwordorcas" value="@{passwordorcas}"/>
+        <property name="tnsname" value="@{tnsname}"/>
+        <property name="jdbcurl" value="@{jdbcurl}"/>
+        <property name="tmpfolder" value="@{tmpfolder}"/>
+        <property name="changeLogFile" value="@{changeLogFile}"/>
+      </ant>
     </sequential>
   </macrodef>
 </project>
