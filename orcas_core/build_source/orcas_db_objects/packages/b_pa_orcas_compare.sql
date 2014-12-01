@@ -2459,7 +2459,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
         then         
           v_orig_mview_soll := find_mview_by_table( v_orig_table_ist, pv_model_soll );
           
-          if( v_orig_mview_soll is null)
+          if( v_orig_mview_soll is null and v_orig_table_ist.i_name not like 'ORCAS_%')
           then  
             drop_with_dropmode_check( 'select 1 from ' || v_orig_table_ist.i_name,
                                       'drop table ' || v_orig_table_ist.i_name );
