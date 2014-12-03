@@ -821,12 +821,12 @@ ${orcas_sql_output}
     <attribute name="logname" default="" />
     <attribute name="autotimestamp" default="false" />
     <attribute name="orcasinternalinitialize" default="true" />
-    <attribute name="excludewhereview" default="object_name like '%'" />
-    <attribute name="excludewhereobjecttype" default="object_name like '%'" />
-    <attribute name="excludewherepackage" default="object_name like '%'" />
-    <attribute name="excludewheretrigger" default="object_name like '%'" />
-    <attribute name="excludewherefunction" default="object_name like '%'" />
-    <attribute name="excludewhereprocedure" default="object_name like '%'" />
+    <attribute name="excludewhereview" default="object_name not like '%'" />
+    <attribute name="excludewhereobjecttype" default="object_name not like '%'" />
+    <attribute name="excludewherepackage" default="object_name not like '%'" />
+    <attribute name="excludewheretrigger" default="object_name not like '%'" />
+    <attribute name="excludewherefunction" default="object_name not like '%'" />
+    <attribute name="excludewhereprocedure" default="object_name not like '%'" />
     <sequential>
      <if>
       <not>
@@ -873,12 +873,12 @@ ${orcas_sql_output}
         </and>          
         <then>
           <echo message="installing orcas in existing schema"/>        
-          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="(@{excludewherepackage}) and not (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="(@{excludewherepackage}) and (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;2" />
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;3" />
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2}" token="&amp;4" />
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;5" />
-          <replace file="@{tmpfolder}/drop_all_types_tmp.sql" value="(@{excludewhereobjecttype}) and not (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
+          <replace file="@{tmpfolder}/drop_all_types_tmp.sql" value="(@{excludewhereobjecttype}) and (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
         </then>
         <else>
           <echo message="installing orcas in separate schema @{user} @{userorcas}"/>
@@ -1266,7 +1266,7 @@ ${orcas_sql_output}
       <if>
         <equals arg1="@{user}" arg2="@{userorcas}"/>
         <then>
-            <echo message="installing orcas in existing schema"/>
+            <fail message="Grant is not possible when installing orcas in the application schema"/>
         </then>
         <else>
           <echo message="installing orcas in separate schema granting to @{user} by @{userorcas}"/>
@@ -1287,7 +1287,7 @@ ${orcas_sql_output}
       <if>
         <equals arg1="@{user}" arg2="@{userorcas}"/>
         <then>
-            <echo message="installing orcas in existing schema"/>
+            <fail message="Grant is not possible when installing orcas in the application schema"/>
         </then>
         <else>
           <echo message="installing orcas in separate schema granting references to @{user} by @{userorcas}"/>
@@ -1496,10 +1496,15 @@ ${orcas_sql_output}
                 <then>        
                   <orcas_liquibase changeLogFile="${orcas_dir}/sql_util_scripts/emptyChangeLog.xml" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" orcasinternalrundirect="true"/>  
                 </then>                  
-              </if>                
-
-              <orcas_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
-
+              </if>   
+              <if>
+                <not>
+                  <equals arg1="@{user}" arg2="@{userorcas}"/>
+                </not>              
+                <then>  
+                  <orcas_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+                </then>
+              </if>
               <orcas_internal_update_checksum userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
             </then>      
             <else>      
