@@ -1730,8 +1730,6 @@ ${orcas_sql_output}
     <attribute name="tnsname" />
     <attribute name="jdbcurl" />
     <sequential>
-        <echo message="$${orcas.default_jdbcurl}"/>
-        <echo message="@{jdbcurl}"/>
       <var name="orcas_internal_jdbc_url" unset="true"/>
       <if>
         <equals arg1="@{jdbcurl}" arg2="$${orcas.default_jdbcurl}"/>
@@ -1742,7 +1740,6 @@ ${orcas_sql_output}
           <property name="orcas_internal_jdbc_url" value="@{jdbcurl}"/>
         </else>
       </if>
-        <echo message="${orcas_internal_jdbc_url}"/>
     </sequential>
   </macrodef>
 
