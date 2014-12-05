@@ -17,7 +17,7 @@
   </target>
 
   <target name="orcas_initialize" depends="show_location">
-    <orcas_initialize extensionfolder="../orcas_extensions" setupliquibase="true"/>
+    <orcas_initialize setupliquibase="true"/>
     <delete dir="${binrundir}/log"/>
   </target>
 
