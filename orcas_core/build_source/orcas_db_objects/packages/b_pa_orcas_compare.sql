@@ -101,6 +101,16 @@ CREATE OR REPLACE package body pa_orcas_compare is
     return replace(replace(replace(p_script, chr(13) || chr(10),' '), chr(10),' '), chr(13),' ');
   end;
   
+  function adjust_compression_literal ( p_literal in varchar2 ) return varchar2 is
+  begin
+    return replace(replace(replace(p_literal, '_low',' low'), '_high',' high'), '_operations',' operations');
+  end;  
+  
+  function adjust_refreshmethod_literal ( p_literal in varchar2 ) return varchar2 is
+  begin
+    return replace(replace(p_literal, 'refresh_',' refresh '), 'never_','never ');
+  end;    
+  
   function is_equal_foreignkey( p_val1 ot_orig_foreignkey, p_val2 ot_orig_foreignkey ) return number  
   is
   begin
@@ -635,7 +645,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
         
       if( p_orig_mview_soll.i_refreshmethod is not null )
       then
-        stmt_add( p_orig_mview_soll.i_refreshmethod.i_literal );    
+        stmt_add( adjust_refreshmethod_literal(p_orig_mview_soll.i_refreshmethod.i_literal) );    
         
         if( p_orig_mview_soll.i_refreshmode is not null )
         then
@@ -689,7 +699,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
           else
             v_refreshmode := ' on ' || v_orig_refreshmodetype.i_literal;
           end if;
-          add_stmt( 'alter materialized view ' || p_orig_mview_soll.i_mview_name || ' ' || p_orig_mview_soll.i_refreshmethod.i_literal || v_refreshmode );  
+          add_stmt( 'alter materialized view ' || p_orig_mview_soll.i_mview_name || ' ' || adjust_refreshmethod_literal(p_orig_mview_soll.i_refreshmethod.i_literal) || v_refreshmode );  
         end if;
         
         -- Physical parameters nur, wenn nicht prebuilt
@@ -726,7 +736,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
               stmt_add( 'compress' ); 
               if ( p_orig_mview_soll.i_compressionFor is not null )
               then
-                stmt_add( 'for ' || p_orig_mview_soll.i_compressionFor.i_literal);
+                stmt_add( 'for ' || adjust_compression_literal(p_orig_mview_soll.i_compressionFor.i_literal));
               end if;
             else
               stmt_add( 'nocompress' );         
@@ -2326,7 +2336,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
           stmt_add( 'compress' ); 
           if ( p_orig_table_soll.i_compressionFor is not null )
           then
-            stmt_add( 'for ' || p_orig_table_soll.i_compressionFor.i_literal);
+            stmt_add( 'for ' || adjust_compression_literal(p_orig_table_soll.i_compressionFor.i_literal));
           end if;
         else
           stmt_add( 'nocompress' );         
