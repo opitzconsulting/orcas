@@ -322,6 +322,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -387,6 +388,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -480,6 +482,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" />
@@ -735,6 +738,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -816,6 +820,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -920,6 +925,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -983,6 +989,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -1045,6 +1052,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -1107,6 +1115,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -1200,6 +1209,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="logname" default="" />
@@ -1239,6 +1249,7 @@ ${orcas_sql_output}
     <attribute name="user" default="${orcas.default_user}" />
     <attribute name="password" default="${orcas.default_password}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <sequential>
       <mkdir dir="@{tmpfolder}" />
@@ -1261,6 +1272,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <sequential>
       <if>
@@ -1401,6 +1413,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="autotimestamp" default="false" />
     <attribute name="extensionfolder" default="" />
@@ -1563,6 +1576,7 @@ ${orcas_sql_output}
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tblspcorcas" default="" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <sequential>
@@ -1707,12 +1721,33 @@ ${orcas_sql_output}
     </sequential>
   </macrodef>
 
+  <macrodef name="orcas_internal_set_jdbc_url">
+    <attribute name="tnsname" />
+    <attribute name="jdbcurl" />
+    <sequential>
+        <echo message="$${orcas.default_jdbcurl}"/>
+        <echo message="@{jdbcurl}"/>
+      <var name="orcas_internal_jdbc_url" unset="true"/>
+      <if>
+        <equals arg1="@{jdbcurl}" arg2="$${orcas.default_jdbcurl}"/>
+        <then>
+          <property name="orcas_internal_jdbc_url" value="jdbc:oracle:oci:${orcas_at_value}@{tnsname}"/>
+        </then>
+        <else>
+          <property name="orcas_internal_jdbc_url" value="@{jdbcurl}"/>
+        </else>
+      </if>
+        <echo message="${orcas_internal_jdbc_url}"/>
+    </sequential>
+  </macrodef>
+
   <macrodef name="orcas_extract">
     <attribute name="user" default="${orcas.default_user}" />
     <attribute name="password" default="${orcas.default_password}" />
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="outputfolder" />
     <attribute name="xsltfile" default="${orcas_dir}/xslt_extract/orcas_extract.xsl" />
@@ -1739,8 +1774,9 @@ ${orcas_sql_output}
         </fileset>  
       </path>
 
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
       <java classname="de.opitzconsulting.orcas.OrcasLoadExtract" classpathref="orcas_internal_xslt_classpath" fork="true" failonerror="true" dir="@{tmpfolder}/load_extract/" maxmemory="512m">
-        <arg value="jdbc:oracle:oci:${orcas_at_value}@{tnsname}"/>
+        <arg value="${orcas_internal_jdbc_url}"/>
         <arg value="@{user}"/>
         <arg value="@{password}"/>
         <arg value="load_extract.xml"/>
@@ -1760,6 +1796,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="scriptfolder" />
     <attribute name="scriptprefix" default="" />
@@ -1778,6 +1815,7 @@ ${orcas_sql_output}
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="outputfolder" />
     <attribute name="scriptfolder" />
@@ -1825,6 +1863,7 @@ ${orcas_sql_output}
     <attribute name="orcasinternalrundirect" default="false" />    
     <attribute name="failonerror" default="true" />
     <sequential>
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
       <if>
         <equals arg1="@{orcasinternalrundirect}" arg2="false" />
         <then>
@@ -1835,7 +1874,7 @@ ${orcas_sql_output}
             <property name="userorcas" value="@{userorcas}"/>
             <property name="passwordorcas" value="@{passwordorcas}"/>
             <property name="tnsname" value="@{tnsname}"/>
-            <property name="jdbcurl" value="@{jdbcurl}"/>
+            <property name="jdbcurl" value="${orcas_internal_jdbc_url}"/>
             <property name="tmpfolder" value="@{tmpfolder}"/>
             <property name="changeLogFile" value="@{changeLogFile}"/>
             <property name="contexts" value="@{contexts}"/>
@@ -1868,7 +1907,7 @@ ${orcas_sql_output}
             <property name="userorcas" value="@{userorcas}"/>
             <property name="passwordorcas" value="@{passwordorcas}"/>
             <property name="tnsname" value="@{tnsname}"/>
-            <property name="jdbcurl" value="@{jdbcurl}"/>
+            <property name="jdbcurl" value="${orcas_internal_jdbc_url}"/>
             <property name="tmpfolder" value="@{tmpfolder}"/>
             <property name="changeLogFile" value="@{changeLogFile}"/>
             <property name="contexts" value="@{contexts}"/>
