@@ -1,9 +1,9 @@
 # Site settings
 title: Orcas
 subtitle: "Oracle adaptive/agile schemas"
-description: > 
- Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes Datenbankschema in einen in Orcas 
- beschriebenen Soll-Zustand geführt werden kann. Orcas steht für Oracle adaptive/agile schemas und 
+description: >
+ Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes Datenbankschema in einen in Orcas
+ beschriebenen Soll-Zustand geführt werden kann. Orcas steht für Oracle adaptive/agile schemas und
  ist nur mit Oracle RDBMS kompatibel.
 baseurl: "/orcas" # the subpath of your site, e.g. /blog/
 #url: "http://yourdomain.com" # the base hostname & protocol for your site
