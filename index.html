@@ -4,76 +4,8 @@ layout: default
 
 <div class="home">
 
-  <h1 class="page-heading">Einführung</h1>
-
-  <p>
-    Die OC-Schemaverwaltung ist ein Deploymentframework mit dem ein bestehendes Schema in einem in der OC-Schemaverwaltung beschriebenen Soll-Zustand überführt werden kann. Der Zustand des bestehenden Schemas ist dabei größtenteils irrelevant. Bei Bedarf werden „überflüssige" Indizes, Constraints, Spalten oder Tabellen verworfen, bzw. neue Tabellen oder Spalten hinzugefügt. Änderungen von Datentypen werden, sofern möglich, durchgeführt. Der Soll-Zustand wird dabei in Form von einfachen SQL Skriptdateien vorgehalten, die in ihrer Syntax stark an die „create table" Syntax angelehnt sind.
-    Die Nutzung der OC-Schemaverwaltung hat viele Vorteile. Ein großer Vorteil ist, dass die Tabellenskripte Versioniert werden können, was bei einem Projektteam eine enorme Erleichterung ist, da Änderungen nachvollzogen und auch rückgängig gemacht werden können. Ein weiterer Vorteil ist, dass ohne große Umstände auf verschiedenen Datenbanken deployed werden, und somit ein einheitlicher Datenbankstand auf beliebig viele Schemata hergestellt werden kann.
-  </p>
-
-  <br/>
-
-  <h1 class="page-heading">Warum Orcas?</h1>
-
-  <p>
-    Folgende Problemfälle treten bei der Datenbankentwicklung immer wieder auf, meist genau dann, wenn man sie am wenigsten gebrauchen kann:
-  </p>
-
-  <ul>
-    <li>Wieso ist die Spaltengröße auf dem Testsystem kleiner als auf der Entwicklungsdatenbank?</li>
-    <li>Wieso fehlt auf der Produktionsdatenbank ein Index?</li>
-    <li>Wer hat bei der Tabelle den PK vergessen?</li>
-    <li>Warum muss ich „ALTER TABLE mytable ADD COLUM …“ schreiben? ich schreibe ja auch nicht „ALTER CLASS myclass.java ADD INSTANCE VARIABLE …“</li>
-    <li>Welche SVN-Version passt eigentlich noch zu meiner Entwicklungsdatenbank?</li>
-    <li>Wer hat gerade meine View-Änderungen überschrieben?</li>
-    <li>...</li>
-  </ul>
-
-  <p>
-    Wenn man nicht gerade damit beschäftigt ist den GO-LIVE-Termin zu retten oder zu erklären warum das Budget doch nicht gereicht hat, dann kommt man oft zu folgenden Fragestellungen:
-  </p>
-
-  <ul>
-    <li>Wie kann man die Entwicklungs-, Test- und Produktionsdatenbank auf dem gleichen Versionsstand halten?</li>
-    <li>Wie kann man Datenbanken versionieren, branchen oder mergen?</li>
-    <li>Wie kann man einheitliche Datenbankkonventionen umsetzen?</li>
-    <li>Wie kann man agile Datenbankentwicklung betreiben?</li>
-    <li>Wie können mehrere Entwickler auf der Entwicklungsdatenbank parallel entwickeln?</li>
-    <li>Oder kurz: Wie macht man das mit der Datenbankentwicklung eigentlich richtig?</li>
-  </ul>
-
-  <br/>
-
-  <h1 class="page-heading">Getting Started</h1>
-
-  <p>
-    Wie kann ich Orcas in meinem Projekt einsetzen? <a href="getting-started">Hier</a> gibt's Starthilfe!
-  </p>
-
-  <br/>
-
-  <h1 class="page-heading">Dokumentation</h1>
-
-  <p>
-    Inhaltsverzeichnis (todo)
-  </p>
-
-  <br/>
-
-  <!--
   <h1 class="page-heading">Posts</h1>
 
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
-  -->
+  <a href="/docs/extensions/">Test</a>
 
 </div>
