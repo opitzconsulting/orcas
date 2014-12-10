@@ -5,14 +5,14 @@ description: >
  Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes Datenbankschema in einen in Orcas
  beschriebenen Soll-Zustand geführt werden kann. Orcas steht für Oracle adaptive/agile schemas und
  ist nur mit Oracle RDBMS kompatibel.
-baseurl: "/orcas" # the subpath of your site, e.g. /blog/
-#url: "http://yourdomain.com" # the base hostname & protocol for your site
 twitter_username: OC_WIRE
 github_username:  opitzconsulting/Orcas
 github_issues: https://github.com/opitzconsulting/orcas/issues
 github_fork: https://github.com/opitzconsulting/orcas/fork
 
 # Build settings
+baseurl: /orcas
+permalink: docs/:title
 markdown: kramdown
 highlighter: pygments
 relative_permalinks: false

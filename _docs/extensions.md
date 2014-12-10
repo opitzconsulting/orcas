@@ -3,7 +3,7 @@ layout: default
 title: Extensions
 prev_section: dev-docs
 next_section: features
-permalink: {{site.baseurl}}/docs/extensions/
+permalink: /docs/extensions/
 ---
 
 #Extensions
