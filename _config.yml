@@ -15,3 +15,10 @@ github_fork: https://github.com/opitzconsulting/orcas/fork
 # Build settings
 markdown: kramdown
 highlighter: pygments
+relative_permalinks: false
+permalink: "/news/:year/:month/:day/:title/"
+collections:
+  docs:
+    output: true
+  sass:
+    style: compressed
