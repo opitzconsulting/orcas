@@ -1,4 +1,23 @@
 /**
+ * Site Navigation
+ */
+.site-navigation {
+    float: right;
+    padding: 85px 15px 0 0;
+    line-height: 2;
+    border-left: 1px solid $grey-color-light;
+    border-bottom: 1px solid $grey-color-light;
+}
+
+.site-navigation ul {
+    list-style-type: none;
+}
+
+.site-navigation h2 {
+    padding-left: 30px;
+}
+
+/**
  * Site header
  */
 .site-header {

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Wie kann ich mitmachen?
-permalink: /participate/
+permalink: /docs/participate/
 ---
 
 not yet implemented
