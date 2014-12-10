@@ -1,5 +1,5 @@
 ---
-layout: docs
+layout: default
 title: Generieren der Statics-Tabellenskripte
 prev_section:
 next_section:

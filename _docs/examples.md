@@ -1,5 +1,5 @@
 ---
-layout: docs
+layout: default
 title: Beispielprojekte
 prev_section:
 next_section:

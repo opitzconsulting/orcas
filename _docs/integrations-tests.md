@@ -1,5 +1,5 @@
 ---
-layout: docs
+layout: default
 title: Integrationstests
 prev_section: how-it-works
 next_section: ant-tasks

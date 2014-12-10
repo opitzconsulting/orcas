@@ -1,5 +1,5 @@
 ---
-layout: docs
+layout: default
 title: Unterstützte DB-Funktionen
 prev_section: statics-syntax
 next_section:

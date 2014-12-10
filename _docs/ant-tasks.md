@@ -1,5 +1,5 @@
 ---
-layout: docs
+layout: default
 title: Ant Tasks
 prev_section: integrations-tests
 next_section: statics-syntax

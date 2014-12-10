@@ -20,5 +20,3 @@ permalink: "/news/:year/:month/:day/:title/"
 collections:
   docs:
     output: true
-  sass:
-    style: compressed

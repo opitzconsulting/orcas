@@ -1,5 +1,5 @@
 ---
-layout: docs
+layout: default
 title: Funktionsweise von Orcas
 prev_section: features
 next_section: integrations-tests

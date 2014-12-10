@@ -1,5 +1,5 @@
 ---
-layout: docs
+layout: default
 title: Extensions
 prev_section: dev-docs
 next_section: features

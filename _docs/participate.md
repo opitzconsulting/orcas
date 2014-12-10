@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: default
 title: Wie kann ich mitmachen?
 permalink: /participate/
 ---
