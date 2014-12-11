@@ -2,11 +2,13 @@
  * Site Navigation
  */
 .site-navigation {
+    width: 25%;
     float: right;
-    padding: 35px 15px 0 0;
+    padding-top: $spacing-unit;
     line-height: 1.75;
     border-left: 1px solid $grey-color-light;
     border-bottom: 1px solid $grey-color-light;
+    font-weight: bold;
 }
 
 .site-navigation ul {
@@ -14,7 +16,7 @@
 }
 
 .site-navigation h2 {
-    padding-left: 30px;
+    padding-left: $spacing-unit;
 }
 
 /**
@@ -105,20 +107,13 @@
     }
 }
 
-
-
 /**
  * Site footer
  */
 .site-footer {
     border-bottom: 10px solid $grey-color-dark;
     border-top: 1px solid $grey-color-light;
-    padding: $spacing-unit 0;
-}
-
-.footer-heading {
-    font-size: 18px;
-    margin-bottom: $spacing-unit / 2;
+    padding: $spacing-unit / 2 0;
 }
 
 .contact-list,
@@ -176,8 +171,6 @@
     }
 }
 
-
-
 /**
  * Page content
  */
@@ -207,8 +200,6 @@
     display: block;
     font-size: 24px;
 }
-
-
 
 /**
  * Posts
@@ -255,12 +246,11 @@
     }
 }
 
-
-
 .section-nav {
   text-align: center;
   position: relative;
   margin-bottom: 50px;
+  margin-right: 25%;
 
   > div { width: 49.5%; }
 
@@ -312,7 +302,6 @@
     cursor: default;
   }
 }
-
 
 .left { float: left; }
 .right { float: right; }

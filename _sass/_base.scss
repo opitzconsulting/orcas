@@ -8,8 +8,6 @@ dl, dd, ol, ul, figure {
     padding: 0;
 }
 
-
-
 /**
 * Table Styles
 */
@@ -53,8 +51,6 @@ table {
   }
 }
 
-
-
 /**
  * Basic styling
  */
@@ -68,8 +64,6 @@ body {
     -webkit-text-size-adjust: 100%;
 }
 
-
-
 /**
  * Set `margin-bottom` to maintain vertical rhythm
  */
@@ -80,8 +74,6 @@ ul, ol, dl, figure,
     margin-bottom: $spacing-unit / 2;
 }
 
-
-
 /**
  * Images
  */
@@ -89,8 +81,6 @@ img {
     max-width: 100%;
     vertical-align: middle;
 }
-
-
 
 /**
  * Figures
@@ -102,8 +92,6 @@ figure > img {
 figcaption {
     font-size: $small-font-size;
 }
-
-
 
 /**
  * Lists
@@ -119,8 +107,6 @@ li {
     }
 }
 
-
-
 /**
  * Headings
  */
@@ -128,26 +114,18 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 300;
 }
 
-
-
 /**
  * Links
  */
 a {
-    color: $brand-color;
+    color: darken($brand-color, 15%);
     text-decoration: none;
-
-    &:visited {
-        color: darken($brand-color, 15%);
-    }
 
     &:hover {
         color: $text-color;
         text-decoration: none;
     }
 }
-
-
 
 /**
  * Blockquotes
@@ -164,8 +142,6 @@ blockquote {
         margin-bottom: 0;
     }
 }
-
-
 
 /**
  * Code formatting
@@ -194,8 +170,6 @@ pre {
     }
 }
 
-
-
 /**
  * Wrapper
  */
@@ -203,7 +177,7 @@ pre {
     max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit} * 2));
     max-width:         calc(#{$content-width} - (#{$spacing-unit} * 2));
     margin-right: auto;
-    margin-left: auto;
+    margin-left: 0px;
     padding-right: $spacing-unit;
     padding-left: $spacing-unit;
     @extend %clearfix;
@@ -216,8 +190,6 @@ pre {
     }
 }
 
-
-
 /**
  * Clearfix
  */
@@ -229,8 +201,6 @@ pre {
         clear: both;
     }
 }
-
-
 
 /**
  * Icons
