@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: Integrationtests
-prev_section: how-it-works
-next_section: ant-tasks
+prev_section: extensions
+next_section: participate
 permalink: /docs/integration-tests/
 ---
 

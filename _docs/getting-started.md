@@ -1,7 +1,9 @@
 ---
-layout: default
+layout: docs
 title: Getting Started
 permalink: /docs/getting-started/
+prev_section:
+next_section: examples
 ---
 
 #Getting Started
@@ -29,10 +31,10 @@ Gradle baut ggf. eine Verbindung zum Maven-Central-Repository auf, es muss als e
 ###Java
 
 Benötigt wird mindestens Java 6 (1.6). Wichtig es muss ein **JDK** sein, kein JRE. Es reicht eine "Standard Edition" (SE) z.B. "Java SE 6u45". Nach der Installation sollte javac die richtige Version ausgeben:
-```
+{% highlight bash %}
 javac -version
 javac 1.6.0_12
-```
+{% endhighlight %}
 Falls nicht, muss ggf. die PATH-Variable angepasstw erden. Java wird bei Orcas nur von ant verwendet, daher evtl. auch ant-Konfigurationsmöglichkeiten beachten (z.B: wird JAVA_HOME von ant vor PATH ausgewertet).
 
 ###ORACLE Client
@@ -78,7 +80,7 @@ Diese können am einfachsten manuell über deren Quellskripte extrahiert werden.
 ###Aufruf des ant-Skriptes
 
 Empfohlen wird das ant-Skript im Quiet-Modus zu starten:
-```
-> ant -q build_all
-```
+{% highlight bash %}
+ant -q build_all
+{% endhighlight %}
 Allerdings sieht man dann auch nicht, welche ant-Targets in welcher Reihenfolge ausgeführt werden.

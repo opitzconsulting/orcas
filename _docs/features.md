@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: Feature Liste
-prev_section: extensions
-next_section: how-it-works
+prev_section: generate-scripts
+next_section: supported-db-functions
 permalink: /docs/features/
 ---
 

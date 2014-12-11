@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: Extensions
-prev_section: dev-docs
-next_section: features
+prev_section: statics-syntax
+next_section: integration-tests
 permalink: /docs/extensions/
 ---
 
@@ -33,9 +33,9 @@ Es besteht die Möglichkeit Extensions zu parametrisiern. Dazu gibt es die Mögl
 
 Es gibt einige Extensions, die als Kopiervorlage für das eigene Projekt genutzt werden können. Einige Extensions werden, sofern sie eingebunden sind, über die Angabe eines Alias aktiviert.
 
-```sql
+{% highlight sql %}
 create table business_partners alias busi (...);
-```
+{% endhighlight %}
 
 ##Alias to ID und PK
 
@@ -58,6 +58,6 @@ Diese Vereinfachung kann aktiviert werden, wenn nach der Definition der Spalten 
 
 Die Extension ermöglicht es, über die Angabe des Alias, die Quell und Zielspalten des Constraints selbst zu ermitteln. Die Extension unterstützt nur einspaltige Primärschlüssel.
 
-```sql
+{% highlight sql %}
 constraint BEISPIEL_FK foreign key references TESTTABELLE
-```
+{% endhighlight %}

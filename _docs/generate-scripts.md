@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: Generieren der Statics-Tabellenskripte
-prev_section:
-next_section:
+prev_section: dbdoc
+next_section: features
 permalink: /docs/generate-scripts/
 ---
 

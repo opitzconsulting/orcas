@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: Unterstützte DB-Funktionen
-prev_section: statics-syntax
-next_section:
+prev_section: features
+next_section: ant-tasks
 permalink: /docs/supported-db-functions/
 ---
 

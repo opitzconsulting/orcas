@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: Beispielprojekte
-prev_section:
-next_section:
+prev_section: getting-started
+next_section: dbdoc
 permalink: /docs/examples/
 ---
 
@@ -29,7 +29,7 @@ Dazu wechselt man in den Ordner examples\orderentry\distribution.
 <br/>Darin gibt es fuer jede Konfiguration einen Unterordner (der Name des Unterordners ist der Namen der location). Hier bitte einen neuen Ordner erstellen (z.:b oc_xy_lokal).
 <br/>In dem Ordner muss eine "location.properties" Datei liegen. Am einfachtsen kopiert man eine Datei als Vorlage aus einer anderen location. In der Datei liegen die Datenbankzugangsdaten. Z.B.:
 
-```
+{% highlight properties %}
 #Database
 database              =XE
 jdbc_host             =localhost
@@ -38,26 +38,26 @@ jdbc_port             =1521
 username_dba          =system
 password_dba          =test
 username_schemaowner  =orderentry
-```
+{% endhighlight %}
 
 **Wichtig**: Die jdbc_XXX Einträge werden hier nicht ausgelesen. Wichtig ist insbesondere "database". Im Beispiel muss ein "tnsping XE" funktionieren (ansonsten evtl. TNS-Names konfigurieren).
 <br/>Damit die Konfiguration auch genutzt wird, muss der location-Name (Name des Ordners unter examples\orderentry\distribution) in die Datei examples\orderentry\distribution\default_location.properties eingetragen werden.
 <br/>Ob die Konfiguration auch verwendet wird, kann man wie folgt testen:
 
-```
+{% highlight bash %}
 Verzeichnis: examples\orderentry\db
 ant show_location
-```
+{% endhighlight %}
 
 Die Ausgabe sollte wie folgt sein:
 
-```
+{% highlight bash %}
 Buildfile: D:\ocschemaverwaltung\src\trunk\examples\orderentry\db\build.xml
 show_location:
 [echo] ================= Location: oc_xy_lokal =================
 BUILD SUCCESSFUL
 Total time: 0 seconds
-```
+{% endhighlight %}
 
 Wichtig dabei ist, dass dort "Location: oc_xy_lokal" steht.
 
@@ -65,10 +65,10 @@ Wichtig dabei ist, dass dort "Location: oc_xy_lokal" steht.
 
 Mit ant install_all wird die Schemaverwaltung eingerichtet. Zusätzlich wird auch der Schemaowner angelegt:
 
-```
+{% highlight bash %}
 Verzeichnis: examples\orderentry\db
 ant install_all
-```
+{% endhighlight %}
 
 Wenn das erfolgreich durchgelaufen ist, gibt es auf der Zieldatenbank zwei neue User:
 - OC_SVW_ORDERENTRY (Schemowner, der die abzugleichenden Tabellen enthält)
@@ -78,19 +78,19 @@ Wenn der ant install_all-Lauf abbricht, dann müssen die beiden User ggf. vorher
 
 #####Schemaverwaltung starten
 
-```
+{% highlight bash %}
 Verzeichnis: examples\orderentry\db
 ant
-```
+{% endhighlight %}
 
 Ergebnis sollte eine Ausgabe sein, die am Ende einen Erfolg meldet:
 
-```
+{% highlight bash %}
 ...
 
 BUILD SUCCESSFUL
 Total time: 12 seconds
-```
+{% endhighlight %}
 
 ##Andere Beispiele
 

@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: dbdoc
-prev_section:
-next_section:
+prev_section: examples
+next_section: generate-scripts
 permalink: /docs/dbdoc/
 ---
 
@@ -21,10 +21,10 @@ Für einen kurzen Einblick in den Html-Export von dbdoc, kann hier ein Beispiel-
 
 Zuerst müssen die dbdoc-Tasks und die Schemaverwaltung-default-Tasks eingebunden werden.
 
-```xml
+{% highlight xml %}
 <import file="${oc_svw_dir}/oc_svw_default_tasks.xml"/>
 <import file="${oc_svw_dbdoc_dir}/oc_svw_dbdoc_tasks.xml"/>
-```
+{% endhighlight %}
 
 ###1.2. Anbinden der Datenbank
 
@@ -38,15 +38,16 @@ Die Datenbank wird im Task **&lt;oc_svw_dbdoc&gt;** ausgelesen.
 |outfolder|Gibt den Ordner an, in dem die erzeugten html-Seiten gespeichert werden|Yes||
 |tmpfolder|Gibt den Ordner an, in dem temporär Daten gespeichert werden |Yes||
 
-```xml
+<br/>
+{% highlight xml %}
 <oc_svw_dbdoc jdbcurl="${jdbc_url}" user="${demo_user}" password="${demo_password}" outfolder="${output}" tmpfolder="${tmpdir}/">
-```
+{% endhighlight %}
 
 ###1.3. Konfiguration des Ablaufs
 
-Im Task **<config>** werden die Tabellengruppen, der Stil der Tabellen und Diagramme sowie die Diagrammstruktur definiert.
+Im Task **&lt;config&gt;** werden die Tabellengruppen, der Stil der Tabellen und Diagramme sowie die Diagrammstruktur definiert.
 
-####1.3.1. KOnfiguration der Tabellengruppen
+####1.3.1. Konfiguration der Tabellengruppen
 
 Alle Tabellengruppen werden im Task **&lt;tablerregistry&gt;** definiert.
 
@@ -70,20 +71,20 @@ Beispiele hierfür:
 |&lt;include name=".+TIER.*/&gt;|.+TIER.*|Alle Tabellen deren Bezeichnung "TIER" enthält (Wortanfang/-mitte/-ende)|
 |&lt;exclude name=".*_TIERUEBERWACHUNG"/&gt;|.*_TIERUEBERWACHUNG|Alle Tabellen mit dem Suffic "_TIERUEBERWACHUNG" werden NICHT in die Tabellengruppe TIER aufgenommen|
 
-```xml
+{% highlight xml %}l
 <tableregistry tablesrcfolder="tables">
 
-<tablegroup name="TIERABGANG">
-<include name=".*ABGANG.*"/>
-<include name="TIEREIGENTUEMER"/>
-</tablegroup>
+  <tablegroup name="TIERABGANG">
+    <include name=".*ABGANG.*"/>
+    <include name="TIEREIGENTUEMER"/>
+  </tablegroup>
 
-<tablegroup name="SCHLACHTUNG">
-<include name="SCHLACHT.*"/>
-<include name="TYP_HANDELSKLASSE"/>
-<include name="TYP_TIERKATEGORIE"/>
+  <tablegroup name="SCHLACHTUNG">
+    <include name="SCHLACHT.*"/>
+    <include name="TYP_HANDELSKLASSE"/>
+    <include name="TYP_TIERKATEGORIE"/>
 </tablegroup>
-```
+{% endhighlight %}
 
 ####1.3.2. Konfiguration des Stils
 
@@ -103,7 +104,7 @@ Im Task **&lt;tables&gt;** kann die Tabellendarstellung für jede Tabellengruppe
 
 Neben diesen, finden sich viele weitere Attribute auf der [Dokumentationsseite zu graphviz](http://www.graphviz.org/content/attrs).
 
-```xml
+{% highlight xml %}
 <tables>
   <style name="fillcolor" value="#FFE500" tablegroup="TIER"/>
   <style name="fontsize"  value="18"      tablegroup="TIER"/>
@@ -112,7 +113,7 @@ Neben diesen, finden sich viele weitere Attribute auf der [Dokumentationsseite z
   <style name="fillcolor" value="#FF6600" tablegroup="BETRIEBSSTAETTE"/>
   <style name="fillcolor" value="#FF9900" tablegroup="ADRESSE"/>
 </tables>
-```
+{% endhighlight %}
 
 #####1.3.2.2. Konfiguration der Diagrammdarstellung
 
@@ -160,7 +161,7 @@ Jede Stilgruppe kann mit dem Task **&lt;style&gt;** angepasst werden.
 
 Neben diesen finden sich viele weitere Attribute auf der [Dokumentationsseite zu graphviz](http://www.graphviz.org/content/attrs). Es werden jedoch nicht alle Attribute von allen Stilgruppen unterstützt.
 
-```xml
+{% highlight xml %}
 <diagrams>
   <stylegroup name="style1" dotexecutable="dot">
     <style name="nodesep" value="1"/>
@@ -168,7 +169,7 @@ Neben diesen finden sich viele weitere Attribute auf der [Dokumentationsseite zu
     <style name="splines" value="polyline"/>
   </stylegroup>
 </diagrams>
-```
+{% endhighlight %}
 
 ####1.3.3. Konfiguration der Diagrammstruktur
 
@@ -222,9 +223,9 @@ Die Diagrammhierarchie wird mit der Verschachtelung des **&lt;diagram&gt;** Task
 <br/> das Hauptdiagramm, welches alle weiteren Diagramme beinhaltet, sollte die Darstellungsform "diagrams_only" gewählt werden, um eine übersichtliche Darstellung zu erreichen.
 <br/>Um alle Tabellengruppen auszuwählen, wird bei "tablegroup" der Wert auf ".*" gesetzt.
 
-```xml
+{% highlight xml %}
 <diagram label="Milcherzeugung" stylegroup="style1" subinnclude="diagrams_only" tablegroup=".*"/>
-```
+{% endhighlight %}
 
 Würde man dies ausführen, werden (da keine weiteren, hierarchisch unterliegenden, Diagramme angelegt sind) alle Tabellengruppen mit zugehörigen Tabellen geladen und angezeigt.
 <br/>Bei einer großen Anzahl an eingebundenen Tabellen kann dies schnell unübersichtlich wirken.
@@ -232,7 +233,7 @@ Würde man dies ausführen, werden (da keine weiteren, hierarchisch unterliegend
 
 Am Beispiel der Welt würde ein Diagramm "Die Welt" angelegt werden. Diesem Diagramm unterliegen die Diagramme der einzelnen Kontinente. Dem Kontinent-Diagramm die Diagramme der Staaten usw.
 
-```xml
+{% highlight xml %}
 <diagram label="Die Welt" subinnclude="diagrams_only" tablegroup=".*">
 
   <diagram label="Europa" subinnclude="diagrams_with_tables">
@@ -250,7 +251,7 @@ Am Beispiel der Welt würde ein Diagramm "Die Welt" angelegt werden. Diesem Diag
   </diagram>
 
 </diagram>
-```
+{% endhighlight %}
 
 Führt man diesen Code aus, ist dies das Diagramm "Europa" mit den unterteilten Diagrammen Spanien und Deutschland (Deutschland ist wiederum unterteilt in die Bundesländer Bayern und Baden Württemberg).
 ![](/assets/Europa.jpg)

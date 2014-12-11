@@ -1,7 +1,7 @@
 ---
-layout: default
+layout: docs
 title: Ant Tasks
-prev_section: integrations-tests
+prev_section: supported-db-functions
 next_section: statics-syntax
 permalink: /docs/ant-tasks/
 ---
@@ -14,7 +14,7 @@ Orcas wird über ant angesteuert. In weiteren Ausbaustufen ist auch eine Steueru
 
 ##Beispiel
 
-```xml
+{% highlight xml %}
 <?xml version = '1.0' encoding = 'windows-1252'?>
 <project name="database">
   <property name="oc_svw_dir" value=".../oc_svw_core"/>
@@ -59,7 +59,7 @@ Orcas wird über ant angesteuert. In weiteren Ausbaustufen ist auch eine Steueru
               logname="post_skripts"/>
             </target>
           </project>
-```
+{% endhighlight %}
 
 ##Initialisierung
 

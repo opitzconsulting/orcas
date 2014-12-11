@@ -11,6 +11,51 @@ dl, dd, ol, ul, figure {
 
 
 /**
+* Table Styles
+*/
+table {
+  width: 100%;
+  padding: 0;
+  border-collapse: collapse;
+
+  tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+  }
+
+  tr:nth-child(2n) {
+    background-color: #f8f8f8;
+  }
+
+  tr th {
+    font-weight: bold;
+    border: 1px solid #cccccc;
+    text-align: left;
+    margin: 0;
+    padding: 6px 13px;
+  }
+
+  tr td {
+    border: 1px solid #cccccc;
+    text-align: left;
+    margin: 0;
+    padding: 6px 13px;
+  }
+
+  tr th :first-child, table tr td :first-child {
+    margin-top: 0;
+  }
+
+  tr th :last-child, table tr td :last-child {
+    margin-bottom: 0;
+  }
+}
+
+
+
+/**
  * Basic styling
  */
 body {
@@ -98,7 +143,7 @@ a {
 
     &:hover {
         color: $text-color;
-        text-decoration: underline;
+        text-decoration: none;
     }
 }
 
@@ -127,10 +172,11 @@ blockquote {
  */
 pre,
 code {
-    font-size: 15px;
+    font-size: 14px;
     border: 1px solid $grey-color-light;
     border-radius: 3px;
-    background-color: #eef;
+    background-color: #f8f8f8;
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
 }
 
 code {

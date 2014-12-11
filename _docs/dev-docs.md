@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: Entwicklerdokumentation
-prev_section:
-next_section: extensions
+prev_section: participate
+next_section:
 permalink: /docs/dev-docs/
 ---
 

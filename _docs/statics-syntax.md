@@ -1,8 +1,8 @@
 ---
-layout: default
+layout: docs
 title: Statics Syntax
 prev_section: ant-tasks
-next_section: supported-db-functions
+next_section: extensions
 permalink: /docs/statics-syntax/
 ---
 
@@ -30,7 +30,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 
 ###Syntax
 
-```sql
+{% highlight sql %}
 create {permanent|global temporary} table table_name [alias table_alias](
   column_name { varchar2(scale {BYTE|CHAR} ) | number(scale[,precision]) | clob(scale) | blob | xmltype | date } [default "default_value"] {null | not null}
   constraint constraint_name primary key ( primary_key_columns ) { enable | disable }
@@ -39,12 +39,12 @@ create {permanent|global temporary} table table_name [alias table_alias](
   index index_name { function_based | domain_index } ( colums ) { nonunique | unique } { logging | nologging} { noparallel | parallel}
   constraint consrtaint_name foreign key ( _src_column ) references des_table_name ( dest_column ) { on delete nothing | on delete cascade } { enable | disable }
   comment on { table | column } {column_name}_ is "comment_string";
-  );
-```
+);
+{% endhighlight %}
 
 ###Beispiel
 
-```sql
+{% highlight sql %}
 create table order_items
 (
   orit_id   number(15)                          not null,
@@ -66,14 +66,18 @@ create table order_items
 
   comment on table is "Ausführliche Beschreibung von Order_Items";
   comment on column version is "Ausführliche Beschreibung der Spalte Order_Items.Version";
-  );
-```
+);
+{% endhighlight %}
 
 ##Column
 
 Bei Spalten werden folgende Datentypen unterstützt:
+
 - number
-- varchar2 - Angabe von char oder byte bei der Längenangabe ist möglich ```... varchar2(50 BYTE) ...```
+- varchar2 - Angabe von char oder byte bei der Längenangabe ist möglich
+{% highlight sql %}
+... varchar2(50 BYTE) ...
+{% endhighlight %}
 - nvarchar2
 - char
 - date
@@ -103,30 +107,30 @@ Ein Index kann innerhalb einer Tabelle angegeben werden (dies wird empfohlen) od
 
 ###Index Beispiel (intern)
 
-```sql
+{% highlight sql %}
 index orit_price_ix (price,value)
-```
+{% endhighlight %}
 
-```sql
+{% highlight sql %}
 index orit_ix (value) unique nologging parallel
-```
+{% endhighlight %}
 
-```sql
+{% highlight sql %}
 index name_lastname_birthdate_ix "upper(lastname),upper(name)"
-```
+{% endhighlight %}
 
 **Achtung**
 <br/>Möchte man sicherstellen, dass der Index nicht bei jedem Build Neu angelegt wird, muss die Definition eines Function-Based-Index in Großbuchstaben erfolgen!
 
-```sql
+{% highlight sql %}
 index such_ix (orde_clob) domain_index "indextype is CTXSYS.CONTEXT PARAMETERS (''Wordlist GERMAN_STEM_PREF'')"
-```
+{% endhighlight %}
 
 ###Index Beispiel (extern)
 
-```sql
+{% highlight sql %}
 create unique index orit_price_ix on order_items (price)
-```
+{% endhighlight %}
 
 ##Foreign Key
 
@@ -138,30 +142,30 @@ Bei Sequences kann nur der Sequence Name angegeben werden. Zusätzlich kann ein 
 
 ###Syntax
 
-```sql
+{% highlight sql %}
 create sequence sequence_name [oc_svw_ext_max_value_select 'select-statement']
-```
+{% endhighlight %}
 
 ###Sequence Beispiel
 
-```sql
+{% highlight sql %}
 create sequence order_items_seq;
 
 create sequence order_items_seq oc_svw_ext_max_value_select 'select nvl(max(orit_id),0) from order_items';
-```
+{% endhighlight %}
 
 ##Kommentare
 
 Zum auskommentieren von Inhalten der Tabellen-Skripte kann die in Java übliche Syntax /\* und \*/ verwendet werden.
 
-```sql
+{% highlight sql %}
 create table order_items
 (
   orit_id   number(15)                          not null,
   version   number(15)       default "0"        not null
   /*  weitere Inhalte mussen noch ergänzt werden */
-  );
-```
+);
+{% endhighlight %}
 
 ##Materialized Views
 
