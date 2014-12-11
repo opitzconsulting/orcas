@@ -1,0 +1,6 @@
+LOESCH!
+
+getting-started.md:
+
+- Projektsetup (Verzeichnisse im aktuelle Projekt stimmen nicht mit Doku überein!)
+- 
