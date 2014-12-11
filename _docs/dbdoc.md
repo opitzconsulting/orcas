@@ -8,44 +8,52 @@ permalink: /docs/dbdoc/
 
 #dbdoc
 
-Das Tool dbdoc ist ein Dokumentationswerkzeug für Datenbankschematas. Es erzeugt eine grafische Darstellung der Schemainformationen um Tabellen und ihre Verbindung zueinander übersichtlich darzustellen.
-<br/>Welche Tabellen zu berücksichtigen sind und wie es dargstellt werden soll kann in einem Ant-Skript festgesetzt werden.
+Das Tool dbdoc ist ein Dokumentationswerkzeug für Datenbankschematas. Es erzeugt eine grafische Darstellung der Schemainformationen, um Tabellen und ihre Beziehungen zueinander übersichtlich darzustellen.
+<br/>Welche Tabellen zu berücksichtigen sind und wie es dargstellt werden soll kann in einem ant-Skript festgesetzt werden.
 
 Zur Ausführung von dbdoc wird eine Installation von [Graphviz](http://www.graphviz.org/Download_windows.php) benötigt.
 
 Für einen kurzen Einblick in den Html-Export von dbdoc, kann hier ein Beispiel-Export runtergeladen werden: `todo: Aktuell Link in internes Netzwerk`
 
+<br/>
+
 ##1. Aufbau eines dbdoc-Skriptes
 
 ###1.1. Einbinden der dbdoc-Tasks
 
-Zuerst müssen die dbdoc-Tasks und die Schemaverwaltung-default-Tasks eingebunden werden.
+Zuerst müssen die dbdoc-Tasks und die Orcas-Default-Tasks eingebunden werden.
 
 {% highlight xml %}
-<import file="${oc_svw_dir}/oc_svw_default_tasks.xml"/>
-<import file="${oc_svw_dbdoc_dir}/oc_svw_dbdoc_tasks.xml"/>
+<import file="${orcas_dir}/orcas_default_tasks.xml"/>
+<import file="${orcas_dbdoc_dir}/orcas_dbdoc_tasks.xml"/>
 {% endhighlight %}
+
+<br/>
 
 ###1.2. Anbinden der Datenbank
 
-Die Datenbank wird im Task **&lt;oc_svw_dbdoc&gt;** ausgelesen.
+Die Datenbank wird im Task **&lt;orcas_dbdoc&gt;** ausgelesen.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
 |jdbcurl  |Gibt die URL zur Datenbank an. <br/>Format: jdbc :oracle:thin:host:port:sid|Yes||
 |user     |Gibt den Benutzernamen des Schematas an, das abgebildet werden soll.|Yes||
 |password |Gibt das Passwort zum Benutzer an. |Yes||
-|outfolder|Gibt den Ordner an, in dem die erzeugten html-Seiten gespeichert werden|Yes||
+|outfolder|Gibt den Ordner an, in dem die erzeugten HTML-Seiten gespeichert werden|Yes||
 |tmpfolder|Gibt den Ordner an, in dem temporär Daten gespeichert werden |Yes||
 
 <br/>
 {% highlight xml %}
-<oc_svw_dbdoc jdbcurl="${jdbc_url}" user="${demo_user}" password="${demo_password}" outfolder="${output}" tmpfolder="${tmpdir}/">
+<orcas_dbdoc jdbcurl="${jdbc_url}" user="${demo_user}" password="${demo_password}" outfolder="${output}" tmpfolder="${tmpdir}/">
 {% endhighlight %}
+
+<br/>
 
 ###1.3. Konfiguration des Ablaufs
 
 Im Task **&lt;config&gt;** werden die Tabellengruppen, der Stil der Tabellen und Diagramme sowie die Diagrammstruktur definiert.
+
+<br/>
 
 ####1.3.1. Konfiguration der Tabellengruppen
 
@@ -53,16 +61,18 @@ Alle Tabellengruppen werden im Task **&lt;tablerregistry&gt;** definiert.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|tablesrcfolder|Gibt den Ordner an, in dem die Tabellenskripte liegen. <br/>Führt zur Anzeige der SQL-Befehle in der Tabellenansicht.|No|||
+|tablesrcfolder|Gibt den Ordner an, in dem die Tabellenskripte liegen. <br/>Führt zur Anzeige der SQL-Befehle in der Tabellenansicht.|No||
 
+<br/>
 Für jede Tabellengruppe wird ein Task **&lt;tablegroup&gt;** angelegt.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|name     |Gibt die Bezeichnung der Tabellengruppe an|Yes|||
+|name     |Gibt die Bezeichnung der Tabellengruppe an|Yes||
 
+<br/>
 Die beiden Tasks **&lt;include&gt;** und **&lt;exclude&gt;** dienen im Task **&lt;tablegroup&gt;** zum Ein- und Ausbinden von Tabellen.
-<br/>Ebenfalls möglich ist das arbeiten mit Regulären Ausdrücken. So können Filter erstellt werden um mehrere Tabellen auszuwählen.
+<br/>Ebenfalls möglich ist das Arbeiten mit Regulären Ausdrücken. So können Filter erstellt werden um mehrere Tabellen auszuwählen.
 Beispiele hierfür:
 
 |Task|Value|Bedeutung|
@@ -71,7 +81,8 @@ Beispiele hierfür:
 |&lt;include name=".+TIER.*/&gt;|.+TIER.*|Alle Tabellen deren Bezeichnung "TIER" enthält (Wortanfang/-mitte/-ende)|
 |&lt;exclude name=".*_TIERUEBERWACHUNG"/&gt;|.*_TIERUEBERWACHUNG|Alle Tabellen mit dem Suffic "_TIERUEBERWACHUNG" werden NICHT in die Tabellengruppe TIER aufgenommen|
 
-{% highlight xml %}l
+<br/>
+{% highlight xml %}
 <tableregistry tablesrcfolder="tables">
 
   <tablegroup name="TIERABGANG">
@@ -86,9 +97,13 @@ Beispiele hierfür:
 </tablegroup>
 {% endhighlight %}
 
+<br/>
+
 ####1.3.2. Konfiguration des Stils
 
 Im Task **&lt;styles&gt;** wird die Ausgabeform der Tabellen und Diagramme definiert.
+
+<br/>
 
 #####1.3.2.1. Konfiguration der Tabellendarstellung
 
@@ -102,6 +117,7 @@ Im Task **&lt;tables&gt;** kann die Tabellendarstellung für jede Tabellengruppe
 |font|Gibt die Schriftart an|Schriftname||
 |fontsize|Gibt die Schriftgröße an|In Punkten|14|
 
+<br/>
 Neben diesen, finden sich viele weitere Attribute auf der [Dokumentationsseite zu graphviz](http://www.graphviz.org/content/attrs).
 
 {% highlight xml %}
@@ -115,6 +131,8 @@ Neben diesen, finden sich viele weitere Attribute auf der [Dokumentationsseite z
 </tables>
 {% endhighlight %}
 
+<br/>
+
 #####1.3.2.2. Konfiguration der Diagrammdarstellung
 
 Alle Stilgruppen werden im Task **&lt;diagrams&gt;** definiert und können im nächsten Schritt, der Diagrammerzeugung im Task **&lt;diagram&gt;** ausgewählt werden.
@@ -124,6 +142,7 @@ Alle Stilgruppen werden im Task **&lt;diagrams&gt;** definiert und können im n�
 |----|-----------|--------|-------|
 |dotexecutable|Stilgruppenvorlage|Name der Stilgruppe|dot|
 
+<br/>
 Es gibt sechs verschiedene Stilgruppen:
 
 <table>
@@ -133,9 +152,9 @@ Es gibt sechs verschiedene Stilgruppen:
     <td>sfdp</td>
   </tr>
   <tr>
-    <td>![](/assets/Tables_dot.jpg)</td>
-    <td>![](/assets/Tables_fdp.jpg)</td>
-    <td>![](/assets/Tables_sfdp.jpg)</td>
+    <td><img src="{{site.baseurl}}/assets/Tables_dot.jpg"/></td>
+    <td><img src="{{site.baseurl}}/assets/Tables_fdp.jpg"/></td>
+    <td><img src="{{site.baseurl}}/assets/Tables_sfdp.jpg"/></td>
   </tr>
   <tr>
     <td>circo</td>
@@ -143,12 +162,13 @@ Es gibt sechs verschiedene Stilgruppen:
     <td>twopi</td>
   </tr>
   <tr>
-    <td>![](/assets/Tables_circo.jpg)</td>
-    <td>![](/assets/Tables_neato.jpg)</td>
-    <td>![](/assets/Tables_twopi.jpg)</td>
+    <td><img src="{{site.baseurl}}/assets/Tables_circo.jpg"/></td>
+    <td><img src="{{site.baseurl}}/assets/Tables_neato.jpg"/></td>
+    <td><img src="{{site.baseurl}}/assets/Tables_twopi.jpg"/></td>
   </tr>
 </table>
 
+<br/>
 Jede Stilgruppe kann mit dem Task **&lt;style&gt;** angepasst werden.
 <br/>Mögliche Parameter sind:
 
@@ -159,6 +179,7 @@ Jede Stilgruppe kann mit dem Task **&lt;style&gt;** angepasst werden.
 |ranksep|Gibt den vertikalen Abstand zwischen Tabellen in Inches an. (Nur gültig bei dot und twopi)|1-n|2|
 |splines|Legt fest, wie und ob Verbindungen zwischen Tabellen dargestellt werden. |(leer), true, false, polyline|polyline|
 
+<br/>
 Neben diesen finden sich viele weitere Attribute auf der [Dokumentationsseite zu graphviz](http://www.graphviz.org/content/attrs). Es werden jedoch nicht alle Attribute von allen Stilgruppen unterstützt.
 
 {% highlight xml %}
@@ -171,6 +192,8 @@ Neben diesen finden sich viele weitere Attribute auf der [Dokumentationsseite zu
 </diagrams>
 {% endhighlight %}
 
+<br/>
+
 ####1.3.3. Konfiguration der Diagrammstruktur
 
 Im Task **&lt;diagram&gt;** können die Bezeichnungen und die Hierarchie der Diagramme festgelegt werden.
@@ -180,15 +203,17 @@ Im Task **&lt;diagram&gt;** können die Bezeichnungen und die Hierarchie der Dia
 |label    |Diagrammtitel, kann frei gewählt werden.|Yes||
 |stylegroup|Auswahl einer angelegten Stilgruppe |No||
 |subinnclude|Gibt die Diagrammdarstellungsform an. <br/>(diagrams_only/diagrams_with_tables/tables)|No||
-|tablegroup|Gibt die zum Diagramm gehörenden Tabellen/-gruppen an.|No|||
+|tablegroup|Gibt die zum Diagramm gehörenden Tabellen/-gruppen an.|No||
 
+<br/>
 Die drei Diagrammdarstellungsformen unterscheiden sich im Umfang der anzuzeigenden Inhalte.
 
 <table>
   <tr>
     <td>
-      **diagrams_only**
-      <br/>![](/assets/Diagrams_only.jpg)
+      <b>diagrams_only</b>
+      <br/>
+      <img src="{{site.baseurl}}/assets/Diagrams_only.jpg"/>
     </td>
     <td>
       Hier werden hierarchisch unterliegende Diagramme mit ihren beinhaltenden Tabellengruppen, sowie deren Verknüpfung zueinander angezeigt.
@@ -198,8 +223,9 @@ Die drei Diagrammdarstellungsformen unterscheiden sich im Umfang der anzuzeigend
   </tr>
   <tr>
     <td>
-      **diagrams_with_tables**
-      <br/>![](/assets/Diagrams_with_tables.jpg)
+    <b>diagrams_with_tables</b>
+      <br/>
+      <img src="{{site.baseurl}}/assets/Diagrams_with_tables.jpg"/>
     </td>
     <td>
       Hier werden hierarchisch unterliegende Diagramme mit zugehörigen Tabellen, sowie deren Verknüpfung zueinander, angezeigt.
@@ -208,8 +234,9 @@ Die drei Diagrammdarstellungsformen unterscheiden sich im Umfang der anzuzeigend
   </tr>
   <tr>
     <td>
-      **tables**
-      <br/>![](/assets/Tables_dot.jpg)
+    <b>tables</b>
+      <br/>
+      <img src="{{site.baseurl}}/assets/Tables_dot.jpg"/>
     </td>
     <td>
       Hier werden alle hierarchisch unterliegende Tabellen mit deren Verknüpfung zueinander angezeigt.
@@ -219,6 +246,7 @@ Die drei Diagrammdarstellungsformen unterscheiden sich im Umfang der anzuzeigend
   </tr>
 </table>
 
+<br/>
 Die Diagrammhierarchie wird mit der Verschachtelung des **&lt;diagram&gt;** Tasks erreicht.
 <br/> das Hauptdiagramm, welches alle weiteren Diagramme beinhaltet, sollte die Darstellungsform "diagrams_only" gewählt werden, um eine übersichtliche Darstellung zu erreichen.
 <br/>Um alle Tabellengruppen auszuwählen, wird bei "tablegroup" der Wert auf ".*" gesetzt.
@@ -263,8 +291,12 @@ Ein Beispielprojekt lässt sich unter examples\dbdoc_demo\build.xml finden, ausf
 <br/>Hier ist das Hauptdiagramm abgebildet.Die grauen Rechtecke stellen hierarchisch untergeordnete Diagramme dar.
 ![](/assets/Diagrams_only.jpg)
 
+<br/>
 Diese können ausgewählt werden und bieten auf einer extra Seite eine Darstellung der Tabellengruppe an.
+
 ![](/assets/Unterdiagramm.jpg)
 
+<br/>
 Auch einzelne Tabellen können ausgewählt werden und zeigen bei eingebundenen Tabellenordner die zugehörigen SQL-Befehle an.
+
 ![](/assets/abgang_hat_praemie.jpg)
