@@ -136,7 +136,7 @@ create or replace package body pa_03_apply_col_domain is
       loop
         if(pv_syex_table_fk_lookup_list(i).i_primary_key is not null)
         then
-          v_match_pk_column_name := pa_domain_extension_helper.get_generated_name_column( v_syex_columndomain.i_generatefk.i_pkcolumnnamerules, v_syex_column.i_name, pv_syex_table_fk_lookup_list(i).i_name, pv_syex_table_fk_lookup_list(i).i_alias );
+          v_match_pk_column_name := pa_domain_extension_helper.get_generated_name_column( v_syex_columndomain.i_generatefk.i_pkcolumnnamerules, v_syex_column.i_name, pv_syex_table_fk_lookup_list(i).i_name, p_syex_table.i_alias );
         
           for j in 1..pv_syex_table_fk_lookup_list(i).i_primary_key.i_pk_columns.count()
           loop
