@@ -10,24 +10,24 @@ permalink: /docs/extensions/
 
 ##Was sollte man über Extensions wissen?
 
-Extensions ermöglichen viele sinnvolle Zusatzfunktionen bei der Arbeit mit der OC-Schemaverwaltung die man normalerweise gar nicht in erwägung ziehen würde.
-<br/>Deshalb ist es sinnvoll sich damit vor Einsatz der OC-Schemaverwaltung kurz zu beschäftigen, um zu klären ob man diese Zusatzfunktionalität nicht im eigenen Projekt gut gebrauchen könnte. Zum Beispiel könnte man die Konvention umsetzen, dass die erste Spalte immer der PK sein muss, indem man daraus die PK-Angabe generiert. Extensions sind immer Projektspezifisch.
+Extensions ermöglichen viele sinnvolle Zusatzfunktionen bei der Arbeit mit Orcas die man normalerweise gar nicht in erwägung ziehen würde.
+<br/>Deshalb ist es sinnvoll sich damit vor Einsatz von Orcas kurz zu beschäftigen, um zu klären ob man diese Zusatzfunktionalität nicht im eigenen Projekt gut gebrauchen könnte. Zum Beispiel könnte man die Konvention umsetzen, dass die erste Spalte immer der PK sein muss, indem man daraus die PK-Angabe generiert. Extensions sind immer Projektspezifisch.
 
 ##Wie erstelle ich Extensions?
 
 - In Java
 
-  Extensions sind Java-Klassen (es besteht der Plan auch PL/SQL als "Extensionsprache" zu ermöglichen). Eine Extension-Java-Klasse implementiert ein spezielles Interface (OcSvwExtension oder BaseSyntaxExtension) und hat damit die Möglichkeit die Schemadefinition bzw. die Struktur der Schemadaten mehr oder weniger beliebig zu ändern.
+  Extensions sind Java-Klassen (es besteht der Plan auch PL/SQL als "Extensionsprache" zu ermöglichen). Eine Extension-Java-Klasse implementiert ein spezielles Interface (OrcasExtension oder BaseSyntaxExtension) und hat damit die Möglichkeit die Schemadefinition bzw. die Struktur der Schemadaten mehr oder weniger beliebig zu ändern.
 
 - in PL/SQL
 
-  Extensions in PL/SQL bestehen aus einem Package body. Das Skript dafür wird in das Extension-Verzeichnis als .sql-Datei abgelegt. Die Specification wird automatisch von der Schemaverwaltung generiert. Sie enthält eine einzige Function: "function run( p_input in ot_syex_model ) return ot_syex_model;".
+  Extensions in PL/SQL bestehen aus einem Package body. Das Skript dafür wird in das Extension-Verzeichnis als .sql-Datei abgelegt. Die Specification wird automatisch von Orcas generiert. Sie enthält eine einzige Function: "function run( p_input in ot_syex_model ) return ot_syex_model;".
 
 Bevor man eine eigene Extension schreibt sollte man sich die Beispiel-Extensions ansehen, bei komplexeren Extensions sollte man vorher jemanden fragen der sich damit auskennt.
 
 ##Wie funktionieren Parameter mit Extensions?
 
-Es besteht die Möglichkeit Extensions zu parametrisiern. Dazu gibt es die Möglichkeit eine Textvariable an alle Extensions zu übergeben. Dazu wird bei dem ant-Task `todo: Link zu den ant-Tasks`oc_svw_initialize das Attribut extensionparameter verwendet. Es gibt eine spezielle Basisklasse (OcSvwBaseExtensionWithParameter) für Parametrisierte Extensions. Diese ermöglicht die Nutzung von mehreren Parametern. Dazu wird die Testvariable in eine Map überführt, auf einen Parameter wird dann mit hilfe der Funktion getParameterAsMap zugegriffen. Beispiel: Um zu dem Parameter mit dem Namen "tablespace" den Wert "testtabs" auszulesen, könnte die Textvariable den folgenden Wert haben: "[xy:15,tablespace:testtabs]".
+Es besteht die Möglichkeit Extensions zu parametrisiern. Dazu gibt es die Möglichkeit eine Textvariable an alle Extensions zu übergeben. Dazu wird bei dem ant-Task `todo: Link zu den ant-Tasks`orcas_initialize das Attribut extensionparameter verwendet. Es gibt eine spezielle Basisklasse (OrcasBaseExtensionWithParameter) für Parametrisierte Extensions. Diese ermöglicht die Nutzung von mehreren Parametern. Dazu wird die Testvariable in eine Map überführt, auf einen Parameter wird dann mit hilfe der Funktion getParameterAsMap zugegriffen. Beispiel: Um zu dem Parameter mit dem Namen "tablespace" den Wert "testtabs" auszulesen, könnte die Textvariable den folgenden Wert haben: "[xy:15,tablespace:testtabs]".
 
 ##Bestehende Extensions
 

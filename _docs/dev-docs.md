@@ -2,7 +2,7 @@
 layout: docs
 title: Entwicklerdokumentation
 prev_section: participate
-next_section:
+next_section: how-it-works
 permalink: /docs/dev-docs/
 ---
 
@@ -10,11 +10,11 @@ permalink: /docs/dev-docs/
 
 ##Funktionsweise
 
-Für die Beschreibung der Funktionsweise siehe: `todo: Link zu Funktionsweise ...`Funktionsweise der Schemaverwaltung.
+Für die Beschreibung der Funktionsweise siehe: [Funktionsweise von Orcas]({{site.baseurl}}/docs/how-it-works/).
 
 ##Integrationstests
 
-Für die Beschreibung der Integrationstests siehe: `todo: Link zu Integrationstests`Integrationstests
+Für die Beschreibung der Integrationstests siehe: [Integrationstests]({{site.baseurl}}/docs/integraiont-tests/)
 
 ##Git
 

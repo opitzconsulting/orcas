@@ -26,7 +26,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
   3. unique key
   4. foreign key
 <br/>Die index Statements können mit den unique keys gemischt werden (um z.B. einen unique key anzulegen der einen explizit angelegten index nutzt).
-  5. Mehr Reservierte Begriffe: so ziemlich alle statischen Begriffe aus der Syntax sind reserviert (z.B.: "table","create","varchar2"). Alle reservierten Begriffe dürfen nicht als Namen vorkommen. Z.B. ist timestamp in SQL als Spaltenname möglich, in der OC-Schemaverwaltung nicht. Diese Limitierung kann man sehr leicht umgehen, wenn man die Begriffe groß schreibt (z.B. "TIMESTAMP"). Natürlich sind in SQL reservierte Bergiffe damit auch nicht möglich.
+  5. Mehr Reservierte Begriffe: so ziemlich alle statischen Begriffe aus der Syntax sind reserviert (z.B.: "table","create","varchar2"). Alle reservierten Begriffe dürfen nicht als Namen vorkommen. Z.B. ist timestamp in SQL als Spaltenname möglich, in Orcas nicht. Diese Limitierung kann man sehr leicht umgehen, wenn man die Begriffe groß schreibt (z.B. "TIMESTAMP"). Natürlich sind in SQL reservierte Bergiffe damit auch nicht möglich.
 
 ###Syntax
 
@@ -95,7 +95,7 @@ Keine Besonderheiten
 
 ##Check Constraint
 
-Um die eigentliche Bedingung müssen doppelte Anführungszeichen gesetzt werden. Ein Constraintname muss mit angegeben werden, es ist aber möglich eine `todo: Link to Extensions`Extension zu schreiben, die Namen automatisch vergibt.
+Um die eigentliche Bedingung müssen doppelte Anführungszeichen gesetzt werden. Ein Constraintname muss mit angegeben werden, es ist aber möglich eine [Extension]({{site.baseurl}}/docs/extensions/) zu schreiben, die Namen automatisch vergibt.
 
 ##Unique Key
 
@@ -134,7 +134,7 @@ create unique index orit_price_ix on order_items (price)
 
 ##Foreign Key
 
-Bei Foreign Keys gibt es einige Möglichkeiten über `todo: Link zu Extensions`Extensions die Syntax zu vereinfachen (z.B. weglassen der Spaltenangabe wenn diese über Namenskonventionen bestimmt werden können).
+Bei Foreign Keys gibt es einige Möglichkeiten über [Extension]({{site.baseurl}}/docs/extensions/) die Syntax zu vereinfachen (z.B. weglassen der Spaltenangabe wenn diese über Namenskonventionen bestimmt werden können).
 
 ##Sequence
 
@@ -143,7 +143,7 @@ Bei Sequences kann nur der Sequence Name angegeben werden. Zusätzlich kann ein 
 ###Syntax
 
 {% highlight sql %}
-create sequence sequence_name [oc_svw_ext_max_value_select 'select-statement']
+create sequence sequence_name [orcas_ext_max_value_select 'select-statement']
 {% endhighlight %}
 
 ###Sequence Beispiel
@@ -151,7 +151,7 @@ create sequence sequence_name [oc_svw_ext_max_value_select 'select-statement']
 {% highlight sql %}
 create sequence order_items_seq;
 
-create sequence order_items_seq oc_svw_ext_max_value_select 'select nvl(max(orit_id),0) from order_items';
+create sequence order_items_seq orcas_ext_max_value_select 'select nvl(max(orit_id),0) from order_items';
 {% endhighlight %}
 
 ##Kommentare
@@ -173,4 +173,4 @@ Materialized view log purge clause: Es gilt die Regel, das start with angegeben 
 
 ##Vollständige Syntax Definition
 
-Die genaue Definition der Syntax ist in xText beschrieben. Die BNF-ähnliche Definition findet sich hier: xText Syntax Definition `todo: Aktuell Link zum internen Stash`
+Die genaue Definition der Syntax ist in xText beschrieben. Die BNF-ähnliche Definition findet sich hier: [xText Syntax Definition](https://github.com/opitzconsulting/orcas/blob/master/orcas_core/build_source/orcas/src/de/opitzconsulting/OrcasDsl.xtext)
