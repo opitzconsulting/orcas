@@ -31,8 +31,6 @@ extensions.md:
 integrationtests:
 - none
 
-
-
 TODO:
 - Funktionsweise der Schemaverwaltung!
 - About
@@ -40,3 +38,6 @@ TODO:
 - Warum Orcas
 
 Rest mehr oder weniger fertig
+
+
+Soll noch ein Newsbereich für Updates rein?! (wie etwa bei jekyll -> http://jekyllrb.com/news/)
