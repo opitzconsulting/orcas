@@ -1,0 +1,43 @@
+LOESCH!
+
+getting-started.md:
+- Projektsetup (Verzeichnisse im aktuelle Projekt stimmen nicht mit Doku überein!)
+
+examples.md:
+- Orderentry: Noch OC-interner Kram drin?!
+
+dbdoc.md:
+- Link in internes Netz (woander hosten?!)
+
+features.md:
+- Ocras License?!
+- Tabelle muss nochmal geprüft werden!
+- 6 Einträge fehlen für orcas (sql parser + 1x other)
+
+supported-db-functions.md:
+- seltsame auflistung im confluence
+
+ant-tasks.md:
+- empty table im confluence?!
+- probleme mit zelle
+
+statics-syntax.md:
+- check on github if create index index_name on tabellen_name is shown correctly (strikethrough  github flavored markdown)
+- inhalt noch oder kurz genug?!
+
+extensions.md:
+- none
+
+integrationtests:
+- none
+
+TODO:
+- Funktionsweise der Schemaverwaltung!
+- About
+- Home
+- Warum Orcas
+
+Rest mehr oder weniger fertig
+
+
+Soll noch ein Newsbereich für Updates rein?! (wie etwa bei jekyll -> http://jekyllrb.com/news/)
