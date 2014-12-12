@@ -1430,6 +1430,14 @@ ${orcas_sql_output}
           </or>    
         </condition>
       </fail>
+      <property environment="orcas_internal_environment" />
+      <fail message="No ORACLE_HOME set.">
+        <condition>
+          <not>
+            <isset property="orcas_internal_environment.ORACLE_HOME"/>  
+          </not>    
+        </condition>
+      </fail>      
       <if>
         <not>
           <equals arg1="${orcas_internal_skip_initialize}" arg2="true"/>
