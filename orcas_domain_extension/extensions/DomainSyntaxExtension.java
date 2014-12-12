@@ -102,6 +102,8 @@ public class DomainSyntaxExtension extends BaseSyntaxExtension
       lRuleNormal.getRule_entries().add( createRuleConstantEntry( "alias_name", "alias-name" ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "|" ) );
       lRuleNormal.getRule_entries().add( createRuleConstantEntry( "column_domain_name", "column-domain-name" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "|" ) );
+      lRuleNormal.getRule_entries().add( createRuleConstantEntry( "remove_next", "remove-next" ) );
     }
 
     {
