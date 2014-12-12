@@ -21,6 +21,7 @@
   <property name="orcas.default_user_orcas" value="${username_schemaowner}"/>
   <property name="orcas.default_password_orcas" value="${password_orcas}"/>
   <property name="orcas.default_tnsname" value="${database}"/>
+  <property name="orcas.default_jdbcurl" value="${jdbc_url}"/>
   <property name="orcas.default_tmpfolder" value="${bintmpdir}/orcas"/>
   <property name="orcas.default_spoolfolder" value=""/>
 
