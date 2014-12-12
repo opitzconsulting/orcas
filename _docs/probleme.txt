@@ -8,3 +8,10 @@ examples.md:
 
 dbdoc.md:
 - Link in internes Netz (woander hosten?!)
+
+features.md:
+-Ocras License?!
+-Tabelle muss nochmal geprüft werden!
+-6 Einträge fehlen für orcas (sql parser + 1x other)
+
+supported-db-functions:

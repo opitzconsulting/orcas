@@ -10,30 +10,31 @@ permalink: /docs/generate-scripts/
 
 ##Übersicht
 
-Für die Einführung der Schemaverwaltung in einer bestehenden Datenbank, müssen zunächst vor allem die Tabellenbeschreibungen initial erstellt werden.
-<br/>Dabei gibt es verschiedene Möglichkeiten:
-- oc_svw_extract
+Für die Einführung von Orcas in einer bestehenden Datenbank, müssen zunächst vor allem die Tabellenbeschreibungen initial erstellt werden.
+<br/>
+Dabei gibt es verschiedene Möglichkeiten:
+
+- orcas_extract
   - Sollte nach Möglichkeit immer genutzt werden
-  - Erweiterbar/Anpassbar
-  - Nutzt Extensions
-  - Basiert auf XSLT
+  - Erweiterbar/anpassbar
+  - Nutzt [Extensions]({{site.baseurl}}/docs/extensions/)
+  - Basiert auf [XSLT](http://www.w3schools.com/xsl/)
   - Kann keine Domain-Indizes (XML-Index, Oracle-Text)
   - Kann (noch) keine Partitionierung
-  - Quell-DB muss OC-Schemaverwaltung installiert haben.
+  - Quell-DB muss Orcas installiert haben.
 - Skripte von Hand neu schreiben
   - Aufwändig bei vielen Tabellen
   - Sehr flexibel
   - Fehleranfällig
-  - Praktikabel für Projekte mit wenigen Tabellen, die sehr "speziell" sind
+  - Praktikabel für Projekte mit wenig Tabellen, die sehr "speziell" sind
 - SQL-Skripte nutzen
-  - Z.B. mit TOAD generieren
-  - Manuelle Anpassungen erfolderlich, das Syntax abweicht
-  - Praktikabel auch bei vielen Tabellen, wenn es nur bei wenigen Tabellen Syntax abwecihungen gibt
-  - ggf. mit Bereingungsskript kombinieren (z.B. UNIX sed)
-- OC_SVW-Skripte generieren
+  - Z.B. mit Toad generieren
+  - Manuelle Anpassungen erforderlich, da Syntax abweicht
+  - Praktikabel auch bei vielen Tabellen, wenn es nur bei wenigen Tabellen Syntaxabweichungen gibt
+  - Ggf. mit Bereingungsskript kombinieren (z.B. UNIX sed)
+- ORCAS-Skripte generieren
   - Automatisierbar (mehrfach durchführbar)
   - Auf verwendete Extensions optimierbar
   - Projektspezifisch
 
-In Orcas gibt es unter trunk/oc_svw_scriptgenerator/static einen Bereich in dem Projektspezifische Skriptgeneratoren gesammelt werden können.
-<br/>Aus diesem Grund gibt es auf dieser Seite eine kurze Übersicht über die verschiedenen Versionen.
+In Orcas gibt es unter trunk/orcas_scriptgenerator/static einen Bereich in dem projektspezifische Skriptgeneratoren gesammelt werden können.

@@ -147,9 +147,9 @@ Es gibt sechs verschiedene Stilgruppen:
 
 <table>
   <tr>
-    <td>dot</td>
-    <td>fdp</td>
-    <td>sfdp</td>
+    <td><b>dot</b></td>
+    <td><b>fdp</b></td>
+    <td><b>sfdp</b></td>
   </tr>
   <tr>
     <td><img src="{{site.baseurl}}/assets/Tables_dot.jpg"/></td>
@@ -157,9 +157,9 @@ Es gibt sechs verschiedene Stilgruppen:
     <td><img src="{{site.baseurl}}/assets/Tables_sfdp.jpg"/></td>
   </tr>
   <tr>
-    <td>circo</td>
-    <td>neato</td>
-    <td>twopi</td>
+    <td><b>circo</b></td>
+    <td><b>neato</b></td>
+    <td><b>twopi</b></td>
   </tr>
   <tr>
     <td><img src="{{site.baseurl}}/assets/Tables_circo.jpg"/></td>
