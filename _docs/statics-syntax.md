@@ -30,7 +30,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 
 ###Syntax
 
-```sql
+{% highlight sql %}
 create {permanent|global temporary} table table_name [alias table_alias](
   column_name { varchar2(scale {BYTE|CHAR} ) | number(scale[,precision]) | clob(scale) | blob | xmltype | date } [default "default_value"] {null | not null}
   constraint constraint_name primary key ( primary_key_columns ) { enable | disable }
@@ -40,7 +40,7 @@ create {permanent|global temporary} table table_name [alias table_alias](
   constraint consrtaint_name foreign key ( _src_column ) references des_table_name ( dest_column ) { on delete nothing | on delete cascade } { enable | disable }
   comment on { table | column } {column_name}_ is "comment_string";
 );
-```
+{% endhighlight %}
 
 ###Beispiel
 
