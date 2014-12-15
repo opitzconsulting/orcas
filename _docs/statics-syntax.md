@@ -44,7 +44,7 @@ create {permanent|global temporary} table table_name [alias table_alias](
 
 ###Beispiel
 
-```sql
+{% highlight sql %}
 create table order_items
 (
   orit_id   number(15)                          not null,
@@ -67,7 +67,7 @@ create table order_items
   comment on table is "Ausführliche Beschreibung von Order_Items";
   comment on column version is "Ausführliche Beschreibung der Spalte Order_Items.Version";
 );
-```
+{% endhighlight %}
 
 ##Column
 
