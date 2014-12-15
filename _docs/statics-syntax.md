@@ -19,7 +19,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 ##Abweichungen vom SQL Standard
 
 - Es wird nur die kompakte Schreibweise unterstützt, bei der alle constraints um weitere Angaben in dem create table enthalten sind.
-- Auch Indizes werden innerhalb des create table Statements erwartet, dabei wird aus dem <code>create index index_name on tabellen_name ...</code><br/>ein <code>~~create~~ index index_name ~~one tabellen_name~~ ...</code>
+- Auch Indizes werden innerhalb des create table Statements erwartet, dabei wird aus dem <code>create index index_name on tabellen_name ...</code><br/>ein <code>index index_name ...</code>
 - Die Reihenfolge der constraints ist wie folgt:
   1. primary key
   2. check constraint
@@ -30,7 +30,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 
 ###Syntax
 
-{% highlight sql %}
+```sql
 create {permanent|global temporary} table table_name [alias table_alias](
   column_name { varchar2(scale {BYTE|CHAR} ) | number(scale[,precision]) | clob(scale) | blob | xmltype | date } [default "default_value"] {null | not null}
   constraint constraint_name primary key ( primary_key_columns ) { enable | disable }
@@ -40,7 +40,7 @@ create {permanent|global temporary} table table_name [alias table_alias](
   constraint consrtaint_name foreign key ( _src_column ) references des_table_name ( dest_column ) { on delete nothing | on delete cascade } { enable | disable }
   comment on { table | column } {column_name}_ is "comment_string";
 );
-{% endhighlight %}
+```
 
 ###Beispiel
 
