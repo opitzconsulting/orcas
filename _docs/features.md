@@ -1,10 +1,11 @@
----
+// disabled
+/*---
 layout: docs
 title: Feature Liste
 prev_section: generate-scripts
 next_section: supported-db-functions
 permalink: /docs/features/
----
+---*/
 
 #Feature Matrix
 

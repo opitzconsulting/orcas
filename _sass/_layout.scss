@@ -44,6 +44,21 @@
     }
 }
 
+.about {
+  position: absolute;
+    left: $content-width;
+    font-size: 22px;
+    line-height: 56px;
+    letter-spacing: -1px;
+    margin-bottom: 0;
+    padding-left: $spacing-unit;
+
+    &,
+    &:visited {
+      color: $grey-color-dark;
+    }
+}
+
 .site-nav {
     float: right;
     line-height: 56px;

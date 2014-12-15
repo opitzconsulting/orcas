@@ -231,8 +231,9 @@ span.legend {
 
 img#OC-Logo {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: $spacing-unit;
+  left: $content-width;
+  padding-left: 100px;
   width: 200px;
 }
 
@@ -247,6 +248,11 @@ img#OC-Logo {
   text-align: center;
 }
 
-.ant-tasks-contents {
+.no-list-style {
   list-style-type: none;
+}
+
+#info-icon {
+  padding-bottom: 5px;
+  height: 30px;
 }

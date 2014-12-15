@@ -19,14 +19,14 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 ##Abweichungen vom SQL Standard
 
 - Es wird nur die kompakte Schreibweise unterstützt, bei der alle constraints um weitere Angaben in dem create table enthalten sind.
-- Auch Indizes werden innerhalb des create table Statements erwartet, dabei wird aus dem <code>create index index_name on tabellen_name ...</code> ein <code>~~create~~ index index_name ~~on tabellen_name~~ ...</code>
+- Auch Indizes werden innerhalb des create table Statements erwartet, dabei wird aus dem <code>create index index_name on tabellen_name ...</code><br/>ein <code> index index_name ...</code>
 - Die Reihenfolge der constraints ist wie folgt:
   1. primary key
   2. check constraint
   3. unique key
   4. foreign key
 <br/>Die index Statements können mit den unique keys gemischt werden (um z.B. einen unique key anzulegen der einen explizit angelegten index nutzt).
-  5. Mehr Reservierte Begriffe: so ziemlich alle statischen Begriffe aus der Syntax sind reserviert (z.B.: "table","create","varchar2"). Alle reservierten Begriffe dürfen nicht als Namen vorkommen. Z.B. ist timestamp in SQL als Spaltenname möglich, in Orcas nicht. Diese Limitierung kann man sehr leicht umgehen, wenn man die Begriffe groß schreibt (z.B. "TIMESTAMP"). Natürlich sind in SQL reservierte Bergiffe damit auch nicht möglich.
+  5. Mehr reservierte Begriffe: so ziemlich alle statischen Begriffe aus der Syntax sind reserviert (z.B.: "table","create","varchar2"). Alle reservierten Begriffe dürfen nicht als Namen vorkommen. Z.B. ist timestamp in SQL als Spaltenname möglich, in Orcas nicht. Diese Limitierung kann man sehr leicht umgehen, wenn man die Begriffe groß schreibt (z.B. "TIMESTAMP"). Natürlich sind in SQL reservierte Bergiffe damit auch nicht möglich.
 
 ###Syntax
 

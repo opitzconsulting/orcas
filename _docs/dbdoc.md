@@ -282,21 +282,21 @@ Am Beispiel der Welt würde ein Diagramm "Die Welt" angelegt werden. Diesem Diag
 {% endhighlight %}
 
 Führt man diesen Code aus, ist dies das Diagramm "Europa" mit den unterteilten Diagrammen Spanien und Deutschland (Deutschland ist wiederum unterteilt in die Bundesländer Bayern und Baden Württemberg).
-![](/assets/Europa.jpg)
+![]({{site.baseurl}}/assets/Europa.jpg)
 
 ##Beispielprojekt dbdoc_demo
 
 Ein Beispielprojekt lässt sich unter examples\dbdoc_demo\build.xml finden, ausführen, und als Grundlage für eigene Projekte verwenden.
 <br/>Als Beispieldatenschemata wurde ein Datenmodell für die Milcherzeugung verwendet.
 <br/>Hier ist das Hauptdiagramm abgebildet.Die grauen Rechtecke stellen hierarchisch untergeordnete Diagramme dar.
-![](/assets/Diagrams_only.jpg)
+![]({{site.baseurl}}/assets/Diagrams_only.jpg)
 
 <br/>
 Diese können ausgewählt werden und bieten auf einer extra Seite eine Darstellung der Tabellengruppe an.
 
-![](/assets/Unterdiagramm.jpg)
+![]({{site.baseurl}}/assets/Unterdiagramm.jpg)
 
 <br/>
 Auch einzelne Tabellen können ausgewählt werden und zeigen bei eingebundenen Tabellenordner die zugehörigen SQL-Befehle an.
 
-![](/assets/abgang_hat_praemie.jpg)
+![]({{site.baseurl}}/assets/abgang_hat_praemie.jpg)

@@ -2,7 +2,7 @@
 layout: docs
 title: Generieren der Statics-Tabellenskripte
 prev_section: dbdoc
-next_section: features
+next_section: supported-db-functions
 permalink: /docs/generate-scripts/
 ---
 
