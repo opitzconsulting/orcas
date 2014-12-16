@@ -13,8 +13,6 @@ github_fork: https://github.com/opitzconsulting/orcas/fork
 baseurl: /orcas
 permalink: docs/:title
 markdown: kramdown
-kramdown:
-  input: GFM
 highlighter: pygments
 relative_permalinks: false
 collections:
