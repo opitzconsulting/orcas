@@ -8,7 +8,8 @@ permalink: /docs/ant-tasks/
 
 #Orcas ant-Tasks zur Ablaufsteuerung
 
-Orcas wird über Ant angesteuert. In weiteren Ausbaustufen ist auch eine Steuerung über Maven geplant. Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen an, die über Ant-Tasks (Makros) realisiert sind. Es gibt einige Beispielprojekte in denen die Verwendung dieser Ant-Tasks für typische Projek-Setups beschrieben ist. Diese Seite soll als Referenz dienen, um den Gesamtfunktionsumfang zu beschreiben.
+Orcas wird über Ant angesteuert. In weiteren Ausbaustufen ist auch eine Steuerung über Gradle und Maven geplant. 
+Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen an, die über Ant-Tasks (Makros) realisiert sind. Es gibt einige Beispielprojekte in denen die Verwendung dieser Ant-Tasks für typische Projek-Setups beschrieben ist. Diese Seite soll als Referenz dienen, um den Gesamtfunktionsumfang zu beschreiben.
 
 <ul class="no-list-style">
   <li><a href="#example">Beispiel</a></li>
