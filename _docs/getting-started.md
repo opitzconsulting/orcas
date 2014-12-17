@@ -13,7 +13,7 @@ next_section: examples
 - Orcas wird in einem eigenen [Repository](https://github.com/opitzconsulting/orcas) auf GitHub verwaltet.
 - Die Dokumentation wird ebenfalls von GitHub gehostet (als [GitHub Page](https://pages.github.com/))
   - Um den Code der Dokumentation zu sehen im Repository auf den [gh-pages Branch](https://github.com/opitzconsulting/orcas/tree/gh-pages) umstellen
-- Bei Interesse bei der Weiterentwicklung zu unterstützen bitte den Anweisungen unter [Hilf uns bei der Weiterentwicklung!]() folgen
+- Bei Interesse bei der Weiterentwicklung zu unterstützen bitte den Anweisungen unter [Hilf uns bei der Weiterentwicklung!](http://localhost:4000/docs/participate/) folgen
 
 <a id="tools"/>
 
@@ -84,7 +84,7 @@ Das kann wahlweise von Hand geschehen oder mittels eines Skriptes ([Details]({{s
 
 Diese können am einfachsten manuell über deren Quellskripte extrahiert werden. Dazu sind die Hinweise zur [Statics Syntax]({{site.baseurl}}/docs/statics-syntax/)) zu beachten.
 
-![](/assets/error.png) Andere DB-Objekte
+![]({{site.baseurl}}/assets/error.png) Andere DB-Objekte
 
 ###Aufruf des ant-Skriptes
 

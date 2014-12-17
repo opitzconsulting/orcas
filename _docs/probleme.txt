@@ -35,7 +35,6 @@ TODO:
 - Funktionsweise der Schemaverwaltung!
 - About
 - Home
-- Warum Orcas
 
 Rest mehr oder weniger fertig
 

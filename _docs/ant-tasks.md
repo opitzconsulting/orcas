@@ -10,7 +10,7 @@ permalink: /docs/ant-tasks/
 
 Orcas wird über Ant angesteuert. In weiteren Ausbaustufen ist auch eine Steuerung über Maven geplant. Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen an, die über Ant-Tasks (Makros) realisiert sind. Es gibt einige Beispielprojekte in denen die Verwendung dieser Ant-Tasks für typische Projek-Setups beschrieben ist. Diese Seite soll als Referenz dienen, um den Gesamtfunktionsumfang zu beschreiben.
 
-<ul class="ant-tasks-contents">
+<ul class="no-list-style">
   <li><a href="#example">Beispiel</a></li>
   <li><a href="#init">Initialisierung</a></li>
   <li><a href="#tasks">Tasks für den Buildprozess</a></li>
@@ -296,7 +296,7 @@ Dieser ant-Task muss vor jedem ant-Lauf augerufen werden um Orcas zu initialisie
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
 |extensionfolder|Gibt das Verzeichnis an, in dem die [Extensions]({{site.baseurl/docs/extensions/}}) liegen. Wenn keine Extensions genutzt werden muss extensionfolder auf ein leeres Verzeichnis verweisen.|Yes||
-|extensionparameter|Damit können Parameter an die Extensions (ein Text-Parameter für alle Extensions) übergeben werden.|No|||
+|extensionparameter|Damit können Parameter an die Extensions (ein Text-Parameter für alle Extensions) übergeben werden.|No||
 
 <a name="grant"/>
 
@@ -306,7 +306,7 @@ Dieser ant-Task dient dazu mehreren User mit dem selben Schemverwaltungs-User zu
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|user     |Gibt den User an, der die Rechte auf Orcas erhalten soll.|Yes|||
+|user     |Gibt den User an, der die Rechte auf Orcas erhalten soll.|Yes||
 
 <a name="install"/>
 

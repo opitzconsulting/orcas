@@ -18,7 +18,7 @@ Die Integrationstests nutzen einen Spooling Mechanismus, der im Wesentlichen die
 ###Tests
 
 Die Spooltests selbst liegen unter orcas_integrationstest\testspool\tests. In dem Ordner befinden sich jeweils Unterordner mit jeweils einem Testfall. Der Testfall besteht aus zwei Dateien (a.sql und b.sql). Der Test läuft wie folgt ab:
-![Bildliche Darstellung des Spoolings](/assets/spooling.GIF "spooling.GIF")
+![Bildliche Darstellung des Spoolings]({{site.baseurl}}/assets/spooling.GIF "spooling.GIF")
 
 1. a.sql wird im einem (zuvor geleertem) Schema ausgeführt.
 2. Das Spooling wird auf diesem Schema ausgeführt und in die Datei a.log geschrieben.
@@ -33,7 +33,7 @@ Bei diesem Vorgehen ist es sehr wichtig, dass jeder einzelne Testfall nur genau 
 Die eigentlichen Integrationstest befinden sich im Ordner orcas_integrationstest/tests. Wie schon beim spooltest gibt es hier wieder Unterordner, und jeder davon ist ein eigener Testfall. Es ist hier aber nicht nötig, für jedes Detail einen eigenen Testfall zu erstellen (Im Gegenteil: Jeder Testfall dauert ca. 3 Minuten, daher sollen die Anzahl der Tests nicht zu groß werden). Mit jedem Testfall werden verschiedene Testszenarios durchgeführt, diese werden nachfolgend beschrieben:
 
 ###Testszenario "normal":
-![Bildliche Darstellung Testszenario "normal"](/assets/testszenario-normal.GIF "testszenario-normal.GIF")
+![Bildliche Darstellung Testszenario "normal"]({{site.baseurl}}/assets/testszenario-normal.GIF "testszenario-normal.GIF")
 
 1. In einem (leeren) Schema wird das Skript erzeuge_zielzustand.sql eingespielt.
 2. Mit dem Spool-Skript wird das Schema in eine Datei geschrieben.
@@ -48,7 +48,7 @@ Die eigentlichen Integrationstest befinden sich im Ordner orcas_integrationstest
   Dadurch wird verifiziert, dass Orcas nicht unnötig Objekte im Schema dropt und neu anlegt (was ohne diesen Test nicht auffallen würde, aber zu teilweise erheblichen Performance-Problemen führen könnte).
 
 ###Testszenario "protokoll"
-![Bildliche Darstellung Testszenario "protokoll"](/assets/testszenario-protokoll.GIF "testszenario-protokoll.GIF")
+![Bildliche Darstellung Testszenario "protokoll"]({{site.baseurl}}/assets/testszenario-protokoll.GIF "testszenario-protokoll.GIF")
 
 1. Auf dem (leeren) protokoll-Schema wird das Skript erzeuge_ausgangszustand.sql eingespielt.
 2. Das beim vorangegangenen Testfall erzeugte Protokoll-Skript wird jetzt auf dem protokoll-Schema ausgeführt.
@@ -57,7 +57,7 @@ Die eigentlichen Integrationstest befinden sich im Ordner orcas_integrationstest
 4. Auch die protokoll-log-Datei muss gleich der zielskript-log-Datei sein.
 
 ###Testszenario "extract"
-![Bildliche Darstellung Testszenario "extract"](/assets/testszenario-extract.GIF "testszenarion-extract.GIF")
+![Bildliche Darstellung Testszenario "extract"]({{site.baseurl}}/assets/testszenario-extract.GIF "testszenarion-extract.GIF")
 
 Dieses Tesszenario wird nur ausgeführt, wenn das Property "test_extract" nicht auf false gesetzt wurde.
 
@@ -69,7 +69,7 @@ Dieses Tesszenario wird nur ausgeführt, wenn das Property "test_extract" nicht 
 5. Die gespoolten-Dateien müssen übereinstimmen.
 
 ###Testszenario "sqlplus-api"
-![Bildliche Darstellung Testszenario sqlplus-api](/assets/testszenario-sqlplus-api.GIF "testszenario-sqlplus-api.GIF")
+![Bildliche Darstellung Testszenario sqlplus-api]({{site.baseurl}}/assets/testszenario-sqlplus-api.GIF "testszenario-sqlplus-api.GIF")
 
 Dieses Tesszenario wird nur ausgeführt, wenn das Verzeichnis tabellen_sqlplus existiert.
 

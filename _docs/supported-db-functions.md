@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Unterstützte DB-Funktionen
-prev_section: features
+prev_section: generate-scripts
 next_section: ant-tasks
 permalink: /docs/supported-db-functions/
 ---
