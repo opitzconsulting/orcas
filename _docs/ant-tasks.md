@@ -115,6 +115,7 @@ Jeder öffentliche ant-Task von Orcas hat folgende default Attribute. Diese, und
 |passwordocsvw|Gibt das Passwort zu dem SCS-Benutzer an.|Yes|${orcas.default_password_orcas}|
 |tnsname  |Gibt den tnsnames Eintrag der Datenbank an.|Yes|${orcas.default_tnsname}|
 |tmpfolder|Gibt ein Verzeichnis an, in dem die Skriptverwaltung temporäre Dateien ablegen soll.|Yes|${orcas.default_tmpfolder}|
+|jdbcurl  |Wird für JDBC-Zugriffe verwendet, ist in allen Tasks vorhanden, wird aber bisher nur von einigen genutzt. Wenn der angegebene Default-Wert auch nicht gesetzt ist, dann wird die URL über den tnsname gesetzt, dabei wird der OCI-Treiber verwendet ("jdbc:oracle:oci:@tnsname") der aber oft zu Problemen führt, daher wird empfohlen den Parameter auf eine ULR mit thin-Treiber zu setzen. |No|${orcas.default_jdbcurl}|
 
 <a name="exe_script"/>
 
