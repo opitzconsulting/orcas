@@ -296,7 +296,7 @@ Dieser ant-Task muss vor jedem ant-Lauf augerufen werden um Orcas zu initialisie
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
 |extensionfolder|Gibt das Verzeichnis an, in dem die [Extensions]({{site.baseurl/docs/extensions/}}) liegen. Wenn keine Extensions genutzt werden muss extensionfolder auf ein leeres Verzeichnis verweisen.|Yes||
-|extensionparameter|Damit können Parameter an die Extensions (ein Text-Parameter für alle Extensions) übergeben werden.|No|||
+|extensionparameter|Damit können Parameter an die Extensions (ein Text-Parameter für alle Extensions) übergeben werden.|No||
 
 <a name="grant"/>
 
@@ -306,7 +306,7 @@ Dieser ant-Task dient dazu mehreren User mit dem selben Schemverwaltungs-User zu
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|user     |Gibt den User an, der die Rechte auf Orcas erhalten soll.|Yes|||
+|user     |Gibt den User an, der die Rechte auf Orcas erhalten soll.|Yes||
 
 <a name="install"/>
 

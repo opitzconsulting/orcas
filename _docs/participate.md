@@ -8,4 +8,4 @@ permalink: /docs/participate/
 
 #Hilf uns bei der Weiterentwicklung
 
-not yet implemented
+``not yet implemented``
