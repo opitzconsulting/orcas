@@ -40,40 +40,47 @@ Benötigt wird mindestens Java 6 (1.6). **Wichtig**: Es muss ein **JDK** sein, k
 javac -version
 javac 1.6.0_12
 {% endhighlight %}
-Falls nicht, muss ggf. die PATH-Variable angepasstw erden. Java wird bei Orcas nur von ant verwendet, daher evtl. auch ant-Konfigurationsmöglichkeiten beachten (z.B: wird JAVA_HOME von ant **vor** PATH ausgewertet).
+Falls nicht, muss ggf. die PATH-Variable angepasstw erden. Java wird bei Orcas von ant und gradle verwendet, daher evtl. auch die Konfigurationsmöglichkeiten beachten (z.B: wird JAVA_HOME von ant **vor** PATH ausgewertet).
 
 ###ORACLE Client
 
 SQL\*Plus muss an der Kommandozeile aufrufbar sein. Genauso sollte ein tnsping auf die Zieldatenbank funktionieren. Orcas benutzt im Kern immer TNS und SQL\*Plus, nur einige Zusatztools (z.B. dbdoc) nutzen JDBC.
+ORACLE_HOME muss gesetzt sein.
+Der Instant-Client kann verwendet werden, dann muss ORACLE_HOME auf diesen zeigen.
+ORACLE_HOME wir derzeit nur genutzt um den JDBC-Treiber zu ermitteln.
 
 ###Projektsetup
 
-``todo: Doku stimmt nicht mit Realität überein!``
-
-Orcas hat sechs Hauptverzeichnisse:
+Orcas hat folgende Hauptverzeichnisse:
 
 - examples
 - orcas_core
 - orcas_dbdoc
+- orcas_domain_extension
 - orcas_extensions
 - orcas_integrationstest
-- orcas_scriptgenerator
+- orcas_sqlplus_core
+- orcas_vagrant
 
 Unter **examples** befinden sich eine Reihe von Beispielprojekten die die Nutzung von Orcas zeigen. Hier kann man sich ein [Beispielprojekt]({{site.baseurl}}/docs/examples/) aussuchen und als Kopiervorlage für das eigene Projekt verwenden.
 
 Unter **orcas_core** liegt der Hauptbestandsteil von Orcas. Dieses Verzeichnis wird benötigt um Orcas laufen zu lassen. Das Verzeichnis kann aus einem konkreten Projekt heraus referenziert oder in ein Projekt kopiert werden. Der Inhalt des Verzeichnisses darf jedoch nicht geändert werden. Sollten solche Änderungen gewünscht sein, bitte immer mit den Entwicklern von Orcas [abstimmen](https://github.com/opitzconsulting/orcas/issues), da mit großer Wahrscheinlichkeit einer der folgenden Gründe vorliegt:
 
 - Es gibt ein Verständnisproblem und die gewünschte Funktionalität kann auf einem anderen, dafür vorgesehenen, Weg erreicht werden.
-- Es gibt einen Bug, dieser sollte für Orcas immer behoben werden.
+- Es gibt einen Bug, dieser sollte in Orcas behoben werden.
 - Es wird eine Erweiterung benötigt, diese sollte entweder in Orcas aufgenommen werden oder projektspezifisch, dann aber in einem anderen projekteigenen Verzeichnis.
 
 Unter **orcas_dbdoc** befindet sich das Tool [dbdoc]({{site.baseurl}}/docs/dbdoc/). Mit dbdoc lässt sich eine grafische Darstellung der Datenbankschemata erstellen.
 
-Unter **orcas_extensions** befinden sich die [Extensions]({{site.baseurl}}/docs/extensions/). Hier kann man Extensions auswählen, die in einem Projekt eingesetzt werden sollen. Diese Dateien sollten ins eigene Projekt kopiert werden und können dort angepasst werden. Natürlich ist es auch erlaubt eigene Extensions zu schreiben. Auf Extensions kann aber auch ganz verzichtet werden.
+Unter **orcas_domain_extension** befinden sich die [Domain-Extensions]({{site.baseurl}}/docs/extensions/). Die Domain-Extension bietet eine Art Templating-Mechanismus. Damit ist es einfach möglich Standard-Spalten für Tabellen zu erzeugen (z.B. ID oder version). Dabei besteht auch die Möglichkeit PK-, FK-, UK- und Check-Constraints zu generieren.
+
+Unter **orcas_extensions** befinden sich beispiel [Extensions]({{site.baseurl}}/docs/extensions/). Mit eigenen Extensions kann man Orcas sehr stark erweitern. In dem Verzeichnis befinden sich Beispiele, die man ins eigene Projekt kopiert kann um sie dort ggf. anzupassen.
 
 Unter **orcas_integrationstest** ist der [Integrationstest]({{site.baseurl}}/docs/integration-tests/) abgelegt. Dieser überprüft die korrekte Arbeitsweise von Orcas durch automatisch gesteuerte Testabläufe auf verschiedenen Datenbanksystemen. Der Integrationstest kann auch lokal ausgeführt und um eigene Tests erweitert werden.
 
-Unter **orcas_scriptgenerator** liegt das [PL/SQL-Package]({{site.baseurl}}/docs/generate-scripts/) zur automatischen Generierung der Tabellenbeschreibung.
+Unter **orcas_sqlplus_core** liegt eine API, die zum dirketen Aufruf aus sqlplus heraus vorgesehen ist. Diese Möglichkeit ist für Alt-Projekte vorgesehen und sollte bei neuen Projekten nicht mehr eingesetzt werden.
+
+Unter **orcas_vagrant** liegt eine Vagrant-Konfiguration mit der man eine VM konfigurieren und starten kann, in der Orcas direkt lauffähig ist.
 
 ###DB-Objekte extrahieren
 
