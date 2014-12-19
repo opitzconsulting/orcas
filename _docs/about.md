@@ -4,7 +4,12 @@ title: About Orcas
 permalink: /docs/about/
 ---
 
-#Warum Orcas?
+Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes **Datenbankschema** in einen mit **Textdateien** beschriebenen Soll-Zustand **überführt** werden kann. 
+<br/>Durch die Verwendung einfacher Textdateien ist eine **Integration** in bestehdende Projekte mit **Versionsverwaltung** denkbar einfach. 
+<br/>Orcas bietet dazu auch die Möglichkeit **kompliziertere Überführungen** zu **integrieren**.
+<br/>Orcas hat zudem einen **Exetnsion**-Mechanismus, mit dem die **Definition** des Datenbankschemas deutlich **vereinfach** und **vereinheitlicht** werden kann.
+
+Orcas steht für **Or**a**c**le **a**daptive/**a**gile **s**chemas und ist nur mit Oracle RDBMS kompatibel. 
 
 ##Problemstellung
 
@@ -38,16 +43,13 @@ Die Nutzung von Orcas hat viele Vorteile. Ein großer Vorteil ist, dass die Tabe
 
 Hier die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
 
-- [Getting Started]({{site.baseurl}}/docs/getting-started/) - Wie kann ich Orcas in meinem Projekt einsetzen?
+- [Wie arbeitet man mit Orcas?]({{site.baseurl}}/docs/usage/)
+- [Installation]({{site.baseurl}}/docs/installation/) - Was muss man tun um Orcas in meinem Projekt einsetzen zu können?
+- [Examples]({{site.baseurl}}/docs/examples/) - Beispielprojekte
 - [ant Tasks]({{site.baseurl}}/docs/ant-tasks/) - Wie erstelle ich einen Gesamtablauf mit ant?
 - [Statics Syntax]({{site.baseurl}}/docs/statics-syntax/) - Wie sehen die Tabellenskripte aus?
 - [Extensions]({{site.baseurl}}/docs/extensions/) - Wie kann ich Projektspezifische Syntaxerweiterungen integrieren?
 - [Funktionsweise Orcas]({{site.baseurl}}/docs/how-it-works/) - Wie funktioniert Orcas?
-- [Entwickler Dokumentation]({{site.baseurl}}/docs/dev-docs/) - Was ist bei der Entwicklung von Orcas zu beachten?
-
-Wir empfehlen für den Beginn das [Getting Started]({{site.baseurl}}/docs/getting-started/) Kapitel und zusätlich die [Ant Tasks]({{site.baseurl}}/docs/ant-tasks/) und die [Statics Syntax]({{site.baseurl}}/docs/statics-syntax/).
-
-Anleitungen für die Weiterentwicklung und Pflege von Orcas und dieser Dokumentation, bitte die Anleitungen im letzten Bereich der Dokumentation beachten (unter "Bei der Weiterentwicklung helfen").
 
 ##Welche Vorteile/Nachteile gibt es?
 
@@ -60,6 +62,6 @@ Anleitungen für die Weiterentwicklung und Pflege von Orcas und dieser Dokumenta
 
 ###Nachteile
 
-- Wenn Funktionen verwendet werden, die Orcas nicht unterstützt, müssen diese Teilbereiche "manuell" verwaltet werden.
+- Wenn Datenbank-Funktionen verwendet werden, die Orcas nicht unterstützt, müssen diese Teilbereiche "manuell" verwaltet werden.
 - Projektmitarbeiter müssen wissen wie man mit Orcas arbeitet.
 

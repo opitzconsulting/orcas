@@ -17,7 +17,7 @@ Dabei handelt es sich im wesentlichen um ein Setup zur Verwaltung von properties
 
 ##Setup Orderentry
 
-Bitte vorher prüfen, dass die benötigten Tools ([Getting Started]({{site.baseurl}}/docs/installation)) funktionieren.
+Bitte vorher prüfen, dass die benötigten Tools ([Installation]({{site.baseurl}}/docs/installation)) funktionieren.
 
 ###Datenbank konfigurieren:
 
@@ -76,6 +76,9 @@ Total time: 12 seconds
 {% endhighlight %}
 
 Die Laufzeit beim aller ersten Lauf wird deutlich länger als 12 Sekunden sein (typischerweise einige Minuten). Zum einen wird Orcas alle benötigten Bibliotheken aus dem Internet (Maven-Central) nachladen, zum anderen wird Orcas beim ersten Lauf aus den Sourcen zusammengebaut. Der eigentliche Abgleich geht dagegen sehr schnell, ein erneuter Aufruf von ant sollte also tatsächlich nur um die 12 Sekunden benötigen. Die Laufzeit sollte auch mit steigender Anzahl an Tabellen nicht zu sehr ansteigen, so ist es z.B. durchaus möglich ein Schema mit 1000 Tabellen (samt zugehöriger Constraints) innerhalb einer Minute abzugleichen. Die Laufzeit wird erst dann signifikant setigen, wenn viele oder langweirige Datenbank-Statements ausgeführt werden müssen.
+
+###Orcas benutzen
+Wenn alles woeit erfolgreich verlaufen ist, kann man unter: [Wie arbeitet man mit Orcas?]({{site.baseurl}}/docs/usage/) eine kurze Einführung in die Arbeitsweise erhalten, oder direkt zu den andrene Projekten übergehen.
 
 ##Andere Beispiele
 
