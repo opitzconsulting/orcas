@@ -8,26 +8,21 @@ permalink: /docs/examples/
 
 #Beispielprojekte
 
-##Orderentry
+Das **Orderentry-Beispiel** ist das Basis-Beispiel für alle anderen Beispiel-Projekte.
+Somit sollte man inital das Orderentry-Beispiel zum laufen bekommen und dann wenig Probleme haben mit den andren Beispiel-Projekten zu arebiten.
 
-**Das Orderentry-Beispiel ist das am besten dokumentierte und gepflegte Beispiel.**
+Das Beispiel setzt das "location" Konzept um, mit dem verschiedene Zielumgebungen (z.B. entwicklung, test, produktion) über locations gehandhabt werden.
 
-Dieses Beispiel zeigt wie das Orderentry Beipiel, das in einigen OPITZ CONSULTING Deutschland GmbH-Schulungen verwendet wird, mit Orcas verwaltet wird.
-<br/>Das Beispiel setzt zusätzlich das "location" Konzept um, mit dem verschiedene Zielumgebungen (z.B. oc_entwicklung, oc_test, kunde_test, kunde_produktiv) über locations gehandhabt werden.
-<br/>Dabei handelt es sich im wesentlichen um ein Setup zur Verwaltung von properties, das auch für andere Teile des Projektes genutzt werden kann (und soll).
+Dabei handelt es sich im wesentlichen um ein Setup zur Verwaltung von properties, das auch für andere Teile des Projektes genutzt werden kann.
 
-###Setup
+##Setup Orderentry
 
-Bitte vorher prüfen, dass die benötigten Tools ([Getting Started]({{site.baseurl}}/docs/getting-started/#tools)) funktionieren.
-<br/>Es gibt zwei Varianten mit welchem Datenbank-Setup das Orderentry Beispiel genutzt werden kann:
+Bitte vorher prüfen, dass die benötigten Tools ([Getting Started]({{site.baseurl}}/docs/installation)) funktionieren.
 
-####Eigene (lokale) Datenbank
+###Datenbank konfigurieren:
 
-#####Dazu benötigt man eine eigene Konfigurationsdatei
-
-Dazu wechselt man in den Ordner examples\orderentry\distribution.
-<br/>Darin gibt es fuer jede Konfiguration einen Unterordner (der Name des Unterordners ist der Name der location). Hier bitte einen neuen Ordner erstellen (z.B. oc_xy_lokal).
-<br/>In dem Ordner muss eine "location.properties" Datei liegen. Am einfachsten kopiert man eine Datei als Vorlage aus einer anderen location. In der Datei liegen die Datenbankzugangsdaten. Z.B.:
+Dazu wechselt man in den Ordner examples\orderentry\distribution\my_location.
+<br/>In dem Ordner liegt eine "location.properties" Datei.
 
 {% highlight properties %}
 #Database
@@ -36,34 +31,21 @@ jdbc_host             =localhost
 jdbc_sid              =XE
 jdbc_port             =1521
 username_dba          =system
-password_dba          =test
+password_dba          =my_system_password
 username_schemaowner  =orderentry
 {% endhighlight %}
 
-**Wichtig**: Die jdbc_XXX Einträge werden hier nicht ausgelesen. Wichtig ist insbesondere "database". Im Beispiel muss ein *tnsping XE* funktionieren (ansonsten evtl. TNS-Names konfigurieren).
-<br/>Damit die Konfiguration auch genutzt wird, muss der location-Name (Name des Ordners unter examples\orderentry\distribution) in die Datei examples\orderentry\distribution\default_location.properties eingetragen werden.
-<br/>Ob die Konfiguration auch verwendet wird, kann man wie folgt testen:
+Die Datei muss angepasst werden, mindestens "password_dba" muss geändert werden (ansonsten passt die Konfiguration für eine lokale-default XE-Installation).
 
-{% highlight bash %}
-Verzeichnis: examples\orderentry\db
-ant show_location
-{% endhighlight %}
+**Wichtig**: Die jdbc_XXX Einträge sind nur von zweitrangiger Bedeutung (für einen eifahcne Test werden sie nicht benötigt). Wichtig ist insbesondere "database". Im Beispiel muss ein *tnsping XE* funktionieren (ansonsten evtl. TNS-Names konfigurieren).
 
-Die Ausgabe sollte wie folgt sein:
+**Wichtig**: Alle Beispiele sollten nicht auf **Produktiv**-Datenbanken eingerichtet werden!
 
-{% highlight bash %}
-Buildfile: D:\orcas\src\trunk\examples\orderentry\db\build.xml
-show_location:
-[echo] ================= Location: oc_xy_lokal =================
-BUILD SUCCESSFUL
-Total time: 0 seconds
-{% endhighlight %}
+*Hinweis*: Es ist keinesfalls notwenig Orcas mit DBA-Rechten laufen zu lassen. Die Beispiel-Projkete sind nur der einfachheit halber so aufgesetzt, dass benötige Datenbank-User automatisch angelegt werden.
 
-Wichtig dabei ist, dass dort "Location: oc_xy_lokal" steht.
+###Einmalig Orcas und das Beispiel auf der Datenbank einrichten:
 
-#####Einmalig die Schemaverwaltung auf der Datenbank einrichten
-
-Mit *ant install_all* wird Orcas eingerichtet. Zusätzlich wird auch der Schemaowner angelegt:
+Mit *ant install_all* werden die benötigten Datenbnak-User einmalig eingerichtet.
 
 {% highlight bash %}
 Verzeichnis: examples\orderentry\db
@@ -72,12 +54,12 @@ ant install_all
 
 Wenn das erfolgreich durchgelaufen ist, gibt es auf der Zieldatenbank zwei neue User:
 
-- ORCAS_ORDERENTRY (Schemaowner, der die abzugleichenden Tabellen enthält)
-- ORCAS_ORDERENTRY_ORCAS (User der Orcas enthält)
+- ORDERENTRY (Schemaowner, der die abzugleichenden Tabellen enthält)
+- ORDERENTRY_ORCAS (User der Orcas enthält)
 
 Wenn der *ant install_all*-Lauf abbricht, dann müssen die beiden User ggf. vorher wieder gelöscht werden, damit ein erneuter Aufruf von *install_all* funktioniert.
 
-#####Orcas starten
+###Orcas starten:
 
 {% highlight bash %}
 Verzeichnis: examples\orderentry\db
@@ -93,27 +75,33 @@ BUILD SUCCESSFUL
 Total time: 12 seconds
 {% endhighlight %}
 
+Die Laufzeit beim aller ersten Lauf wird deutlich länger als 12 Sekunden sein (typischerweise einige Minuten). Zum einen wird Orcas alle benötigten Bibliotheken aus dem Internet (Maven-Central) nachladen, zum anderen wird Orcas beim ersten Lauf aus den Sourcen zusammengebaut. Der eigentliche Abgleich geht dagegen sehr schnell, ein erneuter Aufruf von ant sollte also tatsächlich nur um die 12 Sekunden benötigen. Die Laufzeit sollte auch mit steigender Anzahl an Tabellen nicht zu sehr ansteigen, so ist es z.B. durchaus möglich ein Schema mit 1000 Tabellen (samt zugehöriger Constraints) innerhalb einer Minute abzugleichen. Die Laufzeit wird erst dann signifikant setigen, wenn viele oder langweirige Datenbank-Statements ausgeführt werden müssen.
+
 ##Andere Beispiele
 
-###dbdoc_demo
+Um die anderen Beispiele zu nutzen, kann man einfach den my_location Ordner aus dem Orderentry-Beispiel in den jeweiligen distribution-Ordner kopieren.
 
-Beispielprojekt, generiert eine grafische Darstellung des Datenbankschematas mit [dbdoc]({{site.baseurl}}/docs/dbdoc/).
+###domain_extension_demo
 
-###extensions_demo
+In diesem Beispiel wird die Domain-Extension verwendet.
 
-Beispielprojekt, bindet die [Extensions]({{site.baseurl}}/docs/extensions/) ein.
+###extension_demo
 
-###fahrzeugverwaltung
+In diesem Beispiel wird gezeigt wie man eigene Extensions verwenden kann.
 
-Beipielprojekt, einfaches Ausführen von Tabellenskripten.
+###liquibase_integration
 
-###Scriptgenerator_demo
+In diesem Beispiel wird gezeigt wie man liquibase mit Orcas kombinieren kann.
 
-Ausführen des Scriptgenerators für einen beliebigen Datenbankuser. Die Datenbankverbindung kann unter "Distribution" angelegt werden (dort finden sich auch Kopiervorlagen).
-<br/>Die generierten ORCAS-Tabellenskripte werden in einem lokalen Ausgabeverzeichnis angelegt.
+###orderentry_one_schema
 
-Mehr (aktuellere) Informationen zum Scriptgenerator findet sich hier: [PL/SQL-Package]({{site.baseurl}}/docs/generate-scripts/).
+Dieses Beispiel zeigt, wie Orcas ohne ein eigenes Orcas-Schema genutzt werden kann.
 
-###Sonnensystem
+###sqlplus
 
-Beipielprojekt, das den Einsatz von Orcas in ihrer einfachsten Form zeigt.
+In diesem Beispiel wird die SQL*Plus-API verwendet, dies sollte nur in Projekten gemacht werden, die kein ant, gradle oder java nutzen können/wollen, oder in Projekten die auf alten Versionen von Orcas basieren.
+
+###target_plsql_demo
+
+In diesem Beispiel wird gezeigt wie man die Tabellen-Metadaten aus Orcas für eigene Zwecke nutzen kann (Im Beispiel um Trigger zu generieren).
+

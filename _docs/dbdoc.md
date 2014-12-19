@@ -13,8 +13,6 @@ Das Tool dbdoc ist ein Dokumentationswerkzeug für Datenbankschematas. Es erzeug
 
 Zur Ausführung von dbdoc wird eine Installation von [Graphviz](http://www.graphviz.org/Download_windows.php) benötigt.
 
-Für einen kurzen Einblick in den Html-Export von dbdoc, kann hier ein Beispiel-Export runtergeladen werden: `todo: Aktuell Link in internes Netzwerk`
-
 <br/>
 
 ##1. Aufbau eines dbdoc-Skriptes
