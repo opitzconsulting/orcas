@@ -27,7 +27,7 @@
     <orcas_execute_one_time_scripts scriptfolder="skripte" logname="pre_skripte"/>
   </target>
 
-  <target name="extract" depends="show_location">
+  <target name="extract" depends="show_location,orcas_initialize">
     <orcas_extract outputfolder="${binrundir}/extract_output"/>
   </target>
 
