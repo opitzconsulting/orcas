@@ -4,8 +4,6 @@ title: Generieren der Tabellenskripte
 permalink: /docs/generate-scripts/
 ---
 
-#Generieren der Tabellenskripte
-
 Für die Einführung von Orcas in einem bestehenden Datenbank-Projekt, müssen zunächst die Tabellenskripte initial erstellt werden.
 
 Dazu steht orcas_extract zur Verfügung:

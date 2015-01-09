@@ -4,8 +4,6 @@ title: Extensions
 permalink: /docs/extensions/
 ---
 
-#Extensions
-
 ##Was sollte man über Extensions wissen?
 
 Extensions ermöglichen viele sinnvolle Zusatzfunktionen bei der Arbeit mit Orcas die man normalerweise gar nicht in erwägung ziehen würde.

@@ -4,8 +4,6 @@ title: Funktionsweise von Orcas
 permalink: /docs/how-it-works/
 ---
 
-#Funktionsweise von Orcas
-
 ##Einleitung
 
 Diese Seite beschreibt die grundsätzliche Funktionsweise von Orcas. Insbesondere die Arbeitsweise der Extensions wird hier dargestellt.

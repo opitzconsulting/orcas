@@ -4,8 +4,6 @@ title: Beispielprojekte
 permalink: /docs/examples/
 ---
 
-#Beispielprojekte
-
 Das **Orderentry-Beispiel** ist das Basis-Beispiel für alle anderen Beispiel-Projekte.
 Somit sollte man inital das Orderentry-Beispiel zum laufen bekommen und dann wenig Probleme haben mit den andren Beispiel-Projekten zu arebiten.
 

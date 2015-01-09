@@ -4,8 +4,6 @@ title: Entwicklerdokumentation
 permalink: /docs/dev-docs/
 ---
 
-#Entwicklerdokumentation
-
 ##Funktionsweise
 
 Für die Beschreibung der Funktionsweise siehe: [Funktionsweise von Orcas]({{site.baseurl}}/docs/how-it-works/).

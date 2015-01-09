@@ -4,8 +4,6 @@ title: Projekt-Struktur
 permalink: /docs/project-structure/
 ---
 
-#Projekt-Struktur
-
 Orcas hat folgende Hauptverzeichnisse:
 
 - examples

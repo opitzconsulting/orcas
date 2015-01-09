@@ -4,8 +4,6 @@ title: dbdoc
 permalink: /docs/dbdoc/
 ---
 
-#dbdoc
-
 Das Tool dbdoc ist ein Dokumentationswerkzeug für Datenbankschematas. Es erzeugt eine grafische Darstellung der Schemainformationen, um Tabellen und ihre Beziehungen zueinander übersichtlich darzustellen.
 <br/>Welche Tabellen zu berücksichtigen sind und wie es dargstellt werden soll kann in einem ant-Skript festgesetzt werden.
 

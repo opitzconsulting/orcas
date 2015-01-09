@@ -4,8 +4,6 @@ title: Integrationtests
 permalink: /docs/integration-tests/
 ---
 
-#Integrationstests
-
 ##Spooltests
 
 ###Funktionsweise Spooling

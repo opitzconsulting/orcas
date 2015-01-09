@@ -4,10 +4,6 @@ title: Statics Syntax
 permalink: /docs/statics-syntax/
 ---
 
-#Statics Syntax
-
-`todo: Inhalt mit Links`
-
 ##Syntax Erklärung
 
 Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, die in den einzelnen Abschnitten durch eine genaue Beschreibung und jeweils ein Beispiel erklärt wird.

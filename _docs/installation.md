@@ -4,8 +4,6 @@ title: Installation
 permalink: /docs/installation/
 ---
 
-#Installation
-
 ##Git Projekt
 
 Orcas wird in einem eigenen [Repository](https://github.com/opitzconsulting/orcas) auf GitHub verwaltet. Somit kann man sich einen lokalen git-Clone erstellen oder Orcas einfach als ZIP-Datei herunterladen.
