@@ -9,6 +9,10 @@ permalink: /docs/extensions/
 Extensions ermöglichen viele sinnvolle Zusatzfunktionen bei der Arbeit mit Orcas die man normalerweise gar nicht in Erwägung ziehen würde.
 <br/>Deshalb ist es sinnvoll sich damit vor Einsatz von Orcas **kurz** zu beschäftigen, um zu **klären** ob man diese **Zusatzfunktionalität** nicht **im** eigenen **Projekt gut gebrauchen könnte**. Zum Beispiel könnte man die Konvention umsetzen, dass die erste Spalte immer der PK sein muss, indem man daraus die PK-Angabe generiert. Extensions sind immer Projektspezifisch.
 
+##Domain Extension
+
+Die [Domain-Extension]({{site.baseurl}}/docs/domain-extension) ist eine vorgefertigte Extension, die in 80% der Fälle ausreicht. Da sie nur konfiguriert und benutzt werden muss, ist es immer ratsam die Domain-Extension zu nutzen und nicht selbst eine Extension zu erstellen, wenn die Funktionalität der Domain-Extension ausreichend ist.
+
 ##Wie funktionieren Extensions?
 Eine Extension ist eine Programmkomponente, die die gesamte Datenstruktur aus den Tabellenskripten erhält. Diese Datenstruktur beinhaltet beispielsweise alle Tabellen mitsamt ihren Spalten, genauso wie sie in den Skripten definiert wurde. 
 Eine Extension kann diese Datenstruktur beliebig verändern, z.B. kann man aus der Datenstruktur über alle Tabellen iterieren und zu jeder Tabelle eine neu Spalte mit dem Namen "ID" einfügen. Extensions können auch prüfen ob bestimmte Konventionen eingehalten wurden und ggf. eine Exception werfen, wenn das nicht der Fall ist.
@@ -25,6 +29,7 @@ Es ist auch möglich das Metamodell der Datenstruktur zu erweitern (also z.B. de
 
 Extensions sind Dateien, die in den Extension-Folder gelegt werden (siehe auch: [orcas_initialize]({{site.baseurl}}/docs/ant-tasks/#orcas_initialize)).
 Beispiele sind im Ordner orcas_extensions zu finden.
+Ein Beispielprojekt das Extensions verwendet findet sich hier: [Extension-Demo]({{site.baseurl}}/docs/examples/#extension_demo):
 
 - Java Extension
 

@@ -80,9 +80,13 @@ Wenn alles woeit erfolgreich verlaufen ist, kann man unter: [Wie arbeitet man mi
 
 Um die anderen Beispiele zu nutzen, kann man einfach den my_location Ordner aus dem Orderentry-Beispiel in den jeweiligen distribution-Ordner kopieren.
 
+<a name="domain_extension_demo"/>
+
 ###domain_extension_demo
 
-In diesem Beispiel wird die Domain-Extension verwendet.
+In diesem Beispiel wird die [Domain-Extension]({{site.baseurl}}/docs/domain-extension/) verwendet.
+
+<a name="extension_demo"/>
 
 ###extension_demo
 
