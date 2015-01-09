@@ -86,7 +86,7 @@ In diesem Beispiel wird die Domain-Extension verwendet.
 
 ###extension_demo
 
-In diesem Beispiel wird gezeigt wie man eigene Extensions verwenden kann.
+In diesem Beispiel wird gezeigt wie man eigene [Extensions]({{site.baseurl}}/docs/extensions/) verwenden kann.
 
 ###liquibase_integration
 

@@ -16,25 +16,24 @@ Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen a
   <li>
     <ul class="ant-tasks-contents">
       <li><a href="#general">Allgemeine Attribute</a></li>
-      <li><a href="#exe_script">orcas_execute_script</a></li>
-      <li><a href="#exe_scripts">orcas_execute_scripts</a></li>
-      <li><a href="#exe_ots">orcas_execute_one_time_scripts</a></li>
-      <li><a href="#exe_statics">orcas_execute_statics</a></li>
-      <li><a href="#drop_repl">orcas_drop_replaceables</a></li>
-      <li><a href="#drop_java">orcas_drop_java</a></li>
-      <li><a href="#kill_jobs">orcas_kill_jobs</a></li>
-      <li><a href="#comp">orcas_compile_db_objects</a></li>
-      <li><a href="#update">orcas_update_data</a></li>
-      <li><a href="#clean">orcas_clean_tables</a></li>
-      <li><a href="#initialize">orcas_initialize</a></li>
-      <li><a href="#grant">orcas_grant</a></li>
-      <li><a href="#install">orcas_install</a></li>
-      <li><a href="#check">orcas_check_connection</a></li>
-      <li><a href="#extract">orcas_extract</a></li>
-      <li><a href="#del_dir">orcas_delete_directory</a></li>
+      <li><a href="#orcas_execute_script">orcas_execute_script</a></li>
+      <li><a href="#orcas_execute_scripts">orcas_execute_scripts</a></li>
+      <li><a href="#orcas_execute_one_time_scripts">orcas_execute_one_time_scripts</a></li>
+      <li><a href="#orcas_execute_statics">orcas_execute_statics</a></li>
+      <li><a href="#orcas_drop_replaceables">orcas_drop_replaceables</a></li>
+      <li><a href="#orcas_drop_java">orcas_drop_java</a></li>
+      <li><a href="#orcas_kill_jobs">orcas_kill_jobs</a></li>
+      <li><a href="#orcas_compile_db_objects">orcas_compile_db_objects</a></li>
+      <li><a href="#orcas_update_data">orcas_update_data</a></li>
+      <li><a href="#orcas_clean_tables">orcas_clean_tables</a></li>
+      <li><a href="#orcas_initialize">orcas_initialize</a></li>
+      <li><a href="#orcas_grant">orcas_grant</a></li>
+      <li><a href="#orcas_install">orcas_install</a></li>
+      <li><a href="#orcas_check_connection">orcas_check_connection</a></li>
+      <li><a href="#orcas_extract">orcas_extract</a></li>
     </ul>
   </li>
-  <li><a href="#particularity">Besonderheiten bei exclude_where_XXX Attributen</a></li>
+  <li><a href="#exclude_where">Besonderheiten bei exclude_where_XXX Attributen</a></li>
   <li><a href="#spool">Spooling</a></li>
 </ul>
 
@@ -115,7 +114,7 @@ Jeder öffentliche ant-Task von Orcas hat folgende default Attribute. Diese, und
 |tmpfolder|Gibt ein Verzeichnis an, in dem die Skriptverwaltung temporäre Dateien ablegen soll.|Yes|${orcas.default_tmpfolder}|
 |jdbcurl  |Wird für JDBC-Zugriffe verwendet, ist in allen Tasks vorhanden, wird aber bisher nur von einigen genutzt. Wenn der angegebene Default-Wert auch nicht gesetzt ist, dann wird die URL über den tnsname gesetzt, dabei wird der OCI-Treiber verwendet ("jdbc:oracle:oci:@tnsname") der aber oft zu Problemen führt, daher wird empfohlen den Parameter auf eine ULR mit thin-Treiber zu setzen. |No|${orcas.default_jdbcurl}|
 
-<a name="exe_script"/>
+<a name="orcas_execute_script"/>
 
 ###orcas_execute_script
 
@@ -133,7 +132,7 @@ Dient zur Ausführung **eines** SQL*Plus Skripts.
 |logname  |Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
-<a name="exe_scripts"/>
+<a name="orcas_execute_scripts"/>
 
 ###orcas_execute_scripts
 
@@ -153,7 +152,7 @@ Dient zur Ausführung von **mehreren** SQL*Plus Skripten.
 |logname  |Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
-<a name="exe_ots"/>
+<a name="orcas_execute_one_time_scripts"/>
 
 ###orcas_execute_one_time_scripts
 
@@ -173,7 +172,7 @@ Dient zur Ausführung von mehreren SQL*Plus Skripten, die Besonderhiet liegt dar
 |logname  |Gibt einen Namen an, der für Logausgaben verwendet wird. Ist Plichtangabe, da er auch für die Prüfung ob ein Skript bereits ausgeführt wurde verwendet wird.|Yes||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
-<a name="exe_statics"/>
+<a name="orcas_execute_statics"/>
 
 ###orcas_execute_statics
 
@@ -197,7 +196,7 @@ Dient zur Ausführung des Abgleichs von statischen Objekten mit den bestehenden 
 |logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
-<a name="drop_repl"/>
+<a name="orcas_drop_replaceables"/>
 
 ###orcas_drop_replaceables
 
@@ -212,14 +211,14 @@ Durch diesen ant-Task werden alle replaceable-Objekte in der Datenbank gelöscht
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|excludewhereview|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Views vor dem Löschen geschützt werden.|No|"object_name like '%'"|
-|excludewhereobjecttype|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Object-Types und Collections vor dem Löschen geschützt werden.|No|"object_name like '%'"|
-|excludewherepackage|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Packages vor dem Löschen geschützt werden.|No|"object_name like '%'"|
-|excludewheretrigger|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Trigger vor dem Löschen geschützt werden.|No|"object_name like '%'"|
-|excludewherefunction|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Functions vor dem Löschen geschützt werden.|No|"object_name like '%'"|
-|excludewhereprocedure|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Procedures vor dem Löschen geschützt werden.|No|"object_name like '%'"|
+|excludewhereview|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Views vor dem Löschen geschützt werden.|No|"object_name like '%'"|
+|excludewhereobjecttype|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Object-Types und Collections vor dem Löschen geschützt werden.|No|"object_name like '%'"|
+|excludewherepackage|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Packages vor dem Löschen geschützt werden.|No|"object_name like '%'"|
+|excludewheretrigger|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Trigger vor dem Löschen geschützt werden.|No|"object_name like '%'"|
+|excludewherefunction|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Functions vor dem Löschen geschützt werden.|No|"object_name like '%'"|
+|excludewhereprocedure|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Procedures vor dem Löschen geschützt werden.|No|"object_name like '%'"|
 
-<a name="drop_java"/>
+<a name="orcas_drop_java"/>
 
 ###orcas_drop_java
 
@@ -227,9 +226,9 @@ Durch diesen ant-Task werden alle Java-Klassen aus dem Schema entfernt.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|excludewherejava|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Java-Klassen vor dem Löschen geschützt werden.|No|"name like '%'"|
+|excludewherejava|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Java-Klassen vor dem Löschen geschützt werden.|No|"name like '%'"|
 
-<a name="kill_jobs"/>
+<a name="orcas_kill_jobs"/>
 
 ###orcas_kill_jobs
 
@@ -245,9 +244,9 @@ Dabei werden folgende besonderen Rechte nötig:
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|excludewherejobwhat|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Jobs vor dem Löschen geschützt werden. Der object_name bezieht sich dabei auf die "what"-Angabe des Jobs|No|"what like '%'"|
+|excludewherejobwhat|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Jobs vor dem Löschen geschützt werden. Der object_name bezieht sich dabei auf die "what"-Angabe des Jobs|No|"what like '%'"|
 
-<a name="comp"/>
+<a name="orcas_compile_db_objects"/>
 
 ###orcas_compile_db_objects
 
@@ -256,11 +255,11 @@ Kompiliert alle invaliden DB-Objekte.
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
 |logsinglecompile|Wenn gesetzt, und Spooling verwendet wird, dann wird jeder einzelne compile Befehl protokolliert. Wenn nicht gesetzt, wird ein compile-all Skript protokolliert.|No|false|
-|spoolfolder|Durch setzen dieses Attributes wird das [Spooling]({{site.baseurl/docs/ant-tasks/#spool}}) aktiviert.|No|${orcas.default_spoolfolder}|
-|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl/docs/ant-tasks/#spool}}) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
+|spoolfolder|Durch setzen dieses Attributes wird das [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) aktiviert.|No|${orcas.default_spoolfolder}|
+|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
-<a name="update"/>
+<a name="orcas_upate_data"/>
 
 ###orcas_upate_data
 
@@ -273,11 +272,11 @@ Mit diesem ant-Task können Stammdaten mit der Datenbank abgeglichen werden.
 |scriptpostfix|Gibt einen Postfix an, der die auszuführenden Dateien einschränkt.|No|".sql"|
 |scriptfolderrecursive|Gibt an, ob auch die Skripte aus den Unterverzeichnissen ausgeführt werden sollen.|No|false|
 |checkmode|In diesem Modus werden nur die Daten mit den vorhandenen Daten verglichen. Dabei wird nach Abweichungen bei den nur-Insert Spalten gesucht. Die gefundenen Abweichungen werden ausgegeben.|No|false|
-|spoolfolder|Durch setzen dieses Attributes wird das [Spooling]({{site.baseurl/docs/ant-tasks/#spool}}) aktiviert.|No|${orcas.default_spoolfolder}|
-|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl/docs/ant-tasks/#spool}}) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
+|spoolfolder|Durch setzen dieses Attributes wird das [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) aktiviert.|No|${orcas.default_spoolfolder}|
+|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
-<a name="clean"/>
+<a name="orcas_clean_tables"/>
 
 ###orcas_clean_tables
 
@@ -285,9 +284,9 @@ Diese Funktion entfernt alles bis auf die Daten von einer Tabelle.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Tabellen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
+|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Tabellen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
 
-<a name="initialize"/>
+<a name="orcas_initialize"/>
 
 ###orcas_initialize
 
@@ -295,10 +294,10 @@ Dieser ant-Task muss vor jedem ant-Lauf augerufen werden um Orcas zu initialisie
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|extensionfolder|Gibt das Verzeichnis an, in dem die [Extensions]({{site.baseurl/docs/extensions/}}) liegen. Wenn keine Extensions genutzt werden muss extensionfolder auf ein leeres Verzeichnis verweisen.|Yes||
+|extensionfolder|Gibt das Verzeichnis an, in dem die [Extensions]({{site.baseurl}}/docs/extensions/) liegen. Wenn keine Extensions genutzt werden muss extensionfolder auf ein leeres Verzeichnis verweisen.|Yes||
 |extensionparameter|Damit können Parameter an die Extensions (ein Text-Parameter für alle Extensions) übergeben werden.|No||
 
-<a name="grant"/>
+<a name="orcas_grant"/>
 
 ###orcas_grant
 
@@ -308,7 +307,7 @@ Dieser ant-Task dient dazu mehreren User mit dem selben Schemverwaltungs-User zu
 |---------|-----------|--------|-------|
 |user     |Gibt den User an, der die Rechte auf Orcas erhalten soll.|Yes||
 
-<a name="install"/>
+<a name="orcas_install"/>
 
 ###orcas_install
 
@@ -322,13 +321,13 @@ Der SCS-DB-User erhalt dabei folgende Rechte:
 
 `todo: empty Table in source`
 
-<a name="check"/>
+<a name="orcas_check_connection"/>
 
 ###orcas_check_connection
 
 Dieser ant-Task prüft, ob mit den angegebenen Daten eine Connection aufgebaut werden kann. Die normalen execute_script ant-Tasks prüfen dies nicht (auch nicht wenn failonerror auf true gesetzt wurde). Dieser Task kann aufgerufen werden, ohne vorher Orcas zu installieren oder zu initialisieren.
 
-<a name="extract"/>
+<a name="orcas_extract"/>
 
 ###orcas_extract
 
@@ -338,22 +337,10 @@ Dient zur Generierung der Tabellenskripte aus einem bestehenden Schema (Reverse-
 |---------|-----------|--------|-------|
 |outputfolder|Gibt den Verzeichnisnamen an, in dem die Skripte abgelegt werden sollen. der Ordner wird gelöscht und neu angelegt.|Yes||
 |xsltfile|`todo`|No|orcas_core/xslt_extract/orcas_extract.xsl|
-|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Tabellen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
-|excludewheresequence|Gibt eine [exclude_where-Bedingung]({{site.baseurl/docs/ant-tasks/#particularity}}) an, mit der Sequenzen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
+|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Tabellen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
+|excludewheresequence|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Sequenzen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
 
-<a name="del_dir"/>
-
-###orcas_delete_directory
-
-Mit diesem Target können Ordner gelöscht werden. Es besteht auch die Möglichkeit, den Inhalt des Ordners vor dem Löschen in einer anderen Ordner zu kopieren. So ist es beispielsweise Möglich, alte Log-Dateien in einem Ordner zu Lagern. Die Log-Ordner werden dort über einen Zeitstempel identifiziert.
-
-|Attribute|Description|Required|Default|
-|---------|-----------|--------|-------|
-|autoTimeStamp|Mit der Angabe wird dem Ordnernamen des Backup-Folders ein Zeitstempel angehangen|No|false|
-|folder   |Der zu löschende Ordner|Yes||
-|backup-to-folder|Mit der Angabe wird der Inhalt des zu löschenden Ordner vorher in diesen Ordner kopiert|No|""|
-
-<a name="particularity"/>
+<a name="exclude_where"/>
 
 ##Besonderheiten bei exclude_where_XXX Attributen
 
