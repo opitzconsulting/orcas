@@ -1,9 +1,7 @@
 ---
-layout: docs
+layout: page
 title: Projekt-Struktur
 permalink: /docs/project-structure/
-prev_section:
-next_section: examples
 ---
 
 #Projekt-Struktur

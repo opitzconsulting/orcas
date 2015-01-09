@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: Statics Syntax
-prev_section: ant-tasks
-next_section: extensions
 permalink: /docs/statics-syntax/
 ---
 

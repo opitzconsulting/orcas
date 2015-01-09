@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: Beispielprojekte
-prev_section: getting-started
-next_section: dbdoc
 permalink: /docs/examples/
 ---
 

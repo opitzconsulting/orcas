@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: Pflege der Dokumentation
-prev_section: how-it-works
-next_section:
 permalink: /docs/update-docs/
 ---
 

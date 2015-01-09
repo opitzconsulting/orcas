@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: Entwicklerdokumentation
-prev_section: participate
-next_section: how-it-works
 permalink: /docs/dev-docs/
 ---
 

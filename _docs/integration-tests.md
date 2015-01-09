@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: Integrationtests
-prev_section: extensions
-next_section: participate
 permalink: /docs/integration-tests/
 ---
 

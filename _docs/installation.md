@@ -1,9 +1,7 @@
 ---
-layout: docs
+layout: page
 title: Installation
 permalink: /docs/installation/
-prev_section:
-next_section: 
 ---
 
 #Installation

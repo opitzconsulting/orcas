@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: dbdoc
-prev_section: examples
-next_section: generate-scripts
 permalink: /docs/dbdoc/
 ---
 

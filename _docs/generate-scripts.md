@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: Generieren der Tabellenskripte
-prev_section: dbdoc
-next_section: supported-db-functions
 permalink: /docs/generate-scripts/
 ---
 

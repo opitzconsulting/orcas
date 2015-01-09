@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: Extensions
-prev_section: statics-syntax
-next_section: integration-tests
 permalink: /docs/extensions/
 ---
 

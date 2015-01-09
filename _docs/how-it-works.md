@@ -1,8 +1,6 @@
 ---
-layout: docs
+layout: page
 title: Funktionsweise von Orcas
-prev_section: dev-docs
-next_section: update-docs
 permalink: /docs/how-it-works/
 ---
 
