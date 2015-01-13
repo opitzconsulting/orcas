@@ -81,5 +81,11 @@ Mit [liquibase](http://www.liquibase.org/) ist normalerweise für jede Änderung
 
 Bei beiden Varianten ist zu beachten, dass Entwickler **vergessen** können ein entsprechendes one-time-script bzw. einen database-change-log-Eintrag zu erstellen. Für diese Fälle ist der **dropmode** sehr wichtig, da damit **verhindert** wird, dass es in solchen Fällen zu **Datenverlust** kommen kann.
 
+Zudem müssen die Tabellenänderungen immer auch in den Tabellen-Skripten erfolgen.
+
+### [Warum nimmt man dann nicht gleich liquibase (ohne Orcas)?]({{site.baseurl}}/docs/liquibase/)
+        
+
+
 
 

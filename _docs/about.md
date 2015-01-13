@@ -47,8 +47,9 @@ Hier die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
 - [Installation]({{site.baseurl}}/docs/installation/) - Was muss man tun um Orcas in meinem Projekt einsetzen zu können?
 - [Examples]({{site.baseurl}}/docs/examples/) - Beispielprojekte
 - [ant Tasks]({{site.baseurl}}/docs/ant-tasks/) - Wie erstelle ich einen Gesamtablauf mit ant?
-- [Statics Syntax]({{site.baseurl}}/docs/statics-syntax/) - Wie sehen die Tabellenskripte aus?
-- [Extensions]({{site.baseurl}}/docs/extensions/) - Wie kann ich Projektspezifische Syntaxerweiterungen integrieren?
+- [Tabellen Syntax]({{site.baseurl}}/docs/statics-syntax/) - Wie sehen die Tabellenskripte aus?
+- [Domaion-Extension]({{site.baseurl}}/docs/domain-extension/) - Wie kann ich Projektspezifische Erweiterungen einfach integrieren?
+- [Extensions]({{site.baseurl}}/docs/extensions/) - Wie kann ich spezielle Projektspezifische Erweiterungen integrieren?
 - [Funktionsweise Orcas]({{site.baseurl}}/docs/how-it-works/) - Wie funktioniert Orcas?
 
 ##Welche Vorteile/Nachteile gibt es?
