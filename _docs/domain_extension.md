@@ -14,12 +14,14 @@ Jede Tabelle soll eine Id-Spalte haben:
 {% highlight sql %}
 create table tab_a
 (
-  tab_a_id         number(10)
+  tab_a_id         number(10)          not null,
+  somevalue        varchar2(100)
 );
 
 create table tab_b
 (
-  tab_b_id         number(10)
+  tab_b_id         number(10)          not null,
+  somevalue        varchar2(100)
 );
 {% endhighlight %}
 
@@ -27,7 +29,7 @@ Dies kann mit der Domain-Extension vereinfacht werden. Dazu wird eine Table-Doma
 {% highlight sql %}
 define table domain id_table
 (
-  add column column-name(table-name||"_"||column-name) ( id number(10) )
+  add column column-name(table-name||"_"||column-name) ( id number(10) not null)
 );
 {% endhighlight %}
 
@@ -35,26 +37,33 @@ Die neue Domain kann jetzt bei der Definition der Tabellen verwendet werden:
 {% highlight sql %}
 create table tab_a domain id_table
 (
+  somevalue        varchar2(100)
 );
 
 create table tab_b domain id_table
 (
+  somevalue        varchar2(100)
 );
 {% endhighlight %}
+*Hinweis:* Die Spalte somevalue wird in dem Beispiel benötigt, da in Orcas in jeder Tabellendefinition immer eine Spalte vorhanden sein muss.
 
 ##Column Domain
 Soweit so gut, aber wie gehen wir mit foreign-keys um? Erweitern wir also das Beispiel um eine foreign-key-Spalte:
 {% highlight sql %}
 create table tab_a domain id_table
 (
+  somevalue        varchar2(100),
+  constraint tab_a_pk primary key (tab_a_id)
 );
 
 create table tab_b domain id_table
 (
+  somevalue      varchar2(100),
   tab_a_id       number(10),
-  constraint fk_a_id foreign key (a_id) references tab_a (tab_a_id)
+  constraint fk_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id)
 );
 {% endhighlight %}
+*Hinweis:* Die Tabelle tab_a brauch jetzt einen PK, wie man den genereirt sehen wir später, zunächst mal geht es um den foreign-key.
 
 Wenn wir mal davon ausgehen, dass in unserem Schema FKs immer auf die primary-key-Spalten zeigen, dann haben alle FK-Spalten den Datentyp number(10). Um das zu vereinheitlichen können wir eine Spalten-Domain einführen:
 {% highlight sql %}
@@ -68,10 +77,13 @@ Diese kann dann bei der Spaltendefinition genutzt werden:
 {% highlight sql %}
 create table tab_a domain id_table
 (
+  somevalue        varchar2(100),
+  constraint tab_a_pk primary key (tab_a_id)
 );
 
 create table tab_b domain id_table
 (
+  somevalue      varchar2(100),
   tab_a_id       domain fk_column,
   constraint fk_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id)
 );
@@ -85,25 +97,27 @@ generate-foreign-key (constraint-name ("fk_" || column-name) pk-column-name(colu
   number(10)
 );
 {% endhighlight %}
-Somit würde die Tabellendefinition deutlich verkürzt:
+Somit würde die Tabellendefinition weiter verkürzt:
 {% highlight sql %}
 create table tab_a domain id_table
 (
+  somevalue        varchar2(100),
+  constraint tab_a_pk primary key (tab_a_id)
 );
 
 create table tab_b domain id_table
 (
+  somevalue      varchar2(100),
   tab_a_id       domain fk_column
 );
 {% endhighlight %}
 
-
-Column-Domains können auch in Table-Domains genutzt werden:
+Um auch das generieren der primary-keys auszulagern müssen wir eine Spalten-Domäne definieren und in unserer Tabellen Domäne verwenden:
 
 {% highlight sql %}
 define column domain pk_column
 (
-  number(10)
+  number(10) not null
 );
 
 define table domain id_table
@@ -112,7 +126,31 @@ define table domain id_table
 );
 {% endhighlight %}
 
-Darüber können dann auch automatisch primary-key-constraints und Sequenzen generiert werden. Nachfolgend eine Liste der enthaltenen Funktionen, diese werden alle vom [Domain-Extension-Demo]({{site.baseurl}}/docs/examples/#domain_extension_demo) Beispielprojekt genutzt:
+Das hat erst mal keine Auswirkung, erlaubt uns aber jetzt die neue Spalten-Domäne um den primary-key ergänzen zu können:
+
+{% highlight sql %}
+define column domain pk_column
+generate-primary-key (constraint-name(table-name || "_pk"))
+(
+  number(10) not null
+);
+{% endhighlight %}
+
+Dadurch würde die Tabellendefinition jetzt deutlich vereinfacht (und tab_b hat jetzt auch einen primary-key):
+{% highlight sql %}
+create table tab_a domain id_table
+(
+  somevalue        varchar2(100)
+);
+
+create table tab_b domain id_table
+(
+  somevalue      varchar2(100),
+  tab_a_id       domain fk_column
+);
+{% endhighlight %}
+
+Nachfolgend eine Liste der enthaltenen Funktionen, diese werden alle vom [Domain-Extension-Demo]({{site.baseurl}}/docs/examples/#domain_extension_demo) Beispielprojekt genutzt:
 
 ##Features
 
