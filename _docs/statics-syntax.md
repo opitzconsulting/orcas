@@ -13,6 +13,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 ##Abweichungen vom SQL Standard
 
 - Es wird nur die kompakte Schreibweise unterstützt, bei der alle constraints um weitere Angaben in dem create table enthalten sind.
+- Die Schlüsselworte werden nur in Kleinschreibung unterstützt.
 - Auch Indizes werden innerhalb des create table Statements erwartet, dabei wird aus dem <code>create index index_name on tabellen_name ...</code><br/>ein <code>index index_name ...</code>
 - Die Reihenfolge der constraints ist wie folgt:
   1. primary key
@@ -26,7 +27,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 
 {% highlight sql %}
 create {permanent|global temporary} table table_name [alias table_alias](
-  column_name { varchar2(scale {BYTE|CHAR} ) | number(scale[,precision]) | clob(scale) | blob | xmltype | date } [default "default_value"] {null | not null}
+  column_name { varchar2(scale {BYTE|CHAR} ) | number(scale[,precision]) | clob(scale) | blob | xmltype | date } [default "default_value"] {not null}
   constraint constraint_name primary key ( primary_key_columns ) { enable | disable }
   constraint constraint_name check ( "check_statement" ) { enable | disable }
   constraint constraint_name { index | unique key } ( colums ) { enable | disable }
