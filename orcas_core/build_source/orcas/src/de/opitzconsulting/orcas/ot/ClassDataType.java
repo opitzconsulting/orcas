@@ -61,7 +61,7 @@ public class ClassDataType extends ClassData
       }
     } );
 
-    return _filedDataList;
+    return new ArrayList<FieldData>(_filedDataList);
   }
 
   public void addFiledDataList( FieldData pFiledData )
