@@ -142,7 +142,7 @@ task(generateExtensionHeader)
       def package_name = it.getName().split('\\.')[0];
       def plsqlHeaderFile = new File("${buildDir}/sqlplus/db/packages/${package_name}_spec.sql");
       plsqlHeaderFile.delete();
-      plsqlHeaderFile << """create or replace package ${package_name} is
+      plsqlHeaderFile << """create or replace package ${package_name} authid current_user is
 function run( p_input in ot_syex_model ) return ot_syex_model;
 end;
 /
