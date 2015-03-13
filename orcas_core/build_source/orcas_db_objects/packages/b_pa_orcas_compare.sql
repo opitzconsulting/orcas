@@ -3,10 +3,16 @@ CREATE OR REPLACE package body pa_orcas_compare is
   pv_model_soll ot_orig_model;
   pv_orig_table_list_ist ct_orig_table_list;
   pv_orig_table_list_soll ct_orig_table_list;
+  pv_orig_mview_list_ist ct_orig_mview_list;
+  pv_orig_mview_list_soll ct_orig_mview_list;
+  pv_orig_sequence_list_ist ct_orig_sequence_list;    
+  pv_orig_sequence_list_soll ct_orig_sequence_list;      
   pv_stmt varchar2(32000);
   type t_varchar_list is table of varchar2(32000);
   pv_statement_list t_varchar_list;
   pv_default_orig_chartype ot_orig_chartype;
+  pv_default_tablespace varchar2(30);
+  pv_temporary_tablespace varchar2(30); 
   
   function get_column_list( p_columnref_list in ct_orig_columnref_list ) return varchar2
   is
@@ -191,12 +197,44 @@ CREATE OR REPLACE package body pa_orcas_compare is
     raise_application_error( -20000, 'fk for refpartitioning not found' );
   end;   
   
+
+  function get_mview_elements( p_model_elements in ct_orig_modelelement_list ) return ct_orig_mview_list
+  is
+    v_return ct_orig_mview_list := new ct_orig_mview_list();
+  begin  
+    for i in 1 .. p_model_elements.count loop
+      if( p_model_elements(i) is of (ot_orig_mview) ) 
+      then
+        v_return.extend;
+        v_return(v_return.count) := treat( p_model_elements(i) as ot_orig_mview );
+      end if;
+    end loop;    
+    
+    return v_return;
+  end;
+  
+  function get_sequence_elements( p_model_elements in ct_orig_modelelement_list ) return ct_orig_sequence_list
+  is
+    v_return ct_orig_sequence_list := new ct_orig_sequence_list();
+  begin  
+    for i in 1 .. p_model_elements.count loop
+      if( p_model_elements(i) is of (ot_orig_sequence) ) 
+      then
+        v_return.extend;
+        v_return(v_return.count) := treat( p_model_elements(i) as ot_orig_sequence );
+      end if;
+    end loop;    
+    
+    return v_return;
+  end;  
+  
   function sort_tables_for_ref_part( p_model_elements in ct_orig_modelelement_list ) return ct_orig_table_list
   is
     v_orig_modelelement_list ct_orig_table_list := new ct_orig_table_list();
     v_orig_table_list ct_orig_modelelement_list := new ct_orig_modelelement_list();    
     v_orig_modelelement ot_orig_modelelement;
-    v_tab_list varchar2(32000);
+    type t_varchar_set is table of number index by varchar2(100);
+    v_tab_set t_varchar_set;
     
     procedure clean_orig_table_list
     is
@@ -230,11 +268,11 @@ CREATE OR REPLACE package body pa_orcas_compare is
           v_required_table_name := null;
         end if;
         
-        if( v_required_table_name is null or instr(upper(v_tab_list),upper(v_required_table_name)) != 0 )
+        if( v_required_table_name is null or v_tab_set.exists(v_required_table_name) )
         then 
           v_orig_modelelement_list.extend(1);
           v_orig_modelelement_list(v_orig_modelelement_list.count) := v_orig_table;    
-          v_tab_list := v_tab_list || ';' || v_orig_table.i_name;
+          v_tab_set(upper(v_orig_table.i_name)) := 1;
           v_orig_table_list(i) := null;
           clean_orig_table_list();
          
@@ -373,18 +411,13 @@ CREATE OR REPLACE package body pa_orcas_compare is
     add_stmt( p_stmt_to_execute );
   end;  
   
-  function find_sequence( p_orig_sequence in ot_orig_sequence, p_orig_model in ot_orig_model ) return ot_orig_sequence
+  function find_sequence( p_orig_sequence in ot_orig_sequence, p_orig_sequence_list in ct_orig_sequence_list ) return ot_orig_sequence
   is
-    v_orig_sequence ot_orig_sequence;
   begin
-    for i in 1 .. p_orig_model.i_model_elements.count loop
-      if( p_orig_model.i_model_elements(i) is of (ot_orig_sequence) ) 
+    for i in 1 .. p_orig_sequence_list.count loop
+      if( upper(p_orig_sequence_list(i).i_sequence_name) = upper(p_orig_sequence.i_sequence_name) )
       then
-        v_orig_sequence := treat( p_orig_model.i_model_elements(i) as ot_orig_sequence );
-        if( upper(v_orig_sequence.i_sequence_name) = upper(p_orig_sequence.i_sequence_name) )
-        then
-          return v_orig_sequence;
-        end if;
+        return p_orig_sequence_list(i);
       end if;
     end loop;
     
@@ -420,7 +453,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
     end;
   begin
     load_start_value();
-    v_orig_sequence_ist := find_sequence( p_orig_sequence_soll, pv_model_ist );
+    v_orig_sequence_ist := find_sequence( p_orig_sequence_soll, pv_orig_sequence_list_ist );
     v_increment_by := p_orig_sequence_soll.i_increment_by;
     v_cache_size := p_orig_sequence_soll.i_cache;
     v_min_value := p_orig_sequence_soll.i_minvalue;
@@ -531,7 +564,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
       if( v_modelelement is of (ot_orig_sequence) ) 
       then
         v_orig_sequence := treat( v_modelelement as ot_orig_sequence );      
-        if( find_sequence( v_orig_sequence, pv_model_soll ) is null )
+        if( find_sequence( v_orig_sequence, pv_orig_sequence_list_soll ) is null )
         then
           add_stmt( 'drop sequence ' || v_orig_sequence.i_sequence_name );
         end if;
@@ -539,36 +572,27 @@ CREATE OR REPLACE package body pa_orcas_compare is
     end loop;    
   end;
   
-  function find_mview( p_orig_mview in ot_orig_mview, p_orig_model in ot_orig_model ) return ot_orig_mview
+  function find_mview( p_orig_mview in ot_orig_mview, p_orig_mview_list in ct_orig_mview_list ) return ot_orig_mview
   is
-    v_orig_mview ot_orig_mview;
   begin
-    for i in 1 .. p_orig_model.i_model_elements.count loop
-      if( p_orig_model.i_model_elements(i) is of (ot_orig_mview) ) 
+    for i in 1 .. p_orig_mview_list.count loop
+      if( upper(p_orig_mview_list(i).i_mview_name) = upper(p_orig_mview.i_mview_name) )
       then
-        v_orig_mview := treat( p_orig_model.i_model_elements(i) as ot_orig_mview );
-        if( upper(v_orig_mview.i_mview_name) = upper(p_orig_mview.i_mview_name) )
-        then
-          return v_orig_mview;
-        end if;
+        return p_orig_mview_list(i);
       end if;
     end loop;
     
     return null;
   end;   
   
-  function find_mview_by_table( p_orig_table in ot_orig_table, p_orig_model in ot_orig_model ) return ot_orig_mview
+  function find_mview_by_table( p_orig_table in ot_orig_table, p_orig_mview_list in ct_orig_mview_list ) return ot_orig_mview
   is
     v_orig_mview ot_orig_mview;
   begin
-    for i in 1 .. p_orig_model.i_model_elements.count loop
-      if( p_orig_model.i_model_elements(i) is of (ot_orig_mview) ) 
+    for i in 1 .. p_orig_mview_list.count loop
+      if( upper(p_orig_mview_list(i).i_mview_name) = upper(p_orig_table.i_name) )
       then
-        v_orig_mview := treat( p_orig_model.i_model_elements(i) as ot_orig_mview );
-        if( upper(v_orig_mview.i_mview_name) = upper(p_orig_table.i_name) )
-        then
-          return v_orig_mview;
-        end if;
+        return p_orig_mview_list(i);
       end if;
     end loop;
     
@@ -580,7 +604,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
     v_orig_mview_ist ot_orig_mview;    
     v_orig_refreshmodetype ot_orig_refreshmodetype;
     v_refreshmode varchar2(10);
-    v_default_tablespace varchar2(30);
+
       
     procedure create_mview
     is
@@ -665,15 +689,14 @@ CREATE OR REPLACE package body pa_orcas_compare is
     end;
 
   begin
-    v_orig_mview_ist := find_mview( p_orig_mview_soll, pv_model_ist );
+    v_orig_mview_ist := find_mview( p_orig_mview_soll, pv_orig_mview_list_ist );
       
     if( v_orig_mview_ist is null )
     then
       create_mview();
     else
-      select distinct(default_tablespace) into v_default_tablespace from user_users;
       if(    
-        ( is_equal_ignore_case(v_orig_mview_ist.i_tablespace, nvl(p_orig_mview_soll.i_tablespace, v_default_tablespace)) != 1
+        ( is_equal_ignore_case(v_orig_mview_ist.i_tablespace, nvl(p_orig_mview_soll.i_tablespace, pv_default_tablespace)) != 1
           and not ( v_orig_mview_ist.i_tablespace is null and p_orig_mview_soll.i_tablespace is null ) )
         or is_equal_ignore_case(replace(v_orig_mview_ist.i_viewselectclob, '"', ''), replace_linefeed_by_space(p_orig_mview_soll.i_viewselectclob)) != 1                             
         or ot_orig_buildmodetype.is_equal(  v_orig_mview_ist.i_buildmode,  p_orig_mview_soll.i_buildmode, ot_orig_buildmodetype.c_immediate ) != 1
@@ -771,7 +794,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
       if( v_modelelement is of (ot_orig_mview) ) 
       then
         v_orig_mview := treat( v_modelelement as ot_orig_mview );      
-        if( find_mview( v_orig_mview, pv_model_soll ) is null )
+        if( find_mview( v_orig_mview, pv_orig_mview_list_soll ) is null )
         then
           add_stmt( 'drop materialized view ' || v_orig_mview.i_mview_name );
         end if;
@@ -1580,8 +1603,9 @@ CREATE OR REPLACE package body pa_orcas_compare is
   procedure handle_table( p_orig_table_soll ot_orig_table ) is
     v_orig_table_ist ot_orig_table;
     v_orig_index_soll ot_orig_index;
-    v_orig_uniquekey_soll ot_orig_uniquekey;
-    v_default_tablespace varchar2(30);
+    v_orig_uniquekey_soll ot_orig_uniquekey;        
+    v_tablespace varchar2(100);
+
     
     function find_lobstorage( p_column_name in varchar2 ) return ot_orig_lobstorage
     is
@@ -1837,7 +1861,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
         if( is_equal( v_orig_uniquekey_ist.i_uk_columns, p_orig_uniquekey_soll.i_uk_columns ) != 1 
             or ( is_equal_ignore_case(v_orig_uniquekey_ist.i_indexname, nvl(p_orig_uniquekey_soll.i_indexname, v_orig_uniquekey_ist.i_indexname)) != 1 
               and is_equal_ignore_case(v_orig_uniquekey_ist.i_indexname, v_orig_uniquekey_ist.i_consname) != 1 )
-            or ( is_equal_ignore_case(v_orig_uniquekey_ist.i_tablespace, nvl(p_orig_uniquekey_soll.i_tablespace, v_default_tablespace)) != 1 
+            or ( is_equal_ignore_case(v_orig_uniquekey_ist.i_tablespace, nvl(p_orig_uniquekey_soll.i_tablespace, pv_default_tablespace)) != 1 
              and not (v_orig_uniquekey_ist.i_tablespace is null and p_orig_uniquekey_soll.i_tablespace is null) 
              and pa_orcas_run_parameter.is_indexmovetablespace = 1 ) )
         then
@@ -1851,7 +1875,6 @@ CREATE OR REPLACE package body pa_orcas_compare is
     procedure handle_index( p_orig_index_soll ot_orig_index )
     is     
       v_orig_index_ist ot_orig_index;   
-      v_default_tablespace varchar2(30);
       
       procedure create_index
       is
@@ -1927,7 +1950,6 @@ CREATE OR REPLACE package body pa_orcas_compare is
       then
         create_index();
       else
-        select distinct(default_tablespace) into v_default_tablespace from user_users;
         if(   
 -- domain index kann nicht abgeglichen werden           
               (
@@ -1983,13 +2005,13 @@ CREATE OR REPLACE package body pa_orcas_compare is
             stmt_done();
           end if;
           
-          if ( is_equal_ignore_case(v_orig_index_ist.i_tablespace, nvl(p_orig_index_soll.i_tablespace, v_default_tablespace)) != 1 
+          if ( is_equal_ignore_case(v_orig_index_ist.i_tablespace, nvl(p_orig_index_soll.i_tablespace, pv_default_tablespace)) != 1 
              and not (v_orig_index_ist.i_tablespace is null and p_orig_index_soll.i_tablespace is null) and pa_orcas_run_parameter.is_indexmovetablespace = 1 )
           then
             stmt_set( 'alter index' );
             stmt_add( p_orig_index_soll.i_consname );     
             stmt_add( 'rebuild tablespace' ); 
-            stmt_add( nvl(p_orig_index_soll.i_tablespace, v_default_tablespace) );  
+            stmt_add( nvl(p_orig_index_soll.i_tablespace, pv_default_tablespace) );  
             stmt_done();
           end if;          
         end if;
@@ -2243,9 +2265,9 @@ CREATE OR REPLACE package body pa_orcas_compare is
     then
       if( ot_orig_permanentnesstype.is_equal(p_orig_table_soll.i_permanentness, ot_orig_permanentnesstype.c_global_temporary, ot_orig_permanentnesstype.c_permanent ) = 1 )
       then
-        select distinct(temporary_tablespace) into v_default_tablespace from user_users;        
+        v_tablespace := pv_temporary_tablespace;
       else
-        select distinct(default_tablespace) into v_default_tablespace from user_users;
+        v_tablespace := pv_default_tablespace;
       end if;
       
       if(   ot_orig_permanentnesstype.is_equal( v_orig_table_ist.i_permanentness, p_orig_table_soll.i_permanentness, ot_orig_permanentnesstype.c_permanent ) = 0 
@@ -2256,14 +2278,14 @@ CREATE OR REPLACE package body pa_orcas_compare is
                                   'drop table ' || v_orig_table_ist.i_name );
         v_orig_table_ist := null;
       else
-        if ( is_equal_ignore_case(v_orig_table_ist.i_tablespace, nvl(p_orig_table_soll.i_tablespace, v_default_tablespace)) != 1 
+        if ( is_equal_ignore_case(v_orig_table_ist.i_tablespace, nvl(p_orig_table_soll.i_tablespace, v_tablespace)) != 1 
               and pa_orcas_run_parameter.is_tablemovetablespace = 1
               and not (v_orig_table_ist.i_tablespace is null and p_orig_table_soll.i_tablespace is null) ) 
         then
           stmt_set( 'alter table' );                      
           stmt_add( p_orig_table_soll.i_name ); 
           stmt_add( 'move tablespace' );
-          stmt_add( nvl(p_orig_table_soll.i_tablespace, v_default_tablespace) );
+          stmt_add( nvl(p_orig_table_soll.i_tablespace, v_tablespace) );
           stmt_done;
         end if;
       end if;
@@ -2377,7 +2399,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
          or is_equal_ignore_case( p_orig_table_soll.i_primary_key.i_consname,   v_orig_table_ist.i_primary_key.i_consname   ) != 1
          or is_equal(             p_orig_table_soll.i_primary_key.i_pk_columns, v_orig_table_ist.i_primary_key.i_pk_columns ) != 1
          or is_equal(             p_orig_table_soll.i_primary_key.i_reverse,    v_orig_table_ist.i_primary_key.i_reverse    ) != 1  
-         or ( is_equal_ignore_case(v_orig_table_ist.i_primary_key.i_tablespace, nvl(p_orig_table_soll.i_primary_key.i_tablespace, v_default_tablespace)) != 1 
+         or ( is_equal_ignore_case(v_orig_table_ist.i_primary_key.i_tablespace, nvl(p_orig_table_soll.i_primary_key.i_tablespace, pv_default_tablespace)) != 1 
              and not (v_orig_table_ist.i_primary_key.i_tablespace is null and p_orig_table_soll.i_primary_key.i_tablespace is null) 
              and pa_orcas_run_parameter.is_indexmovetablespace = 1 )
         )
@@ -2467,7 +2489,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
                 
         if( v_orig_table_soll is null )
         then         
-          v_orig_mview_soll := find_mview_by_table( v_orig_table_ist, pv_model_soll );
+          v_orig_mview_soll := find_mview_by_table( v_orig_table_ist, pv_orig_mview_list_soll );
           
           if( v_orig_mview_soll is null and v_orig_table_ist.i_name not like 'ORCAS_%')
           then  
@@ -2543,7 +2565,7 @@ CREATE OR REPLACE package body pa_orcas_compare is
     for i in 1 .. pv_orig_table_list_soll.count loop
       
       -- Sonderbehandlung für Tabellen zu Mviews, die nicht prebuilt sind, sie dürfen nicht behandelt werden
-      v_orig_mview_soll := find_mview_by_table( pv_orig_table_list_soll(i), pv_model_soll );          
+      v_orig_mview_soll := find_mview_by_table( pv_orig_table_list_soll(i), pv_orig_mview_list_soll );          
       if( v_orig_mview_soll is null or
           ( v_orig_mview_soll is not null and 
             ot_orig_buildmodetype.is_equal( v_orig_mview_soll.i_buildmode, ot_orig_buildmodetype.c_prebuilt, ot_orig_buildmodetype.c_immediate ) = 1
@@ -2721,12 +2743,22 @@ CREATE OR REPLACE package body pa_orcas_compare is
     else
       pv_default_orig_chartype := ot_orig_chartype.c_char;
     end if;    
+    
+    select default_tablespace,
+           temporary_tablespace
+      into pv_default_tablespace,
+           pv_temporary_tablespace 
+      from user_users;    
   
     pv_model_ist := pi_model_ist;
     pv_model_soll := pi_model_soll;
     -- dass sortieren der istdaten ist unnoetig, aber im moment die einfachste moeglichkeit die liste der tabellen zu ermitteln
-    pv_orig_table_list_ist := sort_tables_for_ref_part( pv_model_ist.i_model_elements );      
-    pv_orig_table_list_soll := sort_tables_for_ref_part( pv_model_soll.i_model_elements );      
+    pv_orig_table_list_ist      := sort_tables_for_ref_part( pv_model_ist.i_model_elements );      
+    pv_orig_table_list_soll     := sort_tables_for_ref_part( pv_model_soll.i_model_elements );      
+    pv_orig_sequence_list_ist   := get_sequence_elements( pv_model_ist.i_model_elements );          
+    pv_orig_sequence_list_soll  := get_sequence_elements( pv_model_soll.i_model_elements );      
+    pv_orig_mview_list_ist      := get_mview_elements( pv_model_ist.i_model_elements );          
+    pv_orig_mview_list_soll     := get_mview_elements( pv_model_soll.i_model_elements );      
     
     inline_soll_ext_indexes();
     inline_soll_ext_comments();
