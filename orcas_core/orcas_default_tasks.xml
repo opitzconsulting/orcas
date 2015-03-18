@@ -8,6 +8,7 @@
   <property name="orcas_initialze_scripts" value="${orcas_util_scripts}/replaceable" />
   <property name="orcas_install_scripts" value="${orcas_util_scripts}/static" />
   <property name="orcas_at_value" value="@" />
+  <property name="orcas_internal_no_clean_initialize" value="true" />
 
   <tstamp>
     <format property="timestamp" pattern="dd_MM_yyyy_HH_mm_ss" />
@@ -1397,6 +1398,15 @@ ${orcas_sql_output}
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
           <include name="*extensions*-sqlplus.zip"/>
         </fileset>
+      </unzip>
+
+      <unzip dest="@{tmpfolder}/gradle_sqlplus">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*-sqlplus.zip"/>
+        </fileset>
+        <patternset>
+          <include name="**/b_pa_orcas_extension_parameter.sql" />
+        </patternset>        
       </unzip>
 
       <orcas_execute_scripts  scriptfolder="@{tmpfolder}/gradle_sqlplus" scriptfolderrecursive="true" failonerror="true" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />

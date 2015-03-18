@@ -12,6 +12,11 @@ create or replace package body pa_orcas_extension_parameter is
   is
     v_colon_index number;    
   begin
+    if( p_text_part is null )
+    then
+      return;
+    end if;
+
     v_colon_index := instr( p_text_part, ':' );
     
     pv_parameter_map( substr( p_text_part, 1, v_colon_index - 1 ) ) := substr( p_text_part, v_colon_index + 1, length(p_text_part) - v_colon_index );
@@ -47,6 +52,11 @@ create or replace package body pa_orcas_extension_parameter is
     then
       initialize_map();
       pv_is_map_initialized := 1;
+    end if;
+  
+    if( not pv_parameter_map.exists( p_extension_parameter_key ) )
+    then
+      return null;
     end if;
   
     return pv_parameter_map( p_extension_parameter_key );
