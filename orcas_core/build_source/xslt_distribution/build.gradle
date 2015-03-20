@@ -24,4 +24,6 @@ distributions
   }
 }
 
+installDist.fileMode 0755
+
 

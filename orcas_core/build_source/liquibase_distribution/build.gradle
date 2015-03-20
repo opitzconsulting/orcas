@@ -11,7 +11,7 @@ dependencies
 {
   liquibaseDistribution "org.liquibase:liquibase-core:3.3.0"
   liquibaseDistribution fileTree(dir: System.getenv("ORACLE_HOME")+"/jdbc/lib", include: '*.jar')
-  liquibaseDistribution fileTree(dir: System.getenv("ORACLE_HOME"), include: '*.jar') // lookup jars directly inroot home-dir for instant clients
+  liquibaseDistribution fileTree(dir: System.getenv("ORACLE_HOME"), include: '*.jar' ) // lookup jars directly inroot home-dir for instant clients
 }
 
 distributions 
@@ -25,4 +25,5 @@ distributions
   }
 }
 
+installDist.fileMode 0755
 
