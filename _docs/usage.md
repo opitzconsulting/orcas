@@ -8,7 +8,7 @@ Diese Dokumentation beschriebt wie man mit Orcas arbeitet. Dazu wird das Orderen
 
 Mit Orcas werden alle Tabellen (und andere Datenbankobjekte) in normalen Textdateien abgelegt. Diese wird man dann typischerweise in einer Versionsverwaltung zusammen mit den andren Sourcen eines Projektes ablegen. Somit kann man sie weitestgehend problemlos mergen oder branchen.
 
-Die Aufgabe von Orcas besteht darin die Dateien zu lesen, mit einem bestehden Datenbank-Schema zu vergleichen und die ggf. notwendigen Änderungen in dem Schema auszuführen.
+Die Aufgabe von Orcas besteht darin die Dateien zu lesen, mit einem bestehenden Datenbank-Schema zu vergleichen und die ggf. notwendigen Änderungen in dem Schema auszuführen.
 
 Im Orderentry-Beispiel kann man also z.B. in der Datei orderentry\db\tabellen\categories.sql
 {% highlight sql %}
@@ -45,17 +45,19 @@ Orcas starten, und die neue Spalte ist in der Datenbank.
 Auf die gleiche Art und Weise würde man auch andere Änderungen durchführen:
 
 - Default-Werte ändern
-- Constarinst hinzufügen oder löschen
+- Constraints hinzufügen oder löschen
 - "not null" setzen oder entfernen ("not null" setzen geht natürlich nur, wenn in der jeweiligen Tabellen-Spalte durchgängig Daten enthalten sind)
 - Tabellen anlegen (sinnvollerweise in einer neuen Datei)
 - Foreign-Keys anlegen, dabei sorgt Orcas für die richtige Reihenfolge beim Anlegen
-- Datentyp/Länge ändern. Dabei ist das vergrössern einer Spalte realtiv problemlos möglich, dass Verkleinern oder Typ-Änderungen werden nur erfolgreich durchlaufen, wenn die enthaltenen Daten in der Tabelle dazu passen.
+- Datentyp/Länge ändern. Dabei ist das vergrössern einer Spalte realtiv problemlos möglich, das Verkleinern oder Typ-Änderungen werden nur erfolgreich durchlaufen, wenn die enthaltenen Daten in der Tabelle dazu passen.
 
 ## Löschen von Teilen des Datenmodells
 
 Es gibt zwei Änderungen die standardmässig **gesperrt** sind und dementsprechend nicht fehlerfrei durchlaufen:
+
 - Spalte löschen
 - Tabelle löschen
+
 Beide Änderungen laufen durch wenn die Tabelle leer ist (bzw. bei Spalten auch wenn nur null-Werte vorhanden sind). In dem Orderentry-Beispiel wird das also erst mal funktionieren (da alle Tabellen initial leer sind), wenn man in die Tabellen aber Daten schreibt, dann führt diese zu einer Fehlermeldung. 
 <br/>*Hinweise*: Im Fehlerfall wird gar keine Änderung am Schema durchgeführt, somit kann es nicht passieren, dass eine Überführung nur "halb" durchgeführt wurde.
 

@@ -44,5 +44,5 @@ Falls nicht, muss ggf. die PATH-Variable angepasstw erden. Java wird bei Orcas v
 SQL\*Plus muss an der Kommandozeile aufrufbar sein. Genauso sollte ein tnsping auf die Zieldatenbank funktionieren. Orcas benutzt im Kern immer TNS und SQL\*Plus, nur einige Zusatztools (z.B. dbdoc) nutzen JDBC.
 ORACLE_HOME muss gesetzt sein.
 Der Instant-Client kann verwendet werden, dann muss ORACLE_HOME auf diesen zeigen.
-ORACLE_HOME wir derzeit nur genutzt um den JDBC-Treiber zu ermitteln.
+ORACLE_HOME wird derzeit nur genutzt um den JDBC-Treiber zu ermitteln.
 
