@@ -5,9 +5,9 @@ permalink: /docs/about/
 ---
 
 Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes **Datenbankschema** in einen mit **Textdateien** beschriebenen Soll-Zustand **überführt** werden kann. 
-<br/>Durch die Verwendung einfacher Textdateien ist eine **Integration** in bestehdende Projekte mit **Versionsverwaltung** denkbar einfach. 
+<br/>Durch die Verwendung einfacher Textdateien ist eine **Integration** in bestehendende Projekte mit **Versionsverwaltung** denkbar einfach. 
 <br/>Orcas bietet dazu auch die Möglichkeit **kompliziertere Überführungen** zu **integrieren**.
-<br/>Orcas hat zudem einen **Exetnsion**-Mechanismus, mit dem die **Definition** des Datenbankschemas deutlich **vereinfach** und **vereinheitlicht** werden kann.
+<br/>Orcas hat zudem einen **Extension**-Mechanismus, mit dem die **Definition** des Datenbankschemas deutlich **vereinfach** und **vereinheitlicht** werden kann.
 
 Orcas steht für **Or**a**c**le **a**daptive/**a**gile **s**chemas und ist nur mit Oracle RDBMS kompatibel. 
 
@@ -32,37 +32,37 @@ Wenn man nicht gerade damit beschäftigt ist den GO-LIVE-Termin zu retten oder z
 <br/>Oder kurz:
 - Wie macht man das mit der Datenbankentwicklung eigentlich richtig?
 
-Orcas ist zwar kein Allheilmittel. Richtig eingesetzt, kann es aber bei all diesen Fragestellungen eine praktikable Lösung anbieten.
+Orcas ist zwar kein Allheilmittel. Richtig eingesetzt kann es aber bei all diesen Fragestellungen eine praktikable Lösung anbieten.
 
 ##Einführung
 
-Orcas ist ein Deploymentframework mit dem ein bestehendes Schema in einem in Orcas beschriebenen Soll-Zustand überführt werden kann. Der Zustand des bestehenden Schemas ist dabei größtenteils irrelevant. Bei Bedarf werden "überflüssige" Indizes, Constraints, Spalten oder Tabellen verworfen bzw. neue Tabellen oder Spalten hinzugefügt. Änderungen von Datentypen werden, sofern möglich, durchgeführt. Der Soll-Zustand wird dabei in Form von einfachen SQL Skriptdateien vorgehalten, die in ihrer Syntax stark an die "CREATE TABLE" Syntax angelehnt sind.
-Die Nutzung von Orcas hat viele Vorteile. Ein großer Vorteil ist, dass die Tabellenskripte versioniert werden können, was bei einem Projektteam eine enorme Erleichterung ist, da Änderungen nachvollzogen und auch rückgängig gemacht werden können. Ein weiterer Vorteil ist, dass ohne große Umstände auf verschiedenen Datenbanken deployed werden und somit ein einheitlicher Datenbankstand auf beliebig viele Schemata hergestellt werden kann.
+Orcas ist ein Deploymentframework mit dem ein bestehendes Schema in einen in Orcas beschriebenen Soll-Zustand überführt werden kann. Der Zustand des bestehenden Schemas ist dabei größtenteils irrelevant. Bei Bedarf werden "überflüssige" Indizes, Constraints, Spalten oder Tabellen verworfen bzw. neue Tabellen oder Spalten hinzugefügt. Änderungen von Datentypen werden, sofern möglich, durchgeführt. Der Soll-Zustand wird dabei in Form von einfachen SQL Skriptdateien vorgehalten, die in ihrer Syntax stark an die "CREATE TABLE" Syntax angelehnt sind.
+Die Nutzung von Orcas hat viele Vorteile. Ein großer Vorteil ist, dass die Tabellenskripte versioniert werden können, was bei einem Projektteam eine enorme Erleichterung ist, da Änderungen nachvollzogen und auch rückgängig gemacht werden können. Ein weiterer Vorteil ist, dass ohne große Umstände auf verschiedenen Datenbanken deployed werden und somit ein einheitlicher Datenbankstand auf beliebig vielen Schemata hergestellt werden kann.
 
 ##Dokumentation
 
-Hier die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
+Hier sind die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
 
 - [Wie arbeitet man mit Orcas?]({{site.baseurl}}/docs/usage/)
-- [Installation]({{site.baseurl}}/docs/installation/) - Was muss man tun um Orcas in meinem Projekt einsetzen zu können?
+- [Installation]({{site.baseurl}}/docs/installation/) - Was muss ich tun, um Orcas in meinem Projekt einsetzen zu können?
 - [Examples]({{site.baseurl}}/docs/examples/) - Beispielprojekte
 - [ant Tasks]({{site.baseurl}}/docs/ant-tasks/) - Wie erstelle ich einen Gesamtablauf mit ant?
 - [Tabellen Syntax]({{site.baseurl}}/docs/statics-syntax/) - Wie sehen die Tabellenskripte aus?
-- [Domaion-Extension]({{site.baseurl}}/docs/domain-extension/) - Wie kann ich Projektspezifische Erweiterungen einfach integrieren?
-- [Extensions]({{site.baseurl}}/docs/extensions/) - Wie kann ich spezielle Projektspezifische Erweiterungen integrieren?
+- [Domain-Extension]({{site.baseurl}}/docs/domain-extension/) - Wie kann ich projektspezifische Erweiterungen einfach integrieren?
+- [Extensions]({{site.baseurl}}/docs/extensions/) - Wie kann ich spezielle projektspezifische Erweiterungen integrieren?
 - [Funktionsweise Orcas]({{site.baseurl}}/docs/how-it-works/) - Wie funktioniert Orcas?
 
 ##Welche Vorteile/Nachteile gibt es?
 
 ### Vorteile
 
-- Der Soll-Zustand wird in einfachen Textskriptdateien verwaltet, damit kann man alle Vorteile einer Versionsverwaltung nutzen (Versionen nachhalten, nachvollziehen wer wann welche Änderung gemacht hat, einheitliche Versionsstände, Mergeunterstützung, ...).
+- Der Soll-Zustand wird in einfachen Textskriptdateien verwaltet. Damit kann man alle Vorteile einer Versionsverwaltung nutzen (Versionen nachhalten, nachvollziehen wer wann welche Änderung gemacht hat, einheitliche Versionsstände, Mergeunterstützung, ...).
 - Die Skripte sind eine echte "Referenz", man muss also nicht in diversen Schemata suchen wenn man eine aktuelle Package-Version haben will bzw. man braucht keine organisatorische Festlegungen welches Schema als Referenzschema verwendet wird.
 - Umständliche und fehleranfällige DB-Releaseskripte werden nicht benötigt.
-- Es können beliebig viele Schemata für Entwicklungs- und Testzwecke erstellt werden, ohne dass ein gewaltiger Abgleichaufwand entsteht, was zudem noch sehr fehleranfällig ist.
+- Es können beliebig viele Schemata für Entwicklungs- und Testzwecke erstellt werden, ohne dass ein gewaltiger, fehleranfälliger Abgleichaufwand entsteht.
 
 ###Nachteile
 
 - Wenn Datenbank-Funktionen verwendet werden, die Orcas nicht unterstützt, müssen diese Teilbereiche "manuell" verwaltet werden.
-- Projektmitarbeiter müssen wissen wie man mit Orcas arbeitet.
+- Projektmitarbeiter müssen wissen, wie man mit Orcas arbeitet.
 
