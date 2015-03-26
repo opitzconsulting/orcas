@@ -1,7 +1,5 @@
 package de.opitzconsulting.orcas.extensions;
 
-import de.opitzconsulting.orcasDsl.Model;
-
 public interface OrcasExtensionWithParameter extends OrcasExtension
 {
   /**

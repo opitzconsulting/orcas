@@ -1,13 +1,8 @@
 package de.opitzconsulting.orcas.extensions;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-
-import de.opitzconsulting.orcasDsl.Model;
-import de.opitzconsulting.orcasDsl.ModelElement;
-import de.opitzconsulting.orcasDsl.Table;
 
 public abstract class OrcasBaseExtensionWithParameter implements OrcasExtensionWithParameter
 {
