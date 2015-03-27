@@ -31,7 +31,7 @@ Die Datenbank wird im Task **&lt;orcas_dbdoc&gt;** ausgelesen.
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
 |jdbcurl  |Gibt die URL zur Datenbank an. <br/>Format: jdbc :oracle:thin:host:port:sid|Yes||
-|user     |Gibt den Benutzernamen des Schematas an, das abgebildet werden soll.|Yes||
+|user     |Gibt den Benutzernamen des Schemas an, das abgebildet werden soll.|Yes||
 |password |Gibt das Passwort zum Benutzer an. |Yes||
 |outfolder|Gibt den Ordner an, in dem die erzeugten HTML-Seiten gespeichert werden|Yes||
 |tmpfolder|Gibt den Ordner an, in dem temporär Daten gespeichert werden |Yes||
@@ -66,7 +66,7 @@ Für jede Tabellengruppe wird ein Task **&lt;tablegroup&gt;** angelegt.
 
 <br/>
 Die beiden Tasks **&lt;include&gt;** und **&lt;exclude&gt;** dienen im Task **&lt;tablegroup&gt;** zum Ein- und Ausbinden von Tabellen.
-<br/>Ebenfalls möglich ist das Arbeiten mit Regulären Ausdrücken. So können Filter erstellt werden um mehrere Tabellen auszuwählen.
+<br/>Ebenfalls möglich ist das Arbeiten mit Regulären Ausdrücken. So können Filter erstellt werden, um mehrere Tabellen auszuwählen.
 Beispiele hierfür:
 
 |Task|Value|Bedeutung|
@@ -112,7 +112,7 @@ Im Task **&lt;tables&gt;** kann die Tabellendarstellung für jede Tabellengruppe
 |fontsize|Gibt die Schriftgröße an|In Punkten|14|
 
 <br/>
-Neben diesen, finden sich viele weitere Attribute auf der [Dokumentationsseite zu graphviz](http://www.graphviz.org/content/attrs).
+Neben diesen finden sich viele weitere Attribute auf der [Dokumentationsseite zu graphviz](http://www.graphviz.org/content/attrs).
 
 {% highlight xml %}
 <tables>

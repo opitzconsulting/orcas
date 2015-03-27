@@ -7,7 +7,7 @@ permalink: /docs/ant-tasks/
 #Orcas ant-Tasks zur Ablaufsteuerung
 
 Orcas wird über Ant angesteuert. In weiteren Ausbaustufen ist auch eine Steuerung über Gradle und Maven geplant. 
-Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen an, die über Ant-Tasks (Makros) realisiert sind. Es gibt einige Beispielprojekte in denen die Verwendung dieser Ant-Tasks für typische Projek-Setups beschrieben ist. Diese Seite soll als Referenz dienen, um den Gesamtfunktionsumfang zu beschreiben.
+Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen an, die über Ant-Tasks (Makros) realisiert sind. Es gibt einige Beispielprojekte, in denen die Verwendung dieser Ant-Tasks für typische Projek-Setups beschrieben ist. Diese Seite soll als Referenz dienen, um den Gesamtfunktionsumfang zu beschreiben.
 
 <ul class="no-list-style">
   <li><a href="#example">Beispiel</a></li>
@@ -112,7 +112,7 @@ Jeder öffentliche ant-Task von Orcas hat folgende default Attribute. Diese, und
 |passwordocsvw|Gibt das Passwort zu dem SCS-Benutzer an.|Yes|${orcas.default_password_orcas}|
 |tnsname  |Gibt den tnsnames Eintrag der Datenbank an.|Yes|${orcas.default_tnsname}|
 |tmpfolder|Gibt ein Verzeichnis an, in dem die Skriptverwaltung temporäre Dateien ablegen soll.|Yes|${orcas.default_tmpfolder}|
-|jdbcurl  |Wird für JDBC-Zugriffe verwendet, ist in allen Tasks vorhanden, wird aber bisher nur von einigen genutzt. Wenn der angegebene Default-Wert auch nicht gesetzt ist, dann wird die URL über den tnsname gesetzt, dabei wird der OCI-Treiber verwendet ("jdbc:oracle:oci:@tnsname") der aber oft zu Problemen führt, daher wird empfohlen den Parameter auf eine ULR mit thin-Treiber zu setzen. |No|${orcas.default_jdbcurl}|
+|jdbcurl  |Wird für JDBC-Zugriffe verwendet, ist in allen Tasks vorhanden, wird aber bisher nur von einigen genutzt. Wenn der angegebene Default-Wert auch nicht gesetzt ist, dann wird die URL über den tnsname gesetzt, dabei wird der OCI-Treiber verwendet ("jdbc:oracle:oci:@tnsname") der aber oft zu Problemen führt. Daher wird empfohlen den Parameter auf eine ULR mit thin-Treiber zu setzen. |No|${orcas.default_jdbcurl}|
 
 <a name="orcas_execute_script"/>
 
@@ -185,15 +185,15 @@ Dient zur Ausführung des Abgleichs von statischen Objekten mit den bestehenden 
 |scriptpostfix|Gibt einen Postfix an, der die auszuführenden Dateien einschränkt.|No|".sql"|
 |scriptfolderrecursive|Gibt an, ob auch die Skripte aus den Unterverzeichnissen ausgeführt werden sollen.|No|false|
 |dropmode|Gibt an, ob auch Spalten und Tabellen gedropt werden sollen, was im Fehlerfall zu ernsthaftem Datenverlust führen kann.|No|false|
-|indexparallelcreate|Gibt an ob Indexe parallel erstellt werden sollen. Diese Angabe bezieht sich nur auf das Anlegen, nach dem Anlegen wird der Index gemäß parallel bzw. noparallel (default) angabe eingestellt. <br/>Es handelt sich heirbei also nur um eine Performanceoptimierung bei der Indexanlage.|No|true|
+|indexparallelcreate|Gibt an, ob Indexe parallel erstellt werden sollen. Diese Angabe bezieht sich nur auf das Anlegen. Nach dem Anlegen wird der Index gemäß parallel bzw. noparallel (default) Angabe eingestellt. <br/>Es handelt sich hierbei also nur um eine Performanceoptimierung bei der Indexanlage.|No|true|
 |createmissingfkindexes|Gibt an, ob für jeden Foreign-Key ein Index angelegt werden soll, falls kein passender Index vorliegt. <br/>Hintergrund: Aus Performancegründen (Laufzeit und Locking), ist ein Index pro Foreign-Key fast immer notwendig.|No|true|
-|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#paricularity) an, mit der Tabellen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
-|excludewheresequence|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#paricularity) an, mit der Sequenzen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
+|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#paricularity) an, mit der Tabellen von der abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
+|excludewheresequence|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#paricularity) an, mit der Sequenzen von der abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
 |loglevel|Gibt den Umfang der Ausgabe auf der Konsole an. Mögliche Werte: info, verbose|Yes|info|
-|targetplsql|Mit diesem Attribut kann Orcas für andere Zwecke als einen Tabellenabgleich eingesetzt werden. Wenn es gesetzt ist, dann muss es einen Package-Namen enthalten. Dieses Package wird dann an Stelle des eigentlichen Orcas ausgeführt. Das Package muss die folgende Prozedur beiinhalten und das Package muss auch schon in dem User-Schema enthalten sein: "procedure run( p_model in ot_syex_model )". <br/>Mit diesem Mechanismus kann z.B. ein Triggergenerator angesprochen werden (Siehe Beispiel: target_plsql_demo).|No||
-|logonly|Gibt an ob nur protokolliert werden soll, wenn true, dann wird keine Änderung am Datenmodell durchgeführt, sondern nur das Spooling ausgeführt.|No|false|
-|spoolfolder|Durch setzen dieses Attributes wird das [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) aktiviert.|No|${orcas.default_spoolfolder}|
-|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
+|targetplsql|Mit diesem Attribut kann Orcas für andere Zwecke als einen Tabellenabgleich eingesetzt werden. Wenn es gesetzt ist, dann muss es einen Package-Namen enthalten. Dieses Package wird dann an Stelle des eigentlichen Orcas ausgeführt. Das Package muss die folgende Prozedur beinhalten und das Package muss auch schon in dem User-Schema enthalten sein: "procedure run( p_model in ot_syex_model )". <br/>Mit diesem Mechanismus kann z.B. ein Triggergenerator angesprochen werden (Siehe Beispiel: target_plsql_demo).|No||
+|logonly|Gibt an, ob nur protokolliert werden soll. Wenn true, dann wird keine Änderung am Datenmodell durchgeführt, sondern nur das Spooling ausgeführt.|No|false|
+|spoolfolder|Durch Setzen dieses Attributes wird das [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) aktiviert.|No|${orcas.default_spoolfolder}|
+|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutzt wird, ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
 <a name="orcas_drop_replaceables"/>
@@ -237,7 +237,7 @@ Durch diesen ant-Task werden alle Jobs auf der Datenbank entfernt. Dabei wird wi
 - Ggf. aktive Job Session killen
 - Job löschen
 
-Dabei werden folgende besonderen Rechte nötig:
+Dabei sind folgende besonderen Rechte nötig:
 - select on sys.v_$session
 - select on sys.v_$lock
 - alter system
@@ -256,7 +256,7 @@ Kompiliert alle invaliden DB-Objekte.
 |---------|-----------|--------|-------|
 |logsinglecompile|Wenn gesetzt, und Spooling verwendet wird, dann wird jeder einzelne compile Befehl protokolliert. Wenn nicht gesetzt, wird ein compile-all Skript protokolliert.|No|false|
 |spoolfolder|Durch setzen dieses Attributes wird das [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) aktiviert.|No|${orcas.default_spoolfolder}|
-|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
+|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutzt wird, ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
 <a name="orcas_upate_data"/>
@@ -273,7 +273,7 @@ Mit diesem ant-Task können Stammdaten mit der Datenbank abgeglichen werden.
 |scriptfolderrecursive|Gibt an, ob auch die Skripte aus den Unterverzeichnissen ausgeführt werden sollen.|No|false|
 |checkmode|In diesem Modus werden nur die Daten mit den vorhandenen Daten verglichen. Dabei wird nach Abweichungen bei den nur-Insert Spalten gesucht. Die gefundenen Abweichungen werden ausgegeben.|No|false|
 |spoolfolder|Durch setzen dieses Attributes wird das [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) aktiviert.|No|${orcas.default_spoolfolder}|
-|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutz wird ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
+|logname|Gibt einen Namen an, der für Logausgaben verwendet wird. Wenn die [Spooling]({{site.baseurl}}/docs/ant-tasks/#spool) Funktion genutzt wird, ist dieser Name eine Pflichtangabe und muss dann für jeden Taskaufruf unterschiedlich sein.|No||
 |autotimestamp|Falls der Buildvorgang geloggt wird, kann mit der Angabe des automatischen Zeitstempels der Spooling-Folder mit einem Zeitstempel versehen werden. So werden ältere Spools nicht überschrieben.|No|false|
 
 <a name="orcas_clean_tables"/>
@@ -284,24 +284,24 @@ Diese Funktion entfernt alles bis auf die Daten von einer Tabelle.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Tabellen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
+|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Tabellen von der abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
 
 <a name="orcas_initialize"/>
 
 ###orcas_initialize
 
-Dieser ant-Task muss vor jedem ant-Lauf augerufen werden um Orcas zu initialisieren. Dies wird benötigt, um die DB-Objekte von Orcas zu aktualisieren und um das temporäre Verzeichnis zu initialisieren.
+Dieser ant-Task muss vor jedem ant-Lauf aufgerufen werden um Orcas zu initialisieren. Dies wird benötigt, um die DB-Objekte von Orcas zu aktualisieren und um das temporäre Verzeichnis zu initialisieren.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|extensionfolder|Gibt das Verzeichnis an, in dem die [Extensions]({{site.baseurl}}/docs/extensions/) liegen. Wenn keine Extensions genutzt werden muss extensionfolder auf ein leeres Verzeichnis verweisen.|Yes||
+|extensionfolder|Gibt das Verzeichnis an, in dem die [Extensions]({{site.baseurl}}/docs/extensions/) liegen. Wenn keine Extensions genutzt werden, muss extensionfolder auf ein leeres Verzeichnis verweisen.|Yes||
 |extensionparameter|Damit können Parameter an die Extensions (ein Text-Parameter für alle Extensions) übergeben werden.|No||
 
 <a name="orcas_grant"/>
 
 ###orcas_grant
 
-Dieser ant-Task dient dazu mehreren User mit dem selben Schemverwaltungs-User zu nutzen. Der erste User wird über orcas_initialize berechtigt, weiter können mit diesem Task berechtigt werden. Die OC-Schemverwaltung darf in dieser Konstellation nicht parallel gestartet werden (jeder parallelel abgleich braucht einen eigenen Schemverwaltungs-User).
+Dieser ant-Task dient dazu, mehrere User mit dem selben Schemverwaltungs-User zu nutzen. Der erste User wird über orcas_initialize berechtigt, weitere können mit diesem Task berechtigt werden. Die OC-Schemverwaltung darf in dieser Konstellation nicht parallel gestartet werden (jeder parallelel abgleich braucht einen eigenen Schemverwaltungs-User).
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
@@ -311,7 +311,7 @@ Dieser ant-Task dient dazu mehreren User mit dem selben Schemverwaltungs-User zu
 
 ###orcas_install
 
-Dieser ant-Task muss ein einziges Mal aufgerufen werden um den SCS-Datenbankuser einzurichten. Dieser wird mit dem "normalen" User angelegt. Dabei ist es durchaus möglich für diesen Aufruf einen speziellen DB-User als "user" zu verwenden, der die entsprechenden Anlage-Berechtigungen hat.
+Dieser ant-Task muss ein einziges Mal aufgerufen werden, um den SCS-Datenbankuser einzurichten. Dieser wird mit dem "normalen" User angelegt. Dabei ist es durchaus möglich, für diesen Aufruf einen speziellen DB-User als "user" zu verwenden, der die entsprechenden Anlage-Berechtigungen hat.
 
 Der SCS-DB-User erhalt dabei folgende Rechte:
 - connect
@@ -325,7 +325,7 @@ Der SCS-DB-User erhalt dabei folgende Rechte:
 
 ###orcas_check_connection
 
-Dieser ant-Task prüft, ob mit den angegebenen Daten eine Connection aufgebaut werden kann. Die normalen execute_script ant-Tasks prüfen dies nicht (auch nicht wenn failonerror auf true gesetzt wurde). Dieser Task kann aufgerufen werden, ohne vorher Orcas zu installieren oder zu initialisieren.
+Dieser ant-Task prüft, ob mit den angegebenen Daten eine Connection aufgebaut werden kann. Die normalen execute_script ant-Tasks prüfen dies nicht (auch nicht wenn failonerror auf true gesetzt wurde). Dieser Task kann aufgerufen werden ohne vorher Orcas zu installieren oder zu initialisieren.
 
 <a name="orcas_extract"/>
 
@@ -335,18 +335,18 @@ Dient zur Generierung der Tabellenskripte aus einem bestehenden Schema (Reverse-
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|outputfolder|Gibt den Verzeichnisnamen an, in dem die Skripte abgelegt werden sollen. der Ordner wird gelöscht und neu angelegt.|Yes||
+|outputfolder|Gibt den Verzeichnisnamen an, in dem die Skripte abgelegt werden sollen. Der Ordner wird gelöscht und neu angelegt.|Yes||
 |xsltfile|`todo`|No|orcas_core/xslt_extract/orcas_extract.xsl|
-|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Tabellen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
-|excludewheresequence|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Sequenzen von der Abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
+|excludewheretable|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Tabellen von der abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
+|excludewheresequence|Gibt eine [exclude_where-Bedingung]({{site.baseurl}}/docs/ant-tasks/#exclude_where) an, mit der Sequenzen von der abschliessenden Bereinigung ausgenommen werden können.|No|"object_name like '%$%'"|
 
 <a name="exclude_where"/>
 
 ##Besonderheiten bei exclude_where_XXX Attributen
 
-Dabei handelt es sich um eine Möglichkeit DB-Objekte des entsprechenden typs (XXX) von der Verarbeitung auszuschliessen. Dabei wird eine SQL-where-Bedingung formuliert, und alle DB-Objekte, die dieser where-Bedingung entsprechen werden nicht beachtet. Dabei darf in der where-Bedingung eine Spalte verwendet werden, um den Objektnamen zu referenzieren. Diese Spalte heisst immer object_name, unabhängig davon, um welchen Typ von Objekt es sich handelt. Beginnt die where-Bedingung mit einem "and ", dann wird die evtl. angegebene default-where-Bedingung erweitert, ansonsten wird sie überschrieben.
+Dabei handelt es sich um eine Möglichkeit, DB-Objekte des entsprechenden typs (XXX) von der Verarbeitung auszuschliessen. Dabei wird eine SQL-where-Bedingung formuliert, und alle DB-Objekte, die dieser where-Bedingung entsprechen, werden nicht beachtet. Dabei darf in der where-Bedingung eine Spalte verwendet werden, um den Objektnamen zu referenzieren. Diese Spalte heisst immer object_name, unabhängig davon, um welchen Typ von Objekt es sich handelt. Beginnt die where-Bedingung mit einem "and ", dann wird die evtl. angegebene default-where-Bedingung erweitert, ansonsten wird sie überschrieben.
 
 <a name="spool"/>
 
 ##Spooling
-Mit der Spooling Funktionalität wird in einem speziellen Spooling Verzeichnis ein Satz von SQL*Plus Skripten erzeugt, womit die komplette Abarbeitung protokolliert und wiederholbar gemacht wird. Dabei werden die beiden ant-Tasks orcas_install und orcas_initialize nicht mit protokolliert.
+Mit der Spooling Funktionalität wird in einem speziellen Spooling Verzeichnis ein Satz von SQL*Plus Skripten erzeugt, womit die komplette Abarbeitung protokolliert und wiederholbar gemacht wird. Dabei werden die beiden ant-Tasks orcas_install und orcas_initialize nicht mitprotokolliert.

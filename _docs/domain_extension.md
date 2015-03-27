@@ -4,7 +4,7 @@ title: Domain Extension
 permalink: /docs/domain-extension/
 ---
 
-Die Domain-Extension ist eine Extension die einen "Templating-Mechanismus" für Tabellen und Spalten bereitstellt. Der Mechanismus wird auch "Domänen-Konzept" genannt. 
+Die Domain-Extension ist eine Extension, die einen "Templating-Mechanismus" für Tabellen und Spalten bereitstellt. Der Mechanismus wird auch "Domänen-Konzept" genannt. 
 
 Das nachfolgende Beispiel zeigt worum es genau geht:
 
@@ -63,7 +63,7 @@ create table tab_b domain id_table
   constraint fk_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id)
 );
 {% endhighlight %}
-*Hinweis:* Die Tabelle tab_a brauch jetzt einen PK, wie man den genereirt sehen wir später, zunächst mal geht es um den foreign-key.
+*Hinweis:* Die Tabelle tab_a braucht jetzt einen PK. Wie man den generiert sehen wir später, zunächst mal geht es um den foreign-key.
 
 Wenn wir mal davon ausgehen, dass in unserem Schema FKs immer auf die primary-key-Spalten zeigen, dann haben alle FK-Spalten den Datentyp number(10). Um das zu vereinheitlichen können wir eine Spalten-Domain einführen:
 {% highlight sql %}
@@ -126,7 +126,7 @@ define table domain id_table
 );
 {% endhighlight %}
 
-Das hat erst mal keine Auswirkung, erlaubt uns aber jetzt die neue Spalten-Domäne um den primary-key ergänzen zu können:
+Das hat erst mal keine Auswirkung, erlaubt uns aber jetzt, die neue Spalten-Domäne um den primary-key ergänzen zu können:
 
 {% highlight sql %}
 define column domain pk_column
@@ -150,7 +150,7 @@ create table tab_b domain id_table
 );
 {% endhighlight %}
 
-Nachfolgend eine Liste der enthaltenen Funktionen, diese werden alle vom [Domain-Extension-Demo]({{site.baseurl}}/docs/examples/#domain_extension_demo) Beispielprojekt genutzt:
+Nachfolgend eine Liste der enthaltenen Funktionen. Diese werden alle vom [Domain-Extension-Demo]({{site.baseurl}}/docs/examples/#domain_extension_demo) Beispielprojekt genutzt:
 
 ##Features
 
@@ -188,10 +188,10 @@ Sobald orcas_execute_statics mit den Domain-Definitionen erfolgreich durchgelauf
 Ein Beispielprojekt das die Domain-Extension verwendet findet sich hier: [Domain-Extension-Demo]({{site.baseurl}}/docs/examples/#domain_extension_demo).
 
 ##Erweiterung
-Was wenn die Domain-Extension eine Funktionalität nicht bietet, die im Projekt gebraucht wird?
+Was ist zu tun, wenn die Domain-Extension eine Funktionalität nicht bietet, die im Projekt gebraucht wird?
 
-Man kann grundsätzlich eigene Extensions mit der Domain-Extension kombinieren, dabei muss aber sehr auf die Ausführungs-Reihenfolge geachtet werden. Es ist auch denkbar, die Domain-Extension abzuändern (als Kopiervorlage für eine eigene Extension verwenden).
-Allerdings ist es ggf. ratsamer eine komplett eigene Extension zu erstellen, da die Domain-Extension relativ kompliziert ist. Für ein konkretes Projekt ist es oft viel einfacher die Definition direkt in der Extension auszuprogrammieren.
+Man kann grundsätzlich eigene Extensions mit der Domain-Extension kombinieren. Dabei muss aber sehr auf die Ausführungs-Reihenfolge geachtet werden. Es ist auch denkbar, die Domain-Extension abzuändern (als Kopiervorlage für eine eigene Extension verwenden).
+Allerdings ist es ggf. ratsamer eine komplett eigene Extension zu erstellen, da die Domain-Extension relativ kompliziert ist. Für ein konkretes Projekt ist es oft viel einfacher, die Definition direkt in der Extension auszuprogrammieren.
 
 Die Domain-Extension ist ein 80%-Ansatz, wenn das nicht ausreicht, ist in der Regel eine komplett eigene Extension anzuraten. 
 
