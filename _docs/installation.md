@@ -10,9 +10,9 @@ Orcas wird in einem eigenen [Repository](https://github.com/opitzconsulting/orca
 
 ##Vagrant
 
-Orcas hat eine Vagrant Konfiguration mit der man sehr einfach eine VM einrichten kann in der Orcas direkt lauffähig (inc. Datenbank) ist. Für eine Installation der benötigten Tools auf Linux kann man sich hier auch einiges abgucken.
+Orcas hat eine [Vagrant](https://de.wikipedia.org/wiki/Vagrant_%28Software%29)-Konfiguration, mit der man sehr einfach eine VM einrichten kann, in der Orcas direkt lauffähig (incl. Datenbank) ist. Für eine Installation der benötigten Tools auf Linux kann man sich hier auch einiges abgucken.
 
-Die Vagrant VM ist nur für Tests vorgesehen, für den Einstaz von Orcas im eigenen Projekt müssen nachfolgende Tools installiert werden:
+Die Vagrant-VM ist nur für Tests vorgesehen. Für den Einstaz von Orcas im eigenen Projekt müssen nachfolgende Tools installiert werden:
 
 ##Benötigte Tools
 
@@ -28,7 +28,7 @@ Zu finden unter [sourceforge.net](http://sourceforge.net/projects/ant-contrib/) 
 
 Zu finden unter [gradle.org](http://www.gradle.org/). Bis auf weiteres kann die aktuellste Version verwendet werden.
 <br/>Der Befehl gradle muss im PATH aufgenommen sein, oder GRADLE_HOME muss gesetzt sein.
-<br/>Gradle baut ggf. eine Verbindung zum Maven-Central-Repository auf, es muss als eine Internet-Verbindung bestehen.
+<br/>Gradle baut ggf. eine Verbindung zum Maven-Central-Repository auf, es muss also eine Internet-Verbindung bestehen.
 
 ###Java
 
@@ -37,12 +37,12 @@ Benötigt wird mindestens Java 6 (1.6). **Wichtig**: Es muss ein **JDK** sein, k
 javac -version
 javac 1.6.0_12
 {% endhighlight %}
-Falls nicht, muss ggf. die PATH-Variable angepasstw erden. Java wird bei Orcas von ant und gradle verwendet, daher evtl. auch die Konfigurationsmöglichkeiten beachten (z.B: wird JAVA_HOME von ant **vor** PATH ausgewertet).
+Falls nicht, muss ggf. die PATH-Variable angepasst werden. Java wird bei Orcas von ant und gradle verwendet, daher evtl. auch die Konfigurationsmöglichkeiten beachten (z.B: wertet ant die Variable JAVA_HOME **vor** PATH aus).
 
 ###ORACLE Client
 
 SQL\*Plus muss an der Kommandozeile aufrufbar sein. Genauso sollte ein tnsping auf die Zieldatenbank funktionieren. Orcas benutzt im Kern immer TNS und SQL\*Plus, nur einige Zusatztools (z.B. dbdoc) nutzen JDBC.
 ORACLE_HOME muss gesetzt sein.
-Der Instant-Client kann verwendet werden, dann muss ORACLE_HOME auf diesen zeigen.
-ORACLE_HOME wird derzeit nur genutzt um den JDBC-Treiber zu ermitteln.
+Der [Instant-Client](http://www.oracle.com/technetwork/database/features/instant-client/index.html) kann verwendet werden. Dann muss ORACLE_HOME auf diesen zeigen.
+ORACLE_HOME wird derzeit nur genutzt, um den JDBC-Treiber zu ermitteln.
 

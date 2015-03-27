@@ -12,28 +12,28 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 
 ##Abweichungen vom SQL Standard
 
-- Es wird nur die kompakte Schreibweise unterstützt, bei der alle constraints um weitere Angaben in dem create table enthalten sind.
+- Es wird nur die kompakte Schreibweise unterstützt, bei der alle constraints und weitere Angaben in dem create table enthalten sind.
 - Die Schlüsselworte werden nur in Kleinschreibung unterstützt.
-- Auch Indizes werden innerhalb des create table Statements erwartet, dabei wird aus dem <code>create index index_name on tabellen_name ...</code><br/>ein <code>index index_name ...</code>
+- Auch Indizes werden innerhalb des create table Statements erwartet. Dabei wird aus dem <code>create index index_name on tabellen_name ...</code><br/>ein <code>index index_name ...</code>
 - Die Reihenfolge der constraints ist wie folgt:
   1. primary key
   2. check constraint
   3. unique key
   4. foreign key
 <br/>Die index Statements können mit den unique keys gemischt werden (um z.B. einen unique key anzulegen der einen explizit angelegten index nutzt).
-  5. Mehr reservierte Begriffe: so ziemlich alle statischen Begriffe aus der Syntax sind reserviert (z.B.: "table","create","varchar2"). Alle reservierten Begriffe dürfen nicht als Namen vorkommen. Z.B. ist timestamp in SQL als Spaltenname möglich, in Orcas nicht. Diese Limitierung kann man sehr leicht umgehen, wenn man die Begriffe groß schreibt (z.B. "TIMESTAMP"). Natürlich sind in SQL reservierte Bergiffe damit auch nicht möglich.
+  5. Mehr reservierte Begriffe: so ziemlich alle statischen Begriffe aus der SQL-Syntax sind reserviert (z.B.: "table","create","varchar2"). Alle reservierten Begriffe dürfen nicht als Namen vorkommen. Z.B. ist timestamp in SQL als Spaltenname möglich, in Orcas nicht. Diese Limitierung kann man sehr leicht umgehen, wenn man die Begriffe groß schreibt (z.B. "TIMESTAMP"). Natürlich sind in SQL reservierte Begriffe damit auch nicht möglich.
 
 ###Syntax
 
 {% highlight sql %}
 create {permanent|global temporary} table table_name [alias table_alias](
-  column_name { varchar2(scale {BYTE|CHAR} ) | number(scale[,precision]) | clob(scale) | blob | xmltype | date } [default "default_value"] {not null}
+  column_name { [n]varchar2(char_length {BYTE|CHAR} ) | number[(precision[,scale])] | [n]clob | blob | xmltype | date | timestamp[(scale)][ with_time_zone] | rowid | raw(data_length) | long_raw | float | long | object } [default "default_value"] {not null}
   constraint constraint_name primary key ( primary_key_columns ) { enable | disable }
   constraint constraint_name check ( "check_statement" ) { enable | disable }
   constraint constraint_name { index | unique key } ( colums ) { enable | disable }
   index index_name { function_based | domain_index } ( colums ) { nonunique | unique } { logging | nologging} { noparallel | parallel}
-  constraint consrtaint_name foreign key ( _src_column ) references des_table_name ( dest_column ) { on delete nothing | on delete cascade } { enable | disable }
-  comment on { table | column } {column_name}_ is "comment_string";
+  constraint constraint_name foreign key ( src_column ) references ref_table_name ( ref_column ) { on delete nothing | on delete cascade } { enable | disable }
+  comment on { table | column } column_name is "comment_string";
 );
 {% endhighlight %}
 
@@ -81,6 +81,10 @@ Bei Spalten werden folgende Datentypen unterstützt:
 - nclob
 - xmltype
 - rowid
+- timestamp - Angabe von Länge und/oder Timezone ist möglich
+- raw
+- long raw
+- float
 
 Bei Defaultwerten müssen doppelte Anführungszeichen um den Ausdruck gesetzt werden.
 
@@ -111,11 +115,11 @@ index orit_ix (value) unique nologging parallel
 {% endhighlight %}
 
 {% highlight sql %}
-index name_lastname_birthdate_ix "upper(lastname),upper(name)"
+index name_lastname_ix "upper(lastname),upper(name)"
 {% endhighlight %}
 
 **Achtung**
-<br/>Möchte man sicherstellen, dass der Index nicht bei jedem Build Neu angelegt wird, muss die Definition eines Function-Based-Index in Großbuchstaben erfolgen!
+<br/>Möchte man sicherstellen, dass der Index nicht bei jedem Build neu angelegt wird, muss die Definition eines Function-Based-Index in Großbuchstaben erfolgen!
 
 {% highlight sql %}
 index such_ix (orde_clob) domain_index "indextype is CTXSYS.CONTEXT PARAMETERS (''Wordlist GERMAN_STEM_PREF'')"
@@ -129,11 +133,11 @@ create unique index orit_price_ix on order_items (price)
 
 ##Foreign Key
 
-Bei Foreign Keys gibt es einige Möglichkeiten über [Extension]({{site.baseurl}}/docs/extensions/) die Syntax zu vereinfachen (z.B. weglassen der Spaltenangabe wenn diese über Namenskonventionen bestimmt werden können).
+Bei Foreign Keys gibt es einige Möglichkeiten über [Extension]({{site.baseurl}}/docs/extensions/) die Syntax zu vereinfachen (z.B. Weglassen der Spaltenangabe, wenn diese über Namenskonventionen bestimmt werden kann).
 
 ##Sequence
 
-Bei Sequences kann nur der Sequence Name angegeben werden. Zusätzlich kann ein Select angegeben werden, was den größten verwendeten Wert zurückliefert. Wenn dies geschieht, wird geprüft, auf welchen Wert die Sequence aktuell steht und ggf. die Sequence hochgezählt.
+Bei Sequences kann nur der Sequence-Name angegeben werden. Zusätzlich kann ein Select angegeben werden, was den größten verwendeten Wert zurückliefert. Wenn dies geschieht, wird geprüft, auf welchem Wert die Sequence aktuell steht und ggf. die Sequence hochgezählt.
 
 ###Syntax
 
@@ -151,7 +155,7 @@ create sequence order_items_seq orcas_ext_max_value_select 'select nvl(max(orit_
 
 ##Kommentare
 
-Zum auskommentieren von Inhalten der Tabellen-Skripte kann die in Java übliche Syntax /\* und \*/ verwendet werden.
+Zum Auskommentieren von Inhalten der Tabellen-Skripte kann die in Java und PL/SQL übliche Syntax /\* und \*/ verwendet werden.
 
 {% highlight sql %}
 create table order_items
@@ -164,7 +168,7 @@ create table order_items
 
 ##Materialized Views
 
-Materialized view log purge clause: Es gilt die Regel, das start with angegeben werden muss, wenn next oder repeat interval gesetzt werden.
+Materialized view log purge clause: Es gilt die Regel, dass <code>start with</code> angegeben werden muss, wenn <code>next</code> oder <code>repeat interval</code> gesetzt werden.
 
 ##Vollständige Syntax Definition
 

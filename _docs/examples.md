@@ -5,7 +5,7 @@ permalink: /docs/examples/
 ---
 
 Das **Orderentry-Beispiel** ist das Basis-Beispiel für alle anderen Beispiel-Projekte.
-Somit sollte man inital das Orderentry-Beispiel zum laufen bekommen und dann wenig Probleme haben mit den andren Beispiel-Projekten zu arebiten.
+Somit sollte man inital das Orderentry-Beispiel ans Laufen bekommen und dann wenig Probleme haben mit den anderen Beispiel-Projekten zu arbeiten.
 
 Das Beispiel setzt das "location" Konzept um, mit dem verschiedene Zielumgebungen (z.B. entwicklung, test, produktion) über locations gehandhabt werden.
 
@@ -33,11 +33,11 @@ username_schemaowner  =orderentry
 
 Die Datei muss angepasst werden, mindestens "password_dba" muss geändert werden (ansonsten passt die Konfiguration für eine lokale-default XE-Installation).
 
-**Wichtig**: Die jdbc_XXX Einträge sind nur von zweitrangiger Bedeutung (für einen eifahcne Test werden sie nicht benötigt). Wichtig ist insbesondere "database". Im Beispiel muss ein *tnsping XE* funktionieren (ansonsten evtl. TNS-Names konfigurieren).
+**Wichtig**: Die jdbc_XXX Einträge sind nur von zweitrangiger Bedeutung (für einen einfachen Test werden sie nicht benötigt). Wichtig ist insbesondere "database". Im Beispiel muss ein *tnsping XE* funktionieren (ansonsten evtl. TNS-Names konfigurieren).
 
-**Wichtig**: Alle Beispiele sollten nicht auf **Produktiv**-Datenbanken eingerichtet werden!
+**Wichtig**: Alle Beispiele sollten **nicht** auf **Produktiv**-Datenbanken eingerichtet werden!
 
-*Hinweis*: Es ist keinesfalls notwenig Orcas mit DBA-Rechten laufen zu lassen. Die Beispiel-Projkete sind nur der einfachheit halber so aufgesetzt, dass benötige Datenbank-User automatisch angelegt werden.
+*Hinweis*: Es ist keinesfalls notwenig Orcas mit DBA-Rechten laufen zu lassen. Die Beispiel-Projekte sind nur der Einfachheit halber so aufgesetzt, dass benötige Datenbank-User automatisch angelegt werden.
 
 ###Einmalig Orcas und das Beispiel auf der Datenbank einrichten:
 
@@ -71,10 +71,10 @@ BUILD SUCCESSFUL
 Total time: 12 seconds
 {% endhighlight %}
 
-Die Laufzeit beim aller ersten Lauf wird deutlich länger als 12 Sekunden sein (typischerweise einige Minuten). Zum einen wird Orcas alle benötigten Bibliotheken aus dem Internet (Maven-Central) nachladen, zum anderen wird Orcas beim ersten Lauf aus den Sourcen zusammengebaut. Der eigentliche Abgleich geht dagegen sehr schnell, ein erneuter Aufruf von ant sollte also tatsächlich nur um die 12 Sekunden benötigen. Die Laufzeit sollte auch mit steigender Anzahl an Tabellen nicht zu sehr ansteigen, so ist es z.B. durchaus möglich ein Schema mit 1000 Tabellen (samt zugehöriger Constraints) innerhalb einer Minute abzugleichen. Die Laufzeit wird erst dann signifikant setigen, wenn viele oder langweirige Datenbank-Statements ausgeführt werden müssen.
+Die Laufzeit beim ersten Lauf wird deutlich länger als 12 Sekunden sein (typischerweise einige Minuten). Zum einen wird Orcas alle benötigten Bibliotheken aus dem Internet (Maven-Central) nachladen, zum anderen wird Orcas beim ersten Lauf aus den Sourcen zusammengebaut. Der eigentliche Abgleich geht dagegen sehr schnell. Ein erneuter Aufruf von ant sollte also tatsächlich nur um die 12 Sekunden benötigen. Die Laufzeit sollte auch mit steigender Anzahl an Tabellen nicht zu sehr ansteigen, so ist es z.B. durchaus möglich, ein Schema mit 1000 Tabellen (samt zugehöriger Constraints) innerhalb einer Minute abzugleichen. Die Laufzeit wird erst dann signifikant steigen, wenn viele oder langwierige Datenbank-Statements ausgeführt werden müssen.
 
 ###Orcas benutzen
-Wenn alles woeit erfolgreich verlaufen ist, kann man unter: [Wie arbeitet man mit Orcas?]({{site.baseurl}}/docs/usage/) eine kurze Einführung in die Arbeitsweise erhalten, oder direkt zu den andrene Projekten übergehen.
+Wenn alles soweit erfolgreich verlaufen ist, kann man unter: [Wie arbeitet man mit Orcas?]({{site.baseurl}}/docs/usage/) eine kurze Einführung in die Arbeitsweise erhalten, oder direkt zu den anderen Projekten übergehen.
 
 ##Andere Beispiele
 
@@ -90,11 +90,11 @@ In diesem Beispiel wird die [Domain-Extension]({{site.baseurl}}/docs/domain-exte
 
 ###extension_demo
 
-In diesem Beispiel wird gezeigt wie man eigene [Extensions]({{site.baseurl}}/docs/extensions/) verwenden kann.
+In diesem Beispiel wird gezeigt, wie man eigene [Extensions]({{site.baseurl}}/docs/extensions/) verwenden kann.
 
 ###liquibase_integration
 
-In diesem Beispiel wird gezeigt wie man liquibase mit Orcas kombinieren kann.
+In diesem Beispiel wird gezeigt, wie man liquibase mit Orcas kombinieren kann.
 
 ###orderentry_one_schema
 
@@ -106,5 +106,5 @@ In diesem Beispiel wird die SQL*Plus-API verwendet, dies sollte nur in Projekten
 
 ###target_plsql_demo
 
-In diesem Beispiel wird gezeigt wie man die Tabellen-Metadaten aus Orcas für eigene Zwecke nutzen kann (Im Beispiel um Trigger zu generieren).
+In diesem Beispiel wird gezeigt, wie man die Tabellen-Metadaten aus Orcas für eigene Zwecke nutzen kann (Im Beispiel um Trigger zu generieren).
 
