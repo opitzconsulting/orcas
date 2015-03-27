@@ -27,7 +27,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 
 {% highlight sql %}
 create {permanent|global temporary} table table_name [alias table_alias](
-  column_name { [n]varchar2(char_length {BYTE|CHAR} ) | number[(precision[,scale])] | [n]clob | blob | xmltype | date | timestamp[(scale)][ with_time_zone] | rowid | raw(data_length) | long_raw | float | long | object } [default "default_value"] {not null}
+  column_name { [n]varchar2(char_length {BYTE|CHAR} ) | number[(precision[,scale])] | [n]clob | blob | xmltype | date | timestamp[(scale)][ with_time_zone] | rowid | raw(data_length) | long_raw | float | long | object } [default "default_value"] [not null]
   constraint constraint_name primary key ( primary_key_columns ) { enable | disable }
   constraint constraint_name check ( "check_statement" ) { enable | disable }
   constraint constraint_name { index | unique key } ( colums ) { enable | disable }
