@@ -6,7 +6,7 @@
     <ant dir="orderentry/db" target="ci_jenkins"/>         
     <ant dir="orderentry_one_schema/db" target="ci_jenkins"/>    
     <ant dir="sqlplus/db" target="ci_jenkins"/> 
-    <ant dir="liquibase_integration/db" target="ci_jenkins"/> 
+    <ant dir="liquibase_integration/db" target="ci_jenkins"/>  
   </target>
 </project>
 

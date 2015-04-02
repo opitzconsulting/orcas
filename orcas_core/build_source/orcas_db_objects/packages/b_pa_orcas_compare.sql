@@ -840,59 +840,61 @@ CREATE OR REPLACE package body pa_orcas_compare is
       v_return := v_return || ' default ' || p_orig_column.i_default_value;
     end if;
     
-    if( p_orig_column.i_identity is not null )
-    then
-      v_return := v_return || ' generated';
-      if( p_orig_column.i_identity.i_always is not null)
+    $IF DBMS_DB_VERSION.VERSION >= 12 $THEN
+      if( p_orig_column.i_identity is not null )
       then
-        v_return := v_return || ' always';      
-      end if;
-      if( p_orig_column.i_identity.i_by_default is not null)
-      then
-        v_return := v_return || ' by default';      
-      end if;
-      if( p_orig_column.i_identity.i_on_null is not null)
-      then
-        v_return := v_return || ' on null';      
-      end if;
-      v_return := v_return || ' as identity';      
-      
-      v_return := v_return || ' (';      
-
-      if( p_orig_column.i_identity.i_increment_by is not null and p_orig_column.i_identity.i_increment_by > 0 )    
-      then
-        v_return := v_return || ' increment by ' || p_orig_column.i_identity.i_increment_by;
-      else      
-        v_return := v_return || ' increment by 1';
-      end if;      
-      
-      if( p_orig_column.i_identity.i_maxvalue is not null and p_orig_column.i_identity.i_maxvalue > 0)
-      then
-        v_return := v_return || ' maxvalue ' || p_orig_column.i_identity.i_maxvalue;      
-      end if;
-      
-      if( p_orig_column.i_identity.i_minvalue is not null and p_orig_column.i_identity.i_minvalue > 0)
-      then
-        v_return := v_return || ' minvalue ' || p_orig_column.i_identity.i_minvalue;      
-      end if;
-      
-      if( p_orig_column.i_identity.i_cycle is not null )
-      then
-        v_return := v_return || ' ' || p_orig_column.i_identity.i_cycle.i_literal;      
-      end if;
-      
-      if( p_orig_column.i_identity.i_cache is not null and p_orig_column.i_identity.i_cache > 0)
-      then
-        v_return := v_return || ' cache ' || p_orig_column.i_identity.i_cache;      
-      end if;
-      
-      if( p_orig_column.i_identity.i_order is not null )
-      then
-        v_return := v_return || ' ' || p_orig_column.i_identity.i_order.i_literal;      
-      end if;
-      
-      v_return := v_return || ' )';            
-    end if;    
+        v_return := v_return || ' generated';
+        if( p_orig_column.i_identity.i_always is not null)
+        then
+          v_return := v_return || ' always';      
+        end if;
+        if( p_orig_column.i_identity.i_by_default is not null)
+        then
+          v_return := v_return || ' by default';      
+        end if;
+        if( p_orig_column.i_identity.i_on_null is not null)
+        then
+          v_return := v_return || ' on null';      
+        end if;
+        v_return := v_return || ' as identity';      
+        
+        v_return := v_return || ' (';      
+  
+        if( p_orig_column.i_identity.i_increment_by is not null and p_orig_column.i_identity.i_increment_by > 0 )    
+        then
+          v_return := v_return || ' increment by ' || p_orig_column.i_identity.i_increment_by;
+        else      
+          v_return := v_return || ' increment by 1';
+        end if;      
+        
+        if( p_orig_column.i_identity.i_maxvalue is not null and p_orig_column.i_identity.i_maxvalue > 0)
+        then
+          v_return := v_return || ' maxvalue ' || p_orig_column.i_identity.i_maxvalue;      
+        end if;
+        
+        if( p_orig_column.i_identity.i_minvalue is not null and p_orig_column.i_identity.i_minvalue > 0)
+        then
+          v_return := v_return || ' minvalue ' || p_orig_column.i_identity.i_minvalue;      
+        end if;
+        
+        if( p_orig_column.i_identity.i_cycle is not null )
+        then
+          v_return := v_return || ' ' || p_orig_column.i_identity.i_cycle.i_literal;      
+        end if;
+        
+        if( p_orig_column.i_identity.i_cache is not null and p_orig_column.i_identity.i_cache > 0)
+        then
+          v_return := v_return || ' cache ' || p_orig_column.i_identity.i_cache;      
+        end if;
+        
+        if( p_orig_column.i_identity.i_order is not null )
+        then
+          v_return := v_return || ' ' || p_orig_column.i_identity.i_order.i_literal;      
+        end if;
+        
+        v_return := v_return || ' )';            
+      end if;    
+    $END
     
     if( p_orig_column.i_notnull_flg = 1 )      
     then
