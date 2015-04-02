@@ -21,6 +21,10 @@
   <target name="build_all" depends="show_location">
     <orcas_initialize extensionfolder="../orcas_extensions"/>
     <orcas_execute_statics scriptfolder="tabellen"/>
+    <orcas_execute_script script="triggergenerator/pa_generator_h"/>
+    <orcas_execute_script script="triggergenerator/pa_generator_b"/>
+    <orcas_compile_db_objects />
+    <orcas_execute_statics scriptfolder="tabellen" targetplsql="pa_generator"/>
   </target>
 
   <target name="ci_jenkins" depends="drop_users,install_all,build_all">
