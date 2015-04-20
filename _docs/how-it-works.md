@@ -52,7 +52,7 @@ Dabei sollen folgende Punkte gelten:
 
 ##Extract (reverse Engineering)
 
-![Extract - Reverse Engineering]({{site.baseurl}}/assets/reverse_orcas.gif)
+![Extract - Reverse Engineering]({{site.baseurl}}/assets/function_reverse.gif)
 
 1. Die IST-Daten werden aus dem Schema ausgelesen.
 2. Die Daten werden von den PL/SQL-Strich-Typen in die "normalen" PL/SQL-(ohne-Strich)-Typen transformiert.
