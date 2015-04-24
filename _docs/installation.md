@@ -22,7 +22,9 @@ Zu finden unter [apache.org](http://ant.apache.org/). Bis auf weiteres kann die 
 
 ###ant-contrib
 
-Zu finden unter [sourceforge.net](http://sourceforge.net/projects/ant-contrib/) z.B: ant-contrib-1.0b3.jar. Die Datei muss nach ANT_HOME/lib kopiert werden.
+Wichtig die **neueste** **Version** ist **nicht** die **richtige**! Die letzte funktionsfähige Version ist ant-contrib-1.0b3.jar.
+Zu finden unter [sourceforge.net/ant-contrib-1.0b3.zip](http://sourceforge.net/projects/ant-contrib/files/ant-contrib/1.0b3/ant-contrib-1.0b3-bin.zip/download). 
+Die Datei muss nach ANT_HOME/lib kopiert werden. **Die jar-Datei muss aus der zip-Datei extrahiert werden!**
 
 ###Gradle
 
@@ -38,11 +40,16 @@ javac -version
 javac 1.6.0_12
 {% endhighlight %}
 Falls nicht, muss ggf. die PATH-Variable angepasst werden. Java wird bei Orcas von ant und gradle verwendet, daher evtl. auch die Konfigurationsmöglichkeiten beachten (z.B: wertet ant die Variable JAVA_HOME **vor** PATH aus).
+Download-Link für Java 8: [Download](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 ###ORACLE Client
 
 SQL\*Plus muss an der Kommandozeile aufrufbar sein. Genauso sollte ein tnsping auf die Zieldatenbank funktionieren. Orcas benutzt im Kern immer TNS und SQL\*Plus, nur einige Zusatztools (z.B. dbdoc) nutzen JDBC.
 ORACLE_HOME muss gesetzt sein.
+
+####ORACLE Thin Client
 Der [Instant-Client](http://www.oracle.com/technetwork/database/features/instant-client/index.html) kann verwendet werden. Dann muss ORACLE_HOME auf diesen zeigen.
 ORACLE_HOME wird derzeit nur genutzt, um den JDBC-Treiber zu ermitteln.
+Es werden das "Baisc"-Package und das "SQL\*Plus"-Package benötigt. Der Instant Client kommt im Normalfall ohne tnsping, somit sollte das Setup über ein erfolgreichen SQL\*Plus connect getestet werden. 
+Um eine tnsnames.ora mit dem Thin Client verwenden zu können muss diese manuelle im Unterverzeichnis ORACLE_HOME/network/admin angelegt werden (inklusive der Verzeichnisse) oder die TNS_ADMIN Variable muss entsprechend gesetzt sein.
 
