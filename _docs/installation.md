@@ -50,6 +50,6 @@ ORACLE_HOME muss gesetzt sein.
 ####ORACLE Thin Client
 Der [Instant-Client](http://www.oracle.com/technetwork/database/features/instant-client/index.html) kann verwendet werden. Dann muss ORACLE_HOME auf diesen zeigen.
 ORACLE_HOME wird derzeit nur genutzt, um den JDBC-Treiber zu ermitteln.
-Es werden das "Baisc"-Package und das "SQL\*Plus"-Package benötigt. Der Instant Client kommt im Normalfall ohne tnsping, somit sollte das Setup über ein erfolgreichen SQL\*Plus connect getestet werden. 
+Es werden das "Basic"-Package und das "SQL\*Plus"-Package benötigt. Der Instant Client kommt im Normalfall ohne tnsping, somit sollte das Setup über ein erfolgreichen SQL\*Plus connect getestet werden. 
 Um eine tnsnames.ora mit dem Thin Client verwenden zu können muss diese manuelle im Unterverzeichnis ORACLE_HOME/network/admin angelegt werden (inklusive der Verzeichnisse) oder die TNS_ADMIN Variable muss entsprechend gesetzt sein.
 
