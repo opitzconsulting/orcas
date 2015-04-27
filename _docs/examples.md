@@ -40,7 +40,7 @@ Die Datei muss angepasst werden, mindestens "password_dba" muss geändert werden
 
 ###Einmalig Orcas und das Beispiel auf der Datenbank einrichten:
 
-Mit *ant install_all* werden die benötigten Datenbnak-User einmalig eingerichtet.
+Mit *ant install_all* werden die benötigten Datenbank-User einmalig eingerichtet.
 
 {% highlight bash %}
 Verzeichnis: examples\orderentry\db
