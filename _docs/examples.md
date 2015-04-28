@@ -40,7 +40,7 @@ Die Datei muss angepasst werden, mindestens "password_dba" muss geändert werden
 
 ###Einmalig Orcas und das Beispiel auf der Datenbank einrichten:
 
-Mit *ant install_all* werden die benötigten Datenbnak-User einmalig eingerichtet.
+Mit *ant install_all* werden die benötigten Datenbank-User einmalig eingerichtet.
 
 {% highlight bash %}
 Verzeichnis: examples\orderentry\db
@@ -49,8 +49,10 @@ ant install_all
 
 Wenn das erfolgreich durchgelaufen ist, gibt es auf der Zieldatenbank zwei neue User:
 
-- ORDERENTRY (Schemaowner, der die abzugleichenden Tabellen enthält)
-- ORDERENTRY_ORCAS (User der Orcas enthält)
+- ORCAS_ORDERENTRY (Schemaowner, der die abzugleichenden Tabellen enthält)
+- ORCAS_ORDERENTRY_ORCAS (User, der Orcas enthält)
+
+Die Passwörter der beiden User sind definiert in der Datei "examples\orderentry\distribution\default.properties" (standardmässig für beide gleichlautend mit dem Schemaowner in Kleinbuchstaben).
 
 Wenn der *ant install_all*-Lauf abbricht, dann müssen die beiden User ggf. vorher wieder gelöscht werden, damit ein erneuter Aufruf von *install_all* funktioniert.
 
