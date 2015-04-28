@@ -28,7 +28,6 @@ jdbc_sid              =XE
 jdbc_port             =1521
 username_dba          =system
 password_dba          =my_system_password
-username_schemaowner  =orderentry
 {% endhighlight %}
 
 Die Datei muss angepasst werden, mindestens "password_dba" muss geändert werden (ansonsten passt die Konfiguration für eine lokale-default XE-Installation).
