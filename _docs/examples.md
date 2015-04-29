@@ -9,7 +9,7 @@ Somit sollte man inital das Orderentry-Beispiel ans Laufen bekommen und dann wen
 
 Das Beispiel setzt das "location" Konzept um, mit dem verschiedene Zielumgebungen (z.B. entwicklung, test, produktion) über locations gehandhabt werden.
 
-Dabei handelt es sich im wesentlichen um ein Setup zur Verwaltung von properties, das auch für andere Teile des Projektes genutzt werden kann.
+Dabei handelt es sich im Wesentlichen um ein Setup zur Verwaltung von properties, das auch für andere Teile des Projektes genutzt werden kann.
 
 ##Setup Orderentry
 
