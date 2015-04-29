@@ -4,9 +4,9 @@ title: Teil 2.2 - Eigenes Orcas Schema
 permalink: /docs/schulung_teil2_2/
 ---
 
-Wie schon gesagt, die empfohlene Vorgehensweis ist nicht Orcas im selben Schema zu installeirn das auch abgegelichen werden soll. Daher werden wir unser Projekt auf die Nutzung eines separaten Orcas-Schemas umstellen.
+Wie schon gesagt, die empfohlene Vorgehensweis ist nicht Orcas im selben Schema zu installieren das auch abgeglichen werden soll. Daher werden wir unser Projekt auf die Nutzung eines separaten Orcas-Schemas umstellen.
 
-Zunächst einmal sollten wir dazu unser bestehendes Schema neu aufsetzen, um die Orcas-DB-Objekte wieder los zu werden (prinzipiell könnten wqir dazu acuh Orcas-Mittel nutzen, die "kennen" wir aber momentan noch gar nicht).
+Zunächst einmal sollten wir dazu unser bestehendes Schema neu aufsetzen, um die Orcas-DB-Objekte wieder los zu werden (prinzipiell könnten wir dazu auch Orcas-Mittel nutzen, die "kennen" wir aber momentan noch gar nicht).
 
 {% highlight bash %}
 SQL-Skript mit DBA-User auszuführen:
@@ -68,6 +68,6 @@ Verzeichnis: myproject
 ant 
 {% endhighlight %}
 
-Das Ergebnis ist jetzt, dass im myproject nur noch unsere "mytable" existiert, die beiden ORCAS_-Tabellen liegen jetz im Schema "myschema_orcas".
+Das Ergebnis ist jetzt, dass im myproject nur noch unsere "mytable" existiert, die beiden ORCAS_-Tabellen liegen jetzt im Schema "myschema_orcas".
 
 

@@ -55,14 +55,14 @@ ant
 
 Dies führt erst mal nicht zu eienr wesentlichen Veränderung, da unser "migrations_skripte" Verzeichnis ja leer ist.
 
-Um zu verifizieren, dass das auch funktioniert erstellen wir jetzt im Verzeichnis "migrations_skripte" die Datei "test1.sql" mit folgendm Inhalt:
+Um zu verifizieren, dass das auch funktioniert erstellen wir jetzt im Verzeichnis "migrations_skripte" die Datei "test1.sql" mit folgendem Inhalt:
 {% highlight bash %}
 select 'hello world' from dual
 /
 
 {% endhighlight %}
 
-Ein erneuter ant-Aufruf sollte irgednwo in den log-Ausgaben "hello world" anzeigen. Dies aber nur beim ersten Aufruf, jeder weitere Aufruf sollte diese Ausgabe nicht mehr beinhalten.
+Ein erneuter ant-Aufruf sollte irgendwo in den log-Ausgaben "hello world" anzeigen. Dies aber nur beim ersten Aufruf, jeder weitere Aufruf sollte diese Ausgabe nicht mehr beinhalten.
 
 Orcas protokolliert die Ausführung der one_time_scripts. Diese kann bei Bedarf eingesehen werden:
 
