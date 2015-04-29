@@ -11,7 +11,7 @@ Im 2. Teil der Schulung soll es darum gehen, wie man einen Orcas-Build-Ablauf ao
 Um mit Orcas ein DB-Schema (DB-User) zu verwalten benötigen wir natürlich erst mal ein Schema für unser Projekt:
 
 {% highlight bash %}
-DBA-User-SQL:
+SQL-Skript mit DBA-User auszuführen:
 create user myschema identified by myschema;
 grant connect to myschema;
 grant resource to myschema;
@@ -111,4 +111,8 @@ Innerhalb unseres ant-targets benutzen wir zwei oracs-ant-tasks.
 Der Erste ist "orcas_initialize" und dient dazu Orcas "einzurichten" (Orcas wird zum einen aus den Sourcen kompiliert und zum anderen müssen die Orcas-Datenbankobjekte wie z.B. PL/SQL-Packages in dem Datenbankschema eingespielt werden). "orcas_initialize" muss immer ausgeführt werden bevor irgendein anderer orcas-ant-task ausgeführt werden kann (mit sehr wenigen Ausnahmen).
 
 Der zweite orcas-ant-task ist "orcas_execute_statics", dieser startet den eigentlichen Orcas-Ablauf und ist somit auch der, der unsere Tabelle "mytable" angelegt hat.
+
+## Weitere Schritte
+
+In den nachfolgenden Übungen wird unser Beispielprojekt Schritt für Schritt erweitert. Das bedeutet nicht, dass jeder dieser Schritte für jedes Projekt sinnvoll ist.
 
