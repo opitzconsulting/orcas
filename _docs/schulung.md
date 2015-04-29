@@ -20,3 +20,5 @@ permalink: /docs/schulung/
 
 ### sapp-client
 
+### location-konzept
+
