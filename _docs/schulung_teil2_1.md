@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Teil 2 - Orcas ant-Tasks
-permalink: /docs/schulung_teil2/
+title: Teil 2.1 - Orcas ant-Tasks
+permalink: /docs/schulung_teil2_1/
 ---
 
 Im 2. Teil der Schulung soll es darum gehen, wie man einen Orcas-Build-Ablauf so aufbaut, dass er für das eigene Projekt passt.

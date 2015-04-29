@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Teil 2.2 - one_time_scripts
+title: Teil 2.3 - one_time_scripts
 permalink: /docs/schulung_teil2_3/
 ---
 
@@ -35,7 +35,7 @@ Im 1. Teil der Schulung haben wir gelernt, dass zur Orcas-Arbeitsweise auch Skri
 </project>
 {% endhighlight %}
 
-Neu hinzugekommen ist der ant-task "orcas_execute_one_time_scripts". Diesem haben wir mitgetielt, dass unsere Skripte im Verzeichnis "migrations_skripte" liegen sollen. Diesem ant-task müssen wir einen eindeutigen logname geben (normalerweise ist dieser Optional).
+Neu hinzugekommen ist der ant-task "orcas_execute_one_time_scripts". Diesem haben wir mitgeteilt, dass unsere Skripte im Verzeichnis "migrations_skripte" liegen sollen. Diesem ant-task müssen wir einen eindeutigen logname geben (normalerweise ist dieser Optional).
 
 ## Orcas starten
 
