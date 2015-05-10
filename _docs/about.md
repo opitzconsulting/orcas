@@ -9,7 +9,7 @@ Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes **Datenban
 <br/>Orcas bietet dazu auch die Möglichkeit **kompliziertere Überführungen** zu **integrieren**.
 <br/>Orcas hat zudem einen **Extension**-Mechanismus, mit dem die **Definition** des Datenbankschemas deutlich **vereinfach** und **vereinheitlicht** werden kann.
 
-Orcas steht für **Or**a**c**le **a**daptive/**a**gile **s**chemas und ist nur mit Oracle RDBMS kompatibel. 
+Orcas steht für **Or**a**c**le **a**daptive **s**chemas und ist nur mit Oracle RDBMS kompatibel. 
 
 ##Problemstellung
 
