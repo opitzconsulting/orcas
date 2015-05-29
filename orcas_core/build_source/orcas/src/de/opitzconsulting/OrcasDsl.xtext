@@ -1,0 +1,188 @@
+grammar de.opitzconsulting.OrcasDsl with org.eclipse.xtext.common.Terminals
+
+generate orcasDsl "http://www.opitzconsulting.de/OrcasDsl"
+
+Model :
+  (model_elements+=ModelElement)+;
+  
+ModelElement:  
+  Table | Sequence | IndexExTable | Comment | Mview;
+
+Table :
+  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
+
+TablePartitioning :
+  "partition" "by" (RangePartitions | HashPartitions | ListPartitions | RefPartitions);
+
+RangePartitions :
+  "range" "(" (columns+=ColumnRef)+ ")" ("interval" "(" intervalExpression=STRING ")")? ("(" (partitionList+=RangePartition)+ ")" | tableSubPart=TableSubPart "(" (subPartitionList+=RangeSubPart)+ ")");
+
+TableSubPart :
+  "subpartition" "by" (RangeSubParts | ListSubParts | HashSubParts);
+
+RangeSubParts :
+  "range" "(" (columns+=ColumnRef)+ ")";
+
+ListSubParts :
+  "list" "(" column=ColumnRef ")";
+
+HashSubParts :
+  "hash" "(" column=ColumnRef ")";
+
+RangeSubPart :
+  "partition" name=DBNAME "values" "less" "than" "(" (value+=RangePartitionValue)+ ")" "(" (subPartList+=SubSubPart)+ ")" (",")?;
+
+ListSubPart :
+  "partition" name=DBNAME "values" "(" (value+=ListPartitionValue)+ ")" "(" (subPartList+=SubSubPart)+ ")" (",")?;
+
+SubSubPart :
+  RangeSubSubPart | ListSubSubPart | HashSubSubPart;  
+
+RangeSubSubPart :
+  "subpartition" name=DBNAME "values" "less" "than" "(" (value+=RangePartitionValue)+ ")" ("tablespace" tablespace=DBNAME)? (",")?;
+
+ListSubSubPart :
+  "subpartition" name=DBNAME "values" "(" (value+=ListPartitionValue)+ ")" ("tablespace" tablespace=DBNAME)? (",")?;
+
+HashSubSubPart :
+  "subpartition" name=DBNAME ("tablespace" tablespace=DBNAME)? (",")?;
+
+RangePartition :
+  "partition" name=DBNAME "values" "less" "than" "(" (value+=RangePartitionValue)+ ")" ("tablespace" tablespace=DBNAME)? (",")?;
+
+RangePartitionValue :
+  (maxvalue="maxvalue" | value=STRING) (",")?;
+
+HashPartitions :
+  "hash" "(" column=ColumnRef ")" "(" (partitionList+=HashPartition)+ ")";
+
+HashPartition :
+  "partition" name=DBNAME ("tablespace" tablespace=DBNAME)? (",")?;
+
+RefPartitions :
+  "reference" "(" fkName=DBNAME ")" "(" (partitionList+=RefPartition)+ ")";
+
+RefPartition :
+  "partition" name=DBNAME ("tablespace" tablespace=DBNAME)? (",")?;
+
+ListPartitions :
+  "list" "(" column=ColumnRef ")" ("(" (partitionList+=ListPartition)+ ")" | tableSubPart=TableSubPart "(" (subPartitionList+=ListSubPart)+ ")");
+
+ListPartition :
+  "partition" name=DBNAME "values" "(" (value+=ListPartitionValue)+ ")" ("tablespace" tablespace=DBNAME)? (",")?;
+
+ListPartitionValue :
+  (default="default" | value=STRING) (",")?;
+
+LobStorage :
+  "lob" "(" column_name=DBNAME ")" "store" "as" "(" ("tablespace" tablespace=DBNAME)? ")" (",")?; 
+  
+Column :
+  name=DBNAME data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (with_time_zone="with_time_zone")? ("type" object_type=STRING)? ("default" default_value=STRING)? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
+  
+enum DataType :
+  number="number"|blob="blob"|clob="clob"|nclob="nclob"|varchar2="varchar2"|nvarchar2="nvarchar2"|char="char"|date="date"|xmltype="xmltype"|timestamp="timestamp"|rowid="rowid"|raw="raw"|long_raw="long_raw"|float="float"|long="long"|object="object";  
+  
+Constraint :  
+  "constraint" consName=DBNAME "check" "(" rule=STRING ")" ("deferrable" "initially" deferrtype=DeferrType)? (status=EnableType)? (",")?;
+  
+IndexOrUniqueKey :
+  Index | UniqueKey;  
+
+ForeignKey :
+  "constraint" consName=DBNAME "foreign" "key" ("("(srcColumns+=ColumnRef)*")")? "references" destTable=DBNAME ("("(destColumns+=ColumnRef)+")")? ("on" "delete" (delete_rule=FkDeleteRuleType))? ("deferrable" "initially" deferrtype=DeferrType)? (status=EnableType)? (",")?;
+   
+PrimaryKey :
+  ("constraint" consName=DBNAME)? "primary" "key" "(" (pk_columns+=ColumnRef)+ ")" (status=EnableType)? ("using" "index" (reverse="reverse")? ("tablespace" tablespace=DBNAME)?)? (",")?;  
+
+UniqueKey :
+  "constraint" consName=DBNAME "unique" "(" (uk_columns+=ColumnRef)+ ")" ("using" "index" ("tablespace" tablespace=DBNAME)? (indexname=DBNAME)?)? (status=EnableType)? (",")?;  
+  
+Index :
+  "index" consName=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? (",")?;  
+  
+IndexExTable:
+ "create" (uniqueness="unique"|uniqueness="nonunique")? (bitmap="bitmap")? "index" index_name=DBNAME ("on")? table_name=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? ";";
+
+enum FkDeleteRuleType :
+  cascade="cascade"|no_action="no_action"|set_null="set_null";  
+
+enum DeferrType :
+  immediate="immediate"|deferred="deferred"; 
+
+enum CharType :
+  byte="BYTE"|char="CHAR";  
+
+enum LoggingType :
+  logging="logging"|nologging="nologging";  
+
+enum EnableType :
+  enable="enable"|disable="disable";    
+  
+enum ParallelType :
+  parallel="parallel"|noparallel="noparallel";  
+  
+enum IndexGlobalType :
+  local="local"|global="global";  
+
+enum CommentObjectType :
+  table="table"|column="column"; 
+  
+enum PermanentnessType :
+  global_temporary="temporary"|permanent="permanent"; 
+  
+enum PermanentnessTransactionType :
+  on_commit_delete="delete"|on_commit_preserve="preserve"; 
+
+enum CycleType :
+  cycle="cycle"|nocycle="nocycle";  
+
+enum OrderType :
+  order="order"|noorder="noorder";   
+  
+enum CompressForType :
+  all="all_operations"|direct_load="direct_load_operations"|query_low="query_low"|query_high="query_high" | archive_low = "archive_low" | archive_high = "archive_high";    
+  
+enum CompressType :
+  nocompress="nocompress"|compress="compress";     
+  
+enum BuildModeType :
+  immediate="immediate"|deferred="deferred"|prebuilt="prebuilt";  
+  
+enum RefreshModeType :
+  demand="demand"|commit="commit";  
+  
+enum RefreshMethodType :
+  complete="refresh_complete"|force="refresh_force"|fast="refresh_fast"|never="never_refresh";      
+
+ColumnRef :
+  column_name=DBNAME (",")?;  
+  
+Sequence:
+ "create" "sequence" sequence_name=DBNAME ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
+
+ColumnIdentity:
+ "generated" ( always="always"|"by" by_default="default" ("on" on_null="null")? ) "as" "identity" ( "(" ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ")" )?;
+
+Mview:
+ "create" "materialized" "view" mview_name=DBNAME ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (parallel=ParallelType (parallel_degree=INT)? )? (buildMode=BuildModeType)? (refreshMethod=RefreshMethodType ("on" refreshMode=RefreshModeType)?)? (queryRewrite=EnableType "query" "rewrite")? ("as" viewSelectCLOB=STRING) ";";
+
+enum NewValuesType :
+  including="including"|excluding="excluding";
+  
+enum SynchronousType :
+  asynchronous="asynchronous"|synchronous="synchronous";
+
+MviewLog:
+ "materialized" "view" "log" ("tablespace" tablespace=DBNAME)? (parallel=ParallelType (parallel_degree=INT)? )? (newValues=NewValuesType "new" "values")? ( "with" (primaryKey="primary" "key" ","?)? (rowid="rowid" ","?)? (withSequence="sequence" ","?)? ("(" (columns+=ColumnRef)+ ")" ","?)? (commitScn="commit_scn" )? )? (purge="purge" ("immediate" (synchronous=SynchronousType)?)? ("start" "with" startWith=STRING)? ("next" next=STRING)? ("repeat" "interval" repeatInterval=INT)? )?;
+
+Comment:
+ "comment" "on" comment_object=CommentObjectType (table_name=DBNAME) ("." column_name=DBNAME)? "is" comment=STRING ";";
+
+InlineComment:
+ "comment" "on" comment_object=CommentObjectType (column_name=DBNAME)? "is" comment=STRING ";";
+
+terminal DBNAME :
+  ('A'..'Z'|'a'..'z')('A'..'Z'|'a'..'z'|'_'|'0'..'9'|'#')*;
+
+

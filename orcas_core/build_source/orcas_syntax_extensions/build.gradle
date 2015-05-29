@@ -1,0 +1,12 @@
+project.ext.extension_folder_include = "*SyntaxExtension*.java"
+project.ext.extension_folder_exclude = ""
+project.ext.extension_interface_name = "SyntaxExtension"
+project.ext.extension_package_name = "syntax_extensions"
+
+apply from: '../extension_build_plugin.gradle'
+
+dependencies 
+{
+  compile project(':orcas_xtext_extension')
+}
+

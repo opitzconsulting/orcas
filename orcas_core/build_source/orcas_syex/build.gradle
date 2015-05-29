@@ -1,0 +1,23 @@
+project.ext.project_dir        = "../orcas"
+project.ext.mwe2_file_name     = "src/de/opitzconsulting/GenerateOrcasDsl.mwe2"
+project.ext.postfix            = "syex"
+project.ext.xtext_project_name = "orcas"
+
+apply from: '../xtext_generator_build_with_plsql_plugin.gradle'
+
+dependencies 
+{
+   project(':orcas_xtext_extension.generator')
+}
+
+task(copyGeneratedXtextFileToOriginalFilesToBuild, dependsOn: copyOriginalFilesToBuild, type: Copy)
+{
+  from "${project(':orcas_xtext_extension.generator').buildDir}/xtext_syex"
+  into "${project.ext.copy_original_folder}/src"
+}
+
+
+copyGeneratedXtextFileToOriginalFilesToBuild.dependsOn copyOriginalFilesToBuild
+copyGeneratedXtextFileToOriginalFilesToBuild.dependsOn ':orcas_xtext_extension.generator:build'
+generateXtext.dependsOn copyGeneratedXtextFileToOriginalFilesToBuild
+

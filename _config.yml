@@ -1,11 +1,11 @@
 # Site settings
-title: Orcas - Oracle adaptive/agile schemas
+title: Orcas - Oracle Adaptive Schemas
 description: >
  Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes Datenbankschema in einen in Orcas
- beschriebenen Soll-Zustand geführt werden kann. Orcas steht für Oracle adaptive/agile schemas und
+ beschriebenen Soll-Zustand geführt werden kann. Orcas steht für Oracle Adaptive Schemas und
  ist nur mit Oracle RDBMS kompatibel.
 twitter_username: OC_WIRE
-github_username:  opitzconsulting/Orcas
+github_username: opitzconsulting/Orcas
 github_issues: https://github.com/opitzconsulting/orcas/issues
 github_fork: https://github.com/opitzconsulting/orcas/fork
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="windows-1250"?>
+<project name="OC_Schemaverwaltung_Liquibase_Task" xmlns:liquibase="antlib:liquibase.integration.ant">
+  <property name="user" value="" />
+  <property name="password" value="" />
+  <property name="userorcas" value="" />
+  <property name="passwordorcas" value="" />
+  <property name="tnsname" value="" />
+  <property name="jdbcurl" value="" />
+  <property name="tmpfolder" value="" />
+  <property name="changeLogFile" value="" />
+  <property name="outputFile" value="" />
+  <property name="contexts" value="" />
+
+  <property name="orcas_at_value" value="@" />
+
+  <path id="liquibase.classpath">
+    <fileset dir="${tmpfolder}/gradle_build/_liquibase_distribution/install/liquibase_distribution">
+      <include name="*.jar"/>
+    </fileset>  
+  </path>
+
+  <taskdef resource="liquibase/integration/ant/antlib.xml" uri="antlib:liquibase.integration.ant" classpathref="liquibase.classpath">
+    <classpath>
+      <fileset dir="${tmpfolder}/gradle_build/_liquibase_distribution/install/liquibase_distribution">
+        <include name="*.jar"/>
+      </fileset>  
+    </classpath>
+  </taskdef>
+          
+  <liquibase:database id="mydatabase" driver="oracle.jdbc.OracleDriver" url="${jdbcurl}" user="${user}" password="${password}" liquibaseSchemaName="${userorcas}" liquibaseCatalogName="${userorcas}" outputDefaultSchema="false" outputDefaultCatalog="false" databaseChangeLogTableName="ORCAS_LIQUIBASE_CHANGELOG" databaseChangeLogLockTableName="ORCAS_LIQUIBASE_CHANGELOGLOCK" />
+
+  <target name="orcas_liquibase_update" >
+    <if>
+      <equals arg1="${outputFile}" arg2="" />
+      <then>  
+        <liquibase:updateDatabase databaseref="mydatabase" classpathref="liquibase.classpath" changeLogFile="${changeLogFile}" contexts="${contexts}" />
+      </then>  
+      <else>  
+        <liquibase:updateDatabase databaseref="mydatabase" classpathref="liquibase.classpath" changeLogFile="${changeLogFile}" contexts="${contexts}" outputFile="${outputFile}" />
+      </else>  
+    </if>
+  </target>
+
+  <target name="orcas_liquibase_changelogsync" >
+    <liquibase:changeLogSync  databaseref="mydatabase" classpathref="liquibase.classpath" changeLogFile="${changeLogFile}" />
+  </target>
+
+</project>
+

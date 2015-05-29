@@ -1,0 +1,8 @@
+import de::opitzconsulting::orcasXtextExtension;
+import de::opitzconsulting::orcas::syntax_extensions;
+
+      Model transformation_vereinfachung( Model pModel ) :
+      let lAllExtensions = new AllSyntaxExtensions :
+      lAllExtensions.transformSyntaxModel(pModel)
+  ;      
+      

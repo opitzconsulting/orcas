@@ -1,0 +1,2 @@
+include "orcas", "orcas_xtext_extension", "orcas_syntax_extensions", "orcas_xtext_extension.generator", "orcas_syex", "orcas_extensions", "orcas_db_objects", "distribution", "xslt_load_extract", "xslt_distribution", "liquibase_distribution"
+

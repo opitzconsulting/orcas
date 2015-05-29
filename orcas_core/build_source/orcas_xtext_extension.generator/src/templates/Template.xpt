@@ -1,0 +1,58 @@
+«IMPORT de::opitzconsulting::orcasXtextExtension»
+
+«EXTENSION templates::Extensions»
+
+«DEFINE main FOR RuleNormal»
+  «EXPAND write_model FOR ((Model)((ModelElement)this.eContainer()).eContainer()).transformation_vereinfachung()»
+«ENDDEFINE»
+
+«DEFINE write_model FOR Model»
+  «EXPAND write_model_element FOREACH model_elements»
+«ENDDEFINE»
+
+«DEFINE write_model_element FOR ModelElement-»
+«FILE "OrcasDsl.xtext"-»
+grammar «header.this_grammar» with «header.super_grammar»
+
+generate «header.name» "«header.this_generate»"
+
+«FOREACH rules AS l_rule»
+  «IF RuleNormal.isInstance( l_rule )-»
+    «EXPAND write_rule_normal FOR (RuleNormal)l_rule-»
+  «ENDIF-»   
+  «IF RuleTerminal.isInstance( l_rule )-»
+    «EXPAND write_rule_terminal FOR (RuleTerminal)l_rule-»
+  «ENDIF-»   
+«ENDFOREACH-»
+«ENDFILE-»
+«ENDDEFINE»
+
+«DEFINE write_rule_normal FOR RuleNormal-»
+«rule_enum» «name» : 
+ «FOREACH rule_entries AS l_rule_entry-»
+   «EXPAND write_rule_entry FOR l_rule_entry-»     
+ «ENDFOREACH-» ;
+«ENDDEFINE»
+
+«DEFINE write_rule_entry FOR RuleEntry-»
+  «IF RuleValueEntry.isInstance( this )-»
+    «EXPAND write_rule_value_entry FOR (RuleValueEntry)this-»
+  «ENDIF-»   
+  «IF RuleConstnatEntry.isInstance( this )-»
+    «EXPAND write_rule_constant_entry FOR (RuleConstnatEntry)this-»
+  «ENDIF-» 
+  «IF rule_marker != null-»«rule_marker-»«ENDIF-» 
+  «IF constant_string != null-»"«constant_string»"«ENDIF-»  
+«ENDDEFINE»
+
+«DEFINE write_rule_value_entry FOR RuleValueEntry-»
+«value_name-»«assignmnet_type-»«rule_name-» 
+«ENDDEFINE»
+
+«DEFINE write_rule_constant_entry FOR RuleConstnatEntry-»
+«value_name»«assignmnet_type-»"«rule_constant»"«ENDDEFINE»
+
+«DEFINE write_rule_terminal FOR RuleTerminal-»
+terminal «name» : 
+  «terminal_rule»;
+«ENDDEFINE»

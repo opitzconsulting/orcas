@@ -1,0 +1,70 @@
+apply plugin: 'java'
+
+build.dependsOn.remove("check")
+
+configurations 
+{
+  xtextConfiguration 
+  {
+    extendsFrom compile
+  }
+}
+
+project.ext.copy_folder_root   = "${buildDir}/${project.ext.xtext_project_name}${project.ext.postfix}"
+project.ext.copy_folder        = "${project.ext.copy_folder_root}/${project.ext.xtext_project_name}"
+project.ext.copy_original_folder        = "${project.ext.copy_folder_root}/${project.ext.xtext_project_name}_original"
+
+dependencies 
+{
+  compile "org.eclipse.xtext:org.eclipse.xtext.builder.standalone:${project.ext.xtext_version}"
+  compile "org.eclipse.xtext:org.eclipse.xtext.xtext:${project.ext.xtext_version}"
+}
+
+task(copyFilesToBuild, type: Copy)
+{
+  from "${project.ext.project_dir}"
+  into "${project.ext.copy_folder}"
+  include "src/**/*.*"
+  include ".project"
+  include "**/MANIFEST.MF"
+}
+
+task(copyOriginalFilesToBuild, type: Copy)
+{
+  from "${project.ext.project_dir}"
+  into "${project.ext.copy_original_folder}"
+  include "src/**/*.*"
+  include ".project"
+  include "**/MANIFEST.MF"
+}
+
+task(generateXtext, dependsOn: copyFilesToBuild, type: JavaExec) 
+{
+  inputs.dir "${project.ext.project_dir}/src"
+  outputs.dir new File("${project.ext.copy_folder}")
+  outputs.dir new File("${project.ext.copy_folder_root}/xtext-generated")
+
+  workingDir = "${project.ext.copy_folder}"
+  classpath configurations.xtextConfiguration
+  classpath "${project.ext.copy_original_folder}/src"
+  main = "org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher"
+  args "${project.ext.mwe2_file_name}"
+
+  doLast
+  {
+    ant.replace(dir: "${project.ext.copy_folder_root}/xtext-generated", token: 'protected', value: 'public')
+    {
+      include(name: '**/impl/*.java')
+    }
+  }
+}
+
+generateXtext.dependsOn copyFilesToBuild
+generateXtext.dependsOn copyOriginalFilesToBuild
+compileJava.source generateXtext.outputs.files, new File("${project.ext.copy_folder}/src")
+compileJava.dependsOn generateXtext
+
+// include java sources and generated resources
+jar.from compileJava.source
+
+

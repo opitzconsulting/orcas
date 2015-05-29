@@ -1,0 +1,49 @@
+grammar de.opitzconsulting.OrcasXtextExtension with org.eclipse.xtext.common.Terminals
+
+generate orcasXtextExtension "http://www.opitzconsulting.de/OrcasXtextExtension"
+
+Model:
+	(model_elements+=ModelElement)+;
+
+ModelElement:
+	header=Header (rules+=Rule)+;
+
+Header:
+	"grammar" this_grammar=IDDOT "with" super_grammar=IDDOT "generate" name=ID2 this_generate=STRING;
+
+Rule:
+	RuleTerminal | RuleNormal;
+
+RuleNormal:
+	(rule_enum="enum")? name=ID2 ":" (rule_entries+=RuleEntry)+ ";";
+
+RuleTerminal:
+	"terminal" name=ID2 ":" terminal_rule=TERMINAL_RULE ";";
+
+RuleEntry:
+	RuleValueEntry | RuleConstnatEntry | rule_marker=RULE_MARKER | constant_string=STRING;
+
+RuleValueEntry:
+	(value_name=ID2 (assignmnet_type="=" | assignmnet_type="+="))? rule_name=ID2;
+
+RuleConstnatEntry:
+	value_name=ID2 (assignmnet_type="=" | assignmnet_type="?=") rule_constant=STRING;
+
+enum RuleMarker:
+	left_parenthesis="(" | right_parenthesis_with_question_mark=")?" | right_parenthesis_with_plus_sign=")+" |
+	right_parenthesis_with_asterisk=")*" | double_right_parenthesis_with_question_mark="))?" | right_parenthesis=")" |
+	vertical_line="|";
+
+terminal RULE_MARKER:
+	('(' | ')' | '|' | '?' | '*' | '+')*;
+
+terminal ID2:
+	('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
+
+terminal IDDOT:
+	('a'..'z' | 'A'..'Z' | '_' | '0'..'9' | '.')*;
+
+terminal TERMINAL_RULE:
+	('a' | 'z' | 'A' | 'Z' | '_' | '0' | '9' | '.' | '|' | '(' | ')' | '*' | '\'' | '#')*;	
+
+		

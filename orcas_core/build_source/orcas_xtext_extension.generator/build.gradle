@@ -1,0 +1,61 @@
+repositories 
+{
+  mavenCentral()
+}
+
+configurations 
+{
+  xtextConfiguration 
+  {
+  }
+}
+
+
+dependencies 
+{
+  xtextConfiguration files("src")
+  xtextConfiguration project(':orcas_xtext_extension')
+  xtextConfiguration project(':orcas_syntax_extensions')
+  xtextConfiguration "org.eclipse.xtext:org.eclipse.xtext.builder.standalone:${project.ext.xtext_version}"
+  xtextConfiguration "org.eclipse.xtext:org.eclipse.xtext.xtext:${project.ext.xtext_version}"
+}
+
+task(build, type: JavaExec) 
+{
+  doFirst 
+  {
+    copy 
+    {
+      from "src"
+      into "${buildDir}/copy/src"
+    }
+    copy 
+    {
+      from "../orcas/src/de/opitzconsulting/OrcasDsl.xtext"
+      into "${buildDir}/copy/src/model"
+      rename {"model.orcasxtextextension"}
+    }
+  }
+  doLast 
+  {
+    copy 
+    {
+      from "${buildDir}/copy/src-gen"
+      into "${buildDir}/xtext_syex/de/opitzconsulting"
+    }
+  }
+
+  inputs.file "../orcas/src/de/opitzconsulting/OrcasDsl.xtext"
+  outputs.file "${buildDir}/xtext_syex/de/opitzconsulting/OrcasDsl.xtext"
+
+  workingDir = "${buildDir}/copy"
+  classpath configurations.xtextConfiguration
+  main = "org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher"
+  args "src/workflow/OrcasXtextExtensionGenerator.mwe2"
+}
+
+task clean(type: Delete) {
+  delete buildDir
+}
+
+

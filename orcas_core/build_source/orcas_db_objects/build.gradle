@@ -1,0 +1,44 @@
+task(createSqlplusDir) 
+{
+  doFirst
+  {
+    new File("${buildDir}/sqlplus/db").mkdirs();
+  }
+  outputs.file "${buildDir}/sqlplus/db"
+}
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+task(copyFiles, dependsOn: createSqlplusDir, type: Copy) 
+{
+  inputs.property("extensionparameter",project.ext.extensionparameter)
+  from "tables"
+  from "types"
+  from "packages"
+  into "${buildDir}/sqlplus/db"
+
+  filter(ReplaceTokens, tokens: [extensionparameter: project.ext.extensionparameter])
+}
+
+task sqlplusJar( type: Zip ) {
+  classifier = 'sqlplus'
+  baseName = project.name
+  version = project.version
+  destinationDir = file("${buildDir}/libs")
+  from fileTree(dir: "${buildDir}/sqlplus")
+}
+
+configurations.create( "default" )
+
+artifacts.add( "default", sqlplusJar )
+
+sqlplusJar.dependsOn copyFiles
+
+task(build, dependsOn: sqlplusJar) 
+{
+}
+
+task clean(type: Delete) {
+  delete buildDir
+}
+

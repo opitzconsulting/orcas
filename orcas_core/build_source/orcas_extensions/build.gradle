@@ -1,0 +1,173 @@
+project.ext.extension_folder_include = "*.java"
+project.ext.extension_folder_exclude = "*SyntaxExtension*.java"
+project.ext.extension_interface_name = "Extension"
+project.ext.extension_package_name = "extensions"
+
+apply from: '../extension_build_plugin.gradle'
+
+class SyncWithDeleteTask extends DefaultTask 
+{
+  @InputDirectory
+  File fromDir
+
+  @OutputDirectory
+  File intoDir
+
+  String excludeDef
+  String excludeDef2
+  String includeDef
+
+  @TaskAction
+  def doIt() 
+  {
+    ant.delete(dir: intoDir)
+    ant.copy(todir: intoDir) 
+    {
+      fileset(dir: fromDir) 
+      {
+        include(name: includeDef)
+        exclude(name: excludeDef)
+        exclude(name: excludeDef2)
+      }
+    }
+  }
+}
+
+dependencies 
+{
+  compile project(':orcas_syex')
+}
+
+task(createSqlplusDir, dependsOn: jar) 
+{
+  doFirst
+  {
+    new File("${buildDir}/sqlplus/db/packages").mkdirs();
+  }
+  outputs.file "${buildDir}/sqlplus/db/packages"
+}
+
+task(copyPlsqlExtensions, type: SyncWithDeleteTask) 
+{
+  fromDir = file(project.ext.extension_folder)
+  intoDir = file("${buildDir}/plsql_extensions")
+
+  excludeDef = "*reverse*"
+  excludeDef2 = "*helper*"
+  includeDef = "*.sql"
+}
+
+task(copyPlsqlReverseExtensions, type: SyncWithDeleteTask) 
+{
+  fromDir = file(project.ext.extension_folder)
+  intoDir = file("${buildDir}/plsql_reverse_extensions")
+
+  excludeDef = "*helper*"
+  includeDef = "*reverse*.sql"
+}
+
+task(copyAllPlsqlExtensions, dependsOn: createSqlplusDir, type: SyncWithDeleteTask) 
+{
+  fromDir = file(project.ext.extension_folder)
+  intoDir = file("${buildDir}/sqlplus/db/packages")
+
+  includeDef "*.sql"
+}
+
+task(generatePlsqlExtension)
+{
+  inputs.dir "${buildDir}/plsql_extensions"
+  inputs.dir "${buildDir}/plsql_reverse_extensions"
+  outputs.file new File("${buildDir}/sqlplus/db/packages/b_pa_orcas_extensions.sql")
+
+  doLast 
+  {
+    new File("${buildDir}/sqlplus/db/packages").mkdirs();
+    def allPlsqlFile = new File("${buildDir}/sqlplus/db/packages/b_pa_orcas_extensions.sql");
+    allPlsqlFile.delete();
+    allPlsqlFile << """
+create or replace package body pa_orcas_extensions is
+  function call_extensions( p_input in ot_syex_model ) return ot_syex_model
+  is
+    v_syex_model ot_syex_model;
+  begin
+    v_syex_model := p_input;
+"""
+ 
+    new File("${buildDir}/plsql_extensions").mkdirs();
+    new File("${buildDir}/plsql_extensions").listFiles().sort{ it.name }.each
+    { 
+      allPlsqlFile << """    v_syex_model := ${it.getName().split('\\.')[0]}.run( v_syex_model ); 
+"""
+    }
+
+    allPlsqlFile << """
+    return v_syex_model; 
+  end;
+
+  function call_reverse_extensions( p_input in ot_syex_model ) return ot_syex_model
+  is
+    v_syex_model ot_syex_model;
+  begin
+    v_syex_model := p_input;
+"""
+
+    new File("${buildDir}/plsql_reverse_extensions").mkdirs();
+    new File("${buildDir}/plsql_reverse_extensions").listFiles().sort{ it.name }.each
+    { 
+      allPlsqlFile << """    v_syex_model := ${it.getName().split('\\.')[0]}.run( v_syex_model ); 
+"""
+    }
+
+    allPlsqlFile << """
+    return v_syex_model; 
+  end;
+end;
+/
+"""
+  }
+}
+
+task(generateExtensionHeader)
+{
+  inputs.dir "${buildDir}/plsql_extensions"
+  inputs.dir "${buildDir}/plsql_reverse_extensions"
+  outputs.dir new File("${buildDir}/sqlplus/db/packages")
+
+  doLast 
+  {
+    new File("${buildDir}/plsql_extensions").mkdirs();
+    inputs.getFiles().getFiles().each
+    { 
+      def package_name = it.getName().split('\\.')[0];
+      def plsqlHeaderFile = new File("${buildDir}/sqlplus/db/packages/${package_name}_spec.sql");
+      plsqlHeaderFile.delete();
+      plsqlHeaderFile << """create or replace package ${package_name} authid current_user is
+function run( p_input in ot_syex_model ) return ot_syex_model;
+end;
+/
+"""
+    }
+  }
+}
+
+generatePlsqlExtension.dependsOn copyPlsqlExtensions, copyPlsqlReverseExtensions, createSqlplusDir
+generateExtensionHeader.dependsOn copyPlsqlExtensions, copyPlsqlReverseExtensions, createSqlplusDir
+
+task sqlplusJar( type: Zip ) {
+    classifier = 'sqlplus'
+    baseName = jar.baseName
+    destinationDir = jar.destinationDir
+    from fileTree(dir: "${buildDir}/sqlplus")
+}
+
+artifacts
+{
+  runtime sqlplusJar
+}
+
+
+sqlplusJar.dependsOn generatePlsqlExtension, generateExtensionHeader, copyAllPlsqlExtensions
+
+build.dependsOn sqlplusJar
+

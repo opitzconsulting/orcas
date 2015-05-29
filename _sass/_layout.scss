@@ -2,17 +2,26 @@
  * Site Navigation
  */
 .site-navigation {
-    width: 25%;
+    width: 30%;
     float: right;
     padding-top: $spacing-unit;
     line-height: 1.75;
-    border-left: 1px solid $grey-color-light;
-    border-bottom: 1px solid $grey-color-light;
     font-weight: bold;
+    margin-left: 20px;
+    border: 1px solid #e8e8e8;
+    border-radius: 3px;
+    background-color: #f8f8f8;
 }
 
 .site-navigation ul {
     list-style-type: none;
+    margin-left: 1.25em;
+}
+
+.site-navigation i {
+    color: $grey-color-light;
+    padding-right: 0.5em;
+    margin-left: -1em;
 }
 
 .site-navigation h2 {
@@ -25,18 +34,14 @@
 .site-header {
     border-top: 5px solid $grey-color-dark;
     border-bottom: 1px solid $grey-color-light;
-    min-height: 56px;
 
     // Positioning context for the mobile navigation icon
     position: relative;
 }
 
 .site-title {
-    font-size: 26px;
-    line-height: 56px;
-    letter-spacing: -1px;
-    margin-bottom: 0;
-    float: left;
+    font-size: 2em;
+    line-height: 2.5em;
 
     &,
     &:visited {
@@ -151,23 +156,18 @@
 }
 
 .footer-col-1 {
-    width: -webkit-calc(15% - (#{$spacing-unit} / 2));
-    width:         calc(15% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(25% - (#{$spacing-unit} / 2));
+    width:         calc(25% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-2 {
-    width: -webkit-calc(20% - (#{$spacing-unit} / 2));
-    width:         calc(20% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(25% - (#{$spacing-unit} / 2));
+    width:         calc(25% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-3 {
-    width: -webkit-calc(45% - (#{$spacing-unit} / 2));
-    width:         calc(45% - (#{$spacing-unit} / 2));
-}
-
-.footer-col-4 {
-  width: -webkit-calc(20% - (#{$spacing-unit} / 2));
-  width:         calc(20% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(50% - (#{$spacing-unit} / 2));
+    width:         calc(50% - (#{$spacing-unit} / 2));
 }
 
 @include media-query($on-laptop) {
@@ -229,9 +229,7 @@
 }
 
 .post-title {
-    font-size: 42px;
-    letter-spacing: -1px;
-    line-height: 1;
+    font-size: 1.75em;
 
     @include media-query($on-laptop) {
         font-size: 36px;
@@ -242,7 +240,7 @@
     margin-bottom: $spacing-unit;
 
     h2 {
-        font-size: 32px;
+        font-size: 1.5em;
 
         @include media-query($on-laptop) {
             font-size: 28px;
@@ -250,7 +248,7 @@
     }
 
     h3 {
-        font-size: 26px;
+        font-size: 1.25em;
 
         @include media-query($on-laptop) {
             font-size: 22px;
@@ -258,7 +256,7 @@
     }
 
     h4 {
-        font-size: 20px;
+        font-size: 1em;
 
         @include media-query($on-laptop) {
             font-size: 18px;

@@ -1,0 +1,43 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<project default="build_all" basedir="." name="extension_demo">
+  <import file="../distribution/ant_default_include.xml"/>
+
+  <target name="orcas_install" depends="show_location">
+    <orcas_install user="${username_dba}" password="${password_dba}"/>
+  </target>
+
+  <target name="install_schemaowner" depends="show_location">
+    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="create_schemaowner.sql" parameter="${username_schemaowner} ${password_schemaowner}"/>
+  </target>
+
+  <target name="drop_users" depends="show_location">
+    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${username_schemaowner}"/>
+    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${orcas.default_user_orcas}"/>
+  </target>
+
+  <target name="install_all" depends="show_location,orcas_install,install_schemaowner">
+  </target>
+
+  <target name="build_all" depends="show_location">
+    <orcas_initialize extensionfolder="../orcas_extensions"/>
+    <orcas_execute_statics scriptfolder="tabellen"/>
+    <orcas_execute_script script="triggergenerator/pa_generator_h"/>
+    <orcas_execute_script script="triggergenerator/pa_generator_b"/>
+    <orcas_compile_db_objects />
+    <orcas_execute_statics scriptfolder="tabellen" targetplsql="pa_generator"/>
+  </target>
+
+  <target name="ci_jenkins" depends="drop_users,install_all,build_all">
+  </target>
+
+  <target name="extract" depends="show_location">
+    <orcas_initialize extensionfolder="../orcas_extensions"/>
+    <orcas_extract outputfolder="${binrundir}/extract_output" xsltfile="domain_extract.xsl"/>
+  </target>
+
+  <target name="extension_test" depends="show_location">
+    <orcas_initialize extensionfolder="../orcas_extensions"/>
+    <orcas_extension_test scriptfolder="tabellen" outputfolder="${binrundir}/extension_test_output" />
+  </target>
+</project>
+

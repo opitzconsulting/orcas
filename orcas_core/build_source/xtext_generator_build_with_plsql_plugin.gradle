@@ -1,0 +1,66 @@
+apply from: '../xtext_generator_build_plugin.gradle'
+
+configurations 
+{
+  generatorRunPath 
+  {
+    extendsFrom xtextConfiguration
+  }
+}
+
+dependencies 
+{
+  generatorRunPath files("${buildDir}/libs/${jar.archiveName}")
+  compile "org.reflections:reflections:0.9.9-RC1" 
+}
+
+task(createSqlplusDir, dependsOn: jar) 
+{
+  doFirst
+  {
+    new File("${buildDir}/sqlplus/db/packages").mkdirs();
+    new File("${buildDir}/sqlplus/db/types").mkdirs();
+  }
+  outputs.file "${buildDir}/sqlplus/db/packages"
+  outputs.file "${buildDir}/sqlplus/db/types"
+}
+
+task(generateObjectTypes, dependsOn: createSqlplusDir, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath
+
+  main = "de.opitzconsulting.orcas.ot.OracleOtGenerator"
+  args "${buildDir}/sqlplus/db/types/ot_${project.ext.postfix}.sql"
+  args project.ext.postfix
+
+  outputs.file args[0]
+}
+
+task(generateXmlPackage, dependsOn: createSqlplusDir, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath
+
+  main = "de.opitzconsulting.orcas.ot.OtXmlPackageGenerator"
+  args "${buildDir}/sqlplus/db/packages/xml_${project.ext.postfix}.sql"
+  args project.ext.postfix
+
+  outputs.file args[0]
+}
+
+task sqlplusJar( type: Zip ) {
+    classifier = 'sqlplus'
+    baseName = jar.baseName
+    destinationDir = jar.destinationDir
+    from fileTree(dir: "${buildDir}/sqlplus")
+}
+
+artifacts
+{
+  runtime sqlplusJar
+}
+
+sqlplusJar.dependsOn generateObjectTypes, generateXmlPackage
+
+build.dependsOn sqlplusJar
+
+

@@ -1,0 +1,29 @@
+apply plugin: 'distribution'
+
+configurations 
+{
+  xsltDistribution 
+  {
+  }
+}
+
+dependencies 
+{
+  xsltDistribution "xalan:xalan:2.7.2"
+  xsltDistribution project(':xslt_load_extract')
+}
+
+distributions 
+{
+  main 
+  {
+    contents 
+    {
+      from { configurations.xsltDistribution }
+    }
+  }
+}
+
+installDist.fileMode 0755
+
+
