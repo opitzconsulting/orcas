@@ -15,7 +15,6 @@
 
 .site-navigation ul {
     list-style-type: none;
-    margin-left: 1.25em;
 }
 
 .site-navigation i {
@@ -32,7 +31,6 @@
  * Site header
  */
 .site-header {
-    border-top: 5px solid $grey-color-dark;
     border-bottom: 1px solid $grey-color-light;
 
     // Positioning context for the mobile navigation icon
@@ -41,12 +39,8 @@
 
 .site-title {
     font-size: 2em;
-    line-height: 2.5em;
-
-    &,
-    &:visited {
-        color: $grey-color-dark;
-    }
+    line-height: 3em;
+    color: $brand-color;
 }
 
 .about {
@@ -131,9 +125,15 @@
  * Site footer
  */
 .site-footer {
-    border-bottom: 10px solid $grey-color-dark;
-    border-top: 1px solid $grey-color-light;
-    padding: $spacing-unit / 2 0;
+   background-color: $grey-color-light;
+   color: #000;
+   padding: $spacing-unit 0 $spacing-unit/2;
+}
+
+.site-footer h3 {
+  color: $grey-color-dark;
+  font-size: 1em;
+  margin: 0;
 }
 
 .contact-list,
@@ -144,7 +144,6 @@
 
 .footer-col-wrapper {
     font-size: 15px;
-    color: $grey-color;
     margin-left: -$spacing-unit / 2;
     @extend %clearfix;
 }
