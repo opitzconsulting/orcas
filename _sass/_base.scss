@@ -112,14 +112,17 @@ li {
  * Headings
  */
 h1, h2, h3, h4, h5, h6 {
-    font-weight: 300;
+  font-weight: 700;
+  font-family: Lato, Helvetica, Arial, sans-serif;
+  color: $heading-color;
+  font-size: 1.5em;
 }
 
 /**
  * Links
  */
 a {
-    color: darken($brand-color, 15%);
+    color: $brand-color;
     text-decoration: none;
 
     &:hover {
@@ -178,7 +181,7 @@ pre {
     max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit} * 2));
     max-width:         calc(#{$content-width} - (#{$spacing-unit} * 2));
     margin-right: auto;
-    margin-left: 0px;
+    margin-left: auto;
     padding-right: $spacing-unit;
     padding-left: $spacing-unit;
     @extend %clearfix;
@@ -231,14 +234,6 @@ span.legend {
 
 strong {
     font-weight: bold;
-} 
-
-img#OC-Logo {
-  position: absolute;
-  top: $spacing-unit;
-  left: $content-width;
-  padding-left: 100px;
-  width: 200px;
 }
 
 .footer-col-4 img {

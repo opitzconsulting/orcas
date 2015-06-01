@@ -1,15 +1,14 @@
 ---
 layout: page
-title: About Orcas
-permalink: /docs/about/
+title: Was ist Orcas?
+permalink: /
 ---
 
-Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes **Datenbankschema** in einen mit **Textdateien** beschriebenen Soll-Zustand **überführt** werden kann. 
-<br/>Durch die Verwendung einfacher Textdateien ist eine **Integration** in bestehendende Projekte mit **Versionsverwaltung** denkbar einfach. 
-<br/>Orcas bietet dazu auch die Möglichkeit **kompliziertere Überführungen** zu **integrieren**.
-<br/>Orcas hat zudem einen **Extension**-Mechanismus, mit dem die **Definition** des Datenbankschemas deutlich **vereinfach** und **vereinheitlicht** werden kann.
+Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes **Datenbankschema** in einen mit **Textdateien** beschriebenen Soll-Zustand **überführt** werden kann.  
+Durch die Verwendung einfacher Textdateien ist eine **Integration** in bestehendende Projekte mit **Versionsverwaltung** denkbar einfach. Orcas bietet dazu auch die Möglichkeit **kompliziertere Überführungen** zu **integrieren**.  
+Orcas hat zudem einen **Extension**-Mechanismus, mit dem die **Definition** des Datenbankschemas deutlich **vereinfach** und **vereinheitlicht** werden kann.
 
-Orcas steht für **Or**a**c**le **a**daptive **s**chemas und ist nur mit Oracle RDBMS kompatibel. 
+Orcas steht für **Or**a**c**le **a**daptive **s**chemas und ist nur mit Oracle RDBMS kompatibel.
 
 ##Problemstellung
 
@@ -65,4 +64,3 @@ Hier sind die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
 
 - Wenn Datenbank-Funktionen verwendet werden, die Orcas nicht unterstützt, müssen diese Teilbereiche "manuell" verwaltet werden.
 - Projektmitarbeiter müssen wissen, wie man mit Orcas arbeitet.
-
