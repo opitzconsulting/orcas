@@ -1,3 +1,3 @@
-#Orcas Dokumentation Branch
+# Orcas Dokumentation
 
-[Orcas](http://opitzconsulting.github.io/orcas/docs/about/)
+Der Branch `gh-pages` enthält die Sourcen für die offizielle Dokumentation des Orcas-Framework. Diese Dokumentation kann unter der URL [http://opitzconsulting.github.io/orcas](http://opitzconsulting.github.io/orcas) abgerufen werden.
