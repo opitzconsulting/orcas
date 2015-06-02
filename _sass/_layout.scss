@@ -12,6 +12,12 @@
     border: 1px solid #e8e8e8;
     border-radius: 3px;
     background-color: #f8f8f8;
+
+    @include media-query($on-palm) {
+      width: auto;
+      float: none;
+      margin-left: auto;
+    }
 }
 
 .site-navigation ul {
@@ -33,14 +39,16 @@
  */
 .site-header {
     border-bottom: 1px solid $grey-color-light;
-
-    // Positioning context for the mobile navigation icon
     position: relative;
+    padding: 1.5em 0;
+
+    @include media-query($on-palm) {
+      text-align: center;
+    }
 }
 
 .site-title {
     font-size: 2em;
-    line-height: 3em;
     color: $brand-color;
 }
 
