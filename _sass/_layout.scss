@@ -19,7 +19,7 @@
 }
 
 .site-navigation i {
-    color: $grey-color-light;
+    color: $grey-color;
     padding-right: 0.5em;
     margin-left: -1em;
 }
@@ -135,6 +135,14 @@
   color: $grey-color-dark;
   font-size: 1em;
   margin: 0;
+}
+
+.site-footer .fa {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  text-align: center;
+  color: $grey-color;
 }
 
 .contact-list,
