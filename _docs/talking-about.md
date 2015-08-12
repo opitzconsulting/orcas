@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Artikel zu Orcas
-permalink: /talking-about
+permalink: /docs/talking-about
 ---
 
 ## Blogartikel über Orcas
