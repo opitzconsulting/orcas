@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Artikel zu Orcas
+title: Andere Quellen über Orcas
 permalink: /docs/talking-about
 ---
 
