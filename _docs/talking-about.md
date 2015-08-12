@@ -1,8 +1,10 @@
 ---
 layout: page
-title: Andere Quellen über Orcas
-permalink: /docs/talking-about
+title: Orcas im Netz
+permalink: /docs/talking-about/
 ---
+
+Auf dieser Seite findet sich eine Sammlung von Artikeln und Dokumenten, in denen über Orcas berichtet wird.
 
 ## Blogartikel über Orcas
 
