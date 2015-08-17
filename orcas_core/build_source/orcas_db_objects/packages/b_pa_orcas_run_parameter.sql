@@ -37,7 +37,17 @@ create or replace package body pa_orcas_run_parameter is
     else
       return 0;
     end if;  
-  end;      
+  end;   
+  
+  function is_dropmode_ignore return number is
+  begin
+    if( '@dropmode@' = 'ignore' )
+    then
+      return 1;
+    else
+      return 0;
+    end if;  
+  end;     
   
   function is_indexparallelcreate return number is
   begin

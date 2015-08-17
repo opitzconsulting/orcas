@@ -5,6 +5,7 @@ create or replace package pa_orcas_run_parameter is
   function get_dateformat return varchar2;
   function is_logonly return number;
   function is_dropmode return number;  
+  function is_dropmode_ignore return number;  
   function is_indexparallelcreate return number;  
   function is_createmissingfkindexes return number;   
   function is_indexmovetablespace return number;

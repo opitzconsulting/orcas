@@ -404,7 +404,13 @@ CREATE OR REPLACE package body pa_orcas_compare is
     then     
       if( has_rows( p_test_stmt ) = 1 )
       then
-        raise_application_error( -20000, 'drop mode ist nicht aktiv, daher kann folgendes statement nicht ausgefuehrt werden: ' || p_stmt_to_execute );
+        if( pa_orcas_run_parameter.is_dropmode_ignore() != 1 )
+        then
+          raise_application_error( -20000, 'drop mode ist nicht aktiv, daher kann folgendes statement nicht ausgefuehrt werden: ' || p_stmt_to_execute );        
+        else
+          add_stmt( '-- dropmode-ignore: ' || p_stmt_to_execute );          
+          return;
+        end if;
       end if;
     end if;
     

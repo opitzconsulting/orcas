@@ -53,18 +53,23 @@ is
 begin
   if( pa_orcas_run_parameter.is_logonly() = 0 )
   then
-    if( p_keep_exception = 0 )
-    then
-      begin
-        execute immediate pi_stmt;
-      exception
-        when others
-          then raise_application_error( -20000, sqlerrm||' '||pi_stmt);
-      end;
+    if( substr(pi_stmt,1,2) = '--' )
+    then  
+      null;
     else
-      execute immediate pi_stmt;
+      if( p_keep_exception = 0 )
+      then
+        begin
+          execute immediate pi_stmt;
+        exception
+          when others
+            then raise_application_error( -20000, sqlerrm||' '||pi_stmt);
+        end;
+      else
+        execute immediate pi_stmt;
+      end if;    
     end if;    
-  end if;    
+  end if;        
         
   log_exec_stmt( pi_stmt );
 end;
