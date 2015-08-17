@@ -4,7 +4,7 @@ At this place, we have released our open-source schema management framework orca
 
 Documentation (german)
 ======================
-[Orcas](http://opitzconsulting.github.io/orcas/docs/about/)
+[Orcas](http://opitzconsulting.github.io/orcas/)
 
 Introduction
 ============
