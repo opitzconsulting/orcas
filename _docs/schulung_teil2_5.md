@@ -4,7 +4,7 @@ title: Teil 2.5 - Packages, Views & Co
 permalink: /docs/schulung_teil2_5/
 ---
 
-In Orcas wir zwischen **sttaics** und **replaceables** unterschieden.
+In Orcas wir zwischen **statics** und **replaceables** unterschieden.
 
 - **replaceables**: Sind Datenbankobjekte die bei jedem Build-Durchlauf ersetzt (also im Zweifel gelöscht und neu angelegt) werden können.
 
