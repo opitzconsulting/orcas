@@ -4,7 +4,7 @@ title: Teil 1.1 - Das Beispiel zum Laufen bekommen
 permalink: /docs/schulung_teil1_1/
 ---
 
-Zu Beginn der Schulung wollen wir erst mal das Beispiel zum Laufen bekommen
+Zu Beginn der Schulung wollen wir erst mal das Beispiel zum Laufen bekommen.
 
 ## Setup
 

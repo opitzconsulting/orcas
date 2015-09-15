@@ -4,12 +4,16 @@ title: Teil 1.3 - one-time-skripte
 permalink: /docs/schulung_teil1_3/
 ---
 
-Oft ist es nötig zusätzliche Skripte auf der DB auszuführen. Dafür gibt es in ORCAS die **one-time-skripte**, also Skripte die genau einmal ausgeführt werden.
+Manchmal ist es nötig zusätzliche Skripte auf der DB auszuführen. Dafür gibt es in ORCAS die **one-time-skripte**, also Skripte die (auf jedem Datenbankschema) genau einmal ausgeführt werden.
 
 
-### Spalten umbenennen
+### Spalte umbenennen (mit Daten)
 
-In der Tabelle Items befinden sich nach wie vor Daten. Nun wollen wir die Spalte **description** in **descriptions** umbenennen.
+Voraussetzung:
+In der Tabelle Items befinden sich nach wie vor Daten. 
+
+
+Nun wollen wir die Spalte **description** in **descriptions** umbenennen.
 
 Zunächst muss die Tabellendefinition entsprechend angepasst werden:
 
@@ -20,8 +24,8 @@ create table items
   item_id         number(15)                    not null,
   version         number(15)      default "0"   not null,
   ctgr_id         number(15)                    not null,
-  name            varchar2(30)             not null,
-  descriptions     varchar2(1000)           not null,
+  name            varchar2(30)                  not null,
+  descriptions    varchar2(1000)                not null,
   image_location  varchar2(255),
   price           number(8,2)                   not null,
 
@@ -59,9 +63,9 @@ Wichtig hierfür war, dass das Skript ausgeführt wurde bevor die Tabellen gemä
 Dass das Skript VOR den Tabellendefinitionen ausgeführt wurde wird über die build.xml gesteuert:
 
 {% highlight xml %}
-  <target name="pre_scripts" depends="show_location,orcas_initialize">
-    <orcas_execute_one_time_scripts scriptfolder="skripte" logname="pre_skripte"/>
-  </target>
+<target name="pre_scripts" depends="show_location,orcas_initialize">
+  <orcas_execute_one_time_scripts scriptfolder="skripte" logname="pre_skripte"/>
+</target>
 {% endhighlight %}
 
 hier wurde auch der Ordner **skripte** für unser Skript definitiert. 
@@ -70,7 +74,7 @@ Mit:
 
 {% highlight xml %}
 <target name="build_all" depends="show_location,pre_scripts,build_tables">
-  </target>
+</target>
 {% endhighlight %}
 
 Wird die Reihenfolge der Ausführung festgelgt, also **pre_scripts** vor **build_tables**
@@ -78,7 +82,7 @@ Wird die Reihenfolge der Ausführung festgelgt, also **pre_scripts** vor **build
 ### Wie funktionieren Einmalskripte
 
 Ähnlich zu Flyway und Liquibase, sorgt auch in ORCAS eine Tabelle dafür, dass jedes Skript nur einmal ausgeführt wird. Im User **ORCAS_ORDERENTRY_ORCAS** ist die entsprechenden Tabelle **ORCAS_UPDATES** zu finden.
-Hier kann eingesehen werden, wann welches Skript wann ausgeführt wurde.
+Hier kann eingesehen werden, wann welches Skript ausgeführt wurde.
 
 
 

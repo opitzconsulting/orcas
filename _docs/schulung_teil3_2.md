@@ -5,7 +5,7 @@ permalink: /docs/schulung_teil3_2/
 ---
 
 Die Domain-Extension ist eine vorgefertigte Extension, die in 80% der Fälle ausreicht. Da sie nur konfiguriert und benutzt werden muss, ist es immer ratsam die Domain-Extension zu nutzen und nicht selbst eine Extension zu erstellen, wenn die Funktionalität der Domain-Extension ausreichend ist.
-Dabei stellen Domain-Extensions eine Art Template für Spalten oder Tabellen dar, ähnlich der Vererbung in JAVA.
+Dabei stellen Domain-Extensions eine Art Template für Spalten oder Tabellen dar, ähnlich der Vererbung in Java.
 
 ## Beispiel - Tabellen mit einer ID Spalte
 So kann beispielsweise eine Table-Domain angelegt werden, die definiert, dass die zugehörigen Tabellen eine zusätzliche Id-Spalte besitzen sollen.
@@ -94,7 +94,7 @@ Löse mit deren Hilfe die folgenden Aufgaben innerhalb des Orderentry-Beispiels:
 
 1. Ersetze alle **not** **null** Spalten im Beispiel durch eine ColumnDomain
 2. Füge allen Tabellen aliase hinzu und verwende im Nachhinein die Domain-Extensions zum referenzieren von Foreign Keys
-3. Erstelle eine TableDomain, die automatisch zwei neue Datums-Spalten hinzufügt: **Modification_dt** und **Creation_dt**
+3. Erstelle eine TableDomain, die automatisch zwei neue Datums-Spalten hinzufügt: **modification_dt** und **creation_dt**
 
 
 
