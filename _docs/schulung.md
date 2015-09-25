@@ -22,3 +22,5 @@ permalink: /docs/schulung/
 
 ### location-konzept
 
+## [Teil 5 - Einsatzscenarien]({{site.baseurl}}/docs/schulung_teil5)
+
