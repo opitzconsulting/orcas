@@ -29,7 +29,7 @@ grant resource to myschema;
   <property name="orcas.default_user_orcas" value="myschema_orcas"/>
   <property name="orcas.default_password_orcas" value="myschema_orcas"/>
   <property name="orcas.default_tnsname" value="XE"/>
-  <property name="orcas.default_jdbcurl" value="jdbc:oracle:thin:@localhost:XE:1521"/>
+  <property name="orcas.default_jdbcurl" value="jdbc:oracle:thin:@localhost:1521:XE"/>
   <property name="orcas.default_tmpfolder" value="tmp"/>
   <property name="orcas.default_spoolfolder" value=""/>
 
