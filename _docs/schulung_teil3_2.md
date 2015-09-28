@@ -92,7 +92,7 @@ Schaue dir die Beispiele aus der **domain_extension_demo** an (~\examples\domain
 
 Löse mit deren Hilfe die folgenden Aufgaben innerhalb des Orderentry-Beispiels: 
 
-1. Ersetze alle **not** **null** Spalten im Beispiel durch eine ColumnDomain
+1. Ändere alle **varchar2(10) not null** Spalten im Beispiel so ab, dass sie eine ColumnDomain anstelle von **varchar2(10) not null** verwenden.
 2. Füge allen Tabellen aliase hinzu und verwende im Nachhinein die Domain-Extensions zum referenzieren von Foreign Keys
 3. Erstelle eine TableDomain, die automatisch zwei neue Datums-Spalten hinzufügt: **modification_dt** und **creation_dt**
 
