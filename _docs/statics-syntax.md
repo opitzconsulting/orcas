@@ -53,7 +53,7 @@ create table order_items
 
   constraint orit_pk primary key (orit_id),
   constraint orit_pricecheck check ("price>0"),
-  index      orit_text_upper_ix (upper(text)),
+  index      orit_text_upper_ix "UPPER(TEXT)",
   constraint orit_uc unique (ordr_id, item_id) disabled,
   index      orit_version_ix (version),
   constraint orit_item_fk foreign key (item_id) references items (item_id),
