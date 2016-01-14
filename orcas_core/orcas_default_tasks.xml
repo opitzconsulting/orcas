@@ -1429,6 +1429,8 @@ ${orcas_sql_output}
     <attribute name="extensionfolder" default="" />
     <attribute name="extensionparameter" default="" />
     <attribute name="setupliquibase" default="false" />
+    <attribute name="prebuildmode" default="none" />
+    <attribute name="prebuildfile" default="" />
     <sequential>
       <fail message="Unsupported Java version: ${ant.java.version}. Java version 1.7 or greater required.">
         <condition>
@@ -1518,7 +1520,17 @@ ${orcas_sql_output}
               <orcas_check_connection user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
               <orcas_check_connection user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
               
-              <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionparameter="@{extensionparameter}"/>
+              <if>
+                <equals arg1="@{prebuildmode}" arg2="use"/>
+                <then>      
+                  <delete dir="@{tmpfolder}/gradle_build"/>
+                  <mkdir dir="@{tmpfolder}/gradle_build"/>
+                  <unzip src="@{prebuildfile}" dest="@{tmpfolder}/gradle_build" />
+                </then>      
+                <else>
+                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionparameter="@{extensionparameter}"/>                
+                </else>
+              </if>      
 
               <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
 
@@ -1550,6 +1562,11 @@ ${orcas_sql_output}
                 </or>
                 <then>            
                   <echo message="skipping orcas_initialize (no changes core)"/>
+                  <fail message="Can't change extensions in prebuild-use mode.">
+                    <condition>
+                      <equals arg1="@{prebuildmode}" arg2="use"/>
+                    </condition>
+                  </fail>     
                   <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionparameter="@{extensionparameter}"/>
                   <if>
                     <not>
@@ -1579,6 +1596,15 @@ ${orcas_sql_output}
                 </else>      
               </if>                  
             </else>      
+          </if>      
+          <if>
+            <equals arg1="@{prebuildmode}" arg2="build"/>
+            <then>      
+              <delete file="@{prebuildfile}"/>
+              <zip destfile="@{prebuildfile}" >
+                <fileset dir="@{tmpfolder}/gradle_build" includes="*_distribution/**"/>
+              </zip>
+            </then>      
           </if>      
         </then>      
         <else>      
