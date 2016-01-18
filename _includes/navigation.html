@@ -1,67 +1,22 @@
 <div class="site-navigation no-list-style">
-  <h2>Navigation</h2>
-  <ul>
-    <li><a href="{{site.baseurl}}/">Home</a></li>
-    <li><a href="{{site.baseurl}}/docs/usage/">Wie arbeitet man mit Orcas?</a></li>
-    <li><a href="{{site.baseurl}}/docs/liquibase/">Abgrenzung zu liquibase/flyway</a></li>
-    <li>
-      Getting Started
-      <ul>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/installation/">Installation</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/examples/">Beispielprojekte</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/generate-scripts/">Generieren der Tabellenskripte</a></li>
-      </ul>
-    </li>
-    <li>
-      Orcas
-      <ul>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/project-structure/">Projekt-Struktur</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/ant-tasks/">ant-Tasks zur Ablaufsteuerung</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/statics-syntax/">Tabellen Syntax</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/domain-extension/">Domain-Extension</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/extensions/">Extensions</a></li>
-      </ul>
-    </li>
-    <li>
-      Weiterführende Dokumentation
-      <ul>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/dbdoc/">dbdoc</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/talking-about/">Orcas im Netz</a></li>
-      </ul>
-    </li>
-    <li>
-      Bei der Weiterentwicklung helfen
-      <ul>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/participate/">Hilf uns bei der Weiterentwicklung!</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/dev-docs/">Entwicklerdokumentation</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/integration-tests/">Integrationstests</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/how-it-works/">Funktionsweise von Orcas</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/update-docs/">Pflege der Dokumentation</a></li>
-      </ul>
-    </li>
-    <li>
-      Schulung
-      <ul>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung/">Übersicht</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil1_1/">Teil 1.1 - Das Beispiel zum Laufen bringen</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil1_2/">Teil 1.2 - Ein paar einfache Experimente</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil1_3/">Teil 1.3 - One-Time-Skripte</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil2_1/">Teil 2.1 - Orcas ant-Tasks</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil2_2/">Teil 2.2 - Eigenes Orcas Schema</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil2_3/">Teil 2.3 - one_time_scripts</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil2_4/">Teil 2.4 - Logging</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil2_5/">Teil 2.5 - Packages, Views & Co</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil2_6/">Teil 2.6 - Properties</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil2_7/">Teil 2.7 - Mehrere Targets</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil2_8/">Teil 2.8 - Reverse Engineering</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil3_1/">Teil 3.1 - Orcas Extensions</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil3_2/">Teil 3.2 - Domain Extensions</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil3_3/">Teil 3.3 - Eigene Java Extensions</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil3_4/">Teil 3.4 - Eigene PL/SQL Extensions</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil3_5/">Teil 3.5 - Eigene Syntax Extensions</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil4/">Teil 4</a></li>
-        <li><i class="fa fa-database"></i><a href="{{site.baseurl}}/docs/schulung_teil5/">Teil 5 - Einsatzszenarien</a></li>
-      </ul>
-    </li>
-  </ul>
+
+  {% if page.categories %}
+    {% for language in page.categories %}
+
+      {% if language == 'de' %}
+        {% unless page.navigation-de == false %}
+          {% include navigation-de.html %}
+        {% endunless %}
+      {% else %}
+        {% unless page.navigation == false %}
+          {% include navigation-en.html %}
+        {% endunless %}
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    {% unless page.navigation == false %}
+      {% include navigation-en.html %}
+    {% endunless %}
+  {% endif %}
+
 </div>

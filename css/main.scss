@@ -26,6 +26,24 @@ $content-width:    80%;
 $on-palm:          600px;
 $on-laptop:        800px;
 
+.flag:before {
+  content: "";
+  width: 25px;
+  height: 15px;
+  margin-left: 5px;
+  display: inline-block;
+}
+
+.flag-de:before {
+  background: url("../docs/flags/de.png") no-repeat;
+  background-size: 25px 15px;
+}
+
+.flag-en:before {
+  background: url("../docs/flags/en.png") no-repeat;
+  background-size: 25px 15px;
+}
+
 // Using media queries with like this:
 // @include media-query($on-palm) {
 //     .wrapper {

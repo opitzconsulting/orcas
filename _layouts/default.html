@@ -9,9 +9,10 @@
 
     <div class="page-content">
       <div class="wrapper">
-        {% unless page.navigation == false %}
-          {% include navigation.html %}
-        {% endunless %}
+
+		{% unless page.navigation == false %}
+			{% include navigation.html %}
+		{% endunless %}
 
         {{ content }}
       </div>

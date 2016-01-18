@@ -2,7 +2,18 @@
 
   <div class="wrapper">
 
-    <a class="site-title" href="{{ site.baseurl }}/">{{site.title}}</a>
+    {% if page.categories %}
+      {% for language in page.categories %}
+
+        {% if language == 'de' %}
+          <a class="site-title" href="{{ site.baseurl }}/de/">Orcas - Automatisches Deployment für die Datenbank</a>
+        {% else %}
+          <a class="site-title" href="{{ site.baseurl }}/">{{site.title}}</a>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <a class="site-title" href="{{ site.baseurl }}/">{{site.title}}</a>
+    {% endif %}
 
   </div>
 

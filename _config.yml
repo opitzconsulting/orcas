@@ -1,10 +1,8 @@
 # Site settings
 short_title: Orcas
-title: Orcas - Automatisches Deployment für die Datenbank
+title: Orcas - Automatic deployment for the database
 description: >
- Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes Datenbankschema in einen in Orcas
- beschriebenen Soll-Zustand geführt werden kann. Orcas steht für Oracle adaptive schemas und
- ist nur mit Oracle RDBMS kompatibel.
+ Orcas is an Open Source Deployment framework for transferring an existing database schema into a target state defined by Orcas. Orcas stands for Oracle adaptive schemas” and is only compatible with Oracle RDBMS.
 
 # Twitter
 twitter:
@@ -13,11 +11,11 @@ twitter:
 # GitHub (required for local site builds)
 github:
   owner_name: opitzconsulting
-  repository_name: orcas
-  repository_url: https://github.com/opitzconsulting/orcas
+  repository_name: orcas-doku-test
+  repository_url: https://github.com/DFelten/orcas-doku-test
 
 # Build settings
-baseurl: /orcas
+baseurl: /orcas-doku-test
 permalink: docs/:title
 markdown: kramdown
 highlighter: pygments
