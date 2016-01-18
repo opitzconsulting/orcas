@@ -11,11 +11,11 @@ twitter:
 # GitHub (required for local site builds)
 github:
   owner_name: opitzconsulting
-  repository_name: orcas-doku-test
-  repository_url: https://github.com/DFelten/orcas-doku-test
+  repository_name: orcas
+  repository_url: https://github.com/opitzconsulting/orcas
 
 # Build settings
-baseurl: /orcas-doku-test
+baseurl: /orcas
 permalink: docs/:title
 markdown: kramdown
 highlighter: pygments
