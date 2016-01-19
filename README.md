@@ -1,4 +1,4 @@
-orcas
+Orcas
 =====
 At this place, we have released our open-source schema management framework orcas.
 
