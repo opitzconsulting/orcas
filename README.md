@@ -2,7 +2,7 @@ orcas
 =====
 At this place, we have released our open-source schema management framework orcas.
 
-# Orcas Documentation
+# Documentation
 The documentation can be found here: [http://opitzconsulting.github.io/orcas](http://opitzconsulting.github.io/orcas).
 
 Deutsche Version: [http://opitzconsulting.github.io/orcas/de](http://opitzconsulting.github.io/orcas/de).
