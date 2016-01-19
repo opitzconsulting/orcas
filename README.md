@@ -4,8 +4,7 @@ At this place, we have released our open-source schema management framework orca
 
 # Documentation
 The documentation can be found here: [http://opitzconsulting.github.io/orcas](http://opitzconsulting.github.io/orcas).
-
-Deutsche Version: [http://opitzconsulting.github.io/orcas/de](http://opitzconsulting.github.io/orcas/de).
+(Deutsche Version: [http://opitzconsulting.github.io/orcas/de](http://opitzconsulting.github.io/orcas/de).)
 
 # Introduction
 Orcas is a schema management and deployment framework for Oracle Databases. Orcas migrates an existing schema into a new to-be state as described by the framework.
