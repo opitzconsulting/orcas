@@ -298,7 +298,10 @@ This ant-Task has to be called before every ant-run, to initialize Orcas. This i
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
 |extensionfolder|Defines the directory where the [Extensions]({{site.baseurl}}/docs/extensions/) are located. If you don't use extensions, extensionfolder has to refer an empty directory.|Yes|| 
-|extensionparameter|With this, you can commit parameters to extensions (a text parameter for all extentions).|No||
+|extensionparameter|With this, you can pass parameters to extensions (one single text parameter for all extentions).|No||
+|prebuildmode|Allows to store or use orcas-installation to or from a prebuildfile, allows to use orcas without internet connection and gradle. Possible values: 1. build: Creates a prebuildfile, containing orcas, its dependencies and extensions (also initializes orcas normally). ; 2. use: Skips the gradle-build and uses the prebuildfile instead. ; 3. none: Don't use prebuildmode.|No|none|
+|prebuildfile|Filename for the prebuildfiles (required if prebuildmode != none). The file may not reside in the tmpfolder. |No||
+
 
 <a name="orcas_grant"/>
 
