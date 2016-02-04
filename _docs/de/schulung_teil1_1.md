@@ -63,6 +63,6 @@ ant
 
 # Das Beispiel im Toad/SQLDeveloper ansehen
 
-Jetzt kann vom Hostrechner aus wie oben beschrieben (Port 1531) auf das Beispiel zugegriffen werden. Unter Users/Andere Benutzer fondet sich u.a. das Schema ORCAS_ORDERENTRY in dem bereits einige Tabellen zu sehen sind.
+Jetzt kann vom Hostrechner aus wie oben beschrieben (Port 1531) auf das Beispiel zugegriffen werden. Unter Users/Andere Benutzer findet sich u.a. das Schema ORCAS_ORDERENTRY in dem bereits einige Tabellen zu sehen sind.
 
 
