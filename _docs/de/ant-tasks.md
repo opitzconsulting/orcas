@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Ant Tasks
-permalink: /docs/ant-tasks/
+permalink: /docs/de/ant-tasks/
 categories: 
 - de
 ---
