@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE setup_full_supplier( p_bpar_id in number ) is
+create or replace procedure setup_full_supplier( p_bpar_id in number ) is
 begin
   for cur_items in
   (
@@ -24,4 +24,3 @@ begin
   end loop;
 end;
 /
-

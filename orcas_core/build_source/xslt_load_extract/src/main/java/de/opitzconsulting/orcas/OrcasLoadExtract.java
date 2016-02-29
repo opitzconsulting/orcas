@@ -14,7 +14,7 @@ import org.apache.commons.io.IOUtils;
 
 public class OrcasLoadExtract 
 {
-	public static void main(String[] pArgs) {
+  public static void main(String[] pArgs) {
     try
     {
       Class.forName( "oracle.jdbc.OracleDriver" );

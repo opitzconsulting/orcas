@@ -1836,6 +1836,56 @@ ${orcas_sql_output}
     </sequential>
   </macrodef>
 
+  <macrodef name="orcas_extract_replaceables">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="viewmode" default="text" />
+    <attribute name="outputfolder" />
+    <sequential>
+      <delete dir="@{outputfolder}"/>
+      <delete dir="@{tmpfolder}/load_extract_replaceables"/>  
+      <mkdir dir="@{outputfolder}/views"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/triggers"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/packages"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
+
+      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz triggers/ NONE TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/spec_ NONE PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/body_ NONE PACKAGE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz functions/ NONE FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz procedures/ NONE PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+
+      <copy todir="@{outputfolder}" overwrite="true">
+        <fileset dir="@{tmpfolder}/load_extract_replaceables/extract" includes="**/*.sql"/>
+        <filterchain>
+          <tokenfilter>
+            <replaceregex pattern="^LINE_BEGIN" replace="" flags="g"/>
+          </tokenfilter>              
+        </filterchain>
+      </copy>
+
+      <path id="orcas_internal_xslt_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_xslt_distribution/install/xslt_distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <java classname="de.opitzconsulting.orcas.OrcasExtractViews" classpathref="orcas_internal_xslt_classpath" fork="true" failonerror="true" dir="@{outputfolder}/views" maxmemory="512m">
+        <arg value="${orcas_internal_jdbc_url}"/>
+        <arg value="@{user}"/>
+        <arg value="@{password}"/>
+        <arg value="@{viewmode}"/>
+      </java>      
+    </sequential>
+  </macrodef>
+
   <macrodef name="orcas_extension_test">
     <attribute name="user" default="${orcas.default_user}" />
     <attribute name="password" default="${orcas.default_password}" />

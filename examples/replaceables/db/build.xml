@@ -25,12 +25,12 @@
 
   <target name="build_replaceables" depends="show_location,orcas_initialize">
     <orcas_drop_replaceables/>
-    <orcas_execute_scripts scriptfolder="views"/>
-    <orcas_execute_scripts scriptfolder="triggers"/>
-    <orcas_execute_scripts scriptfolder="packages" scriptpostfix="spec.sql"/>
-    <orcas_execute_scripts scriptfolder="packages" scriptpostfix="body.sql"/>
-    <orcas_execute_scripts scriptfolder="functions"/>
-    <orcas_execute_scripts scriptfolder="procedures"/>
+    <orcas_execute_scripts scriptfolder="replaceables/views"/>
+    <orcas_execute_scripts scriptfolder="replaceables/triggers"/>
+    <orcas_execute_scripts scriptfolder="replaceables/packages" scriptprefix="spec"/>
+    <orcas_execute_scripts scriptfolder="replaceables/packages" scriptprefix="body"/>
+    <orcas_execute_scripts scriptfolder="replaceables/functions"/>
+    <orcas_execute_scripts scriptfolder="replaceables/procedures"/>
     <orcas_compile_db_objects/>
   </target>
 
@@ -43,7 +43,8 @@
   </target>
 
   <target name="extract" depends="show_location,orcas_initialize">
-    <orcas_extract outputfolder="${binrundir}/extract_output"/>
+    <orcas_extract outputfolder="${binrundir}/extract_output/tables"/>
+    <orcas_extract_replaceables outputfolder="${binrundir}/extract_output/replaceables"/>
   </target>
 
   <target name="install_all" depends="show_location,orcas_install,orderentry_install">
