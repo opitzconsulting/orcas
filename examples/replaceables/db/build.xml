@@ -1,0 +1,58 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<project default="build_all" basedir="." name="replaceables">
+  <import file="../distribution/ant_default_include.xml"/>
+
+  <target name="orcas_install" depends="show_location">
+    <orcas_install user="${username_dba}" password="${password_dba}"/>
+  </target>
+
+  <target name="orderentry_install" depends="show_location">
+    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="create_schemaowner.sql" parameter="${username_schemaowner} ${password_schemaowner}"/>
+  </target>
+
+  <target name="drop_users" depends="show_location">
+    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${username_schemaowner}"/>
+    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${orcas.default_user_orcas}"/>
+  </target>
+
+  <target name="orcas_initialize" depends="show_location">
+    <orcas_initialize extensionfolder="../orcas_extensions"/>
+  </target>
+
+  <target name="build_statics" depends="show_location,orcas_initialize">
+    <orcas_execute_statics scriptfolder="tables" scriptfolderrecursive="true" spoolfolder="${binrundir}/log" logname="tables" dropmode="false"/>
+  </target>
+
+  <target name="build_replaceables" depends="show_location,orcas_initialize">
+    <orcas_drop_replaceables/>
+    <orcas_execute_scripts scriptfolder="views"/>
+    <orcas_execute_scripts scriptfolder="triggers"/>
+    <orcas_execute_scripts scriptfolder="packages" scriptpostfix="spec.sql"/>
+    <orcas_execute_scripts scriptfolder="packages" scriptpostfix="body.sql"/>
+    <orcas_execute_scripts scriptfolder="functions"/>
+    <orcas_execute_scripts scriptfolder="procedures"/>
+    <orcas_compile_db_objects/>
+  </target>
+
+  <target name="pre_tables" depends="show_location,orcas_initialize">
+    <orcas_execute_one_time_scripts scriptfolder="scripts/pre_tables" logname="pre_tables"/>
+  </target>
+
+  <target name="post_tables" depends="show_location,orcas_initialize">
+    <orcas_execute_one_time_scripts scriptfolder="scripts/post_tables" logname="post_tables"/>
+  </target>
+
+  <target name="extract" depends="show_location,orcas_initialize">
+    <orcas_extract outputfolder="${binrundir}/extract_output"/>
+  </target>
+
+  <target name="install_all" depends="show_location,orcas_install,orderentry_install">
+  </target>
+
+  <target name="build_all" depends="show_location,pre_tables,build_statics,build_replaceables,post_tables">
+  </target>
+
+  <target name="ci_jenkins" depends="drop_users,install_all,build_all">
+  </target>
+</project>
+
