@@ -16,26 +16,6 @@ spool &1
 select text
   from
        (
-       select replace
-              (
-                'prompt LINE_BEGIN' ||
-                case 
-                  when( line = 1 )
-                    then
-                      'create or replace '
-                    else
-                      null
-                end ||
-                text ||
-                ';',
-                chr(10),
-                ''
-              ) as text,              
-              line,
-              name,
-              type
-         from user_source
-       union all
        select 'spool ' ||  
               '&2' ||
               lower( object_name ) ||
@@ -45,7 +25,7 @@ select text
               object_type as type
          from user_objects
        union all
-       select 'prompt LINE_BEGIN/;' as text,
+       select 'prompt LINE_BEGINdrop ' || lower(object_type) || ' ' || lower(object_name) || ';;' as text,
               1000001 as line,
               object_name as name,
               object_type as type
@@ -57,9 +37,8 @@ select text
               object_type as type
          from user_objects         
        )
- where type = decode( '&3', 'PACKAGE_BODY', 'PACKAGE BODY', '&3' )
+ where type = decode( '&3', 'PACKAGE_BODY', 'PACKAGE BODY', '&3' )    
    and name like '&4'
-   and 'VIEW' != '&3'
  order by name, line;
 
 spool off

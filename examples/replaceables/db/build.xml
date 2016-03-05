@@ -47,6 +47,11 @@
     <orcas_extract_replaceables outputfolder="${binrundir}/extract_output/replaceables"/>
   </target>
 
+  <target name="sync_replaceables" depends="show_location,orcas_initialize">
+    <orcas_sync_replaceables scriptfolder="replaceables" logname="sync_replaceables"/>
+    <orcas_compile_db_objects/>    
+  </target>
+
   <target name="install_all" depends="show_location,orcas_install,orderentry_install">
   </target>
 

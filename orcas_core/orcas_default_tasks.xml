@@ -1855,11 +1855,11 @@ ${orcas_sql_output}
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
 
-      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz triggers/ NONE TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/spec_ NONE PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/body_ NONE PACKAGE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz functions/ NONE FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz procedures/ NONE PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/body_ PACKAGE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
 
       <copy todir="@{outputfolder}" overwrite="true">
         <fileset dir="@{tmpfolder}/load_extract_replaceables/extract" includes="**/*.sql"/>
@@ -1883,6 +1883,87 @@ ${orcas_sql_output}
         <arg value="@{password}"/>
         <arg value="@{viewmode}"/>
       </java>      
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_internal_extract_drop_replaceables">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="outputfolder" />
+    <sequential>
+      <delete dir="@{outputfolder}"/>
+      <delete dir="@{tmpfolder}/load_extract_replaceables"/>  
+      <mkdir dir="@{outputfolder}/views"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/triggers"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/packages"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
+
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz views/ VIEW %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+
+      <copy todir="@{outputfolder}" overwrite="true">
+        <fileset dir="@{tmpfolder}/load_extract_replaceables/extract" includes="**/*.sql"/>
+        <filterchain>
+          <tokenfilter>
+            <replaceregex pattern="^LINE_BEGIN" replace="" flags="g"/>
+          </tokenfilter>              
+        </filterchain>
+      </copy>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_sync_replaceables">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="scriptfolder" />
+    <attribute name="logname" default="" />
+    <sequential>
+
+    <delete dir="@{tmpfolder}/sync_replaceables"/>
+      <mkdir dir="@{tmpfolder}/sync_replaceables/src_orig"/>
+      <mkdir dir="@{tmpfolder}/sync_replaceables/src_db"/>
+      <mkdir dir="@{tmpfolder}/sync_replaceables/src_db_drop"/>
+      <mkdir dir="@{tmpfolder}/sync_replaceables/result"/>
+
+      <copy todir="@{tmpfolder}/sync_replaceables/src_orig">
+        <fileset dir="@{scriptfolder}" includes="**/*.sql">
+        </fileset>
+      </copy>      
+
+      <orcas_extract_replaceables user="@{user}" password="@{password}" tnsname="@{tnsname}" outputfolder="@{tmpfolder}/sync_replaceables/src_db"/>
+
+      <orcas_internal_extract_drop_replaceables user="@{user}" password="@{password}" tnsname="@{tnsname}"  outputfolder="@{tmpfolder}/sync_replaceables/src_db_drop"/>
+
+      <fixcrlf srcdir="@{tmpfolder}/sync_replaceables" eol="lf" eof="remove" fixlast="true" />
+
+      <copy todir="@{tmpfolder}/sync_replaceables/result">
+        <fileset dir="@{tmpfolder}/sync_replaceables/src_orig" includes="**/*.sql">
+          <different targetdir="@{tmpfolder}/sync_replaceables/src_db" ignoreFileTimes="true"/>      
+        </fileset>
+      </copy>        
+
+      <copy todir="@{tmpfolder}/sync_replaceables/result">
+        <fileset dir="@{tmpfolder}/sync_replaceables/src_db_drop" includes="**/*.sql">
+          <not>
+            <present targetdir="@{tmpfolder}/sync_replaceables/src_orig"/>
+          </not>
+        </fileset>
+      </copy>        
+
+      <orcas_execute_scripts user="@{user}" password="@{password}" tnsname="@{tnsname}" scriptfolder="@{tmpfolder}/sync_replaceables/result" scriptfolderrecursive="true" logname="@{logname}" spoolfolder="@{spoolfolder}"/>
     </sequential>
   </macrodef>
 
