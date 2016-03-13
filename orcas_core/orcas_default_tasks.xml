@@ -1851,11 +1851,14 @@ ${orcas_sql_output}
       <delete dir="@{tmpfolder}/load_extract_replaceables"/>  
       <mkdir dir="@{outputfolder}/views"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/triggers"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/types"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/packages"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
 
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz types/spec_ TYPE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz types/body_ TYPE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/body_ PACKAGE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
@@ -1898,12 +1901,14 @@ ${orcas_sql_output}
       <delete dir="@{tmpfolder}/load_extract_replaceables"/>  
       <mkdir dir="@{outputfolder}/views"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/triggers"/>  
+      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/types"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/packages"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
 
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz views/ VIEW %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz types/spec_ TYPE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
       <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>

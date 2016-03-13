@@ -25,6 +25,8 @@
 
   <target name="build_replaceables" depends="show_location,orcas_initialize">
     <orcas_drop_replaceables/>
+    <orcas_execute_scripts scriptfolder="replaceables/types" scriptprefix="spec"/>
+    <orcas_execute_scripts scriptfolder="replaceables/types" scriptprefix="body"/>
     <orcas_execute_scripts scriptfolder="replaceables/views"/>
     <orcas_execute_scripts scriptfolder="replaceables/triggers"/>
     <orcas_execute_scripts scriptfolder="replaceables/packages" scriptprefix="spec"/>

@@ -57,7 +57,7 @@ select text
               object_type as type
          from user_objects         
        )
- where type = decode( '&3', 'PACKAGE_BODY', 'PACKAGE BODY', '&3' )
+ where type = decode( '&3', 'PACKAGE_BODY', 'PACKAGE BODY', 'TYPE_BODY', 'TYPE BODY', '&3' )
    and name like '&4'
    and 'VIEW' != '&3'
  order by name, line;

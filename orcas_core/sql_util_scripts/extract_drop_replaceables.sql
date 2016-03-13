@@ -25,7 +25,7 @@ select text
               object_type as type
          from user_objects
        union all
-       select 'prompt LINE_BEGINdrop ' || lower(object_type) || ' ' || lower(object_name) || ';;' as text,
+       select 'prompt LINE_BEGINdrop ' || lower(object_type) || ' ' || lower(object_name) || decode( '&3', 'TYPE', ' force', '' )   || ';;' as text,
               1000001 as line,
               object_name as name,
               object_type as type
