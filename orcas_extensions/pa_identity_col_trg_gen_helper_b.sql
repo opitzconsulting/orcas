@@ -1,4 +1,4 @@
-create or replace package body pa_generator is
+create or replace package body pa_identity_col_trg_gen_helper is
   pv_syex_model ot_syex_model;
   pv_stmt varchar2(32000);
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import de.opitzconsulting.orcasDsl.*;
 import de.opitzconsulting.orcasDsl.impl.*;
 
-public class ColumnIdentityExtension extends TableVisitorExtension
+public class IdentityColumnExtension extends TableVisitorExtension
 {
   @Override
   protected void handleTable( Table pTable )
