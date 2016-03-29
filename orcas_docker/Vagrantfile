@@ -1,0 +1,30 @@
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "box-cutter/ubuntu1504-docker" 
+
+  config.vm.synced_folder "images", "/vm_inside/images", create: true
+  config.vm.synced_folder "jenkins", "/vm_inside/jenkins", create: true
+
+  config.vm.provision :shell, inline: "docker build -t orcas_runtime /vm_inside/images/orcas_runtime"
+  config.vm.provision :shell, inline: "docker build -t orcas_runtime_deps /vm_inside/images/orcas_runtime_deps"
+  config.vm.provision :shell, inline: "docker build -t orcas_jenkins_slave /vm_inside/images/orcas_jenkins_slave"
+  config.vm.provision :shell, inline: "docker create --name orcasdb -p 49161:1521 wnameless/oracle-xe-11g"
+  config.vm.provision :shell, inline: "docker create --name jenkins_slave -p 49022:22 --link=orcasdb:orcasdb orcas_jenkins_slave"
+  config.vm.provision :shell, inline: "docker create --name jenkins -p 8080:8080 -p 50000:50000 -v /vm_inside/jenkins:/var/jenkins_home --link=jenkins_slave:jenkins_slave jenkins"
+  config.vm.provision :shell, inline: "docker start orcasdb", run: "always" 
+  config.vm.provision :shell, inline: "docker start jenkins_slave", run: "always" 
+  config.vm.provision :shell, inline: "docker start jenkins", run: "always" 
+
+  config.vm.network :forwarded_port, guest: 49161, host: 1541 # Oracle XE
+  config.vm.network :forwarded_port, guest: 8080, host: 8281 # jenkins
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+    v.cpus = 2
+  end
+end
+
+
+
+
