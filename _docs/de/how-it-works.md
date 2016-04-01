@@ -156,11 +156,11 @@ Die **pa_orcas_xtext_\*** Packages werden komplett (Specification und Body) im A
 
 ##Installation und Aufruf
 
-Das folgende Diagramm gibt einen groben Überblick über die Installation von Orcas und den Aufruf eines Schemaabgleich. Die einzelnen Schritte, die mit Nummern versehen sind, werden nachfolgend genauer beschrieben. Die Schritte 1 und 2 passieren beim Initialisieren von Orcas für ein bestimmtes Zielschema, die Schritte 3 und 4 beim eigentlichen Schemaabgleich. Der Schemaabgleich wird für jedes zu deployende Zielschema separat ausgeführt.
+Das folgende Diagramm gibt einen groben Überblick über die Installation von Orcas und den Aufruf eines Schemaabgleichs. Die einzelnen Schritte, die mit Nummern versehen sind, werden nachfolgend genauer beschrieben. Die Schritte 1 und 2 passieren beim Initialisieren von Orcas für ein bestimmtes Zielschema, die Schritte 3 und 4 beim eigentlichen Schemaabgleich. Der Schemaabgleich wird für jedes zu deployende Zielschema separat ausgeführt.
 
 ![Aufruf von Orcas]({{site.baseurl}}/assets/aufruf_orcas.png)
 
 1. Orcas wird in einem separaten Schema ("ORCAS") installiert.
 2. Die execute-Rechte an den Orcas-Packages werden an das Schema, für das der Abgleich durchgeführt werden soll, gegranted. Außerdem werden in diesem Schema Synonyme für die Orcas-Packages erzeugt. 
 3. Für den Schemaabgleich meldet sich Orcas mit dem Schemaowner des zu deployenden Schemas an der Datenbank an. Es wird ein Aufruf des Schemaabgleichs über die Synonyme der Orcas-Packages durchgeführt.  
-4. Im Rahmen des Schemaabgleichs generieren diese Packages die mit den Rechten des Aufrufers (also von Schemaowner) aufgerufen werden, DDL-Statements, die im Zielschema ausgeführt werden.
+4. Im Rahmen des Schemaabgleichs generieren diese Packages die mit den Rechten des Aufrufers (also von Schemaowner) aufgerufen werden, DDL-Statements, die in diesem Schema ausgeführt werden.
