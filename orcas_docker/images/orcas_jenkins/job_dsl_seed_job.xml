@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>master</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <javaposse.jobdsl.plugin.ExecuteDslScripts plugin="job-dsl@1.44">
+      <scriptText>job(&apos;orcas_integration_test&apos;) {   
+    description &apos;orcas core tests&apos;
+    steps {
+         ant {
+            prop(&apos;ladetest&apos;,&apos;test*&apos;)
+            prop(&apos;bindir&apos;,&apos;/tmp/jenkins/workspace/orcas_integration_test/bin&apos;)
+            prop(&apos;available_feature_list&apos;,&apos;&apos;)
+            buildFile(&apos;/opt/orcas/orcas-master/orcas_integrationstest/build.xml&apos;)
+        }
+    }
+    publishers {
+        archiveJunit(&apos;**/testresult.xml&apos;)
+    }  
+}
+job(&apos;orcas_spool_test&apos;) {     
+    description &apos;orcas test tests (tests the capabiltiy of the test framework to detect relevant schema difeereneces)&apos;
+    steps {
+         ant {
+            prop(&apos;ladespooltest&apos;,&apos;*&apos;)
+            prop(&apos;bindir&apos;,&apos;/tmp/jenkins/workspace/orcas_spool_test/bin&apos;)
+            buildFile(&apos;/opt/orcas/orcas-master/orcas_integrationstest/testspool/build.xml&apos;)
+        }
+    }    
+}
+job(&apos;orcas_examples&apos;) {   
+    description &apos;orcas example tests, simply executes all examples testing for no errors&apos;
+    steps {
+         ant {
+            buildFile(&apos;/opt/orcas/orcas-master/examples/build.xml&apos;)
+        }
+    }    
+}</scriptText>
+      <usingScriptText>true</usingScriptText>
+      <ignoreExisting>false</ignoreExisting>
+      <removedJobAction>IGNORE</removedJobAction>
+      <removedViewAction>IGNORE</removedViewAction>
+      <lookupStrategy>JENKINS_ROOT</lookupStrategy>
+      <additionalClasspath></additionalClasspath>
+    </javaposse.jobdsl.plugin.ExecuteDslScripts>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
