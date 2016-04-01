@@ -2,22 +2,20 @@
 layout: page
 title: dbdoc
 permalink: /docs/dbdoc/
-categories: 
-- en
 ---
 
-Dbdoc is a tool for documenting database schemas. It generates a graphic of all schema information in which you are able to see all tables and their relations to each other.
-<br/>You can set an ant-Script for the right consideration of your tables and the right plotting.
+dbdoc is a tool for documenting database schemas. It generates a visual display of all schema information in which you are able to see all tables and their relation to each other.
+<br/>You can set an Ant script to configure the order and display of your tables.
 
 To execute dbdoc you need to install [Graphviz](http://www.graphviz.org/Download_windows.php).
 
 <br/>
 
-##1. Structure of a dbdoc-Script
+##1. Structure of a dbdoc script
 
-###1.1. Including of dbdoc-Tasks
+###1.1. Including of dbdoc tasks
 
-First you have to include the dbdoc-Tasks and Orcas-Default-Tasks.
+First you have to include the dbdoc tasks and Orcas default tasks.
 
 {% highlight xml %}
 <import file="${orcas_dir}/orcas_default_tasks.xml"/>
@@ -26,7 +24,7 @@ First you have to include the dbdoc-Tasks and Orcas-Default-Tasks.
 
 <br/>
 
-###1.2. Including of the database
+###1.2. Accessing the database
 
 The database will be read out in the task **&lt;orcas_dbdoc&gt;**.
 
@@ -36,7 +34,7 @@ The database will be read out in the task **&lt;orcas_dbdoc&gt;**.
 |user     |Defines the username of the schema.|Yes||
 |password |Defines the password for the user. |Yes||
 |outfolder|Defines the folder for the generated HTML pages.|Yes||
-|tmpfolder|Defines the folder for temporary saving data. |Yes||
+|tmpfolder|Defines the folder for storing temporary files. |Yes||
 
 <br/>
 {% highlight xml %}
@@ -47,7 +45,7 @@ The database will be read out in the task **&lt;orcas_dbdoc&gt;**.
 
 ###1.3. Configuration of the process
 
-All table groups, the style and the diagramms as well as the structure of the diagramms will be defined in **&lt;config&gt;**.
+All table groups, the style, the diagrams and their structure will be defined in **&lt;config&gt;**.
 
 <br/>
 
@@ -57,10 +55,10 @@ All table groups will be defines in **&lt;tablerregistry&gt;**.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|tablesrcfolder|Defines the folder where to find the table scripts. <br/>Results in a display of SQL commands in a table view.|No||
+|tablesrcfolder|Defines the folder where to find the table scripts. <br/>Results in a display of SQL commands in a table.|No||
 
 <br/>
-There will be created a task **&lt;tablegroup&gt;** for every table group.
+The task **&lt;tablegroup&gt;** will be created for every table group.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
@@ -68,14 +66,13 @@ There will be created a task **&lt;tablegroup&gt;** for every table group.
 
 <br/>
 Both tasks **&lt;include&gt;** and **&lt;exclude&gt;** will be used in **&lt;tablegroup&gt;** for including and excluding tables.
-<br/>Working with regular expressions is also possible. therefore you can create filters to select multiple tables.
+<br/>Working with regular expressions is also possible, so you can create filters to select multiple tables.
 Examples:
 
 |Task|Value|Meaning|
 |----|-----|---------|
 |&lt;include name="MASTERDATA_.*/&gt;|MASTERDATA_.*|All tables with prefix "Masterdata_" will be assigned to table group "ADRESSE".|
 |&lt;include name=".+TIER.*/&gt;|.+TIER.*|All tables which include "TIER" in their name(beginning, middle, end)|
-
 |&lt;exclude name=".*_TIERMONITORING"/&gt;|.*_TIERMONITORING|All tables with suffix "_TIERMONITORING" will NOT be included into table group TIER|
 
 <br/>
@@ -96,16 +93,16 @@ Examples:
 
 <br/>
 
-####1.3.2. Configuration of style
+####1.3.2. Style configuration
 
-The output format of the tables and diagramms are defined in **&lt;styles&gt;**.
+The output format of the tables and diagrams are defined in **&lt;styles&gt;**.
 
 <br/>
 
 #####1.3.2.1. Configuration of table presentation
 
-You are able to adjust the table presentation for every single table group in **&lt;tables&gt;**.
-<br/>You only have to keep in mind not to assign a table to multiple table groups (the same applies to multi selections by regular expressions!)
+You can adjust the table presentation for every single table group in **&lt;tables&gt;**.
+<br/>You only have to keep in mind not to assign a table to multiple table groups (the same applies to multiple selections by regular expressions!)
 
 |Name|Description|Value|Default|
 |----|-----------|--------|-------|
@@ -115,7 +112,7 @@ You are able to adjust the table presentation for every single table group in **
 |fontsize|Defines the font size|In dots|14|
 
 <br/>
-You'll find many additional attributes at the [Documentation site of graphviz](http://www.graphviz.org/content/attrs).
+You'll find many additional attributes in the [Graphviz documentation](http://www.graphviz.org/content/attrs).
 
 {% highlight xml %}
 <tables>
@@ -132,8 +129,8 @@ You'll find many additional attributes at the [Documentation site of graphviz](h
 
 #####1.3.2.2. Configuration of table presentation
 
-All style groups are defined in **&lt;diagrams&gt;** and can be selected in the next step (diagramm generation) in **&lt;diagram&gt;**.
-<br/>There will be created a task **&lt;stylegroup&gt;** for every style group.
+All style groups are defined in **&lt;diagrams&gt;** and can be selected in the next step (diagram generation) in **&lt;diagram&gt;**.
+<br/>The task **&lt;stylegroup&gt;** will be created for every style group.
 
 |Name|Description|Value|Default|
 |----|-----------|--------|-------|
@@ -172,13 +169,13 @@ Every style group can be adjusted with **&lt;style&gt;**.
 |Name|Description|Value|Default|
 |----|-----------|-----|-------|
 |overlap|Defines whether tables can be overlapping in a presentation or not|true/false|false|
-|nodesep|Defines the horizontal space (Inches) between tables. (Only valid with dot).|1-n|1|
-|ranksep|Defines the vertical space (Inches) between tables. (Only valid with dot and twopi)|1-n|2|
+|nodesep|Defines the horizontal space (inches) between tables. (Only valid with dot).|1-n|1|
+|ranksep|Defines the vertical space (inches) between tables. (Only valid with dot and twopi)|1-n|2|
 |splines|Defines whether and how table connections are displayed. |(empty), true, false, polyline|polyline|
 
 <br/>
 
-You'll find many additional attributes at the [Documentation site of graphviz](http://www.graphviz.org/content/attrs). Not all attributes are supported by all style groups.
+You'll find many additional attributes in the [Graphviz documentation ](http://www.graphviz.org/content/attrs). Not all attributes are supported by all style groups.
 
 {% highlight xml %}
 <diagrams>
@@ -192,14 +189,14 @@ You'll find many additional attributes at the [Documentation site of graphviz](h
 
 <br/>
 
-####1.3.3. Configuration of diagramm structure
+####1.3.3. Configuration of diagram structure
 
 You can define the names and hierarchy of diagrams in **&lt;diagram&gt;**.
 
 |Attribute|Description|Required|Default|
 |---------|-----------|--------|-------|
-|label    |Diagramm label can be what you want.|Yes||
-|stylegroup|Selection of an existing style group. |No||
+|label|Defines the diagram label.|Yes||
+|stylegroup|Choose an existing style group.|No||
 |subinnclude|Defines the presentation format of the diagram. <br/>(diagrams_only/diagrams_with_tables/tables)|No||
 |tablegroup|Defines the tables and table groups belonging to the diagram.|No||
 
@@ -251,14 +248,14 @@ The hierarchical structure of the a diagram will be achieved by nesting **&lt;di
 <br/>To select all table groups, you have to set "tablegroup" to ".*".
 
 {% highlight xml %}
-<diagram label="Milk production" stylegroup="style1" subinnclude="diagrams_only" tablegroup=".*"/>
+<diagram label="Milk production" stylegroup="style1" subinclude="diagrams_only" tablegroup=".*"/>
 {% endhighlight %}
 
-If you are going to execute this,all table group with all associated tables will be loaded and displayed because there are no hierarchically subordinated diagrams.
+If you are going to execute this, all table groups with all associated tables will be loaded and displayed because there are no hierarchically subordinated diagrams.
 <br/>With a big amount of included tables, this can get complex very fast.
-<br/>Because of this, there is the possibility to summarize tale groups to diagrams, with are hierarchically subordinated to the main diagram.
+<br/>Because of this, there is the possibility to summarize table groups in separate diagrams, which are displayed hierarchically below the main diagram.
 
-If you take the world as an example, there will be a diagram called "world". For this diagram you have a subordinated diagram for each continent. For a continent diagram you will have subordinated state diagrams and so on.
+If you take the world as an example, there will be a diagram called "world". For this diagram you have a subordinate diagram for each continent. For a continent diagram you will have subordinate state diagrams and so on.
 
 {% highlight xml %}
 <diagram label="The world" subinnclude="diagrams_only" tablegroup=".*">
@@ -268,7 +265,7 @@ If you take the world as an example, there will be a diagram called "world". For
       <diagram label="Baden_Wuerttemberg" tablegroup="Baden_Wuerttemberg"/>
       <diagram label="Bavaria" tablegroup="Bavaria"/>
     </diagram>
-    <diagram label="Spin" tablegroup="Spain"/>
+    <diagram label="Spain" tablegroup="Spain"/>
   </diagram>
 
   <diagram label="South America" subinnclude="tables">
@@ -280,22 +277,22 @@ If you take the world as an example, there will be a diagram called "world". For
 </diagram>
 {% endhighlight %}
 
-If you are going to execute this Code, there will be a diagram for "Europe" with subordinated diagrams "Spain" and "Germany" ("Germany" has to more subordinated diagrams for the federa states Bavaria and Baden-Württemberg).
+If you execute this code, there will be a diagram for "Europe" with subordinate diagrams "Spain" and "Germany" ("Germany" has two more subordinate diagrams for the federa states Bavaria and Baden-Württemberg).
 ![]({{site.baseurl}}/assets/Europa.jpg)
 
 ##Example project dbdoc_demo
 
-You will find an example project at examples\dbdoc_demo\build.xml and also be able to execute this and to use it as a basement for your own projects.
-<br/>For example data there is a data model für milk production.
-<br/>Here you will find the main diagram. The gray rectangles are hierarchically subordinated diagrams.
+You will find an example project at examples\dbdoc_demo\build.xml. You can execute it and use it as a template for your own projects.
+<br/>The example is a data model für milk production.
+<br/>Here you will find the main diagram (the gray rectangles are hierarchically subordinate diagrams):
 ![]({{site.baseurl}}/assets/Diagrams_only.jpg)
 
 <br/>
-These can be used and offer a presentation of the table group on an extra page.
+This link offers a presentation of the table group on an extra page.
 
 ![]({{site.baseurl}}/assets/Unterdiagramm.jpg)
 
 <br/>
-Single tables can also be selected and will display associated SQL-Queries of included table directories.
+Single tables can also be selected and will display associated SQL queries of included table directories.
 
 ![]({{site.baseurl}}/assets/abgang_hat_praemie.jpg)
