@@ -33,7 +33,7 @@ job(&apos;orcas_spool_test&apos;) {
     steps {
          ant {
             prop(&apos;ladespooltest&apos;,&apos;*&apos;)
-            prop(&apos;bindir&apos;,&apos;/tmp/jenkins/workspace/orcas_spool_test/bin&apos;)
+            prop(&apos;bindir&apos;,&apos;/tmp/workspace/orcas_spool_test/bin&apos;)
             buildFile(&apos;/opt/orcas/orcas-master/orcas_integrationstest/testspool/build.xml&apos;)
         }
     }    

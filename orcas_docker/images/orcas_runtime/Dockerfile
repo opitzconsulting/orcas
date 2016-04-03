@@ -16,4 +16,5 @@ RUN wget -Nnv http://services.gradle.org/distributions/gradle-${gradle_version}-
 ENV GRADLE_HOME=/opt/gradle/latest 
 ENV ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
 ENV PATH=$PATH:$GRADLE_HOME/bin:$ORACLE_HOME/bin
+ENV LD_LIBRARY_PATH=$ORACLE_HOME/lib
 
