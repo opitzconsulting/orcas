@@ -1,11 +1,10 @@
 FROM orcas_runtime_deps
 
-RUN adduser --disabled-password --gecos '' jenkins_slave \
- && echo jenkins_slave:jenkins_slave | chpasswd 
-
 COPY distribution /opt/orcas/distribution
 
-RUN chmod -R 777 /opt
+WORKDIR /tmp
 
-CMD ["/usr/sbin/sshd", "-D"]
+RUN wget -Nnv http://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/2.0/swarm-client-2.0-jar-with-dependencies.jar
+
+CMD ["java", "-jar", "swarm-client-2.0-jar-with-dependencies.jar"]
 
