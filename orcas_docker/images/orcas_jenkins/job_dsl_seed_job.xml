@@ -19,7 +19,7 @@
     steps {
          ant {
             prop(&apos;ladetest&apos;,&apos;test*&apos;)
-            prop(&apos;bindir&apos;,&apos;/tmp/jenkins/workspace/orcas_integration_test/bin&apos;)
+            prop(&apos;bindir&apos;,&apos;/tmp/workspace/orcas_integration_test/bin&apos;)
             prop(&apos;available_feature_list&apos;,&apos;&apos;)
             buildFile(&apos;/opt/orcas/orcas-master/orcas_integrationstest/build.xml&apos;)
         }
@@ -37,6 +37,9 @@ job(&apos;orcas_spool_test&apos;) {
             buildFile(&apos;/opt/orcas/orcas-master/orcas_integrationstest/testspool/build.xml&apos;)
         }
     }    
+    publishers {
+        archiveJunit(&apos;**/*testresult.xml&apos;)
+    }      
 }
 job(&apos;orcas_examples&apos;) {   
     description &apos;orcas example tests, simply executes all examples testing for no errors&apos;
