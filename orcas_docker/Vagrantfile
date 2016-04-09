@@ -4,7 +4,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "box-cutter/ubuntu1504-docker" 
 
   config.vm.synced_folder "images", "/vm_inside/images", create: true
-  config.vm.synced_folder "jenkins", "/vm_inside/jenkins", create: true
+  # mount orcas directory to vm
+  config.vm.synced_folder "..", "/vm_inside/orcas", create: true
 
   config.vm.provision :shell, inline: "docker build -t orcas_runtime /vm_inside/images/orcas_runtime"
   config.vm.provision :shell, inline: "docker build -t orcas_runtime_deps /vm_inside/images/orcas_runtime_deps"

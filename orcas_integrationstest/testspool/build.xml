@@ -51,17 +51,68 @@
 	<macrodef name="run_single_test">
 		<attribute name="folder"/>
 		<sequential>
-		        <echo message="###################### now running: @{folder} ################"/>
-			<mkdir dir="${bindir}/"/>
-			<mkdir dir="${tmpfolder}/"/>
-			<run_and_spool_single_script script="@{folder}/a.sql" spoolfile="${bindir}/a.log" checksumproperty="checksum_a"/>
-			<run_and_spool_single_script script="@{folder}/b.sql" spoolfile="${bindir}/b.log" checksumproperty="checksum_b"/>
+			<var name="required_feature_list" unset="true"/>
+			<var name="test_runnable" unset="true"/>
+
+                        <property file="@{folder}/parameter.properties"/>
+                        <property name="required_feature_list" value=""/>
+                        <for list="${required_feature_list}" param="requiredfeature">
+                          <sequential>
+                            <if>
+                              <not>
+                                <contains string="${available_feature_list}" substring="@{requiredfeature}" />
+                              </not>
+                              <then>
+                                <property name="test_runnable" value="false"/>
+                              </then>
+                            </if>
+                          </sequential>
+                        </for>
+                        <property name="test_runnable" value="true"/>
+
 			<if>
-				<equals arg1="${checksum_a}" arg2="${checksum_b}"/>
-				<then>
-					<fail message="@{folder}"/>
-				</then>
-			</if>
+	                  <equals arg1="${test_runnable}" arg2="true"/>
+	                  <then>
+                            <echo message="###################### now running: @{folder} ################"/>
+		        
+                            <mkdir dir="${bindir}/"/>
+                            <mkdir dir="${tmpfolder}/"/>
+                            <run_and_spool_single_script script="@{folder}/a.sql" spoolfile="${bindir}/a.log" checksumproperty="checksum_a"/>
+                            <run_and_spool_single_script script="@{folder}/b.sql" spoolfile="${bindir}/b.log" checksumproperty="checksum_b"/>
+                            <if>
+                              <equals arg1="${checksum_a}" arg2="${checksum_b}"/>
+                              <then>
+                                <fail message="@{folder}"/>
+                              </then>
+                            </if>
+
+      <concat destfile="${bindir}/@{folder}testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
+      <concat destfile="${bindir}/@{folder}testresult.xml" append="true">
+<![CDATA[<testsuite name="@{folder}" time="0">]]></concat>
+      <concat destfile="${bindir}/@{folder}testresult.xml" append="true">
+<![CDATA[
+    <testcase name="test" time="0" >
+    </testcase>]]></concat>
+      <concat destfile="${bindir}/@{folder}testresult.xml" append="true">
+<![CDATA[</testsuite>]]></concat>
+
+                          </then>
+                          <else>                            
+                            <echo message="###################### skipping: @{folder} ${required_feature_list} ${available_feature_list} ################"/>
+
+
+      <concat destfile="${bindir}/@{folder}testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
+      <concat destfile="${bindir}/@{folder}testresult.xml" append="true">
+<![CDATA[<testsuite name="@{folder}" time="0">]]></concat>
+      <concat destfile="${bindir}/@{folder}testresult.xml" append="true">
+<![CDATA[
+    <testcase name="test" time="0" >
+      <skipped/>
+    </testcase>]]></concat>
+      <concat destfile="${bindir}/@{folder}testresult.xml" append="true">
+<![CDATA[</testsuite>]]></concat>
+                          </else>
+                        </if>
 		</sequential>
 	</macrodef>
 
