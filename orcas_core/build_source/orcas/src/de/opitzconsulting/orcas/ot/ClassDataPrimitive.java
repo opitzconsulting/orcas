@@ -13,4 +13,14 @@ public class ClassDataPrimitive extends ClassData
   {
     _sqlName = pSqlName;
   }
+
+  @Override
+  public String getDiffSqlName() {
+	throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean isAtomicValue() {	
+	return true;
+  }
 }

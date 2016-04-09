@@ -33,7 +33,7 @@ public class OracleOtGenerator
 
     for( ClassDataType lClassDataType : orderClassDataTypeList( lTypeDataContainer.getAllClassDataTypes(), lTypeDataContainer ) )
     {
-      _writeOt( lClassDataType, lTypeDataContainer, lPrintStream );
+      writeOt( lClassDataType, lTypeDataContainer, lPrintStream );
     }
 
     lPrintStream.close();
@@ -110,7 +110,7 @@ public class OracleOtGenerator
     return lReturn;
   }
 
-  private static void _writeOt( ClassDataType pClassDataType, TypeDataContainer pTypeDataContainer, PrintStream pOut )
+  static void writeOt( ClassDataType pClassDataType, TypeDataContainer pTypeDataContainer, PrintStream pOut )
   {
     pOut.print( "create or replace type " + pClassDataType.getSqlName() );
 

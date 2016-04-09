@@ -111,6 +111,16 @@ public class ClassDataType extends ClassData
   {
     return "ct_" + _typePrefix + "_" + getMaxLengthName() + "_list";
   }
+  
+  public String getDiffSqlName()
+  {
+    return "od_" + _typePrefix + "_" + getMaxLengthName();
+  }
+
+  public String getDiffSqlNameCollection()
+  {
+    return "cd_" + _typePrefix + "_" + getMaxLengthName() + "_list";
+  }
 
   public String getSqlDummyFieldName()
   {
@@ -135,5 +145,10 @@ public class ClassDataType extends ClassData
   public List<EnumData> getEnumData()
   {
     return _enumDataList;
+  }
+
+  @Override
+  public boolean isAtomicValue() {
+	  return isEnum();
   }
 }

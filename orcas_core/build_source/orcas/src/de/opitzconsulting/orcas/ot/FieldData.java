@@ -49,18 +49,43 @@ public class FieldData
   {
     return _getterMethod.getName().startsWith("is");
   }  
-
-  public String getSqlName()
+  
+  private String getSqlNameWthPrefix(String pPrefix)
   {
     if(isFlag())
     {
-      return "i_" + _javaName.toLowerCase() + "_flg";
+      return pPrefix + _javaName.toLowerCase() + "_flg";
     }
     else
     {
-      return "i_" + _javaName.toLowerCase();
+      return pPrefix + _javaName.toLowerCase();
     }
   }
+
+  public String getSqlName()
+  {
+	return getSqlNameWthPrefix("i_");
+  }
+  
+  public String getDiffNewSqlName()
+  {
+    return getSqlNameWthPrefix("n_");
+  }
+  
+  public String getDiffOldSqlName()
+  {
+    return getSqlNameWthPrefix("o_");
+  }
+  
+  public String getDiffEqualFlagSqlName()
+  {
+    return getSqlNameWthPrefix("e_");
+  }  
+  
+  public String getDiffChangeSqlName()
+  {
+    return getSqlNameWthPrefix("c_");
+  }  
 
   public ClassData getClassData( Class pJavaType, TypeDataContainer pTypeDataContainer )
   {

@@ -16,7 +16,18 @@ task(generateTransformerPackage, dependsOn: createSqlplusDir, type: JavaExec)
   outputs.file args[0]
 }
 
-sqlplusJar.dependsOn generateTransformerPackage
+task(generateDiffTypes, dependsOn: createSqlplusDir, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath
+
+  main = "de.opitzconsulting.orcas.ot.OracleOdGenerator"
+  args "${buildDir}/sqlplus/db/types/z_od_orig.sql"
+  args "orig"
+
+  outputs.file args[0]
+}
+
+sqlplusJar.dependsOn generateTransformerPackage, generateDiffTypes
 
 configurations
 {
