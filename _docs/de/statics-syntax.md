@@ -6,17 +6,19 @@ categories:
 - de
 ---
 
-##Syntax Erklärung
+## Syntax Erklärung
 
 Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, die in den einzelnen Abschnitten durch eine genaue Beschreibung und jeweils ein Beispiel erklärt wird.
-<br/><br/>Angaben in den geschweiften Klammern sind Pflichtangaben. In einigen Fällen ist ein Standardwert definiert, der verwendet wird, wenn keine Angabe gemacht wird. Standardwerte sind durch <u>Unterstreichung</u> gekennzeichnet. Falls kein Standardwert definiert ist, muss ein Wert aus den geschweiften Klammern verwendet werden. Die Möglichkeiten sind durch einen Senkrecht-Strich getrennt. Variable Angaben, wie etwa Objektnamen, sind *kursiv* geschrieben.
-<br/><br/>Angaben in den eckigen Klammern sind optional. Bei Werten innerhalb von Anführungszeichen müssen die Anführungszeichen mitgeschrieben werden.
 
-##Abweichungen vom SQL Standard
+Angaben in den geschweiften Klammern sind Pflichtangaben. In einigen Fällen ist ein Standardwert definiert, der verwendet wird, wenn keine Angabe gemacht wird. Standardwerte sind durch _Unterstreichung_ gekennzeichnet. Falls kein Standardwert definiert ist, muss ein Wert aus den geschweiften Klammern verwendet werden. Die Möglichkeiten sind durch einen Senkrecht-Strich getrennt. Variable Angaben, wie etwa Objektnamen, sind *kursiv* geschrieben.
+
+Angaben in den eckigen Klammern sind optional. Bei Werten innerhalb von Anführungszeichen müssen die Anführungszeichen mitgeschrieben werden.
+
+## Abweichungen vom SQL Standard
 
 - Es wird nur die kompakte Schreibweise unterstützt, bei der alle constraints und weitere Angaben in dem create table enthalten sind.
 - Die Schlüsselworte werden nur in Kleinschreibung unterstützt.
-- Auch Indizes werden innerhalb des create table Statements erwartet. Dabei wird aus dem <code>create index index_name on tabellen_name ...</code><br/>ein <code>index index_name ...</code>
+- Auch Indizes werden innerhalb des create table Statements erwartet. Dabei wird aus dem `create index index_name on tabellen_name ...` ein `index index_name ...`
 - Die Reihenfolge der constraints ist wie folgt:
   1. primary key
   2. check constraint
@@ -25,7 +27,7 @@ Die Tabellen-, Sequenzen- und Index-Skripte besitzen alle ihre eigene Syntax, di
 <br/>Die index Statements können mit den unique keys gemischt werden (um z.B. einen unique key anzulegen der einen explizit angelegten index nutzt).
   5. Mehr reservierte Begriffe: so ziemlich alle statischen Begriffe aus der SQL-Syntax sind reserviert (z.B.: "table","create","varchar2"). Alle reservierten Begriffe dürfen nicht als Namen vorkommen. Z.B. ist timestamp in SQL als Spaltenname möglich, in Orcas nicht. Diese Limitierung kann man sehr leicht umgehen, wenn man die Begriffe groß schreibt (z.B. "TIMESTAMP"). Natürlich sind in SQL reservierte Begriffe damit auch nicht möglich.
 
-###Syntax
+### Syntax
 
 {% highlight sql %}
 create {permanent|global temporary} table table_name [alias table_alias](
@@ -39,7 +41,7 @@ create {permanent|global temporary} table table_name [alias table_alias](
 );
 {% endhighlight %}
 
-###Beispiel
+### Beispiel
 
 {% highlight sql %}
 create table order_items
@@ -66,7 +68,7 @@ create table order_items
 );
 {% endhighlight %}
 
-##Column
+## Column
 
 Bei Spalten werden folgende Datentypen unterstützt:
 
@@ -90,23 +92,23 @@ Bei Spalten werden folgende Datentypen unterstützt:
 
 Bei Defaultwerten müssen doppelte Anführungszeichen um den Ausdruck gesetzt werden.
 
-##Primary Key
+## Primary Key
 
 Keine Besonderheiten
 
-##Check Constraint
+## Check Constraint
 
 Um die eigentliche Bedingung müssen doppelte Anführungszeichen gesetzt werden. Ein Constraintname muss mit angegeben werden, es ist aber möglich eine [Extension]({{site.baseurl}}/docs/de/extensions/) zu schreiben, die Namen automatisch vergibt.
 
-##Unique Key
+## Unique Key
 
 Keine Besonderheiten
 
-##Index
+## Index
 
 Ein Index kann innerhalb einer Tabelle angegeben werden (dies wird empfohlen) oder extern ausserhalb der Tabellendefinition (wie im SQL Standard). Spalten-Indizes sollten nicht mit funcion-based-Indizes gemischt werden. Es kann dabei zu Fehlern kommen.
 
-###Index Beispiel (intern)
+### Index Beispiel (intern)
 
 {% highlight sql %}
 index orit_price_ix (price,value)
@@ -127,27 +129,27 @@ index name_lastname_ix "upper(lastname),upper(name)"
 index such_ix (orde_clob) domain_index "indextype is CTXSYS.CONTEXT PARAMETERS (''Wordlist GERMAN_STEM_PREF'')"
 {% endhighlight %}
 
-###Index Beispiel (extern)
+### Index Beispiel (extern)
 
 {% highlight sql %}
 create unique index orit_price_ix on order_items (price)
 {% endhighlight %}
 
-##Foreign Key
+## Foreign Key
 
 Bei Foreign Keys gibt es einige Möglichkeiten über [Extension]({{site.baseurl}}/docs/de/extensions/) die Syntax zu vereinfachen (z.B. Weglassen der Spaltenangabe, wenn diese über Namenskonventionen bestimmt werden kann).
 
-##Sequence
+## Sequence
 
 Bei Sequences kann nur der Sequence-Name angegeben werden. Zusätzlich kann ein Select angegeben werden, was den größten verwendeten Wert zurückliefert. Wenn dies geschieht, wird geprüft, auf welchem Wert die Sequence aktuell steht und ggf. die Sequence hochgezählt.
 
-###Syntax
+### Syntax
 
 {% highlight sql %}
 create sequence sequence_name [orcas_ext_max_value_select 'select-statement']
 {% endhighlight %}
 
-###Sequence Beispiel
+### Sequence Beispiel
 
 {% highlight sql %}
 create sequence order_items_seq;
@@ -155,7 +157,7 @@ create sequence order_items_seq;
 create sequence order_items_seq orcas_ext_max_value_select 'select nvl(max(orit_id),0) from order_items';
 {% endhighlight %}
 
-##Kommentare
+## Kommentare
 
 Zum Auskommentieren von Inhalten der Tabellen-Skripte kann die in Java und PL/SQL übliche Syntax /\* und \*/ verwendet werden.
 
@@ -168,10 +170,10 @@ create table order_items
 );
 {% endhighlight %}
 
-##Materialized Views
+## Materialized Views
 
 Materialized view log purge clause: Es gilt die Regel, dass <code>start with</code> angegeben werden muss, wenn <code>next</code> oder <code>repeat interval</code> gesetzt werden.
 
-##Vollständige Syntax Definition
+## Vollständige Syntax Definition
 
 Die genaue Definition der Syntax ist in xText beschrieben. Die BNF-ähnliche Definition findet sich hier: [xText Syntax Definition](https://github.com/opitzconsulting/orcas/blob/master/orcas_core/build_source/orcas/src/de/opitzconsulting/OrcasDsl.xtext)
