@@ -78,12 +78,11 @@ But as soon as a **data migration** is required, Orcas can no longer recognize t
 
 Orcas offers two ways to perform such changes to the data model.
 
-###1. one_time_scripts
+### 1. one_time_scripts
 In this possibility SQLPlus scripts on any database schema only be executed exactly once. The Orderentry example is so arranged, that all scripts under orderentry\db\skripte are handled like this.
 
-###2. liquibase
+### 2. liquibase
 With [liquibase](http://www.liquibase.org/) a change statement in the database change log is usually necessary for any change to a scheme. Orcas offers the possibility to reduce  these change instructions to a minimum.
-
 
 With both variants you have to mind, there is a possibility developers **forget** to create a specificone-time-script or database-change-log-entry. In these cases the **dropmode** is very important to **prevent** a loss of data.
 
