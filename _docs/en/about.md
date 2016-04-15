@@ -9,7 +9,7 @@ By using simple text files, an **integration** into existing projects using **ve
 Orcas is an acronym for **Or**a**c**le **a**daptive **s**chemas”. It is only compatible with Oracle RDBMS.
 
 
-##Problem
+## Problem
 
 The following problems can frequently occur during development of database applications:
 ..*Why is the column size on the testing environment smaller than on the development database?
@@ -29,11 +29,11 @@ In short:
 Orcas is certainly no panacea, but by using it, you get a powerful tool to solve all those problems.
 
 
-##Introduction
+## Introduction
 
 Orcas is a deployment framework for transforming an existing database schema into a target state. The state of the existing schema is irrelevant in most cases. If needed, unnecessary indexes, constraints, columns and tables will be deleted and necessary tables and columns will be added. Data types will be changed if possible. The target state will be provided in the form of SQL files, which are based on the CREATE / ALTER TABLE syntax. The use of Orcas has many advantages. One huge advantage is the possibility of versioning table creation scripts, which is a great help when working in a team, because changes can easily be recognized and undone if needed. An additional benefit is the ease of deployment on different databases without hassle so you have the same version of your source code on any number of databases.
 
-##Documentation
+## Documentation
 
 Table of contents
 ..*[How to work with Orcas?]({{site.baseurl}}/docs/usage/)
@@ -46,7 +46,7 @@ Table of contents
 ..*[Functionality of Orcas]({{site.baseurl}}/docs/how-it-works/) - How does Orcas work?
 
 
-##Advantages and Disadvantages
+## Advantages and Disadvantages
 
 ### Advantages
 
@@ -56,7 +56,7 @@ Table of contents
 ..*You can create as many schemas for development or testing purposes as you want without any cumbersome comparison effort.
 
 
-###Disadvantages
+### Disadvantages
 
 ..*When using unsupported database functions, these parts have to be managed manually.
 ..*Project associates need to know how to work with Orcas.
