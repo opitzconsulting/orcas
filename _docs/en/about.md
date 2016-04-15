@@ -2,6 +2,8 @@
 layout: page
 title: About Orcas
 permalink: /
+categories: 
+- en
 ---
 
 Orcas is an open source deployment framework for transforming an existing **database schema** into a **target state** described by **text files**. 
