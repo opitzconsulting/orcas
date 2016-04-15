@@ -6,15 +6,15 @@ categories:
 - en
 ---
 
-##Functionality
+## Functionality
 
 For the description of the functionality, see: [Functionality of Orcas]({{site.baseurl}}/docs/how-it-works/).
 
-##Integration tests
+## Integration tests
 
 For the description of the integration tests, see: [Integration tests]({{site.baseurl}}/docs/integration-tests/)
 
-##Git
+## Git
 
 `todo: many things ...`
 Changes to Orcas should be made in a separate developer branch. Each OC employee should already have the right to create a new developer branch and to push.
@@ -28,7 +28,7 @@ Changes to Orcas should be made in a separate developer branch. Each OC employee
 <br/>pullrequest-fsa-OCSVERW-78
 <br/><br/>In the branch pullrequest-fsa-OCSVERW-78 if necessary corrections are made, which can then be merged in the developer-fsa branch if necessary.
 
-##Method for SQL*Plus scripts
+## Method for SQL*Plus scripts
 
 In order to implement the variant described in [Functionality of Orcas]({{site.baseurl}}/docs/how-it-works/) step 7a, the following procedure is provided:
 
@@ -46,14 +46,14 @@ In order to implement the variant described in [Functionality of Orcas]({{site.b
 8. Implement missing domain points
 9. Perform test with the first real project
 
-##Procedure Reverse Engineering
+## Procedure Reverse Engineering
 
 Reverse engineering should take place over the model data.
 
-##Variance analysis
+## Variance analysis
 
 In step 10, 11 and 12 of [Functionality of Orcas]({{site.baseurl}}/docs/how-it-works/) is shown how the comparison with the database should run. Currently, the behavior is not (all) that. In a first implementation step the variance analysis should take place without the ADJUSTMENT (step 11). The implementation should be done in steps (eg in sequences).
 
-##SQL*Plus standalone variant
+## SQL*Plus standalone variant
 
 A possibility is to be created to use Orcas without Ant or Java.
