@@ -18,8 +18,8 @@ The following problems can frequently occur during development of database appli
 * Why is the column size on the testing environment smaller than on the development database?
 * Why is an index missing on the production database?
 * Why does my table not have a primary key?
-* Why do I always have to write “ALTER TABLE mytable ADD COLUMN...”?  In Java, it is much simpler than “ALTER CLASS myclass.java ADD INSTANCE VARIABLE...”!
-* Which SVN- or Git revision corresponds to the version of my development database?
+* Why do I always have to write `ALTER TABLE mytable ADD COLUMN...`?  In Java, it is much simpler than `ALTER CLASS myclass.java ADD INSTANCE VARIABLE...`!
+* Which SVN or Git revision corresponds to the version of my development database?
 * Who overwrote my recent changes to a DB view?
 
 And if you are not busy trying to keep the GO-LIVE date or explaining why the budget was insufficient, you probably have some of the following questions:
