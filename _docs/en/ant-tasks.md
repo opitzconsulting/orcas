@@ -6,7 +6,7 @@ categories:
 - en
 ---
 
-#Orcas Ant tasks sequence control
+# Orcas Ant tasks sequence control
 
 Orcas is run by Apache Ant. Gradle and Maven support is planned for future expansions.
 By using such a tool, the sequence control is very flexible and offers the following features, which are implemented in Ant tasks (macros). There are some example projects in which the usage of Ant tasks for typical project setups is described. This page should serve as reference, to show the whole range of functions.
@@ -41,7 +41,7 @@ By using such a tool, the sequence control is very flexible and offers the follo
 
 <a name="example"/>
 
-##Example
+## Example
 
 {% highlight xml %}
 <?xml version = '1.0' encoding = 'windows-1252'?>
@@ -92,17 +92,17 @@ By using such a tool, the sequence control is very flexible and offers the follo
 
 <a name="init"/>
 
-##Initialisation
+## Initialisation
 
 To use the following tasks you have to include the file "orcas_default_tasks.xml from the directory "orcas_core" by using Ant. In addition to this you have to set the property "orcas_dir" to the "orcas_core" directory.
 
 <a name="tasks"/>
 
-##Tasks for build process
+## Tasks for build process
 
 <a name="general"/>
 
-###General attributes
+### General attributes
 
 Every public Ant task of Orcas has the following default attributes. These - and only these - can be set by properties and therefore they are always optional in the Ant task itself.
 
@@ -118,7 +118,7 @@ Every public Ant task of Orcas has the following default attributes. These - and
 
 <a name="orcas_execute_script"/>
 
-###orcas_execute_script
+### orcas_execute_script
 
 Is used for executing exactly **one** SQL*Plus script.
 
@@ -136,7 +136,7 @@ Is used for executing exactly **one** SQL*Plus script.
 
 <a name="orcas_execute_scripts"/>
 
-###orcas_execute_scripts
+### orcas_execute_scripts
 
 Is used for executing **more than one** SQL*Plus script.
 
@@ -156,7 +156,7 @@ Is used for executing **more than one** SQL*Plus script.
 
 <a name="orcas_execute_one_time_scripts"/>
 
-###orcas_execute_one_time_scripts
+### orcas_execute_one_time_scripts
 
 Is used for executing more than one SQL*Plus script, but with the restriction that scripts will be executed **only once**. Orcas also stores which scripts have already been executed on a schema.
 
@@ -176,7 +176,7 @@ Is used for executing more than one SQL*Plus script, but with the restriction th
 
 <a name="orcas_execute_statics"/>
 
-###orcas_execute_statics
+### orcas_execute_statics
 
 Is used for executing the comparison between static objects and existing database objects. Static objects have to be defined in the special [Spooling]({{site.baseurl}}/docs/statics-syntax/) notation for static objects of Orcas.
 
@@ -200,7 +200,7 @@ Is used for executing the comparison between static objects and existing databas
 
 <a name="orcas_drop_replaceables"/>
 
-###orcas_drop_replaceables
+### orcas_drop_replaceables
 
 With this Ant task, all replaceable objects in the database will be deleted. Replaceable objects in this case are the following:
 
@@ -222,7 +222,7 @@ With this Ant task, all replaceable objects in the database will be deleted. Rep
 
 <a name="orcas_drop_java"/>
 
-###orcas_drop_java
+### orcas_drop_java
 
 With this Ant task, all Java classes will be deleted from the schema.
 
@@ -232,7 +232,7 @@ With this Ant task, all Java classes will be deleted from the schema.
 
 <a name="orcas_kill_jobs"/>
 
-###orcas_kill_jobs
+### orcas_kill_jobs
 
 With this ant-Task, all jobs will be deleted from the schema. This will be achieved by the following steps:
 - Set job to broken
@@ -250,7 +250,7 @@ The following permissions are necessary for this:
 
 <a name="orcas_compile_db_objects"/>
 
-###orcas_compile_db_objects
+### orcas_compile_db_objects
 
 Compiles every invalid DB object.
 
@@ -263,7 +263,7 @@ Compiles every invalid DB object.
 
 <a name="orcas_upate_data"/>
 
-###orcas_upate_data
+### orcas_upate_data
 
 With this Ant task, master data can be compared with the database.
 
@@ -280,7 +280,7 @@ With this Ant task, master data can be compared with the database.
 
 <a name="orcas_clean_tables"/>
 
-###orcas_clean_tables
+### orcas_clean_tables
 
 This feature deletes everything except the table data.
 
@@ -290,7 +290,7 @@ This feature deletes everything except the table data.
 
 <a name="orcas_initialize"/>
 
-###orcas_initialize
+### orcas_initialize
 
 This Ant task has to be called before every Ant build to initialize Orcas. This is necessary to update all DB objects and to initialize the temporary directory.
 
@@ -301,7 +301,7 @@ This Ant task has to be called before every Ant build to initialize Orcas. This 
 
 <a name="orcas_grant"/>
 
-###orcas_grant
+### orcas_grant
 
 This Ant task is used to handle several users with the same schema management user. The first user will be authorized by orcas_initialize, more users can be authorized with this task. 
 You must not start the Orcas schema management in parallel with this constellation (every comparison parallel to this needs an own schema management user). 
@@ -312,7 +312,7 @@ You must not start the Orcas schema management in parallel with this constellati
 
 <a name="orcas_install"/>
 
-###orcas_install
+### orcas_install
 
 This Ant task has to be called only once to set up the SCS database user. This one will be created by the standard Orcas user. Although it is possible to use a special DB user who was granted the necessary rights.
 
@@ -326,13 +326,13 @@ The SCS-DB-User grants the following rights:
 
 <a name="orcas_check_connection"/>
 
-###orcas_check_connection
+### orcas_check_connection
 
 This Ant task tests if a DB connection is successful, or not. Regular execute_script Ant tasks don't test this (also not if failonerror has been set "true"). This task can be called without having Orcas installed or initialized.
 
 <a name="orcas_extract"/>
 
-###orcas_extract
+### orcas_extract
 
 Is used for generating table scripts from an existing schema (reverse engineering). See also: [Generating statics table scripts]({{site.baseurl}}/docs/generate-scripts/).
 
@@ -345,11 +345,11 @@ Is used for generating table scripts from an existing schema (reverse engineerin
 
 <a name="exclude_where"/>
 
-##Special features with exclude_where_XXX attributes
+## Special features with exclude_where_XXX attributes
 
 It is possible to exclude database objects with a specific type (XXX) from being processed. In this process, a SQL WHERE statement will be used to not consider objects that this statement applies to. You may use a column in this WHERE condition to reference the object name. The name of this column is always object_name, no matter the object type. If the where-condition starts with "and" the existing default WHERE condition will be expanded. Otherwise, it will be overwritten.
 
 <a name="spool"/>
 
-##Spooling
+## Spooling
 With Spooling, SQL*Plus scripts will be generated in a specific Spooling directory. With these scripts, the complete build process will be logged and can easily be repeated. The Ant tasks orcas_install and orcas_initialize will not be logged within this process.
