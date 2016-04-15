@@ -6,21 +6,21 @@ categories:
 - en
 ---
 
-##Introduction
+## Introduction
 
 This page describes the basic functionality of Orcas. In particular, the procedure of the extensions is shown here.
 
-##Who should read it?
+## Who should read it?
 
 The understanding of the functionality of Orcas is not necessary to use it. It is important for the development of extensions and work on Orcas itself.
 
-##Flowchart
+## Flowchart
 
 The following chart shows the roughly sequence of Orcas. The individual steps, which are marked with numbers, are described in more detail below:
 
 ![Functionality of Orcas]({{site.baseurl}}/assets/funktion_orcas.gif)
 
-##Description
+## Description
 
 1. The BNF (Backus-Naur-Form) describes the syntax of the tables scripts (specifically: statics scripts). The BNF is stored in the format xText (orcas_core/xtext/orcas/src/de/opitzconsulting/OrcasDsl.xtext). In the first step a set of "PL/SQL types" (Oracle Object types and Collection type) is generated, which habe the ability to absorb the schema information. There are, for example, an object type for tables, and this in turn has a collection of object types with column data. The object types are in the scheme of Orcas deployed.
 2. In the second step a BNF' is made from the original BNF. This is the task of syntax extensions. It there is no syntax extension used in the project, nothing happens. It's possible to use multiple syntax extensions to create the final BNF'. The alias syntax extension for example expands the BNF expand so that after the table name the alias can follow (or should). The syntax for the table scripts results from the BNF'.
@@ -35,7 +35,7 @@ The following chart shows the roughly sequence of Orcas. The individual steps, w
 11. Adjustment of the data in step eleven makes it possible to ignore certain deviations between target and actual (for example, if storage parameters vary). This is achieved in overwriting the data to ignore with the corresponding actual data in the adjustment state.
 12. Finally, the actual adjustment is performed in the last step. In this step, the "actual" logic happens. He is by far the most complicated step of the whole process. In the adjustment the actual state is compared with the target state. All differences are implemented in the database schema.
 
-###7a row based SQL\*Plus scripts
+### 7a row based SQL\*Plus scripts
 
 This variant allows projects that are still using the SQL\*Plus script based table scripts to use Orcas.
 
@@ -52,7 +52,7 @@ The following points should be considered:
 - The templates implementation of SQL\*Plus scripts should be robust to the extend of OT_SYEX_ data structures. It is, for example, not allowed to use the default constructor with all the parameters, but it must always the generated empty constructor be used followed by setting the attributes.
 - The SQLPlus scripts be created manually in the first step. Possibly, it is meanwhile or afterwards possible to generate the SQLPlus scripts.
 
-##Extract (reverse engineering)
+## Extract (reverse engineering)
 
 ![Extract - Reverse engineering]({{site.baseurl}}/assets/funktion_reverse.gif)
 
@@ -61,9 +61,9 @@ The following points should be considered:
 3. The reverse extensions are applied. These should analyze the data and possibly create extension data and removing the original data. In addition, the extensions can remove data that are unnecessary (eg tablespace information).
 4. In the final step, the data are converted into XML and with a stylesheet transformation the actual scripts are generated.
 
-##PL/SQL components
+## PL/SQL components
 
-###Object/Collection - types
+### Object/Collection - types
 
 All Object types are generated and should never be directly modified. The object types are used to receive the model data. There is for example the type "ot_orig_table". Occurrences (instances) of this type represent the tables that are to be created/adjusted in the schema.
 
@@ -72,7 +72,7 @@ There are two "sets" of object types:
 - Firstly, the OT_ORIG_*/CT_ORIG_* types. These contain the data from the BNF, and the core of Orcas works with it.
 - The other set (OT_SYEX_*/CT_SYEX_*) contains  also the data that have come into the model through syntax extensions.
 
-###Procedure
+### Procedure
 
 The procedure is that the package **pa_orcas_xtext_model** model content will be added over **pa_orcas_model_holder.add_model_element**, to then read out the model on **get_model**, transform into ORIG types and hand over to **pa_orcas_ddl_call.update_schema**.
 
@@ -92,7 +92,7 @@ end;
 /
 {% endhighlight %}
 
-###Packages
+### Packages
 
 **pa_orcas_checksum**
 
