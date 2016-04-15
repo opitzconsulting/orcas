@@ -2,6 +2,8 @@
 layout: page
 title: Ant Tasks
 permalink: /docs/ant-tasks/
+categories: 
+- en
 ---
 
 #Orcas Ant tasks sequence control
