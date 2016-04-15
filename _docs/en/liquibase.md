@@ -11,9 +11,10 @@ Both are working in principle with a list of database changes which need to be p
 
 Both Tools, on principle, are recommended and will also be used in some projects of OPITZ CONSULTING. The big advantage of both tools is, you are not used to work with Oracle databases.
 
-##So, why Orcas?
+## So, why Orcas?
 
-##Databse model in form of scripts
+### Database model in form of scripts
+
 Important: only the database model itself and not the change log of the database model will be retained.
 A change log in Orcas is only necessary for special cases and is always just basically in existence to the database model.
 
@@ -25,7 +26,7 @@ The data model in form of scripts is also very suitable for ensuring the traceab
 
 The data model in form of scripts is also very useful as a reference, because you can easily check, which columns are included in a table.
 
-##Data model will be compared
+### Data model will be compared
 
 With this step you can ensure, the structure of a target schema is exactly like you defined it in the data model scripts.
 
@@ -33,12 +34,12 @@ While proceeding changes with change logs there is always the risk that changing
 
 Obviously Orcas does not prevent directly executing changes "incidentally"  on the database schema, but with the next comparison those changings will immediately be detected and undone. Of course Orcas offers the possibility to log the changes that are to be made and also the possibility to only display these changes. According to this there is the possibility to recognize such changes and to update the data model scripts without rejecting them, if needed. 
 
-## PL/SQL, Views, Trigger...
+### PL/SQL, Views, Trigger...
 
 In addition to the normal comparison, Orcas has many ways to implement database objects. This is useful for database objects, which are able to be overwritten. These objects are normally Packages, Views, Triggers, Procedures, Functions and (restricted) Object-Types.
 This happens with ant-Tasks for executing scripts (e.g. execute all script in a directory) and also for compiling and clearing up.
 
-## Extensions
+### Extensions
 
 Extensions have many opportunities. The main task is to unify and simplify the definitions of the data model scripts. In addition to the opportunity to write [Extensions]({{site.baseurl}}/docs/extensions/) by yourself, there is the [Domain-Extension]({{site.baseurl}}/docs/domain-extension/), which already provides many functionality.
 
