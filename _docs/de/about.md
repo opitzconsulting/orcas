@@ -12,7 +12,7 @@ Orcas hat zudem einen **Extension**-Mechanismus, mit dem die **Definition** des 
 
 Orcas steht für **Or**a**c**le **a**daptive **s**chemas und ist nur mit Oracle RDBMS kompatibel.
 
-##Problemstellung
+## Problemstellung
 
 Folgende Problemfälle treten bei der Datenbankentwicklung immer wieder auf, meist genau dann, wenn man sie am wenigsten gebrauchen kann:
 
@@ -30,17 +30,19 @@ Wenn man nicht gerade damit beschäftigt ist den GO-LIVE-Termin zu retten oder z
 - Wie kann man einheitliche Datenbankkonventionen umsetzen?
 - Wie kann man agile Datenbankentwicklung betreiben?
 - Wie können mehrere Entwickler auf der Entwicklungsdatenbank parallel entwickeln?
-<br/>Oder kurz:
+
+Oder kurz:
+
 - Wie macht man das mit der Datenbankentwicklung eigentlich richtig?
 
 Orcas ist zwar kein Allheilmittel. Richtig eingesetzt kann es aber bei all diesen Fragestellungen eine praktikable Lösung anbieten.
 
-##Einführung
+## Einführung
 
 Orcas ist ein Deploymentframework mit dem ein bestehendes Schema in einen in Orcas beschriebenen Soll-Zustand überführt werden kann. Der Zustand des bestehenden Schemas ist dabei größtenteils irrelevant. Bei Bedarf werden "überflüssige" Indizes, Constraints, Spalten oder Tabellen verworfen bzw. neue Tabellen oder Spalten hinzugefügt. Änderungen von Datentypen werden, sofern möglich, durchgeführt. Der Soll-Zustand wird dabei in Form von einfachen SQL Skriptdateien vorgehalten, die in ihrer Syntax stark an die "CREATE TABLE" Syntax angelehnt sind.
 Die Nutzung von Orcas hat viele Vorteile. Ein großer Vorteil ist, dass die Tabellenskripte versioniert werden können, was bei einem Projektteam eine enorme Erleichterung ist, da Änderungen nachvollzogen und auch rückgängig gemacht werden können. Ein weiterer Vorteil ist, dass ohne große Umstände auf verschiedenen Datenbanken deployed werden und somit ein einheitlicher Datenbankstand auf beliebig vielen Schemata hergestellt werden kann.
 
-##Dokumentation
+## Dokumentation
 
 Hier sind die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
 
@@ -53,7 +55,7 @@ Hier sind die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
 - [Extensions]({{site.baseurl}}/docs/de/extensions/) - Wie kann ich spezielle projektspezifische Erweiterungen integrieren?
 - [Funktionsweise Orcas]({{site.baseurl}}/docs/de/how-it-works/) - Wie funktioniert Orcas?
 
-##Welche Vorteile/Nachteile gibt es?
+## Welche Vorteile/Nachteile gibt es?
 
 ### Vorteile
 
@@ -62,7 +64,7 @@ Hier sind die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
 - Umständliche und fehleranfällige DB-Releaseskripte werden nicht benötigt.
 - Es können beliebig viele Schemata für Entwicklungs- und Testzwecke erstellt werden, ohne dass ein gewaltiger, fehleranfälliger Abgleichaufwand entsteht.
 
-###Nachteile
+### Nachteile
 
 - Wenn Datenbank-Funktionen verwendet werden, die Orcas nicht unterstützt, müssen diese Teilbereiche "manuell" verwaltet werden.
 - Projektmitarbeiter müssen wissen, wie man mit Orcas arbeitet.
