@@ -10,7 +10,7 @@ Die Domain-Extension ist eine Extension, die einen "Templating-Mechanismus" für
 
 Das nachfolgende Beispiel zeigt worum es genau geht:
 
-##Table Domain
+## Table Domain
 
 Jede Tabelle soll eine Id-Spalte haben:
 {% highlight sql %}
@@ -49,7 +49,8 @@ create table tab_b domain id_table
 {% endhighlight %}
 *Hinweis:* Die Spalte somevalue wird in dem Beispiel benötigt, da in Orcas in jeder Tabellendefinition immer eine Spalte vorhanden sein muss.
 
-##Column Domain
+## Column Domain
+
 Soweit so gut, aber wie gehen wir mit foreign-keys um? Erweitern wir also das Beispiel um eine foreign-key-Spalte:
 {% highlight sql %}
 create table tab_a domain id_table
@@ -154,7 +155,7 @@ create table tab_b domain id_table
 
 Nachfolgend eine Liste der enthaltenen Funktionen. Diese werden alle vom [Domain-Extension-Demo]({{site.baseurl}}/docs/de/examples/#domain_extension_demo) Beispielprojekt genutzt:
 
-##Features
+## Features
 
 * Column Domains
   * Datentyp
@@ -175,21 +176,23 @@ Nachfolgend eine Liste der enthaltenen Funktionen. Diese werden alle vom [Domain
 * Trigger zum befüllen von History-Tabellen generieren
 
 
-##Wie verwendet man die Domain-Extension?
+## Wie verwendet man die Domain-Extension?
+
 Dazu muss nur der Extension-Folder-Parameter ([orcas_initialize]({{site.baseurl}}/docs/de/ant-tasks/#orcas_initialize)) auf orcas_domain_extension/extensions verweisen.
 Danach kann man die Domains genau wie Tabellen und Sequenzen in Skripten definieren und verwenden. Es ist keine besondere Dateiendung oder Verzeichnisstruktur notwendig. Auch die Reihenfolge ist, wie bei Orcas üblich, irrelevant.
 
-##Funktioniert Reverse-Engineering?
+## Funktioniert Reverse-Engineering?
+
 Ja! Dazu muss Orcas zunächst einmal die Domain-Definitionen kennen, die verwendet werden sollen. Dazu ist ein kleiner Trick erforderlich:
 <br/>[orcas_execute_statics]({{site.baseurl}}/docs/de/ant-tasks/#orcas_execute_statics) muss ausgeführt werden, und zwar mit den Domains. Da orcas_execute_statics leider nicht funktioniert, wenn nicht mindestens eine Tabelle angegeben ist, muss man also noch eine Dummy-Tabelle hinzufügen. Wichtig: orcas_execute_statics sollte auf jeden Fall mit <code>logonly="true"</code> ausgeführt werden, da sonst im Schema ja alles gelöscht werden würde (die Dropmode-Prüfung sollte dies zwar verhindern, aber dann bricht orcas_execute_statics mit einem Fehler ab). 
 
 Sobald orcas_execute_statics mit den Domain-Definitionen erfolgreich durchgelaufen ist, kann man ganz normal ([orcas_extract]({{site.baseurl}}/docs/de/ant-tasks/#orcas_extract)) verwenden, wobei XSLT-File auf orcas_domain_extension/xslt_extract/orcas_domain_extract.xsl verweisen muss.
 
-##Beispiel
+## Beispiel
 
 Ein Beispielprojekt das die Domain-Extension verwendet findet sich hier: [Domain-Extension-Demo]({{site.baseurl}}/docs/de/examples/#domain_extension_demo).
 
-##Erweiterung
+## Erweiterung
 Was ist zu tun, wenn die Domain-Extension eine Funktionalität nicht bietet, die im Projekt gebraucht wird?
 
 Man kann grundsätzlich eigene Extensions mit der Domain-Extension kombinieren. Dabei muss aber sehr auf die Ausführungs-Reihenfolge geachtet werden. Es ist auch denkbar, die Domain-Extension abzuändern (als Kopiervorlage für eine eigene Extension verwenden).
@@ -198,4 +201,3 @@ Allerdings ist es ggf. ratsamer eine komplett eigene Extension zu erstellen, da 
 Die Domain-Extension ist ein 80%-Ansatz, wenn das nicht ausreicht, ist in der Regel eine komplett eigene Extension anzuraten. 
 
 Es ist natürlich immer sinnvoll für eine fehlende Funktionalität einen <a href="{{ site.github_issues }}">Issue</a> auf der github Seite anzulegen.
-
