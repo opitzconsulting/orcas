@@ -13,14 +13,14 @@ Das Beispiel setzt das "location" Konzept um, mit dem verschiedene Zielumgebunge
 
 Dabei handelt es sich im Wesentlichen um ein Setup zur Verwaltung von properties, das auch für andere Teile des Projektes genutzt werden kann.
 
-##Setup Orderentry
+## Setup Orderentry
 
 Bitte vorher prüfen, dass die benötigten Tools ([Installation]({{site.baseurl}}/docs/de/installation)) funktionieren.
 
-###Datenbank konfigurieren:
+### Datenbank konfigurieren:
 
-Dazu wechselt man in den Ordner examples\orderentry\distribution\my_location.
-<br/>In dem Ordner liegt eine "location.properties" Datei.
+Dazu wechselt man in den Ordner `examples\orderentry\distribution\my_location`.    
+In dem Ordner liegt eine "location.properties" Datei.
 
 {% highlight properties %}
 #Database
@@ -40,7 +40,7 @@ Die Datei muss angepasst werden, mindestens "password_dba" muss geändert werden
 
 *Hinweis*: Es ist keinesfalls notwenig Orcas mit DBA-Rechten laufen zu lassen. Die Beispiel-Projekte sind nur der Einfachheit halber so aufgesetzt, dass benötige Datenbank-User automatisch angelegt werden.
 
-###Einmalig Orcas und das Beispiel auf der Datenbank einrichten:
+### Einmalig Orcas und das Beispiel auf der Datenbank einrichten:
 
 Mit *ant install_all* werden die benötigten Datenbank-User einmalig eingerichtet.
 
@@ -58,7 +58,7 @@ Die Passwörter der beiden User sind definiert in der Datei "examples\orderentry
 
 Wenn der *ant install_all*-Lauf abbricht, dann müssen die beiden User ggf. vorher wieder gelöscht werden, damit ein erneuter Aufruf von *install_all* funktioniert.
 
-###Orcas starten:
+### Orcas starten:
 
 {% highlight bash %}
 Verzeichnis: examples\orderentry\db
@@ -76,38 +76,37 @@ Total time: 12 seconds
 
 Die Laufzeit beim ersten Lauf wird deutlich länger als 12 Sekunden sein (typischerweise einige Minuten). Zum einen wird Orcas alle benötigten Bibliotheken aus dem Internet (Maven-Central) nachladen, zum anderen wird Orcas beim ersten Lauf aus den Sourcen zusammengebaut. Der eigentliche Abgleich geht dagegen sehr schnell. Ein erneuter Aufruf von ant sollte also tatsächlich nur um die 12 Sekunden benötigen. Die Laufzeit sollte auch mit steigender Anzahl an Tabellen nicht zu sehr ansteigen, so ist es z.B. durchaus möglich, ein Schema mit 1000 Tabellen (samt zugehöriger Constraints) innerhalb einer Minute abzugleichen. Die Laufzeit wird erst dann signifikant steigen, wenn viele oder langwierige Datenbank-Statements ausgeführt werden müssen.
 
-###Orcas benutzen
+### Orcas benutzen
 Wenn alles soweit erfolgreich verlaufen ist, kann man unter: [Wie arbeitet man mit Orcas?]({{site.baseurl}}/docs/de/usage/) eine kurze Einführung in die Arbeitsweise erhalten, oder direkt zu den anderen Projekten übergehen.
 
-##Andere Beispiele
+## Andere Beispiele
 
 Um die anderen Beispiele zu nutzen, kann man einfach den my_location Ordner aus dem Orderentry-Beispiel in den jeweiligen distribution-Ordner kopieren.
 
 <a name="domain_extension_demo"/>
 
-###domain_extension_demo
+### domain_extension_demo
 
 In diesem Beispiel wird die [Domain-Extension]({{site.baseurl}}/docs/de/domain-extension/) verwendet.
 
 <a name="extension_demo"/>
 
-###extension_demo
+### extension_demo
 
 In diesem Beispiel wird gezeigt, wie man eigene [Extensions]({{site.baseurl}}/docs/de/extensions/) verwenden kann.
 
-###liquibase_integration
+### liquibase_integration
 
 In diesem Beispiel wird gezeigt, wie man liquibase mit Orcas kombinieren kann.
 
-###orderentry_one_schema
+### orderentry_one_schema
 
 Dieses Beispiel zeigt, wie Orcas ohne ein eigenes Orcas-Schema genutzt werden kann.
 
-###sqlplus
+### sqlplus
 
 In diesem Beispiel wird die SQL*Plus-API verwendet, dies sollte nur in Projekten gemacht werden, die kein ant, gradle oder java nutzen können/wollen, oder in Projekten die auf alten Versionen von Orcas basieren.
 
-###target_plsql_demo
+### target_plsql_demo
 
 In diesem Beispiel wird gezeigt, wie man die Tabellen-Metadaten aus Orcas für eigene Zwecke nutzen kann (Im Beispiel um Trigger zu generieren).
-
