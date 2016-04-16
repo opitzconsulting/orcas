@@ -6,14 +6,14 @@ categories:
 - de
 ---
 
-##Spooltests
+## Spooltests
 
-###Funktionsweise Spooling
+### Funktionsweise Spooling
 
 Die Integrationstests nutzen einen Spooling Mechanismus, der im Wesentlichen die IST-Schema-Daten aus der DB lädt und via XML-Export in eine Datei ausgibt (dieser Weg wird auch für das Reverse-Engineering verwendet).
 <br/>Das Spooling macht noch ein paar weitere Abfragen auf dem Data-Dictionary (dies sollte bald entfernt werden). Und es werden auch die Inhalte der Tabellen mit ausgegeben (dabei nur Datentypen, die problemlos via sqlplus gespoolt werden könne, also z.B. keine LOB-Daten).
 
-###Tests
+### Tests
 
 Die Spooltests selbst liegen unter orcas_integrationstest\testspool\tests. In dem Ordner befinden sich jeweils Unterordner mit jeweils einem Testfall. Der Testfall besteht aus zwei Dateien (a.sql und b.sql). Der Test läuft wie folgt ab:
 ![Bildliche Darstellung des Spoolings]({{site.baseurl}}/assets/spooling.GIF "spooling.GIF")
@@ -26,11 +26,12 @@ Die Spooltests selbst liegen unter orcas_integrationstest\testspool\tests. In de
 
 Bei diesem Vorgehen ist es sehr wichtig, dass jeder einzelne Testfall nur genau ein Detail testet, da sonst eine ungewollte Oder-Verknüpfung durchgeführt würde ("Das Spooling erkennt eine Abweichung im Datentyp ODER in der Precision").
 
-##Integrationstests
+## Integrationstests
 
 Die eigentlichen Integrationstest befinden sich im Ordner orcas_integrationstest/tests. Wie schon beim spooltest gibt es hier wieder Unterordner, und jeder davon ist ein eigener Testfall. Es ist hier aber nicht nötig, für jedes Detail einen eigenen Testfall zu erstellen (Im Gegenteil: Jeder Testfall dauert ca. 3 Minuten, daher soll die Anzahl der Tests nicht zu groß werden). Mit jedem Testfall werden verschiedene Testszenarios durchgeführt Diese werden nachfolgend beschrieben:
 
-###Testszenario "normal":
+### Testszenario "normal"
+
 ![Bildliche Darstellung Testszenario "normal"]({{site.baseurl}}/assets/testszenario-normal.GIF "testszenario-normal.GIF")
 
 1. In einem (leeren) Schema wird das Skript erzeuge_zielzustand.sql eingespielt.
@@ -45,7 +46,8 @@ Die eigentlichen Integrationstest befinden sich im Ordner orcas_integrationstest
 8. Das Protokoll des zweiten Abgleichs muss leer sein.
   Dadurch wird verifiziert, dass Orcas nicht unnötig Objekte im Schema dropt und neu anlegt (was ohne diesen Test nicht auffallen würde, aber zu teilweise erheblichen Performance-Problemen führen könnte).
 
-###Testszenario "protokoll"
+### Testszenario "protokoll"
+
 ![Bildliche Darstellung Testszenario "protokoll"]({{site.baseurl}}/assets/testszenario-protokoll.GIF "testszenario-protokoll.GIF")
 
 1. Auf dem (leeren) protokoll-Schema wird das Skript erzeuge_ausgangszustand.sql eingespielt.
@@ -54,7 +56,8 @@ Die eigentlichen Integrationstest befinden sich im Ordner orcas_integrationstest
 3. Das protokoll-Schema wird auch in eine Datei geschrieben.
 4. Auch die protokoll-log-Datei muss gleich der zielskript-log-Datei sein.
 
-###Testszenario "extract"
+### Testszenario "extract"
+
 ![Bildliche Darstellung Testszenario "extract"]({{site.baseurl}}/assets/testszenario-extract.GIF "testszenarion-extract.GIF")
 
 Dieses Testszenario wird nur ausgeführt, wenn das Property "test_extract" nicht auf false gesetzt wurde.
@@ -66,7 +69,8 @@ Dieses Testszenario wird nur ausgeführt, wenn das Property "test_extract" nicht
 4. Das Schema wird wieder in eine Datei gespoolt.
 5. Die gespoolten-Dateien müssen übereinstimmen.
 
-###Testszenario "sqlplus-api"
+### Testszenario "sqlplus-api"
+
 ![Bildliche Darstellung Testszenario sqlplus-api]({{site.baseurl}}/assets/testszenario-sqlplus-api.GIF "testszenario-sqlplus-api.GIF")
 
 Dieses Testszenario wird nur ausgeführt, wenn das Verzeichnis tabellen_sqlplus existiert.
