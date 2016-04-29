@@ -19,7 +19,7 @@ Folgende Problemfälle treten bei der Datenbankentwicklung immer wieder auf, mei
 - Wieso ist die Spaltengröße auf dem Testsystem kleiner als auf der Entwicklungsdatenbank?
 - Wieso fehlt auf der Produktionsdatenbank ein Index?
 - Wer hat bei der Tabelle den PK vergessen?
-- Warum muss ich `ALTER TABLE mytable ADD COLUM` schreiben? Ich schreibe ja auch nicht "ALTER CLASS myclass.java ADD INSTANCE VARIABLE"
+- Warum muss ich `ALTER TABLE mytable ADD COLUM` schreiben? Ich schreibe ja auch nicht `ALTER CLASS myclass.java ADD INSTANCE VARIABLE`
 - Welche SVN/Git-Version passt eigentlich noch zu meiner Entwicklungsdatenbank?
 - Wer hat gerade meine View-Änderungen überschrieben?
 
