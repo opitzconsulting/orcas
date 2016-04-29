@@ -1,0 +1,111 @@
+Dropping Tables...
+drop table order_items
+           *
+FEHLER in Zeile 1:
+ORA-00942: table or view does not exist 
+
+
+drop table orders
+           *
+FEHLER in Zeile 1:
+ORA-00942: table or view does not exist 
+
+
+drop table items_suppliers
+           *
+FEHLER in Zeile 1:
+ORA-00942: table or view does not exist 
+
+
+drop table items
+           *
+FEHLER in Zeile 1:
+ORA-00942: table or view does not exist 
+
+
+drop table categories
+           *
+FEHLER in Zeile 1:
+ORA-00942: table or view does not exist 
+
+
+drop table business_partners
+           *
+FEHLER in Zeile 1:
+ORA-00942: table or view does not exist 
+
+
+Dropping Sequences...
+drop sequence ctgr_id_seq
+              *
+FEHLER in Zeile 1:
+ORA-02289: sequence does not exist 
+
+
+drop sequence item_id_seq
+              *
+FEHLER in Zeile 1:
+ORA-02289: sequence does not exist 
+
+
+drop sequence ordr_id_seq
+              *
+FEHLER in Zeile 1:
+ORA-02289: sequence does not exist 
+
+
+drop sequence orit_id_seq
+              *
+FEHLER in Zeile 1:
+ORA-02289: sequence does not exist 
+
+
+drop sequence bpar_id_seq
+              *
+FEHLER in Zeile 1:
+ORA-02289: sequence does not exist 
+
+
+drop sequence tracking_number_seq
+              *
+FEHLER in Zeile 1:
+ORA-02289: sequence does not exist 
+
+
+Creating Table 'CATEGORIES' (CTGR)
+Creating Table 'BUSINESS_PARTNERS' (BPAR)
+Creating Table 'ITEMS' (ITEM)
+Creating Table 'ITEMS_SUPPLIERS' (ITSU)
+Creating Table 'ORDERS' (ORDR)
+Creating Table 'ORDER_ITEMS' (ORIT)
+inserting values into categories
+inserting values into business_partners
+inserting values into items
+inserting values into items_suppliers
+Creating Primary Key on 'CATEGORIES'
+Creating Primary Key on 'BUSINESS_PARTNERS'
+Creating Primary Key on 'ITEMS'
+Creating Primary Key on 'ITEMS_SUPPLIERS'
+Creating Primary Key on 'ORDERS'
+Creating Primary Key on 'ORDER_ITEMS'
+Creating Unique Constraint on 'CATEGORIES'
+Creating Unique Constraints on 'BUSINESS_PARTNERS'
+Creating Unique Constraint on 'ITEMS'
+Creating Unique Constraint on 'ORDERS'
+Creating Unique Constraint on 'ORDER_ITEMS'
+Creating Foreign Keys on 'ITEMS'
+Creating Foreign Keys on 'ITEMS_SUPPLERS'
+Creating Foreign Keys on 'ORDER_ITEMS'
+Creating Foreign Keys on 'ORDERS'
+Creating sequence BPAR_ID_SEQ
+Creating sequence CTGR_ID_SEQ
+Creating sequence ITEM_ID_SEQ
+Creating sequence ORDR_ID_SEQ
+Creating sequence ORIT_ID_SEQ
+Creating sequence TRACKING_NUMBER_SEQ
+Creating Trigger 'BPAR_BRI'
+Creating Trigger 'CTGR_BRI'
+Creating Trigger 'ITEM_BRI'
+Creating Trigger 'ORDR_BRI'
+Creating Trigger 'ORIT_BRI'
+...done.
