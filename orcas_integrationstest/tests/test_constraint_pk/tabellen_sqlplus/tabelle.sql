@@ -24,3 +24,7 @@
 @@alter_table_add_column        tab_noname_pk  id1  number(15)  mandatory  ""  ""
 @@alter_table_add_primary_key2  tab_noname_pk  ""  id1  ""
 
+@@create_table                  tab_create_tab_named_pk  ""  ""  ""  ""  ""  ""
+@@alter_table_add_column        tab_create_tab_named_pk  id1  number(15)  mandatory  ""  ""
+@@alter_table_add_primary_key2  tab_create_tab_named_pk  pk_name  id1  ""
+

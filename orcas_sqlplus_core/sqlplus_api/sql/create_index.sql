@@ -7,7 +7,7 @@ declare
   v_table_name                  varchar2(30)   := substr(upper('&1'),1,30);
   v_index_name                  varchar2(30)   := substr(upper('&2'),1,30);
   v_column_list                 varchar2(2000) := substr('&3',1,2000);
-  v_uniqueness                  varchar2(30)   := substr(upper('&4'),1,30);
+  v_uniqueness                  varchar2(30)   := substr(lower('&4'),1,30);
   v_partition_range             varchar2(30)   := substr(upper('&5'),1,30);
   v_domain_index_text           varchar2(2000) := substr(upper('&6'),1,2000);
   v_index_mode                  varchar2(2000) := substr(upper('&7'),1,2000);
@@ -54,15 +54,15 @@ begin
     end if;
     
     -- UNIQUENESS
-    if ( nvl(v_uniqueness,'NULL')  not in ('NULL','UNIQUE','NONUNIQUE','BITMAP') ) then
+    if ( nvl(v_uniqueness,'NULL')  not in ('NULL','unique','nonunique','bitmap') ) then
       raise_application_error(-20000, 'Uniqueness falsch (Param_4) ' || v_uniqueness );
     end if;
     
-    if v_uniqueness in ('NULL','NONUNIQUE') then
+    if v_uniqueness in ('NULL','nonunique') then
       v_uniqueness := null;
     end if;
     
-    if v_uniqueness in ('BITMAP') then
+    if v_uniqueness in ('bitmap') then
       v_bitmap := v_uniqueness;
       v_uniqueness := null;
     end if;

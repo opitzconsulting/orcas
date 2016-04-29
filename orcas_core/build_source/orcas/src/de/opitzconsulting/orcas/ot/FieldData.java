@@ -34,7 +34,7 @@ public class FieldData
     _javaType = pJavaType;
     _isList = pIsList;
     _getterMethod = pGtterMethod;
-    _javaName = _getFiledNameFromMethod();    
+    _javaName = _getFiledNameFromMethod();
   }
 
   @Override
@@ -44,15 +44,15 @@ public class FieldData
 
     return lReturn;
   }
-  
+
   public boolean isFlag()
   {
-    return _getterMethod.getName().startsWith("is");
-  }  
-  
-  private String getSqlNameWthPrefix(String pPrefix)
+    return _getterMethod.getName().startsWith( "is" );
+  }
+
+  private String getSqlNameWthPrefix( String pPrefix )
   {
-    if(isFlag())
+    if( isFlag() )
     {
       return pPrefix + _javaName.toLowerCase() + "_flg";
     }
@@ -64,37 +64,61 @@ public class FieldData
 
   public String getSqlName()
   {
-	return getSqlNameWthPrefix("i_");
+    return getSqlNameWthPrefix( "i_" );
   }
-  
+
   public String getDiffNewSqlName()
   {
-    return getSqlNameWthPrefix("n_");
+    return getSqlNameWthPrefix( "n_" );
   }
-  
+
   public String getDiffOldSqlName()
   {
-    return getSqlNameWthPrefix("o_");
+    return getSqlNameWthPrefix( "o_" );
   }
-  
+
   public String getDiffEqualFlagSqlName()
   {
-    return getSqlNameWthPrefix("e_");
-  }  
-  
+    return getSqlNameWthPrefix( "e_" );
+  }
+
   public String getDiffChangeSqlName()
   {
-    return getSqlNameWthPrefix("c_");
-  }  
+    return getSqlNameWthPrefix( "c_" );
+  }
+
+  public String getDiffChangeSqlNameForSubType( ClassDataType pClassDataType )
+  {
+    String lReturn = getSqlNameWthPrefix( "c_" ) + "_" + pClassDataType.getJavaName().toLowerCase();
+    return lReturn.length() > 30 ? lReturn.substring( 0, 30 ) : lReturn;
+  }
+
+  public String getCleanValueMethodName()
+  {
+    return getSqlNameWthPrefix( "d_" );
+  }
+
+  public String getDefaultValueFieldName()
+  {
+    return getSqlNameWthPrefix( "def_" );
+  }
+
+  public String getUpperCaseFieldFlagName()
+  {
+    return getSqlNameWthPrefix( "up_" );
+  }
 
   public ClassData getClassData( Class pJavaType, TypeDataContainer pTypeDataContainer )
   {
     ClassData result = null;
 
-    if(_javaName.toUpperCase().contains("CLOB")) {
+    if( _javaName.toUpperCase().contains( "CLOB" ) )
+    {
       result = new ClassDataPrimitive( "clob" );
-    } else {
-      result = pTypeDataContainer.getClassData(pJavaType);
+    }
+    else
+    {
+      result = pTypeDataContainer.getClassData( pJavaType );
     }
     return result;
   }
@@ -102,12 +126,12 @@ public class FieldData
   private String _getFiledNameFromMethod()
   {
     String lMethodName = _getterMethod.getName();
-    
-    if(lMethodName.startsWith("is"))
+
+    if( lMethodName.startsWith( "is" ) )
     {
-      return lMethodName.substring( 2, 3 ).toLowerCase() + lMethodName.substring( 3 );    	
+      return lMethodName.substring( 2, 3 ).toLowerCase() + lMethodName.substring( 3 );
     }
 
     return lMethodName.substring( 3, 4 ).toLowerCase() + lMethodName.substring( 4 );
-  }  
+  }
 }

@@ -36,3 +36,9 @@ create table tab_noname_pk
   primary key (id1)
 );
 
+create table tab_create_tab_named_pk
+(
+  id1 number(15) not null,
+  constraint pk_name primary key (id1)
+);
+

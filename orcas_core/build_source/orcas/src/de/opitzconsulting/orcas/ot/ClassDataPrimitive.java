@@ -15,12 +15,25 @@ public class ClassDataPrimitive extends ClassData
   }
 
   @Override
-  public String getDiffSqlName() {
-	throw new UnsupportedOperationException();
+  public String getDiffSqlName()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override  
+  public boolean isAtomicValue()
+  {
+    return true;
   }
 
   @Override
-  public boolean isAtomicValue() {	
-	return true;
+  public String getPlainSqlName()
+  {
+    if( _sqlName.indexOf( '(' ) != -1 )
+    {
+      return _sqlName.substring( 0, _sqlName.indexOf( '(' ) );
+    }
+
+    return _sqlName;
   }
 }

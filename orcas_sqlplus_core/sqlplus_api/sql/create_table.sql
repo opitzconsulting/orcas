@@ -63,7 +63,7 @@ begin
   end if;   
   
   -- LOGGING 
-  v_loggingtype := ot_syex_loggingtype.c_logging;
+  v_loggingtype := null;
   if instr(upper(v_parameters), 'NOLOGGING') > 0 then
     v_loggingtype := ot_syex_loggingtype.c_nologging;
   end if;        

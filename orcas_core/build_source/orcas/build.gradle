@@ -21,13 +21,24 @@ task(generateDiffTypes, dependsOn: createSqlplusDir, type: JavaExec)
   classpath configurations.generatorRunPath
 
   main = "de.opitzconsulting.orcas.ot.OracleOdGenerator"
-  args "${buildDir}/sqlplus/db/types/z_od_orig.sql"
+  args "${buildDir}/sqlplus/db/types/z1_od_orig.sql"
   args "orig"
 
   outputs.file args[0]
 }
 
-sqlplusJar.dependsOn generateTransformerPackage, generateDiffTypes
+task(generateDiffXmlPackage, dependsOn: createSqlplusDir, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath
+
+  main = "de.opitzconsulting.orcas.ot.OdXmlPackageGenerator"
+  args "${buildDir}/sqlplus/db/packages/z2_pa_orcas_xml_orig_od.sql"
+  args "orig"
+
+  outputs.file args[0]
+}
+
+sqlplusJar.dependsOn generateTransformerPackage, generateDiffTypes, generateDiffXmlPackage
 
 configurations
 {

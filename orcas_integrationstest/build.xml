@@ -29,6 +29,7 @@
   <property name="include_sqlplus_tests" value="true" />
   <!-- clean_mode options: once, for_each_test, never -->
   <property name="clean_mode" value="once" />
+  <property name="testexcludesfile" value="empty_excludesfile.txt" />
 
   <target name="show_location">
     <echo message="================= Location: ${location} ================="/>
@@ -223,6 +224,15 @@ ${akt_verzeichnis}: @{message}</concat>
     </sequential>
   </macrodef>    
 
+  <macrodef name="log_testcase_start">
+    <attribute name="testname" />
+    <sequential>
+      <echo message="###" />
+      <echo message="### ${akt_verzeichnis}.@{testname}" />
+      <echo message="###" />    
+    </sequential>
+  </macrodef>    
+
   <macrodef name="log_success">
     <attribute name="testname" />
     <sequential>
@@ -376,10 +386,10 @@ ${akt_verzeichnis}: @{message}</concat>
       </condition>
     </fail>
 
-    <echo message="folgende tests werden ausgefuehrt (ladetest=${ladetest}):" />
+    <echo message="folgende tests werden ausgefuehrt (ladetest=${ladetest},testexcludesfile=${testexcludesfile}):" />
     <for param="folder">
       <path>
-        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests">
+        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests" excludesfile="${testexcludesfile}">
           <include name="${ladetest}" />
         </dirset>
       </path>
@@ -394,10 +404,10 @@ ${akt_verzeichnis}: @{message}</concat>
        
       </sequential>
     </for>
-    <echo message="folgende tests werden NICHT ausgefuehrt (ladetest=${ladetest},available_features=${available_feature_list}):" />
+    <echo message="folgende tests werden NICHT ausgefuehrt (ladetest=${ladetest},testexcludesfile=${testexcludesfile},available_features=${available_feature_list}):" />
     <for param="folder">
       <path>
-        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests">
+        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests" excludesfile="${testexcludesfile}">
           <include name="${ladetest}" />
         </dirset>
       </path>
@@ -431,7 +441,7 @@ ${akt_verzeichnis}: @{message}</concat>
 
     <for param="folder">
       <path>
-        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests">
+        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests" excludesfile="${testexcludesfile}">
           <include name="${ladetest}" />
         </dirset>
       </path>
@@ -496,6 +506,7 @@ ${akt_verzeichnis}: @{message}</concat>
                 <log_success testname="test_initialized" />  
 
                 <!-- test_run -->
+                <log_testcase_start testname="test_run"/>
                 <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                   dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
                   createmissingfkindexes="${createmissingfkindexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll"
@@ -503,6 +514,7 @@ ${akt_verzeichnis}: @{message}</concat>
                 <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${ueberfuehrung}" logfile2="ueberfuehrung" testname="test_run" />
 
                 <!-- second_run_does_nothing -->
+                <log_testcase_start testname="second_run_does_nothing"/>
                 <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                   dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
                   createmissingfkindexes="${createmissingfkindexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test"
@@ -519,6 +531,7 @@ ${akt_verzeichnis}: @{message}</concat>
                 </if>                
 
                 <!-- test_run_with_log -->
+                <log_testcase_start testname="test_run_with_log"/>
                 <orcas_execute_script executiondir="${tmpfolder}/${akt_verzeichnis}/Protokoll" user="${protokoll}" script="master_install.sql" userorcas="${user_orcas}" logname="ausfuehren_protokoll" />
       
                 <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${protokoll}" logfile2="protokoll" testname="test_run_with_log" />
@@ -527,6 +540,7 @@ ${akt_verzeichnis}: @{message}</concat>
                 <if>
                   <equals arg1="${test_extract}" arg2="true" />
                   <then>
+                    <log_testcase_start testname="test_run_with_extract"/>
                     <orcas_extract user="${zielskript}" userorcas="${user_orcas}" outputfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" dateformat="${dateformat}"/>
 
                     <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" userorcas="${user_orcas}" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
@@ -549,6 +563,7 @@ ${akt_verzeichnis}: @{message}</concat>
                     <equals arg1="${include_sqlplus_tests}" arg2="true" />
                   </and>
                   <then>
+                    <log_testcase_start testname="test_run_sqlplus"/>
                     <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" userorcas="${user_orcas}" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
                     <orcas_grant user="${ueberfuehrung}" userorcas="${user_orcas}" />    
                     <orcas_execute_script user="${ueberfuehrung}" script="@{folder}/erzeuge_ausgangszustand.sql" parameter="${alternate_tablespace_1} ${alternate_tablespace_2}" userorcas="${user_orcas}"
@@ -560,6 +575,7 @@ ${akt_verzeichnis}: @{message}</concat>
                     <check_struktur_equal user1="${zielskript}" logfile1="zielskript_sqlplus" user2="${ueberfuehrung}" logfile2="ueberfuehrung_sqlplus" testname="test_run_sqlplus" />
 
                     <!-- second_run_does_nothing_sqlplus -->
+                    <log_testcase_start testname="second_run_does_nothing_sqlplus"/>
                     <orcas_sqlplus_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen_sqlplus/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                       dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="${createmissingfkindexes}" 
                       logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test" dateformat="${dateformat}"/>                

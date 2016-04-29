@@ -1,0 +1,14 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<project name="integrationstest_jenkins" default="Main" basedir=".">
+
+  <property environment="env"/>
+
+  <target name="Main">
+    <available file="${env.WORKSPACE}/exclusions.txt" property="testexcludesfile" value="${env.WORKSPACE}/exclusions.txt" />
+    <ant antfile="build.xml">
+      <property name="bindir" value="${env.WORKSPACE}/bin"/>
+      <property name="testuser_prefix" value="orcas_it_j${env.EXECUTOR_NUMBER}_"/>
+    </ant>
+  </target>
+</project>
+

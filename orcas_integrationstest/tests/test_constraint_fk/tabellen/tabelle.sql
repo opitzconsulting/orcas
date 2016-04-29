@@ -33,9 +33,9 @@ create table tab_no_action
 	tab_b_id				number(8),
 	tab_c_id				number(8),
 	
-	constraint fk_tab_no_action_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id) on delete no_action disable,
-	constraint fk_tab_no_action_tab_b_id foreign key (tab_b_id) references tab_b (tab_b_id) on delete no_action disable,
-	constraint fk_tab_no_action_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete no_action disable,
+	constraint fk_tab_no_action_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id) on delete no_action enable,
+	constraint fk_tab_no_action_tab_b_id foreign key (tab_b_id) references tab_b (tab_b_id) on delete no_action enable,
+	constraint fk_tab_no_action_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete no_action enable,
 );
 
 create table tab_set_null

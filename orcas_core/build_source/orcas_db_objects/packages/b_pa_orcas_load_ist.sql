@@ -811,7 +811,10 @@ $END
             v_orig_uniquekey.i_status := v_orig_enabletype;
             v_orig_uniquekey.i_uk_columns := new ct_orig_columnref_list();                  
             v_orig_uniquekey.i_tablespace := cur_constraints.tablespace_name;
-            v_orig_uniquekey.i_indexname := cur_constraints.index_name;
+            if( cur_constraints.constraint_name != cur_constraints.index_name )
+            then
+              v_orig_uniquekey.i_indexname := cur_constraints.index_name;
+            end if;
 
             v_unique_key_to_table_name_map( cur_constraints.constraint_name ) := cur_constraints.table_name;
             

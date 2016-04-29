@@ -61,7 +61,7 @@ public class ClassDataType extends ClassData
       }
     } );
 
-    return new ArrayList<FieldData>(_filedDataList);
+    return new ArrayList<FieldData>( _filedDataList );
   }
 
   public void addFiledDataList( FieldData pFiledData )
@@ -107,14 +107,25 @@ public class ClassDataType extends ClassData
     return "ot_" + _typePrefix + "_" + getMaxLengthName();
   }
 
+  @Override
+  public String getPlainSqlName()
+  {
+    return getSqlName();
+  }
+
   public String getSqlNameCollection()
   {
     return "ct_" + _typePrefix + "_" + getMaxLengthName() + "_list";
   }
-  
+
   public String getDiffSqlName()
   {
     return "od_" + _typePrefix + "_" + getMaxLengthName();
+  }
+
+  public String getMergeSqlName()
+  {
+    return "om_" + _typePrefix + "_" + getMaxLengthName();
   }
 
   public String getDiffSqlNameCollection()
@@ -148,7 +159,8 @@ public class ClassDataType extends ClassData
   }
 
   @Override
-  public boolean isAtomicValue() {
-	  return isEnum();
+  public boolean isAtomicValue()
+  {
+    return isEnum();
   }
 }
