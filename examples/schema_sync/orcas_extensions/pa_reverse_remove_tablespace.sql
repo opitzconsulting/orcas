@@ -1,4 +1,4 @@
-create or replace package body pa_reverse_22_remove_defaults is
+create or replace package body pa_reverse_remove_tablespace is
   pv_default_chartype ot_syex_chartype;
   pv_default_tablespace varchar2(100);
 
