@@ -110,8 +110,8 @@ Every public Ant task of Orcas has the following default attributes. These - and
 |---------|-----------|--------|-------|
 |user     |Defines the user who should execute the scripts.|Yes|${orcas.default_user}|
 |password |Defines the password for the user.|Yes|${orcas.default_password}|
-|userocsvw|Defines the username by whom database objects will be stored (SCS user), which Orcas needs for internal tasks. This has to be a different DB user than "user" but has to be on the same DB instance as "user".|Yes|${orcas.default_user_orcas}
-|passwordocsvw|Defines the password for the SCS user.|Yes|${orcas.default_password_orcas}|
+|userorcas|Defines the username by whom database objects will be stored (SCS user), which Orcas needs for internal tasks. This has to be a different DB user than "user" but has to be on the same DB instance as "user".|Yes|${orcas.default_user_orcas}
+|passwordorcas|Defines the password for the SCS user.|Yes|${orcas.default_password_orcas}|
 |tnsname  |Defines the tnsnames entry for the database.|Yes|${orcas.default_tnsname}|
 |tmpfolder|Defines the temp directory for the script management.|Yes|${orcas.default_tmpfolder}|
 |jdbcurl  |Is used for JDBC accesses. Every task has this attribute, but it is only used by a few tasks so far. If the default value is not set, the url will be set by tnsname by using the OCI driver. |No|${orcas.default_jdbcurl}|
