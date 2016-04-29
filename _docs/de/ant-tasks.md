@@ -110,8 +110,8 @@ Jeder öffentliche ant-Task von Orcas hat folgende default Attribute. Diese, und
 |---------|-----------|--------|-------|
 |user     |Gibt den Benutzernamen an mit dem die Skripte ausgeführt werden sollen.|Yes|${orcas.default_user}|
 |password |Gibt das Passwort zu dem Benutzer an.|Yes|${orcas.default_password}|
-|userocsvw|Gibt den Benutzernamen an unter dem DB-Objekte abgelegt werden, die Orcas für interne Aufgaben benötigt. Dabei muss es sich um einen anderen DB-User handeln als "user", dieser muss aber auf der gleichen DB-Instanz liegen.|Yes|${orcas.default_user_orcas}
-|passwordocsvw|Gibt das Passwort zu dem SCS-Benutzer an.|Yes|${orcas.default_password_orcas}|
+|userorcas|Gibt den Benutzernamen an unter dem DB-Objekte abgelegt werden, die Orcas für interne Aufgaben benötigt. Dabei muss es sich um einen anderen DB-User handeln als "user", dieser muss aber auf der gleichen DB-Instanz liegen.|Yes|${orcas.default_user_orcas}
+|passwordorcas|Gibt das Passwort zu dem SCS-Benutzer an.|Yes|${orcas.default_password_orcas}|
 |tnsname  |Gibt den tnsnames Eintrag der Datenbank an.|Yes|${orcas.default_tnsname}|
 |tmpfolder|Gibt ein Verzeichnis an, in dem die Skriptverwaltung temporäre Dateien ablegen soll.|Yes|${orcas.default_tmpfolder}|
 |jdbcurl  |Wird für JDBC-Zugriffe verwendet, ist in allen Tasks vorhanden, wird aber bisher nur von einigen genutzt. Wenn der angegebene Default-Wert auch nicht gesetzt ist, dann wird die URL über den tnsname gesetzt, dabei wird der OCI-Treiber verwendet ("jdbc:oracle:oci:@tnsname") der aber oft zu Problemen führt. Daher wird empfohlen den Parameter auf eine ULR mit thin-Treiber zu setzen. |No|${orcas.default_jdbcurl}|
