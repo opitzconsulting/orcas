@@ -6,21 +6,21 @@ categories:
 - de
 ---
 
-##Einleitung
+## Einleitung
 
 Diese Seite beschreibt die grundsätzliche Funktionsweise von Orcas. Insbesondere die Arbeitsweise der Extensions wird hier dargestellt.
 
-##Wer sollte das lesen?
+## Wer sollte das lesen?
 
 Um Orcas einzusetzen, ist das Verständnis der Funktionsweise nicht notwendig. Es ist wichtig für die Entwicklung von Extensions und die Arbeit an Orcas selbst.
 
-##Ablaufdiagramm
+## Ablaufdiagramm
 
 Das folgende Diagramm zeigt den groben Ablauf von Orcas. Die einzelnen Schritte, die mit Nummern versehen sind, werden nachfolgend genauer beschrieben:
 
 ![Funktionsweise von Orcas]({{site.baseurl}}/assets/funktion_orcas.gif)
 
-##Beschreibung
+## Beschreibung
 
 1. Die BNF (Backus-Naur-Form) beschreibt die Syntax der Tabellen-Skripte (genauer: Statics-Skripte). Die BNF ist in einem xText-Format abgelegt (orcas_core/xtext/orcas/src/de/opitzconsulting/OrcasDsl.xtext). Im ersten Schritt wird daraus ein Satz an "PL/SQL Typen" (Oracle-Object-Types und Collection-Types) generiert, die Schemadaten aufnehmen können. Es gibt beispielsweise einen Object-Type für Tabellen, und dieser hat wiederum eine Collection von Object-Types mit Spaltendaten. Die Object-Types werden in das Schema von Orcas deployed.
 2. Im Zweiten Schritt wird aus der Original-BNF eine BNF' gemacht. Dies ist die Aufgabe von Syntax-Extensions. Wenn in einem Projekt keine Syntax-Extensions benutzt werden, dann passiert hier nichts. Es können mehrere Syntax-Extensions benutzt werden um die endgültige BNF' zu erstellen. Die Alias-Syntax-Extension wird beispielsweise die BNF derart erweitern, dass nach Angabe des Tabellennamens noch der Alias folgen kann (oder muss). Die Syntax für die Tabellen-Skripte ergibt sich also aus der BNF'.
@@ -35,7 +35,7 @@ Das folgende Diagramm zeigt den groben Ablauf von Orcas. Die einzelnen Schritte,
 11. Der Abgleich der Daten im Schritt elf ermöglicht es, bestimmte Abweichungen zwischen SOLL und IST zu ignorieren (z.B. wenn Storage-Parameter abweichen). Dies wird dadurch erreicht, dass im ABGLEICH-Stand die zu ignorierenden SOLL-Daten mit den entsprechenden IST-Daten überschrieben werden.
 12. Abschliessend wird im letzten Schritt der eigentliche Abgleich durchgeführt. In diesem Schritt passiert die "eigentliche" Logik. Er ist bei weitem der komplizierteste Schritt des ganzen Ablaufs. Beim Abgleich wird der IST-Stand mit dem ABGLEICH-Stand verglichen. Alle IST- / ABGLEICH-Differenzen werden im DB-Schema umgesetzt.
 
-###7a Zeilenbasierte SQL\*Plus Skripte
+### 7a Zeilenbasierte SQL\*Plus Skripte
 
 Diese Variante ermöglicht Projekten, die noch die SQL\*Plus-Skript basierten Tabellenskripte verwenden, Orcas zu nutzen.
 
@@ -52,7 +52,7 @@ Dabei sollen folgende Punkte gelten:
   - Die Vorlagen-Implementierung der SQL\*Plus Skripte soll möglichst robust gegenüber dem Erweitern der OT_SYEX_ Datenstrukturen sein. Es darf z.B. nicht der Defaultkonstruktor mit allen Parametern genutzt werden, sondern es muss immer der generierte leere Konstruktor verwendet werden mit anschliessendem Setzen der Attribute.
 - Die SQL\*Plus Skripte werden im ersten Schritt manuell erstellt. Evtl. ist es danach oder dabei möglich die SQL\*Plus Skripte zu generieren.
 
-##Extract (reverse Engineering)
+## Extract (reverse Engineering)
 
 ![Extract - Reverse Engineering]({{site.baseurl}}/assets/funktion_reverse.gif)
 
@@ -61,9 +61,9 @@ Dabei sollen folgende Punkte gelten:
 3. Die reverse-Extensions werden angewendet. Diese sollten die Daten analysieren und ggf. Extension-Daten erzeugen und dabei die Original-Daten entfernen. Zusätzlich können die Extensions Daten entfernen die unnötig sind (z.B. Tablespace-Angaben).
 4. Im letzten Schritt werden die Daten in XML umgewandelt und mit einer Stylesheet-Transformation die eigentlichen Skripte erzeugt.
 
-##PL/SQL Komponenten
+## PL/SQL Komponenten
 
-###Object/Collection - Types
+### Object/Collection - Types
 
 Alle Object-Types sind generiert und sollten nie direkt geändert werden. Die Objekttypen dienen dazu die Modelldaten aufzunehmen. Es gibt z.B. den Typ "ot_orig_table". Ausprägungen (Instanzen) von diesem Typ repräsentieren die Tabellen, die im Schema angelegt/abgeglichen werden sollen.
 
@@ -72,7 +72,7 @@ Es gibt zwei "Sätze" von Objekttypen:
 - Zum einen die OT_ORIG_*/CT_ORIG_* Typen, diese enthalten die Daten aus der BNF, und damit arbeitet der Kern von Orcas.
 - Der andere Satz (OT_SYEX_*/CT_SYEX_*) enthält auch die Daten, die durch Syntaxextensions in das Modell gekommen sind.
 
-###Ablauf
+### Ablauf
 
 Der Ablauf ist so, dass dem Package **pa_orcas_xtext_model**  Modellinhalte über **pa_orcas_model_holder.add_model_element** hinzugefügt werden, um anschliessend das Model über **get_model** auszulesen, in ORIG-Typen zu transformieren und an **pa_orcas_ddl_call.update_schema** zu übergeben.
 
@@ -92,7 +92,7 @@ end;
 /
 {% endhighlight %}
 
-###Packages
+### Packages
 
 **pa_orcas_checksum**
 
@@ -153,3 +153,14 @@ Das Package hat die Aufgabe, das Modell, das in **pa_orcas_model_holder** gehalt
 **pa_orcas_xtext_* (pa_orcas_xtext_1,pa_orcas_xtext_2...)**
 
 Die **pa_orcas_xtext_\*** Packages werden komplett (Specification und Body) im Ant-build-Ablauf generiert und enthalten die Modelldaten. Meistens gibt es nur eins. Mehrere Packages werden automatisch generiert, wenn es ein sehr großes Model (Datenbankschema) abzugleichen gilt. Dann werden wegen der PL/SQL / SQL\*Plus Größenbeschränkungen mehrere Packages generiert. Die Packages werden in Schritt 7 generiert und enthalten die echten Modelldaten (Tabellennamen, Spaltennamen, ...).
+
+## Installation und Aufruf
+
+Das folgende Diagramm gibt einen groben Überblick über die Installation von Orcas und den Aufruf eines Schemaabgleichs. Die einzelnen Schritte, die mit Nummern versehen sind, werden nachfolgend genauer beschrieben. Die Schritte 1 und 2 passieren beim Initialisieren von Orcas für ein bestimmtes Zielschema, die Schritte 3 und 4 beim eigentlichen Schemaabgleich. Der Schemaabgleich wird für jedes zu deployende Zielschema separat ausgeführt.
+
+![Aufruf von Orcas]({{site.baseurl}}/assets/aufruf_orcas.png)
+
+1. Orcas wird in einem separaten Schema ("ORCAS") installiert.
+2. Die execute-Rechte an den Orcas-Packages werden an das Schema, für das der Abgleich durchgeführt werden soll, gegranted. Außerdem werden in diesem Schema Synonyme für die Orcas-Packages erzeugt. 
+3. Für den Schemaabgleich meldet sich Orcas mit dem Schemaowner des zu deployenden Schemas an der Datenbank an. Es wird ein Aufruf des Schemaabgleichs über die Synonyme der Orcas-Packages durchgeführt.  
+4. Im Rahmen des Schemaabgleichs generieren diese Packages die mit den Rechten des Aufrufers (also von Schemaowner) aufgerufen werden, DDL-Statements, die in diesem Schema ausgeführt werden.

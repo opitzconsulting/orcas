@@ -77,10 +77,10 @@ Sobald aber eine **Datenmigration** erforderlich ist, kann Orcas nicht mehr durc
 
 Orcas bietet zwei Möglichkeiten an, solche Änderungen am Datenmodell durchzuführen.
 
-###1. one_time_scripts
+### 1. one_time_scripts
 Bei dieser Möglichkeit werden SQL*Plus-Skripte auf jedem Datenbankschema nur genau ein mal ausgeführt. Das Orderentry-Beispiel ist so eingerichtet, dass alle Skripte unter orderentry\db\skripte so gehandhabt werden.
 
-###2. liquibase
+### 2. liquibase
 Mit [liquibase](http://www.liquibase.org/) ist normalerweise für jede Änderung an einem Schema eine Änderungsanweisung im database-change-log notwendig. Orcas bietet die Möglichkeit diese Änderungsanweisungen auf ein Minimum zu reduzieren.
 
 Bei beiden Varianten ist zu beachten, dass Entwickler **vergessen** können ein entsprechendes one-time-script bzw. einen database-change-log-Eintrag zu erstellen. Für diese Fälle ist der **dropmode** sehr wichtig, da damit **verhindert** wird, dass es in solchen Fällen zu **Datenverlust** kommen kann.

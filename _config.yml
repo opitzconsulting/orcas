@@ -18,7 +18,7 @@ github:
 baseurl: /orcas
 permalink: docs/:title
 markdown: kramdown
-highlighter: pygments
+highlighter: rouge
 relative_permalinks: false
 collections:
   docs:

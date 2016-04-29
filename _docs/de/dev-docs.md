@@ -6,15 +6,15 @@ categories:
 - de
 ---
 
-##Funktionsweise
+## Funktionsweise
 
 Für die Beschreibung der Funktionsweise siehe: [Funktionsweise von Orcas]({{site.baseurl}}/docs/de/how-it-works/).
 
-##Integrationstests
+## Integrationstests
 
 Für die Beschreibung der Integrationstests siehe: [Integrationstests]({{site.baseurl}}/docs/de/integration-tests/)
 
-##Git
+## Git
 
 `todo: many things ...`
 Änderungen an Orcas sollten in einem eigenen Entwickler-Branch erfolgen. Jeder OC-Mitarbeiter sollte bereits das Recht haben einen neuen Entwickler-Branch anzulegen und zu pushen.
@@ -28,7 +28,7 @@ Für die Beschreibung der Integrationstests siehe: [Integrationstests]({{site.ba
 <br/>pullrequest-fsa-OCSVERW-78
 <br/><br/>Im Branch pullrequest-fsa-OCSVERW-78 werden ggf. Korrekturen durchgeführt, die dann bei Bedarf in den developer-fsa Branch gemerged werden können.
 
-##Vorgehensweise SQL*Plus Skripte
+## Vorgehensweise SQL*Plus Skripte
 
 Um die unter [Funktionsweise von Orcas]({{site.baseurl}}/docs/de/how-it-works/) Schritt 7a beschriebene Variante umzusetzen, ist folgende Vorgehensweise vorgesehen:
 
@@ -46,14 +46,14 @@ Um die unter [Funktionsweise von Orcas]({{site.baseurl}}/docs/de/how-it-works/) 
 8. Fehlende Domänen-Punkte umsetzen
 9. Test mit erstem echten Projekt durchführen
 
-##Vorgehensweise Reverse Engineering
+## Vorgehensweise Reverse Engineering
 
 Reverse Engineering soll über die Modelldaten erfolgen.
 
-##SOLL-IST-Abgleich
+## SOLL-IST-Abgleich
 
 In [Funktionsweise von Orcas]({{site.baseurl}}/docs/de/how-it-works/) Schritt 10, 11 und 12 wird geziegt wie der Abgleich mit der DB laufen sollte. Derzeit ist das Verahalten noch nicht (überall) so. In einem ersten Realisierungsschritt soll der SOLL-IST-Abgleich ohne den ABGLEICH (Schritt 11) erfolgen.Die Umsetzung soll Schrittweise erfolgen (wie z.B: bei Sequenzen).
 
-##SQL*Plus Standalone Variante
+## SQL*Plus Standalone Variante
 
 Es soll eine Möglichkeit geschaffen werden, Orcas ohne Ant und Java zu nutzen.

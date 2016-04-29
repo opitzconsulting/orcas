@@ -1,12 +1,12 @@
 ---
 layout: page
 title: Ant Tasks
-permalink: /docs/ant-tasks/
+permalink: /docs/de/ant-tasks/
 categories: 
 - de
 ---
 
-#Orcas ant-Tasks zur Ablaufsteuerung
+# Orcas ant-Tasks zur Ablaufsteuerung
 
 Orcas wird über Ant angesteuert. In weiteren Ausbaustufen ist auch eine Steuerung über Gradle und Maven geplant. 
 Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen an, die über Ant-Tasks (Makros) realisiert sind. Es gibt einige Beispielprojekte, in denen die Verwendung dieser Ant-Tasks für typische Projek-Setups beschrieben ist. Diese Seite soll als Referenz dienen, um den Gesamtfunktionsumfang zu beschreiben.
@@ -41,7 +41,7 @@ Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen a
 
 <a name="example"/>
 
-##Beispiel
+## Beispiel
 
 {% highlight xml %}
 <?xml version = '1.0' encoding = 'windows-1252'?>
@@ -69,40 +69,28 @@ Die Ablaufsteuerung ist dabei sehr flexibel und bietet nachfolgende Funktionen a
 
   <target name="build_all" depends="">
     <orcas_initialize extensionfolder="${distributiondir}/../../orcas/orcas_extensions"/>
-    <orcas_execute_one_time_scripts
-      scriptfolder="skripts_pre"
-      scriptfolderrecursive="true"
-      logname="pre_skripts"/>
-      <orcas_execute_statics
-        scriptfolder="tables"
-        dropmode="${dropmode}"
-        logname="statics"/>
-        <orcas_drop_replaceables
-          logname="dropreplaceables"/>
-          <orcas_execute_scripts
-            scriptfolder="views"
-            logname="views" />
-            <orcas_execute_one_time_scripts
-              scriptfolder="skripts_post"
-              scriptfolderrecursive="true"
-              logname="post_skripts"/>
-            </target>
-          </project>
+    <orcas_execute_one_time_scripts scriptfolder="skripts_pre" scriptfolderrecursive="true" logname="pre_skripts"/>
+    <orcas_execute_statics scriptfolder="tables" dropmode="${dropmode}" logname="statics"/>
+    <orcas_drop_replaceables logname="dropreplaceables"/>
+    <orcas_execute_scripts scriptfolder="views" logname="views" />
+    <orcas_execute_one_time_scripts scriptfolder="skripts_post" scriptfolderrecursive="true" logname="post_skripts"/>
+  </target>
+</project>
 {% endhighlight %}
 
 <a name="init"/>
 
-##Initialisierung
+## Initialisierung
 
 Um die nachfolgenden Tasks nutzen zu können muss die Datei "orcas_default_tasks.xml" aus dem Verzeichnis "orcas_core" mittels ant includiert werden. Zusätzlich muss das property "orcas_dir" auf das "orcas_core" Verzeichnis gesetzt werden.
 
 <a name="tasks"/>
 
-##Tasks für den Buildprozess
+## Tasks für den Buildprozess
 
 <a name="general"/>
 
-###Allgemeine Attribute
+### Allgemeine Attribute
 
 Jeder öffentliche ant-Task von Orcas hat folgende default Attribute. Diese, und nur diese, können auch über properties gesetzt werden und sind daher in dem ant-Task selbst immer optional.
 
@@ -118,7 +106,7 @@ Jeder öffentliche ant-Task von Orcas hat folgende default Attribute. Diese, und
 
 <a name="orcas_execute_script"/>
 
-###orcas_execute_script
+### orcas_execute_script
 
 Dient zur Ausführung **eines** SQL*Plus Skripts.
 
@@ -136,7 +124,7 @@ Dient zur Ausführung **eines** SQL*Plus Skripts.
 
 <a name="orcas_execute_scripts"/>
 
-###orcas_execute_scripts
+### orcas_execute_scripts
 
 Dient zur Ausführung von **mehreren** SQL*Plus Skripten.
 
@@ -156,7 +144,7 @@ Dient zur Ausführung von **mehreren** SQL*Plus Skripten.
 
 <a name="orcas_execute_one_time_scripts"/>
 
-###orcas_execute_one_time_scripts
+### orcas_execute_one_time_scripts
 
 Dient zur Ausführung von mehreren SQL*Plus Skripten, die Besonderhiet liegt darin, dass diese Skripte nur ein einziges Mal ausgeführt werden. Dazu wird von Orcas nachgehalten, welche Skripte auf einem Schema schon ausgeführt wurden.
 
@@ -176,7 +164,7 @@ Dient zur Ausführung von mehreren SQL*Plus Skripten, die Besonderhiet liegt dar
 
 <a name="orcas_execute_statics"/>
 
-###orcas_execute_statics
+### orcas_execute_statics
 
 Dient zur Ausführung des Abgleichs von statischen Objekten mit den bestehenden Datenbankobjekten. Die statischen Objekte müssen in der speziellen [Spooling]({{site.baseurl}}/docs/statics-syntax/) Notation von Orcas für statische Objekte definiert sein.
 
@@ -200,7 +188,7 @@ Dient zur Ausführung des Abgleichs von statischen Objekten mit den bestehenden 
 
 <a name="orcas_drop_replaceables"/>
 
-###orcas_drop_replaceables
+### orcas_drop_replaceables
 
 Durch diesen ant-Task werden alle replaceable-Objekte in der Datenbank gelöscht. Replaceable Objekte sind dabei die folgenden:
 
@@ -222,7 +210,7 @@ Durch diesen ant-Task werden alle replaceable-Objekte in der Datenbank gelöscht
 
 <a name="orcas_drop_java"/>
 
-###orcas_drop_java
+### orcas_drop_java
 
 Durch diesen ant-Task werden alle Java-Klassen aus dem Schema entfernt.
 
@@ -232,7 +220,7 @@ Durch diesen ant-Task werden alle Java-Klassen aus dem Schema entfernt.
 
 <a name="orcas_kill_jobs"/>
 
-###orcas_kill_jobs
+### orcas_kill_jobs
 
 Durch diesen ant-Task werden alle Jobs auf der Datenbank entfernt. Dabei wird wie folgt vorgegangen:
 - Job auf broken setzen
@@ -250,7 +238,7 @@ Dabei sind folgende besonderen Rechte nötig:
 
 <a name="orcas_compile_db_objects"/>
 
-###orcas_compile_db_objects
+### orcas_compile_db_objects
 
 Kompiliert alle invaliden DB-Objekte.
 
@@ -263,7 +251,7 @@ Kompiliert alle invaliden DB-Objekte.
 
 <a name="orcas_upate_data"/>
 
-###orcas_upate_data
+### orcas_upate_data
 
 Mit diesem ant-Task können Stammdaten mit der Datenbank abgeglichen werden.
 
@@ -280,7 +268,7 @@ Mit diesem ant-Task können Stammdaten mit der Datenbank abgeglichen werden.
 
 <a name="orcas_clean_tables"/>
 
-###orcas_clean_tables
+### orcas_clean_tables
 
 Diese Funktion entfernt alles bis auf die Daten von einer Tabelle.
 
@@ -290,7 +278,7 @@ Diese Funktion entfernt alles bis auf die Daten von einer Tabelle.
 
 <a name="orcas_initialize"/>
 
-###orcas_initialize
+### orcas_initialize
 
 Dieser ant-Task muss vor jedem ant-Lauf aufgerufen werden um Orcas zu initialisieren. Dies wird benötigt, um die DB-Objekte von Orcas zu aktualisieren und um das temporäre Verzeichnis zu initialisieren.
 
@@ -303,7 +291,7 @@ Dieser ant-Task muss vor jedem ant-Lauf aufgerufen werden um Orcas zu initialisi
 
 <a name="orcas_grant"/>
 
-###orcas_grant
+### orcas_grant
 
 Dieser ant-Task dient dazu, mehrere User mit dem selben Schemverwaltungs-User zu nutzen. Der erste User wird über orcas_initialize berechtigt, weitere können mit diesem Task berechtigt werden. Die OC-Schemverwaltung darf in dieser Konstellation nicht parallel gestartet werden (jeder parallelel abgleich braucht einen eigenen Schemverwaltungs-User).
 
@@ -313,7 +301,7 @@ Dieser ant-Task dient dazu, mehrere User mit dem selben Schemverwaltungs-User zu
 
 <a name="orcas_install"/>
 
-###orcas_install
+### orcas_install
 
 Dieser ant-Task muss ein einziges Mal aufgerufen werden, um den SCS-Datenbankuser einzurichten. Dieser wird mit dem "normalen" User angelegt. Dabei ist es durchaus möglich, für diesen Aufruf einen speziellen DB-User als "user" zu verwenden, der die entsprechenden Anlage-Berechtigungen hat.
 
@@ -327,13 +315,13 @@ Der SCS-DB-User erhalt dabei folgende Rechte:
 
 <a name="orcas_check_connection"/>
 
-###orcas_check_connection
+### orcas_check_connection
 
 Dieser ant-Task prüft, ob mit den angegebenen Daten eine Connection aufgebaut werden kann. Die normalen execute_script ant-Tasks prüfen dies nicht (auch nicht wenn failonerror auf true gesetzt wurde). Dieser Task kann aufgerufen werden ohne vorher Orcas zu installieren oder zu initialisieren.
 
 <a name="orcas_extract"/>
 
-###orcas_extract
+### orcas_extract
 
 Dient zur Generierung der Tabellenskripte aus einem bestehenden Schema (Reverse-Engineering). Siehe auch: [Generieren der Statics-Tabellenskripte]({{site.baseurl}}/docs/generate-scripts/).
 
@@ -346,11 +334,11 @@ Dient zur Generierung der Tabellenskripte aus einem bestehenden Schema (Reverse-
 
 <a name="exclude_where"/>
 
-##Besonderheiten bei exclude_where_XXX Attributen
+## Besonderheiten bei exclude_where_XXX Attributen
 
 Dabei handelt es sich um eine Möglichkeit, DB-Objekte des entsprechenden typs (XXX) von der Verarbeitung auszuschliessen. Dabei wird eine SQL-where-Bedingung formuliert, und alle DB-Objekte, die dieser where-Bedingung entsprechen, werden nicht beachtet. Dabei darf in der where-Bedingung eine Spalte verwendet werden, um den Objektnamen zu referenzieren. Diese Spalte heisst immer object_name, unabhängig davon, um welchen Typ von Objekt es sich handelt. Beginnt die where-Bedingung mit einem "and ", dann wird die evtl. angegebene default-where-Bedingung erweitert, ansonsten wird sie überschrieben.
 
 <a name="spool"/>
 
-##Spooling
+## Spooling
 Mit der Spooling Funktionalität wird in einem speziellen Spooling Verzeichnis ein Satz von SQL*Plus Skripten erzeugt, womit die komplette Abarbeitung protokolliert und wiederholbar gemacht wird. Dabei werden die beiden ant-Tasks orcas_install und orcas_initialize nicht mitprotokolliert.
