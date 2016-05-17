@@ -24,8 +24,20 @@ public class JavaTransformerGenerator extends JavaGenerator
   @Override
   public void export()
   {
-    writeJavaFile( "TransformSyexOrig.java", p -> writeTransfromer( p, "syex", "orig", "TransformSyexOrig" ) );
-    writeJavaFile( "TransformOrigSyex.java", p -> writeTransfromer( p, "orig", "syex", "TransformOrigSyex" ) );
+    writeJavaFile( "TransformSyexOrig.java", new DoWithWriter()
+    {
+      public void write( JavaPrettyWriter pJavaPrettyWriter )
+      {
+        writeTransfromer( pJavaPrettyWriter, "syex", "orig", "TransformSyexOrig" );
+      }
+    } );
+    writeJavaFile( "TransformOrigSyex.java", new DoWithWriter()
+    {
+      public void write( JavaPrettyWriter pJavaPrettyWriter )
+      {
+        writeTransfromer( pJavaPrettyWriter, "orig", "syex", "TransformOrigSyex" );
+      }
+    } );
   }
 
   private void writeTransfromer( JavaPrettyWriter pOut, String pSourcePrefix, String pTargetPrefix, String pClassName )
@@ -38,7 +50,8 @@ public class JavaTransformerGenerator extends JavaGenerator
     pOut.println();
     pOut.println( "import java.util.*;" );
     pOut.println();
-    pOut.print( "public class " + pClassName );
+    pOut.print( "public class " +
+                pClassName );
     pOut.println( "{" );
 
     String lSrcPackage = "";
@@ -57,7 +70,15 @@ public class JavaTransformerGenerator extends JavaGenerator
 
     for( ClassDataType lClassDataType : OracleOtGenerator.orderClassDataTypeList( lTypeDataContainer.getAllClassDataTypes(), lTypeDataContainer ) )
     {
-      pOut.println( "public static " + lDstPackage + lClassDataType.getJavaName() + " convert" + lClassDataType.getJavaName() + "( " + lSrcPackage + lClassDataType.getJavaName() + " pInput )" );
+      pOut.println( "public static " +
+                    lDstPackage +
+                    lClassDataType.getJavaName() +
+                    " convert" +
+                    lClassDataType.getJavaName() +
+                    "( " +
+                    lSrcPackage +
+                    lClassDataType.getJavaName() +
+                    " pInput )" );
       pOut.println( "{" );
 
       pOut.println( "if( pInput == null )" );
@@ -69,11 +90,20 @@ public class JavaTransformerGenerator extends JavaGenerator
       {
         for( ClassDataType lSubClassDataType : lTypeDataContainer.getAllClassDataTypes() )
         {
-          if( lSubClassDataType.getSuperclass() != null && lTypeDataContainer.getClassData( lSubClassDataType.getSuperclass() ).equals( lClassDataType ) )
+          if( lSubClassDataType.getSuperclass() != null &&
+              lTypeDataContainer.getClassData( lSubClassDataType.getSuperclass() ).equals( lClassDataType ) )
           {
-            pOut.println( "  if( pInput instanceof " + lSrcPackage + lSubClassDataType.getJavaName() + " )" );
+            pOut.println( "  if( pInput instanceof " +
+                          lSrcPackage +
+                          lSubClassDataType.getJavaName() +
+                          " )" );
             pOut.println( "  {" );
-            pOut.println( "    return convert" + lSubClassDataType.getJavaName() + "( (" + lSrcPackage + lSubClassDataType.getJavaName() + ")pInput );" );
+            pOut.println( "    return convert" +
+                          lSubClassDataType.getJavaName() +
+                          "( (" +
+                          lSrcPackage +
+                          lSubClassDataType.getJavaName() +
+                          ")pInput );" );
             pOut.println( "  }" );
           }
         }
@@ -86,16 +116,32 @@ public class JavaTransformerGenerator extends JavaGenerator
         {
           for( EnumData lEnumData : lClassDataType.getEnumData() )
           {
-            pOut.println( "  if( pInput == " + lSrcPackage + lClassDataType.getJavaName() + "." + lEnumData.getJavaName() + ")" );
+            pOut.println( "  if( pInput == " +
+                          lSrcPackage +
+                          lClassDataType.getJavaName() +
+                          "." +
+                          lEnumData.getJavaName() +
+                          ")" );
             pOut.println( "  {" );
-            pOut.println( "    return " + lDstPackage + lClassDataType.getJavaName() + "." + lEnumData.getJavaName() + ";" );
+            pOut.println( "    return " +
+                          lDstPackage +
+                          lClassDataType.getJavaName() +
+                          "." +
+                          lEnumData.getJavaName() +
+                          ";" );
             pOut.println( "  }" );
           }
           pOut.println( "  return null;" );
         }
         else
         {
-          pOut.println( lDstPackage + lClassDataType.getJavaName() + " lReturn = new " + lDstPackage + "impl." + lClassDataType.getJavaName() + "Impl();" );
+          pOut.println( lDstPackage +
+                        lClassDataType.getJavaName() +
+                        " lReturn = new " +
+                        lDstPackage +
+                        "impl." +
+                        lClassDataType.getJavaName() +
+                        "Impl();" );
 
           List<FieldData> lFieldDataList = new ArrayList<FieldData>();
 
@@ -111,17 +157,33 @@ public class JavaTransformerGenerator extends JavaGenerator
 
             if( lFieldClassDataType == null )
             {
-              pOut.println( "lReturn." + lFieldData.getJavaSetterName() + "( pInput." + lFieldData.getJavaGetterCall() + " );" );
+              pOut.println( "lReturn." +
+                            lFieldData.getJavaSetterName() +
+                            "( pInput." +
+                            lFieldData.getJavaGetterCall() +
+                            " );" );
             }
             else
             {
               if( lFieldData.isList() )
               {
-                pOut.println( "lReturn." + lFieldData.getJavaGetterCall() + ".addAll( convert" + lFieldClassDataType.getJavaName() + "List( pInput." + lFieldData.getJavaGetterCall() + ") );" );
+                pOut.println( "lReturn." +
+                              lFieldData.getJavaGetterCall() +
+                              ".addAll( convert" +
+                              lFieldClassDataType.getJavaName() +
+                              "List( pInput." +
+                              lFieldData.getJavaGetterCall() +
+                              ") );" );
               }
               else
               {
-                pOut.println( "lReturn." + lFieldData.getJavaSetterName() + "( convert" + lFieldClassDataType.getJavaName() + "( pInput." + lFieldData.getJavaGetterCall() + ") );" );
+                pOut.println( "lReturn." +
+                              lFieldData.getJavaSetterName() +
+                              "( convert" +
+                              lFieldClassDataType.getJavaName() +
+                              "( pInput." +
+                              lFieldData.getJavaGetterCall() +
+                              ") );" );
               }
             }
           }
@@ -135,13 +197,29 @@ public class JavaTransformerGenerator extends JavaGenerator
 
       if( lClassDataType.isListNeeded() )
       {
-        pOut.println( "public static List<" + lDstPackage + lClassDataType.getJavaName() + "> convert" + lClassDataType.getJavaName() + "List( List<" + lSrcPackage + lClassDataType.getJavaName() + "> pInput )" );
+        pOut.println( "public static List<" +
+                      lDstPackage +
+                      lClassDataType.getJavaName() +
+                      "> convert" +
+                      lClassDataType.getJavaName() +
+                      "List( List<" +
+                      lSrcPackage +
+                      lClassDataType.getJavaName() +
+                      "> pInput )" );
         pOut.println( "{" );
-        pOut.println( "List<" + lDstPackage + lClassDataType.getJavaName() + "> lReturn = new ArrayList<>();" );
+        pOut.println( "List<" +
+                      lDstPackage +
+                      lClassDataType.getJavaName() +
+                      "> lReturn = new ArrayList();" );
 
-        pOut.println( "  for( " + lSrcPackage + lClassDataType.getJavaName() + " lValue : pInput )" );
+        pOut.println( "  for( " +
+                      lSrcPackage +
+                      lClassDataType.getJavaName() +
+                      " lValue : pInput )" );
         pOut.println( "  {" );
-        pOut.println( "    lReturn.add( convert" + lClassDataType.getJavaName() + "( lValue  ) );" );
+        pOut.println( "    lReturn.add( convert" +
+                      lClassDataType.getJavaName() +
+                      "( lValue  ) );" );
         pOut.println( "  }" );
         pOut.println( "" );
         pOut.println( "  return lReturn;" );

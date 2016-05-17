@@ -24,9 +24,9 @@ public class JavaOdGenerator extends JavaGenerator
   @Override
   public void export()
   {
-    TypeDataContainer lTypeDataContainer = new ClassDataParser().parse();
+    final TypeDataContainer lTypeDataContainer = new ClassDataParser().parse();
 
-    List<ClassDataType> lNoneEnumTypes = new ArrayList<ClassDataType>();
+    final List<ClassDataType> lNoneEnumTypes = new ArrayList<ClassDataType>();
     for( ClassDataType lClassDataType : orderClassDataTypeList( lTypeDataContainer.getAllClassDataTypes(), lTypeDataContainer ) )
     {
       if( !lClassDataType.isEnum() )
@@ -35,20 +35,42 @@ public class JavaOdGenerator extends JavaGenerator
       }
     }
 
-    for( ClassDataType lClassDataType : lNoneEnumTypes )
+    for( final ClassDataType lClassDataType : lNoneEnumTypes )
     {
-      writeJavaFile( lClassDataType.getDiffJavaName() + ".java", p -> _writeDiffClass( lClassDataType, lTypeDataContainer, p ) );
+      writeJavaFile( lClassDataType.getDiffJavaName() +
+                     ".java",
+          new DoWithWriter()
+          {
+            public void write( JavaPrettyWriter pJavaPrettyWriter )
+            {
+              _writeDiffClass( lClassDataType, lTypeDataContainer, pJavaPrettyWriter );
+            }
+          } );
     }
 
     Set<ClassDataType> lOmTypesSet = getOmTypesRecursive( (ClassDataType)lTypeDataContainer.getClassData( lTypeDataContainer.getRootClass() ), new HashSet<ClassDataType>(), lTypeDataContainer );
-    List<ClassDataType> lOmTypes = new ArrayList<ClassDataType>( lOmTypesSet );
+    final List<ClassDataType> lOmTypes = new ArrayList<ClassDataType>( lOmTypesSet );
 
-    for( ClassDataType lClassDataType : lNoneEnumTypes )
+    for( final ClassDataType lClassDataType : lNoneEnumTypes )
     {
-      writeJavaFile( lClassDataType.getMergeJavaName() + ".java", p -> _writeMergeClass( lClassDataType, lTypeDataContainer, p, lOmTypes.contains( lClassDataType ) ) );
+      writeJavaFile( lClassDataType.getMergeJavaName() +
+                     ".java",
+          new DoWithWriter()
+          {
+            public void write( JavaPrettyWriter pJavaPrettyWriter )
+            {
+              _writeMergeClass( lClassDataType, lTypeDataContainer, pJavaPrettyWriter, lOmTypes.contains( lClassDataType ) );
+            }
+          } );
     }
 
-    writeJavaFile( "DiffRepository.java", p -> _writeDiffRepository( lNoneEnumTypes, lTypeDataContainer, p ) );
+    writeJavaFile( "DiffRepository.java", new DoWithWriter()
+    {
+      public void write( JavaPrettyWriter pJavaPrettyWriter )
+      {
+        _writeDiffRepository( lNoneEnumTypes, lTypeDataContainer, pJavaPrettyWriter );
+      }
+    } );
   }
 
   private static Set<ClassDataType> getOmTypesRecursive( ClassDataType pClassDataType, Set<ClassDataType> pReturn, TypeDataContainer pTypeDataContainer )
@@ -87,7 +109,9 @@ public class JavaOdGenerator extends JavaGenerator
   @Override
   protected String getPackageName()
   {
-    return "de.opitzconsulting.orcas." + ClassDataType.getTypePrefix() + ".diff";
+    return "de.opitzconsulting.orcas." +
+           ClassDataType.getTypePrefix() +
+           ".diff";
   }
 
   private void _writeDiffRepository( List<ClassDataType> pOmTypes, TypeDataContainer pTypeDataContainer, JavaPrettyWriter pOut )
@@ -101,25 +125,43 @@ public class JavaOdGenerator extends JavaGenerator
     pOut.println( "{" );
     for( ClassDataType lClassDataType : pOmTypes )
     {
-      pOut.println( "private static " + lClassDataType.getMergeJavaName() + " field" + lClassDataType.getMergeJavaName() + " = new " + lClassDataType.getMergeJavaName() + "();" );
+      pOut.println( "private static " +
+                    lClassDataType.getMergeJavaName() +
+                    " field" +
+                    lClassDataType.getMergeJavaName() +
+                    " = new " +
+                    lClassDataType.getMergeJavaName() +
+                    "();" );
     }
 
     pOut.println();
 
     for( ClassDataType lClassDataType : pOmTypes )
     {
-      pOut.println( "public static " + lClassDataType.getMergeJavaName() + " get" + lClassDataType.getMergeJavaName() + "()" );
+      pOut.println( "public static " +
+                    lClassDataType.getMergeJavaName() +
+                    " get" +
+                    lClassDataType.getMergeJavaName() +
+                    "()" );
       pOut.println( "{" );
-      pOut.println( "return field" + lClassDataType.getMergeJavaName() + ";" );
+      pOut.println( "return field" +
+                    lClassDataType.getMergeJavaName() +
+                    ";" );
       pOut.println( "}" );
       pOut.println();
     }
     pOut.println();
     for( ClassDataType lClassDataType : pOmTypes )
     {
-      pOut.println( "public static void set" + lClassDataType.getMergeJavaName() + "( " + lClassDataType.getMergeJavaName() + " pValue )" );
+      pOut.println( "public static void set" +
+                    lClassDataType.getMergeJavaName() +
+                    "( " +
+                    lClassDataType.getMergeJavaName() +
+                    " pValue )" );
       pOut.println( "{" );
-      pOut.println( "field" + lClassDataType.getMergeJavaName() + " = pValue;" );
+      pOut.println( "field" +
+                    lClassDataType.getMergeJavaName() +
+                    " = pValue;" );
       pOut.println( "}" );
       pOut.println();
     }
@@ -151,7 +193,8 @@ public class JavaOdGenerator extends JavaGenerator
     writeOrcasImport( pOut );
     pOut.println( "import java.util.*;" );
     pOut.println();
-    pOut.print( "public class " + pClassDataType.getMergeJavaName() );
+    pOut.print( "public class " +
+                pClassDataType.getMergeJavaName() );
     pOut.println( "{" );
 
     for( FieldData lFieldData : pClassDataType.getFiledDataList() )
@@ -159,13 +202,19 @@ public class JavaOdGenerator extends JavaGenerator
       ClassData lClassData = pTypeDataContainer.getClassData( lFieldData.getJavaType() );
       if( lFieldData.getJavaType() == String.class )
       {
-        pOut.println( "public boolean " + lFieldData.getUpperCaseJavaFieldFlagName() + ";" );
+        pOut.println( "public boolean " +
+                      lFieldData.getUpperCaseJavaFieldFlagName() +
+                      ";" );
       }
       if( lClassData instanceof ClassDataType )
       {
         if( ((ClassDataType)lClassData).isEnum() )
         {
-          pOut.println( "public " + lClassData.getJavaName() + " " + lFieldData.getDefaultValueJavaFieldName() + ";" );
+          pOut.println( "public " +
+                        lClassData.getJavaName() +
+                        " " +
+                        lFieldData.getDefaultValueJavaFieldName() +
+                        ";" );
         }
       }
     }
@@ -179,7 +228,9 @@ public class JavaOdGenerator extends JavaGenerator
       {
         for( ClassDataType lClassDataSubType : getAllClassDataSubTypes( pClassDataType, pTypeDataContainer ) )
         {
-          pOut.println( "if( DiffRepository.get" + lClassDataSubType.getMergeJavaName() + "().isChildOrderRelevant() )" );
+          pOut.println( "if( DiffRepository.get" +
+                        lClassDataSubType.getMergeJavaName() +
+                        "().isChildOrderRelevant() )" );
           pOut.println( "{" );
           pOut.println( "return false;" );
           pOut.println( "}" );
@@ -191,7 +242,11 @@ public class JavaOdGenerator extends JavaGenerator
 
       if( !pClassDataType.isHasSubclasses() )
       {
-        pOut.println( "public List<Integer> getMergeResult( " + pClassDataType.getDiffJavaNameCollection() + " pNewDiffValues, " + pClassDataType.getJavaNameCollection() + " pOldValues )" );
+        pOut.println( "public List<Integer> getMergeResult( " +
+                      pClassDataType.getDiffJavaNameCollection() +
+                      " pNewDiffValues, " +
+                      pClassDataType.getJavaNameCollection() +
+                      " pOldValues )" );
         pOut.println( "{" );
         pOut.println( "List<Integer> lReturn = new ArrayList();" );
         pOut.println( "for( int i=0; i<pOldValues.size(); i++ )" );
@@ -213,7 +268,9 @@ public class JavaOdGenerator extends JavaGenerator
       }
     }
 
-    pOut.println( " public void cleanupValues( " + pClassDataType.getJavaName() + " pValue )" );
+    pOut.println( " public void cleanupValues( " +
+                  pClassDataType.getJavaName() +
+                  " pValue )" );
     pOut.println( " {" );
 
     for( FieldData lFieldData : pClassDataType.getFiledDataList() )
@@ -221,24 +278,42 @@ public class JavaOdGenerator extends JavaGenerator
       ClassData lClassData = pTypeDataContainer.getClassData( lFieldData.getJavaType() );
       if( lClassData.isAtomicValue() )
       {
-        pOut.println( " pValue." + lFieldData.getJavaSetterName() + "( " + lFieldData.getCleanValueJavaMethodName() + "( pValue." + lFieldData.getJavaGetterCall() + " ) );" );
+        pOut.println( " pValue." +
+                      lFieldData.getJavaSetterName() +
+                      "( " +
+                      lFieldData.getCleanValueJavaMethodName() +
+                      "( pValue." +
+                      lFieldData.getJavaGetterCall() +
+                      " ) );" );
       }
       else
       {
         ClassDataType lClassDataType = (ClassDataType)lClassData;
-        pOut.println( " if( pValue." + lFieldData.getJavaGetterCall() + " != null )" );
+        pOut.println( " if( pValue." +
+                      lFieldData.getJavaGetterCall() +
+                      " != null )" );
         pOut.println( " {" );
 
         if( lFieldData.isList() )
         {
-          pOut.println( " for( " + lClassDataType.getJavaName() + " lValue : pValue." + lFieldData.getJavaGetterCall() + " )" );
+          pOut.println( " for( " +
+                        lClassDataType.getJavaName() +
+                        " lValue : pValue." +
+                        lFieldData.getJavaGetterCall() +
+                        " )" );
           pOut.println( " {" );
-          pOut.println( " DiffRepository.get" + lClassDataType.getMergeJavaName() + "().cleanupValues( lValue );" );
+          pOut.println( " DiffRepository.get" +
+                        lClassDataType.getMergeJavaName() +
+                        "().cleanupValues( lValue );" );
           pOut.println( " }" );
         }
         else
         {
-          pOut.println( " DiffRepository.get" + lClassDataType.getMergeJavaName() + "().cleanupValues( pValue." + lFieldData.getJavaGetterCall() + " );" );
+          pOut.println( " DiffRepository.get" +
+                        lClassDataType.getMergeJavaName() +
+                        "().cleanupValues( pValue." +
+                        lFieldData.getJavaGetterCall() +
+                        " );" );
         }
         pOut.println( " }" );
       }
@@ -247,9 +322,15 @@ public class JavaOdGenerator extends JavaGenerator
     {
       for( ClassDataType lClassDataSubType : getAllClassDataSubTypes( pClassDataType, pTypeDataContainer ) )
       {
-        pOut.println( " if( pValue instanceof " + lClassDataSubType.getJavaName() + " )" );
+        pOut.println( " if( pValue instanceof " +
+                      lClassDataSubType.getJavaName() +
+                      " )" );
         pOut.println( " {" );
-        pOut.println( " DiffRepository.get" + lClassDataSubType.getMergeJavaName() + "().cleanupValues( (" + lClassDataSubType.getJavaName() + ")pValue );" );
+        pOut.println( " DiffRepository.get" +
+                      lClassDataSubType.getMergeJavaName() +
+                      "().cleanupValues( (" +
+                      lClassDataSubType.getJavaName() +
+                      ")pValue );" );
         pOut.println( " }" );
       }
     }
@@ -261,7 +342,13 @@ public class JavaOdGenerator extends JavaGenerator
       ClassData lClassData = pTypeDataContainer.getClassData( lFieldData.getJavaType() );
       if( lClassData.isAtomicValue() )
       {
-        pOut.println( " public " + lClassData.getJavaName() + " " + lFieldData.getCleanValueJavaMethodName() + "( " + lClassData.getJavaName() + " pValue )" );
+        pOut.println( " public " +
+                      lClassData.getJavaName() +
+                      " " +
+                      lFieldData.getCleanValueJavaMethodName() +
+                      "( " +
+                      lClassData.getJavaName() +
+                      " pValue )" );
         pOut.println( " {" );
         if( lFieldData.isInt() )
         {
@@ -272,7 +359,9 @@ public class JavaOdGenerator extends JavaGenerator
         }
         if( lFieldData.getJavaType() == String.class )
         {
-          pOut.println( " if( pValue != null && " + lFieldData.getUpperCaseJavaFieldFlagName() + " )" );
+          pOut.println( " if( pValue != null && " +
+                        lFieldData.getUpperCaseJavaFieldFlagName() +
+                        " )" );
           pOut.println( " {" );
           pOut.println( " return pValue.toUpperCase();" );
           pOut.println( " }" );
@@ -282,7 +371,9 @@ public class JavaOdGenerator extends JavaGenerator
           ClassDataType lClassDataType = (ClassDataType)lClassData;
           if( lClassDataType.isEnum() )
           {
-            pOut.println( " if( pValue == " + lFieldData.getDefaultValueJavaFieldName() + " )" );
+            pOut.println( " if( pValue == " +
+                          lFieldData.getDefaultValueJavaFieldName() +
+                          " )" );
             pOut.println( " {" );
             pOut.println( " return null;" );
             pOut.println( " }" );
@@ -377,11 +468,13 @@ public class JavaOdGenerator extends JavaGenerator
     writeOrcasImport( pOut );
     pOut.println( "import java.util.*;" );
     pOut.println();
-    pOut.print( "public class " + pClassDataType.getDiffJavaName() );
+    pOut.print( "public class " +
+                pClassDataType.getDiffJavaName() );
 
     if( pClassDataType.getSuperclass() != null )
     {
-      pOut.println( " extends " + ((ClassDataType)pTypeDataContainer.getClassData( pClassDataType.getSuperclass() )).getDiffJavaName() );
+      pOut.println( " extends " +
+                    ((ClassDataType)pTypeDataContainer.getClassData( pClassDataType.getSuperclass() )).getDiffJavaName() );
     }
     else
     {
@@ -394,7 +487,8 @@ public class JavaOdGenerator extends JavaGenerator
     {
       ClassData lType = lFieldData.getClassData( lFieldData.getJavaType(), pTypeDataContainer );
 
-      if( !lType.isAtomicValue() && ((ClassDataType)lType).isHasSubclasses() )
+      if( !lType.isAtomicValue() &&
+          ((ClassDataType)lType).isHasSubclasses() )
       {
         List<ClassDataType> lAllClassDataSubTypes = getAllClassDataSubTypes( (ClassDataType)lType, pTypeDataContainer );
 
@@ -402,14 +496,22 @@ public class JavaOdGenerator extends JavaGenerator
         {
           for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
           {
-            pOut.println( "public " + lClassDataSubType.getDiffJavaNameCollection() + " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ";" );
+            pOut.println( "public " +
+                          lClassDataSubType.getDiffJavaNameCollection() +
+                          " " +
+                          lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                          ";" );
           }
         }
         else
         {
           for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
           {
-            pOut.println( "public " + lClassDataSubType.getDiffJavaName() + " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ";" );
+            pOut.println( "public " +
+                          lClassDataSubType.getDiffJavaName() +
+                          " " +
+                          lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                          ";" );
           }
         }
       }
@@ -424,40 +526,72 @@ public class JavaOdGenerator extends JavaGenerator
             lTypeName = "Integer";
           }
 
-          pOut.println( "public " + lTypeName + " " + lFieldData.getDiffOldJavaName() + ";" );
-          pOut.println( "public " + lTypeName + " " + lFieldData.getDiffNewJavaName() + ";" );
+          pOut.println( "public " +
+                        lTypeName +
+                        " " +
+                        lFieldData.getDiffOldJavaName() +
+                        ";" );
+          pOut.println( "public " +
+                        lTypeName +
+                        " " +
+                        lFieldData.getDiffNewJavaName() +
+                        ";" );
         }
         else
         {
           if( lFieldData.isList() )
           {
-            pOut.println( "public " + ((ClassDataType)lType).getDiffJavaNameCollection() + " " + lFieldData.getDiffChangeJavaName() + ";" );
+            pOut.println( "public " +
+                          ((ClassDataType)lType).getDiffJavaNameCollection() +
+                          " " +
+                          lFieldData.getDiffChangeJavaName() +
+                          ";" );
           }
           else
           {
-            pOut.println( "public " + ((ClassDataType)lType).getDiffJavaName() + " " + lFieldData.getDiffChangeJavaName() + ";" );
+            pOut.println( "public " +
+                          ((ClassDataType)lType).getDiffJavaName() +
+                          " " +
+                          lFieldData.getDiffChangeJavaName() +
+                          ";" );
           }
         }
       }
-      pOut.println( "public " + "boolean " + lFieldData.getDiffEqualFlagJavaName() + ";" );
+      pOut.println( "public " +
+                    "boolean " +
+                    lFieldData.getDiffEqualFlagJavaName() +
+                    ";" );
     }
 
     if( pClassDataType.getSuperclass() == null )
     {
-      pOut.println( "public " + "Integer oldParentIndex;" );
-      pOut.println( "public " + "Integer newParentIndex;" );
-      pOut.println( "public " + "boolean isNew;" );
-      pOut.println( "public " + "Boolean isOld;" );
-      pOut.println( "public " + "boolean isMatched;" );
-      pOut.println( "public " + "boolean parentIndexIsEqual;" );
-      pOut.println( "public " + "boolean isAllFieldsEqual;" );
-      pOut.println( "public " + "boolean isEqual;" );
-      pOut.println( "public " + "boolean isRecreateNeeded;" );
+      pOut.println( "public " +
+                    "Integer oldParentIndex;" );
+      pOut.println( "public " +
+                    "Integer newParentIndex;" );
+      pOut.println( "public " +
+                    "boolean isNew;" );
+      pOut.println( "public " +
+                    "Boolean isOld;" );
+      pOut.println( "public " +
+                    "boolean isMatched;" );
+      pOut.println( "public " +
+                    "boolean parentIndexIsEqual;" );
+      pOut.println( "public " +
+                    "boolean isAllFieldsEqual;" );
+      pOut.println( "public " +
+                    "boolean isEqual;" );
+      pOut.println( "public " +
+                    "boolean isRecreateNeeded;" );
     }
 
     if( !pClassDataType.isHasSubclasses() )
     {
-      pOut.println( "public " + pClassDataType.getDiffJavaName() + "( " + pClassDataType.getJavaName() + " pNewValue )" );
+      pOut.println( "public " +
+                    pClassDataType.getDiffJavaName() +
+                    "( " +
+                    pClassDataType.getJavaName() +
+                    " pNewValue )" );
       pOut.println( "{" );
       pOut.println( "initWithNewValue( pNewValue ); " );
       pOut.println( "}" );
@@ -504,13 +638,21 @@ public class JavaOdGenerator extends JavaGenerator
       ClassData lType = lFieldData.getClassData( lFieldData.getJavaType(), pTypeDataContainer );
       if( lType.isAtomicValue() )
       {
-        pOut.println( " if( Objects.equals( " + lFieldData.getDiffOldJavaName() + ", " + lFieldData.getDiffNewJavaName() + " ) )" );
+        pOut.println( " if( Objects.equals( " +
+                      lFieldData.getDiffOldJavaName() +
+                      ", " +
+                      lFieldData.getDiffNewJavaName() +
+                      " ) )" );
         pOut.println( " {" );
-        pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = true;" );
+        pOut.println( " " +
+                      lFieldData.getDiffEqualFlagJavaName() +
+                      " = true;" );
         pOut.println( " }" );
         pOut.println( " else" );
         pOut.println( " {" );
-        pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = false;" );
+        pOut.println( " " +
+                      lFieldData.getDiffEqualFlagJavaName() +
+                      " = false;" );
         pOut.println( " isAllFieldsEqual = false;" );
         pOut.println( " }" );
       }
@@ -518,15 +660,22 @@ public class JavaOdGenerator extends JavaGenerator
       {
         ClassDataType lClassDataType = (ClassDataType)lType;
 
-        if( !lClassDataType.isHasSubclasses() && !lFieldData.isList() )
+        if( !lClassDataType.isHasSubclasses() &&
+            !lFieldData.isList() )
         {
-          pOut.println( " if( " + lFieldData.getDiffChangeJavaName() + ".isEqual )" );
+          pOut.println( " if( " +
+                        lFieldData.getDiffChangeJavaName() +
+                        ".isEqual )" );
           pOut.println( " {" );
-          pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = true;" );
+          pOut.println( " " +
+                        lFieldData.getDiffEqualFlagJavaName() +
+                        " = true;" );
           pOut.println( " }" );
           pOut.println( " else" );
           pOut.println( " {" );
-          pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = false;" );
+          pOut.println( " " +
+                        lFieldData.getDiffEqualFlagJavaName() +
+                        " = false;" );
           pOut.println( " isAllFieldsEqual = false;" );
           pOut.println( " }" );
         }
@@ -534,12 +683,20 @@ public class JavaOdGenerator extends JavaGenerator
         {
           if( !lClassDataType.isHasSubclasses() )
           {
-            pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = true;" );
-            pOut.println( " for( " + lClassDataType.getDiffJavaName() + " lValue : " + lFieldData.getDiffChangeJavaName() + " )" );
+            pOut.println( " " +
+                          lFieldData.getDiffEqualFlagJavaName() +
+                          " = true;" );
+            pOut.println( " for( " +
+                          lClassDataType.getDiffJavaName() +
+                          " lValue : " +
+                          lFieldData.getDiffChangeJavaName() +
+                          " )" );
             pOut.println( " {" );
             pOut.println( " if( !lValue.isEqual )" );
             pOut.println( " {" );
-            pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = false;" );
+            pOut.println( " " +
+                          lFieldData.getDiffEqualFlagJavaName() +
+                          " = false;" );
             pOut.println( " isAllFieldsEqual = false;" );
             pOut.println( " }" );
             pOut.println( " }" );
@@ -550,14 +707,22 @@ public class JavaOdGenerator extends JavaGenerator
 
             if( lFieldData.isList() )
             {
-              pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = true;" );
+              pOut.println( " " +
+                            lFieldData.getDiffEqualFlagJavaName() +
+                            " = true;" );
               for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
               {
-                pOut.println( " for( " + lClassDataSubType.getDiffJavaName() + " lValue : " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + " )" );
+                pOut.println( " for( " +
+                              lClassDataSubType.getDiffJavaName() +
+                              " lValue : " +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              " )" );
                 pOut.println( " {" );
                 pOut.println( " if( !lValue.isEqual )" );
                 pOut.println( " {" );
-                pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = false;" );
+                pOut.println( " " +
+                              lFieldData.getDiffEqualFlagJavaName() +
+                              " = false;" );
                 pOut.println( " isAllFieldsEqual = false;" );
                 pOut.println( " }" );
                 pOut.println( " }" );
@@ -565,12 +730,18 @@ public class JavaOdGenerator extends JavaGenerator
             }
             else
             {
-              pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = true;" );
+              pOut.println( " " +
+                            lFieldData.getDiffEqualFlagJavaName() +
+                            " = true;" );
               for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
               {
-                pOut.println( " if( !" + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".isEqual )" );
+                pOut.println( " if( !" +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              ".isEqual )" );
                 pOut.println( " {" );
-                pOut.println( " " + lFieldData.getDiffEqualFlagJavaName() + " = false;" );
+                pOut.println( " " +
+                              lFieldData.getDiffEqualFlagJavaName() +
+                              " = false;" );
                 pOut.println( " isAllFieldsEqual = false;" );
                 pOut.println( " }" );
               }
@@ -598,14 +769,17 @@ public class JavaOdGenerator extends JavaGenerator
   private static void writeInitWithNewValueMethod( ClassDataType pClassDataType, TypeDataContainer pTypeDataContainer, JavaPrettyWriter pOut )
   {
 
-    pOut.println( " public void initWithNewValue( " + pClassDataType.getJavaName() + " pNewValue )" );
+    pOut.println( " public void initWithNewValue( " +
+                  pClassDataType.getJavaName() +
+                  " pNewValue )" );
     pOut.println( " {" );
     if( pClassDataType.getSuperclass() != null )
     {
       pOut.println( " super.initWithNewValue(pNewValue);" );
     }
 
-    if( pClassDataType.isHasSubclasses() && pClassDataType.getFiledDataList().isEmpty() )
+    if( pClassDataType.isHasSubclasses() &&
+        pClassDataType.getFiledDataList().isEmpty() )
     {
     }
     else
@@ -625,35 +799,72 @@ public class JavaOdGenerator extends JavaGenerator
         {
           if( lFieldData.isInt() )
           {
-            pOut.println( " " + lFieldData.getDiffNewJavaName() + " = DiffRepository.getNullableIntValue( pNewValue." + lFieldData.getJavaGetterCall() + " );" );
+            pOut.println( " " +
+                          lFieldData.getDiffNewJavaName() +
+                          " = DiffRepository.getNullableIntValue( pNewValue." +
+                          lFieldData.getJavaGetterCall() +
+                          " );" );
           }
           else
           {
-            pOut.println( " " + lFieldData.getDiffNewJavaName() + " = pNewValue." + lFieldData.getJavaGetterCall() + ";" );
+            pOut.println( " " +
+                          lFieldData.getDiffNewJavaName() +
+                          " = pNewValue." +
+                          lFieldData.getJavaGetterCall() +
+                          ";" );
           }
         }
         else
         {
           ClassDataType lClassDataType = (ClassDataType)lType;
 
-          if( !lClassDataType.isHasSubclasses() && !lFieldData.isList() )
+          if( !lClassDataType.isHasSubclasses() &&
+              !lFieldData.isList() )
           {
-            pOut.println( " " + lFieldData.getDiffChangeJavaName() + " = new " + lClassDataType.getDiffJavaName() + "(pNewValue." + lFieldData.getJavaGetterCall() + ");" );
+            pOut.println( " " +
+                          lFieldData.getDiffChangeJavaName() +
+                          " = new " +
+                          lClassDataType.getDiffJavaName() +
+                          "(pNewValue." +
+                          lFieldData.getJavaGetterCall() +
+                          ");" );
           }
           else
           {
             if( !lClassDataType.isHasSubclasses() )
             {
-              pOut.println( " " + lFieldData.getDiffChangeJavaName() + " = new Array" + lClassDataType.getDiffJavaNameCollection() + "();" );
+              pOut.println( " " +
+                            lFieldData.getDiffChangeJavaName() +
+                            " = new Array" +
+                            lClassDataType.getDiffJavaNameCollection() +
+                            "();" );
 
-              pOut.println( " if( pNewValue." + lFieldData.getJavaGetterCall() + " != null )" );
+              pOut.println( " if( pNewValue." +
+                            lFieldData.getJavaGetterCall() +
+                            " != null )" );
               pOut.println( " {" );
-              pOut.println( " for( " + lClassDataType.getJavaName() + " lValue : pNewValue." + lFieldData.getJavaGetterCall() + " ) " );
+              pOut.println( " for( " +
+                            lClassDataType.getJavaName() +
+                            " lValue : pNewValue." +
+                            lFieldData.getJavaGetterCall() +
+                            " ) " );
               pOut.println( " {" );
-              pOut.println( " " + lFieldData.getDiffChangeJavaName() + ".add( new " + lClassDataType.getDiffJavaName() + "( lValue ) );" );
-              pOut.println( " if( DiffRepository.get" + lClassDataType.getMergeJavaName() + "().isChildOrderRelevant() )" );
+              pOut.println( " " +
+                            lFieldData.getDiffChangeJavaName() +
+                            ".add( new " +
+                            lClassDataType.getDiffJavaName() +
+                            "( lValue ) );" );
+              pOut.println( " if( DiffRepository.get" +
+                            lClassDataType.getMergeJavaName() +
+                            "().isChildOrderRelevant() )" );
               pOut.println( " {" );
-              pOut.println( " " + lFieldData.getDiffChangeJavaName() + ".get(" + lFieldData.getDiffChangeJavaName() + ".size()-1).newParentIndex = " + lFieldData.getDiffChangeJavaName() + ".size()-1;" );
+              pOut.println( " " +
+                            lFieldData.getDiffChangeJavaName() +
+                            ".get(" +
+                            lFieldData.getDiffChangeJavaName() +
+                            ".size()-1).newParentIndex = " +
+                            lFieldData.getDiffChangeJavaName() +
+                            ".size()-1;" );
               pOut.println( " }" );
               pOut.println( " }" );
               pOut.println( " }" );
@@ -666,22 +877,48 @@ public class JavaOdGenerator extends JavaGenerator
               {
                 for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
                 {
-                  pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + " = new Array" + lClassDataSubType.getDiffJavaNameCollection() + "();" );
+                  pOut.println( " " +
+                                lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                                " = new Array" +
+                                lClassDataSubType.getDiffJavaNameCollection() +
+                                "();" );
                 }
 
-                pOut.println( " if( pNewValue." + lFieldData.getJavaGetterCall() + " != null )" );
+                pOut.println( " if( pNewValue." +
+                              lFieldData.getJavaGetterCall() +
+                              " != null )" );
                 pOut.println( " {" );
-                pOut.println( " for( " + lClassDataType.getJavaName() + " lValue : pNewValue." + lFieldData.getJavaGetterCall() + ")" );
+                pOut.println( " for( " +
+                              lClassDataType.getJavaName() +
+                              " lValue : pNewValue." +
+                              lFieldData.getJavaGetterCall() +
+                              ")" );
                 pOut.println( " {" );
 
                 for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
                 {
-                  pOut.println( " if( lValue instanceof " + lClassDataSubType.getJavaName() + " ) " );
+                  pOut.println( " if( lValue instanceof " +
+                                lClassDataSubType.getJavaName() +
+                                " ) " );
                   pOut.println( " {" );
-                  pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".add( new " + lClassDataSubType.getDiffJavaName() + "( (" + lClassDataSubType.getJavaName() + ")lValue ) );" );
-                  pOut.println( " if( DiffRepository.get" + lClassDataType.getMergeJavaName() + "().isChildOrderRelevant() )" );
+                  pOut.println( " " +
+                                lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                                ".add( new " +
+                                lClassDataSubType.getDiffJavaName() +
+                                "( (" +
+                                lClassDataSubType.getJavaName() +
+                                ")lValue ) );" );
+                  pOut.println( " if( DiffRepository.get" +
+                                lClassDataType.getMergeJavaName() +
+                                "().isChildOrderRelevant() )" );
                   pOut.println( " {" );
-                  pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".get( " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".size()-1).newParentIndex = pNewValue." + lFieldData.getJavaGetterCall() + ".indexOf(lValue);" );
+                  pOut.println( " " +
+                                lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                                ".get( " +
+                                lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                                ".size()-1).newParentIndex = pNewValue." +
+                                lFieldData.getJavaGetterCall() +
+                                ".indexOf(lValue);" );
                   pOut.println( " }" );
                   pOut.println( " }" );
                 }
@@ -693,13 +930,31 @@ public class JavaOdGenerator extends JavaGenerator
               {
                 for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
                 {
-                  pOut.println( " if( pNewValue." + lFieldData.getJavaGetterCall() + " != null && pNewValue." + lFieldData.getJavaGetterCall() + " instanceof " + lClassDataSubType.getJavaName() + " ) " );
+                  pOut.println( " if( pNewValue." +
+                                lFieldData.getJavaGetterCall() +
+                                " != null && pNewValue." +
+                                lFieldData.getJavaGetterCall() +
+                                " instanceof " +
+                                lClassDataSubType.getJavaName() +
+                                " ) " );
                   pOut.println( " {" );
-                  pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + " = new " + lClassDataSubType.getDiffJavaName() + "( (" + lClassDataSubType.getJavaName() + ")pNewValue." + lFieldData.getJavaGetterCall() + ");" );
+                  pOut.println( " " +
+                                lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                                " = new " +
+                                lClassDataSubType.getDiffJavaName() +
+                                "( (" +
+                                lClassDataSubType.getJavaName() +
+                                ")pNewValue." +
+                                lFieldData.getJavaGetterCall() +
+                                ");" );
                   pOut.println( " }" );
                   pOut.println( " else" );
                   pOut.println( " {" );
-                  pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + " = new " + lClassDataSubType.getDiffJavaName() + "( null );" );
+                  pOut.println( " " +
+                                lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                                " = new " +
+                                lClassDataSubType.getDiffJavaName() +
+                                "( null );" );
                   pOut.println( " }" );
                 }
               }
@@ -729,14 +984,22 @@ public class JavaOdGenerator extends JavaGenerator
           {
             if( !lClassDataType.isHasSubclasses() )
             {
-              pOut.println( " " + lFieldData.getDiffChangeJavaName() + " = new Array" + lClassDataType.getDiffJavaNameCollection() + "();" );
+              pOut.println( " " +
+                            lFieldData.getDiffChangeJavaName() +
+                            " = new Array" +
+                            lClassDataType.getDiffJavaNameCollection() +
+                            "();" );
             }
             else
             {
               List<ClassDataType> lAllClassDataSubTypes = getAllClassDataSubTypes( lClassDataType, pTypeDataContainer );
               for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
               {
-                pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + " = new Array" + lClassDataSubType.getDiffJavaNameCollection() + "();" );
+                pOut.println( " " +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              " = new Array" +
+                              lClassDataSubType.getDiffJavaNameCollection() +
+                              "();" );
               }
             }
           }
@@ -744,14 +1007,22 @@ public class JavaOdGenerator extends JavaGenerator
           {
             if( !lClassDataType.isHasSubclasses() )
             {
-              pOut.println( " " + lFieldData.getDiffChangeJavaName() + " = new " + lClassDataType.getDiffJavaName() + "( null );" );
+              pOut.println( " " +
+                            lFieldData.getDiffChangeJavaName() +
+                            " = new " +
+                            lClassDataType.getDiffJavaName() +
+                            "( null );" );
             }
             else
             {
               List<ClassDataType> lAllClassDataSubTypes = getAllClassDataSubTypes( lClassDataType, pTypeDataContainer );
               for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
               {
-                pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + " = new " + lClassDataSubType.getDiffJavaName() + "( null );" );
+                pOut.println( " " +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              " = new " +
+                              lClassDataSubType.getDiffJavaName() +
+                              "( null );" );
               }
             }
           }
@@ -772,7 +1043,9 @@ public class JavaOdGenerator extends JavaGenerator
     {
       pOut.println( " @Override" );
     }
-    pOut.println( " public void mergeWithOldValue( " + getBaseSuperclass( pClassDataType, pTypeDataContainer ).getJavaName() + " pOldValue )" );
+    pOut.println( " public void mergeWithOldValue( " +
+                  getBaseSuperclass( pClassDataType, pTypeDataContainer ).getJavaName() +
+                  " pOldValue )" );
     pOut.println( " {" );
     pOut.println( " List<Integer> lMergeResult;" );
     pOut.println( " boolean lMergeTypeEqual;" );
@@ -794,7 +1067,9 @@ public class JavaOdGenerator extends JavaGenerator
 
     if( pClassDataType.getSuperclass() != null )
     {
-      lParameterTreated = "((" + pClassDataType.getJavaName() + ")pOldValue)";
+      lParameterTreated = "((" +
+                          pClassDataType.getJavaName() +
+                          ")pOldValue)";
     }
 
     for( FieldData lFieldData : pClassDataType.getFiledDataList() )
@@ -804,46 +1079,91 @@ public class JavaOdGenerator extends JavaGenerator
       {
         if( lFieldData.isInt() )
         {
-          pOut.println( " " + lFieldData.getDiffOldJavaName() + " = DiffRepository.getNullableIntValue( " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " );" );
+          pOut.println( " " +
+                        lFieldData.getDiffOldJavaName() +
+                        " = DiffRepository.getNullableIntValue( " +
+                        lParameterTreated +
+                        "." +
+                        lFieldData.getJavaGetterCall() +
+                        " );" );
         }
         else
         {
-          pOut.println( " " + lFieldData.getDiffOldJavaName() + " = " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + ";" );
+          pOut.println( " " +
+                        lFieldData.getDiffOldJavaName() +
+                        " = " +
+                        lParameterTreated +
+                        "." +
+                        lFieldData.getJavaGetterCall() +
+                        ";" );
         }
       }
       else
       {
         ClassDataType lClassDataType = (ClassDataType)lType;
 
-        if( !lClassDataType.isHasSubclasses() && !lFieldData.isList() )
+        if( !lClassDataType.isHasSubclasses() &&
+            !lFieldData.isList() )
         {
-          pOut.println( " " + lFieldData.getDiffChangeJavaName() + ".mergeWithOldValue( " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " );" );
+          pOut.println( " " +
+                        lFieldData.getDiffChangeJavaName() +
+                        ".mergeWithOldValue( " +
+                        lParameterTreated +
+                        "." +
+                        lFieldData.getJavaGetterCall() +
+                        " );" );
         }
         else
         {
           if( !lClassDataType.isHasSubclasses() )
           {
-            pOut.println( " if( " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " != null )" );
+            pOut.println( " if( " +
+                          lParameterTreated +
+                          "." +
+                          lFieldData.getJavaGetterCall() +
+                          " != null )" );
             pOut.println( " {" );
-            pOut.println( " lMergeResult = DiffRepository.get" + lClassDataType.getMergeJavaName() + "().getMergeResult( " + lFieldData.getDiffChangeJavaName() + ", " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " );" );
+            pOut.println( " lMergeResult = DiffRepository.get" +
+                          lClassDataType.getMergeJavaName() +
+                          "().getMergeResult( " +
+                          lFieldData.getDiffChangeJavaName() +
+                          ", " +
+                          lParameterTreated +
+                          "." +
+                          lFieldData.getJavaGetterCall() +
+                          " );" );
 
             pOut.println( " for( int i = 0; i < lMergeResult.size(); i++ )" );
             pOut.println( " {" );
-            pOut.println( " " + lClassDataType.getDiffJavaName() + " lValueDiff;" );
+            pOut.println( " " +
+                          lClassDataType.getDiffJavaName() +
+                          " lValueDiff;" );
             pOut.println( " if( lMergeResult.get(i) == null )" );
             pOut.println( " {" );
-            pOut.println( " lValueDiff = new " + lClassDataType.getDiffJavaName() + "( null );" );
-            pOut.println( " " + lFieldData.getDiffChangeJavaName() + ".add( lValueDiff );" );
+            pOut.println( " lValueDiff = new " +
+                          lClassDataType.getDiffJavaName() +
+                          "( null );" );
+            pOut.println( " " +
+                          lFieldData.getDiffChangeJavaName() +
+                          ".add( lValueDiff );" );
             pOut.println( " }" );
             pOut.println( " else" );
             pOut.println( " {" );
-            pOut.println( " lValueDiff = " + lFieldData.getDiffChangeJavaName() + ".get(lMergeResult.get(i));" );
+            pOut.println( " lValueDiff = " +
+                          lFieldData.getDiffChangeJavaName() +
+                          ".get(lMergeResult.get(i));" );
             pOut.println( " }" );
-            pOut.println( " if( DiffRepository.get" + lClassDataType.getMergeJavaName() + "().isChildOrderRelevant() )" );
+            pOut.println( " if( DiffRepository.get" +
+                          lClassDataType.getMergeJavaName() +
+                          "().isChildOrderRelevant() )" );
             pOut.println( " {" );
             pOut.println( " lValueDiff.oldParentIndex = i;" );
             pOut.println( " }" );
-            pOut.println( " lValueDiff.mergeWithOldValue( " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + ".get(i) );" );
+            pOut.println( " lValueDiff.mergeWithOldValue( " +
+                          lParameterTreated +
+                          "." +
+                          lFieldData.getJavaGetterCall() +
+                          ".get(i) );" );
             pOut.println( " }" );
             pOut.println( " }" );
           }
@@ -853,42 +1173,78 @@ public class JavaOdGenerator extends JavaGenerator
 
             if( lFieldData.isList() )
             {
-              pOut.println( " if( " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " != null )" );
+              pOut.println( " if( " +
+                            lParameterTreated +
+                            "." +
+                            lFieldData.getJavaGetterCall() +
+                            " != null )" );
               pOut.println( " {" );
 
               for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
               {
                 pOut.println( " {" );
-                pOut.println( " " + lClassDataSubType.getJavaNameCollection() + " lTypedList = new Array" + lClassDataSubType.getJavaNameCollection() + "();" );
+                pOut.println( " " +
+                              lClassDataSubType.getJavaNameCollection() +
+                              " lTypedList = new Array" +
+                              lClassDataSubType.getJavaNameCollection() +
+                              "();" );
                 pOut.println( " List<Integer> lIndexMap = null;" );
-                pOut.println( " if( DiffRepository.get" + lClassDataType.getMergeJavaName() + "().isChildOrderRelevant() )" );
+                pOut.println( " if( DiffRepository.get" +
+                              lClassDataType.getMergeJavaName() +
+                              "().isChildOrderRelevant() )" );
                 pOut.println( " {" );
                 pOut.println( " lIndexMap = new ArrayList<Integer>();" );
                 pOut.println( " }" );
-                pOut.println( " for( " + lClassDataType.getJavaName() + " lValue : " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " )" );
+                pOut.println( " for( " +
+                              lClassDataType.getJavaName() +
+                              " lValue : " +
+                              lParameterTreated +
+                              "." +
+                              lFieldData.getJavaGetterCall() +
+                              " )" );
                 pOut.println( " {" );
-                pOut.println( " if( lValue instanceof " + lClassDataSubType.getJavaName() + " ) " );
+                pOut.println( " if( lValue instanceof " +
+                              lClassDataSubType.getJavaName() +
+                              " ) " );
                 pOut.println( " {" );
-                pOut.println( " lTypedList.add( (" + lClassDataSubType.getJavaName() + ")lValue );" );
+                pOut.println( " lTypedList.add( (" +
+                              lClassDataSubType.getJavaName() +
+                              ")lValue );" );
                 pOut.println( " if( lIndexMap != null )" );
                 pOut.println( " {" );
-                pOut.println( " lIndexMap.add(" + lParameterTreated + "." + lFieldData.getJavaGetterCall() + ".indexOf(lValue));" );
+                pOut.println( " lIndexMap.add(" +
+                              lParameterTreated +
+                              "." +
+                              lFieldData.getJavaGetterCall() +
+                              ".indexOf(lValue));" );
                 pOut.println( " }" );
                 pOut.println( " }" );
                 pOut.println( " }" );
-                pOut.println( " lMergeResult = DiffRepository.get" + lClassDataSubType.getMergeJavaName() + "().getMergeResult( " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ", lTypedList );" );
+                pOut.println( " lMergeResult = DiffRepository.get" +
+                              lClassDataSubType.getMergeJavaName() +
+                              "().getMergeResult( " +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              ", lTypedList );" );
                 pOut.println( " int i=0;" );
                 pOut.println( " for(Integer lIndex : lMergeResult)" );
                 pOut.println( " {" );
-                pOut.println( " " + lClassDataSubType.getDiffJavaName() + " lValueDiff;" );
+                pOut.println( " " +
+                              lClassDataSubType.getDiffJavaName() +
+                              " lValueDiff;" );
                 pOut.println( " if( lIndex == null )" );
                 pOut.println( " {" );
-                pOut.println( " lValueDiff = new " + lClassDataSubType.getDiffJavaName() + "( null );" );
-                pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".add(lValueDiff);" );
+                pOut.println( " lValueDiff = new " +
+                              lClassDataSubType.getDiffJavaName() +
+                              "( null );" );
+                pOut.println( " " +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              ".add(lValueDiff);" );
                 pOut.println( " }" );
                 pOut.println( " else" );
                 pOut.println( " {" );
-                pOut.println( " lValueDiff =" + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".get( lIndex );" );
+                pOut.println( " lValueDiff =" +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              ".get( lIndex );" );
                 pOut.println( " }" );
                 pOut.println( " if( lIndexMap != null )" );
                 pOut.println( " {" );
@@ -905,13 +1261,33 @@ public class JavaOdGenerator extends JavaGenerator
             {
               for( ClassDataType lClassDataSubType : lAllClassDataSubTypes )
               {
-                pOut.println( " if( " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " != null && " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " instanceof " + lClassDataSubType.getJavaName() + " ) " );
+                pOut.println( " if( " +
+                              lParameterTreated +
+                              "." +
+                              lFieldData.getJavaGetterCall() +
+                              " != null && " +
+                              lParameterTreated +
+                              "." +
+                              lFieldData.getJavaGetterCall() +
+                              " instanceof " +
+                              lClassDataSubType.getJavaName() +
+                              " ) " );
                 pOut.println( " {" );
-                pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".mergeWithOldValue( (" + lClassDataSubType.getJavaName() + ") " + lParameterTreated + "." + lFieldData.getJavaGetterCall() + " );" );
+                pOut.println( " " +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              ".mergeWithOldValue( (" +
+                              lClassDataSubType.getJavaName() +
+                              ") " +
+                              lParameterTreated +
+                              "." +
+                              lFieldData.getJavaGetterCall() +
+                              " );" );
                 pOut.println( " }" );
                 pOut.println( " else" );
                 pOut.println( " {" );
-                pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".mergeWithOldValue( null );" );
+                pOut.println( " " +
+                              lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                              ".mergeWithOldValue( null );" );
                 pOut.println( " }" );
               }
             }
@@ -941,13 +1317,17 @@ public class JavaOdGenerator extends JavaGenerator
         {
           if( !lClassDataType.isHasSubclasses() )
           {
-            pOut.println( " " + lFieldData.getDiffChangeJavaName() + ".mergeWithOldValue( null );" );
+            pOut.println( " " +
+                          lFieldData.getDiffChangeJavaName() +
+                          ".mergeWithOldValue( null );" );
           }
           else
           {
             for( ClassDataType lClassDataSubType : getAllClassDataSubTypes( lClassDataType, pTypeDataContainer ) )
             {
-              pOut.println( " " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + ".mergeWithOldValue( null );" );
+              pOut.println( " " +
+                            lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                            ".mergeWithOldValue( null );" );
             }
           }
         }
@@ -965,7 +1345,11 @@ public class JavaOdGenerator extends JavaGenerator
 
         if( !lClassDataType.isHasSubclasses() )
         {
-          pOut.println( " for( " + lClassDataType.getDiffJavaName() + " lValue : " + lFieldData.getDiffChangeJavaName() + " ) " );
+          pOut.println( " for( " +
+                        lClassDataType.getDiffJavaName() +
+                        " lValue : " +
+                        lFieldData.getDiffChangeJavaName() +
+                        " ) " );
           pOut.println( " {" );
           pOut.println( " if( lValue.isOld == null )" );
           pOut.println( " {" );
@@ -977,7 +1361,11 @@ public class JavaOdGenerator extends JavaGenerator
         {
           for( ClassDataType lClassDataSubType : getAllClassDataSubTypes( lClassDataType, pTypeDataContainer ) )
           {
-            pOut.println( " for( " + lClassDataSubType.getDiffJavaName() + " lValue : " + lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) + " ) " );
+            pOut.println( " for( " +
+                          lClassDataSubType.getDiffJavaName() +
+                          " lValue : " +
+                          lFieldData.getDiffChangeJavaNameForSubType( lClassDataSubType ) +
+                          " ) " );
             pOut.println( " {" );
             pOut.println( " if( lValue.isOld == null )" );
             pOut.println( " {" );

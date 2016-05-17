@@ -235,7 +235,7 @@ public class OrcasDiff
 
   public class DiffResult
   {
-    private List<String> sqlStatements = new ArrayList<>();
+    private List<String> sqlStatements = new ArrayList<String>();
 
     public List<String> getSqlStatements()
     {
@@ -1719,7 +1719,7 @@ public class OrcasDiff
 
   private boolean has_rows( String pTestStatement )
   {
-    return (boolean)new WrapperReturnValueFromResultSet( pTestStatement, JdbcConnectionHandler.getCallableStatementProvider() )
+    return (Boolean)new WrapperReturnValueFromResultSet( pTestStatement, JdbcConnectionHandler.getCallableStatementProvider() )
     {
       @Override
       protected Object getValueFromResultSet( ResultSet pResultSet ) throws SQLException
@@ -1735,7 +1735,7 @@ public class OrcasDiff
   }
 
   private String pv_stmt;
-  private List<String> pv_stmtList = new ArrayList<>();
+  private List<String> pv_stmtList = new ArrayList<String>();
 
   private void add_stmt()
   {

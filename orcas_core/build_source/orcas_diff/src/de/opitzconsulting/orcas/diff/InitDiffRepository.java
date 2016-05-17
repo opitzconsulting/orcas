@@ -69,7 +69,7 @@ public class InitDiffRepository
       lDefaultCharType = CharType.CHAR;
     }
 
-    String lDefaultTablespace = (String)new WrapperReturnFirstValue( "select default_tablespace from user_users", JdbcConnectionHandler.getCallableStatementProvider() ).executeForValue();
+    final String lDefaultTablespace = (String)new WrapperReturnFirstValue( "select default_tablespace from user_users", JdbcConnectionHandler.getCallableStatementProvider() ).executeForValue();
     String lDefaultTempTablespace = (String)new WrapperReturnFirstValue( "select temporary_tablespace from user_users", JdbcConnectionHandler.getCallableStatementProvider() ).executeForValue();
 
     DiffRepository.setIndexOrUniqueKeyMerge( new IndexOrUniqueKeyMerge()

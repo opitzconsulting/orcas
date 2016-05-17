@@ -137,7 +137,7 @@ public class LoadIst
     }
   }
 
-  private void loadIgnoreCache( String pExcludeWhere, String pType )
+  private void loadIgnoreCache( String pExcludeWhere, final String pType )
   {
     if( !excludeMap.containsKey( pType ) )
     {
@@ -192,7 +192,7 @@ public class LoadIst
     return pBigDecimal.intValue();
   }
 
-  private void loadSequencesIntoModel( Model pModel )
+  private void loadSequencesIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select sequence_name," + //
@@ -247,7 +247,7 @@ public class LoadIst
     }.execute();
   }
 
-  private void loadMViewsIntoModel( Model pModel )
+  private void loadMViewsIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select mview_name," + //
@@ -278,7 +278,7 @@ public class LoadIst
 
         if( !isIgnoredMView( pResultSet.getString( "mview_name" ) ) )
         {
-          Mview lMview = new MviewImpl();
+          final Mview lMview = new MviewImpl();
 
           lMview.setMview_name( pResultSet.getString( "mview_name" ) );
           lMview.setViewSelectCLOB( "\"" +
@@ -379,8 +379,6 @@ public class LoadIst
 
             handleDegree( pResultSet.getString( "degree" ), new DegreeHandler()
             {
-
-              @Override
               public void setDegree( ParallelType pParallelType, int ParallelDegree )
               {
                 lMview.setParallel( pParallelType );
@@ -495,7 +493,7 @@ public class LoadIst
                                      pForeignkeyname );
   }
 
-  private void loadTableColumnsIntoModel( Model pModel )
+  private void loadTableColumnsIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select user_tab_cols.table_name," + //
@@ -681,7 +679,7 @@ public class LoadIst
     }.execute();
   }
 
-  private void loadIndexesIntoModel( Model pModel )
+  private void loadIndexesIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select index_name," + //
@@ -714,7 +712,7 @@ public class LoadIst
       {
         if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
         {
-          Index lIndex = new IndexImpl();
+          final Index lIndex = new IndexImpl();
 
           lIndex.setConsName( pResultSet.getString( "index_name" ) );
 
@@ -732,7 +730,6 @@ public class LoadIst
 
           handleDegree( pResultSet.getString( "degree" ), new DegreeHandler()
           {
-            @Override
             public void setDegree( ParallelType pParallelType, int ParallelDegree )
             {
               lIndex.setParallel( pParallelType );
@@ -778,7 +775,7 @@ public class LoadIst
     }.execute();
   }
 
-  private void loadIndexColumnsIntoModel( Model pModel )
+  private void loadIndexColumnsIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select user_ind_columns.table_name," + //
@@ -833,7 +830,7 @@ public class LoadIst
 
   }
 
-  private void loadIndexExpressionsIntoModel( Model pModel )
+  private void loadIndexExpressionsIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select user_ind_expressions.table_name," + //
@@ -877,7 +874,7 @@ public class LoadIst
     }.execute();
   }
 
-  private void loadTableConstraintsIntoModel( Model pModel )
+  private void loadTableConstraintsIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select user_constraints.table_name," + //
@@ -1034,7 +1031,7 @@ public class LoadIst
     }.execute();
   }
 
-  private void loadTableConstraintColumnsIntoModel( Model pModel )
+  private void loadTableConstraintColumnsIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select user_cons_columns.table_name," + //
@@ -1081,7 +1078,7 @@ public class LoadIst
     }.execute();
   }
 
-  private void loadTableCommentsIntoModel( Model pModel )
+  private void loadTableCommentsIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select table_name," + //
@@ -1110,7 +1107,7 @@ public class LoadIst
     }.execute();
   }
 
-  private void loadTableColumnCommentsIntoModel( Model pModel )
+  private void loadTableColumnCommentsIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select table_name," + //
@@ -1143,7 +1140,7 @@ public class LoadIst
     }.execute();
   }
 
-  private void loadLobstorageIntoModel( Model pModel )
+  private void loadLobstorageIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select table_name," + //
@@ -1212,7 +1209,7 @@ public class LoadIst
     }
   }
 
-  private void loadTablesIntoModel( Model pModel )
+  private void loadTablesIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select tables.table_name," + //
@@ -1237,7 +1234,7 @@ public class LoadIst
       {
         if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
         {
-          Table lTable = new TableImpl();
+          final Table lTable = new TableImpl();
 
           lTable.setName( pResultSet.getString( "table_name" ) );
 
@@ -1263,7 +1260,6 @@ public class LoadIst
 
           handleDegree( pResultSet.getString( "degree" ), new DegreeHandler()
           {
-            @Override
             public void setDegree( ParallelType pParallelType, int ParallelDegree )
             {
               lTable.setParallel( pParallelType );
