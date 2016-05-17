@@ -19,6 +19,28 @@ public class FieldData
     return _javaName;
   }
 
+  public boolean isInt()
+  {
+    return getJavaType() == int.class;
+  }
+
+  public String getJavaGetterCall()
+  {
+    if( isFlag() )
+    {
+      return "is" + _javaName.substring( 0, 1 ).toUpperCase() + _javaName.substring( 1 ) + "()";
+    }
+    else
+    {
+      return "get" + _javaName.substring( 0, 1 ).toUpperCase() + _javaName.substring( 1 ) + "()";
+    }
+  }
+
+  public String getJavaSetterName()
+  {
+    return "set" + _javaName.substring( 0, 1 ).toUpperCase() + _javaName.substring( 1 );
+  }
+
   public Class getJavaType()
   {
     return _javaType;
@@ -87,15 +109,45 @@ public class FieldData
     return getSqlNameWthPrefix( "c_" );
   }
 
+  public String getDiffNewJavaName()
+  {
+    return _javaName + "New";
+  }
+
+  public String getDiffOldJavaName()
+  {
+    return _javaName + "Old";
+  }
+
+  public String getDiffEqualFlagJavaName()
+  {
+    return _javaName + "IsEqual";
+  }
+
+  public String getDiffChangeJavaName()
+  {
+    return _javaName + "Diff";
+  }
+
   public String getDiffChangeSqlNameForSubType( ClassDataType pClassDataType )
   {
     String lReturn = getSqlNameWthPrefix( "c_" ) + "_" + pClassDataType.getJavaName().toLowerCase();
     return lReturn.length() > 30 ? lReturn.substring( 0, 30 ) : lReturn;
   }
 
+  public String getDiffChangeJavaNameForSubType( ClassDataType pClassDataType )
+  {
+    return _javaName + pClassDataType.getJavaName() + "Diff";
+  }
+
   public String getCleanValueMethodName()
   {
     return getSqlNameWthPrefix( "d_" );
+  }
+
+  public String getCleanValueJavaMethodName()
+  {
+    return _javaName + "CleanValueIfNeeded";
   }
 
   public String getDefaultValueFieldName()
@@ -108,13 +160,23 @@ public class FieldData
     return getSqlNameWthPrefix( "up_" );
   }
 
+  public String getUpperCaseJavaFieldFlagName()
+  {
+    return _javaName + "IsConvertToUpperCase";
+  }
+
+  public String getDefaultValueJavaFieldName()
+  {
+    return _javaName + "DefaultValue";
+  }
+
   public ClassData getClassData( Class pJavaType, TypeDataContainer pTypeDataContainer )
   {
     ClassData result = null;
 
     if( _javaName.toUpperCase().contains( "CLOB" ) )
     {
-      result = new ClassDataPrimitive( "clob" );
+      result = new ClassDataPrimitive( "clob", "String" );
     }
     else
     {

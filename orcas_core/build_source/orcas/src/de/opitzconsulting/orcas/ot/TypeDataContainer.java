@@ -1,17 +1,13 @@
 package de.opitzconsulting.orcas.ot;
 
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import org.reflections.*;
-import org.reflections.scanners.SubTypesScanner;
 
-import de.opitzconsulting.orcasDsl.Model;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 public class TypeDataContainer
 {
@@ -27,27 +23,29 @@ public class TypeDataContainer
     try
     {
       ClassLoader lClassLoader = Thread.currentThread().getContextClassLoader();
-      Reflections reflections = new Reflections(pPackage.getName(), new SubTypesScanner(false));
-      Iterator<String> allClasses = reflections.getStore().getSubTypesOf(Object.class.getName()).iterator();
+      Reflections reflections = new Reflections( pPackage.getName(), new SubTypesScanner( false ) );
+      Iterator<String> allClasses = reflections.getStore().getSubTypesOf( Object.class.getName() ).iterator();
       List<Class> lReturn = new ArrayList<Class>();
 
-      while (allClasses.hasNext()){
+      while( allClasses.hasNext() )
+      {
         Class lClass = Class.forName( allClasses.next() );
-        if (lClass.isInterface()){
-            boolean lUse = false;
+        if( lClass.isInterface() )
+        {
+          boolean lUse = false;
 
-            for( Class lInterface : lClass.getInterfaces() )
+          for( Class lInterface : lClass.getInterfaces() )
+          {
+            if( pUsedInterfaces.contains( lInterface ) )
             {
-              if( pUsedInterfaces.contains( lInterface ) )
-              {
-                  lUse = true;
-              }
+              lUse = true;
             }
+          }
 
-            if( lUse )
-            {
-              lReturn.add( lClass );
-            }
+          if( lUse )
+          {
+            lReturn.add( lClass );
+          }
         }
       }
 
@@ -66,7 +64,7 @@ public class TypeDataContainer
 
     List<Class> lAllwaysCheckClasses = new ArrayList<Class>();
 
-    Class lModelClass = Model.class;
+    Class lModelClass = getRootClass();
     lAllwaysCheckClasses.add( lModelClass );
 
     for( Class lClass : lAllwaysCheckClasses )
@@ -116,11 +114,11 @@ public class TypeDataContainer
       if( lClass == boolean.class )
       {
         lSqlName = "number(1)";
-      }      
+      }
 
       if( lSqlName != null )
       {
-        addClassData( lClass, new ClassDataPrimitive( lSqlName ) );
+        addClassData( lClass, new ClassDataPrimitive( lSqlName, lClass.getSimpleName() ) );
         lReturn.remove( lClass );
       }
       else
@@ -143,6 +141,20 @@ public class TypeDataContainer
     }
 
     return lReturn;
+  }
+
+  public Class getRootClass()
+  {
+    Class lModelClass;
+    try
+    {
+      lModelClass = Class.forName( ClassDataType.getTypePrefix().equals( "syex" ) ? "de.opitzconsulting.orcasDsl.Model" : "de.opitzconsulting.origOrcasDsl.Model" );
+    }
+    catch( ClassNotFoundException e )
+    {
+      throw new RuntimeException( e );
+    }
+    return lModelClass;
   }
 
   public List<ClassDataType> getAllClassDataTypes()

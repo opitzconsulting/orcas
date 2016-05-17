@@ -36,7 +36,7 @@ public class ClassDataParser
       {
         if( lFieldData.isList() )
         {
-          ((ClassDataType) lFieldData.getClassData( lFieldData.getJavaType(), _typeDataContainer )).setListNeeded( true );
+          ((ClassDataType)lFieldData.getClassData( lFieldData.getJavaType(), _typeDataContainer )).setListNeeded( true );
         }
       }
     }
@@ -163,8 +163,7 @@ public class ClassDataParser
       {
         Object lValue = Array.get( lValues, i );
 
-        lEnumDataList.add( new EnumData( (String)pClass.getMethod( "getLiteral" ).invoke( lValue ), (String)pClass.getMethod( "getName" ).invoke( lValue ), (Integer)pClass.getMethod( "getValue" )
-            .invoke( lValue ) ) );
+        lEnumDataList.add( new EnumData( (String)pClass.getMethod( "getLiteral" ).invoke( lValue ), (String)pClass.getMethod( "getName" ).invoke( lValue ), (Integer)pClass.getMethod( "getValue" ).invoke( lValue ), (String)pClass.getMethod( "name" ).invoke( lValue ) ) );
       }
 
       lClassDataType.setupEnum( lEnumDataList );

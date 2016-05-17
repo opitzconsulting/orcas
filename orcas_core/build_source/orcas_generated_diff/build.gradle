@@ -1,0 +1,52 @@
+apply plugin: 'java'
+
+configurations 
+{
+  generatorRunPath 
+  {
+  }
+}
+
+dependencies 
+{
+  generatorRunPath project(':orcas')
+  compile project(':orcas')
+  compile project(':orcas_syex')
+}
+
+task(createGenDirs) 
+{
+  doFirst
+  {
+    new File("${buildDir}/srcgen/src/de/opitzconsulting/orcas/orig/diff").mkdirs();
+    new File("${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/trans").mkdirs();
+  }
+  outputs.file "${buildDir}/srcgen"
+}
+
+task(generateDiffJava, dependsOn: createGenDirs, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath 
+
+  main = "de.opitzconsulting.orcas.ot.JavaOdGenerator"
+  args "${buildDir}/srcgen/src/de/opitzconsulting/orcas/orig/diff"
+  args "orig"
+
+  outputs.file args[0]
+}
+
+task(generateTransformerJava, dependsOn: createGenDirs, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath 
+
+  main = "de.opitzconsulting.orcas.ot.JavaTransformerGenerator"
+  args "${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/trans"
+  args "orig"
+
+  outputs.file args[0]
+}
+
+compileJava.source "${buildDir}/srcgen"
+compileJava.dependsOn generateDiffJava, generateTransformerJava
+
+

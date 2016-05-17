@@ -56,6 +56,10 @@ task(generateXtext, dependsOn: copyFilesToBuild, type: JavaExec)
     {
       include(name: '**/impl/*.java')
     }
+    ant.replaceregexp(match:'(Type .*_EDEFAULT = ).*;', replace:'\\1 null;', flags:'g', byline:true) 
+    {
+      fileset(dir: "${project.ext.copy_folder_root}/xtext-generated", includes: '**/impl/*.java')
+    }
   }
 }
 

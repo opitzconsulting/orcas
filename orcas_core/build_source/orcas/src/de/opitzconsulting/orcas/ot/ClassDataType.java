@@ -21,6 +21,11 @@ public class ClassDataType extends ClassData
     _typePrefix = pTypePrefix;
   }
 
+  public static String getTypePrefix()
+  {
+    return _typePrefix;
+  }
+
   public boolean isListNeeded()
   {
     return _isListNeeded;
@@ -118,9 +123,19 @@ public class ClassDataType extends ClassData
     return "ct_" + _typePrefix + "_" + getMaxLengthName() + "_list";
   }
 
+  public String getJavaNameCollection()
+  {
+    return "List<" + _javaName + ">";
+  }
+
   public String getDiffSqlName()
   {
     return "od_" + _typePrefix + "_" + getMaxLengthName();
+  }
+
+  public String getDiffJavaName()
+  {
+    return _javaName + "Diff";
   }
 
   public String getMergeSqlName()
@@ -128,9 +143,19 @@ public class ClassDataType extends ClassData
     return "om_" + _typePrefix + "_" + getMaxLengthName();
   }
 
+  public String getMergeJavaName()
+  {
+    return _javaName + "Merge";
+  }
+
   public String getDiffSqlNameCollection()
   {
     return "cd_" + _typePrefix + "_" + getMaxLengthName() + "_list";
+  }
+
+  public String getDiffJavaNameCollection()
+  {
+    return "List<" + getDiffJavaName() + ">";
   }
 
   public String getSqlDummyFieldName()
@@ -163,4 +188,5 @@ public class ClassDataType extends ClassData
   {
     return isEnum();
   }
+
 }

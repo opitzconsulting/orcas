@@ -12,9 +12,9 @@
 
 «DEFINE write_model_element FOR ModelElement-»
 «FILE "OrcasDsl.xtext"-»
-grammar «header.this_grammar» with «header.super_grammar»
+grammar de.opitzconsulting.OrcasDsl with org.eclipse.xtext.common.Terminals
 
-generate «header.name» "«header.this_generate»"
+generate orcasDsl "http://www.opitzconsulting.de/OrcasDsl"
 
 «FOREACH rules AS l_rule»
   «IF RuleNormal.isInstance( l_rule )-»

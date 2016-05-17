@@ -1,6 +1,6 @@
-grammar de.opitzconsulting.OrcasDsl with org.eclipse.xtext.common.Terminals
+grammar de.opitzconsulting.OrigOrcasDsl with org.eclipse.xtext.common.Terminals
 
-generate orcasDsl "http://www.opitzconsulting.de/OrcasDsl"
+generate origOrcasDsl "http://www.opitzconsulting.de/OrigOrcasDsl"
 
 Model :
   (model_elements+=ModelElement)+;

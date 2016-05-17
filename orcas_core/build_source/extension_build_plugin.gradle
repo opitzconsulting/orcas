@@ -79,6 +79,6 @@ public class All${project.ext.extension_interface_name}s extends BaseMulti${proj
   }
 }
 
-compileJava.source new File("${buildDir}/extensions"), new File("${buildDir}/all_extension")
+compileJava.source new File("${buildDir}/extensions"), new File("${buildDir}/all_extension"), new File("src")
 compileJava.dependsOn generateAll, generateAll
 

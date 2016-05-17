@@ -28,8 +28,9 @@ public class OtTransformerPackageGenerator
 
   private static void writePackageBody( PrintStream pPrintStream, String pSourcePrefix, String pTargetPrefix )
   {
-    ClassDataType.setTypePrefix( pTargetPrefix );
+    ClassDataType.setTypePrefix( "orig" );
     TypeDataContainer lTypeDataContainer = new ClassDataParser().parse();
+    ClassDataType.setTypePrefix( pTargetPrefix );
 
     pPrintStream.println( "create or replace package body pa_orcas_trans_" + pSourcePrefix + "_" + pTargetPrefix + " is" );
     pPrintStream.println( "" );

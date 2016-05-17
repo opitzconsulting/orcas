@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.opitzconsulting.orcasDsl.Model;
 
 public class OracleOdGenerator
 {
@@ -50,7 +49,7 @@ public class OracleOdGenerator
       _writeOd( lClassDataType, lTypeDataContainer, new PlSqlPrettyWriter( lPrintStream ) );
     }
 
-    Set<ClassDataType> lOmTypesSet = getOmTypesRecursive( (ClassDataType)lTypeDataContainer.getClassData( Model.class ), new HashSet<ClassDataType>(), lTypeDataContainer );
+    Set<ClassDataType> lOmTypesSet = getOmTypesRecursive( (ClassDataType)lTypeDataContainer.getClassData( lTypeDataContainer.getRootClass() ), new HashSet<ClassDataType>(), lTypeDataContainer );
     List<ClassDataType> lOmTypes = new ArrayList<ClassDataType>( lOmTypesSet );
 
     for( ClassDataType lClassDataType : lNoneEnumTypes )

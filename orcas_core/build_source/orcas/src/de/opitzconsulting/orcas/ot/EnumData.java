@@ -5,12 +5,19 @@ public class EnumData
   private String _literal;
   private String _name;
   private int _value;
+  private String _javaName;
 
-  public EnumData( String pLiteral, String pName, int pValue )
+  public String getJavaName()
+  {
+    return _javaName;
+  }
+
+  public EnumData( String pLiteral, String pName, int pValue, String pJavaName )
   {
     _literal = pLiteral;
     _name = pName;
     _value = pValue;
+    _javaName = pJavaName;
   }
 
   public String getLiteral()

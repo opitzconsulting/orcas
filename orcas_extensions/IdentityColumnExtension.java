@@ -26,6 +26,8 @@ public class IdentityColumnExtension extends TableVisitorExtension
         _addSequence(pTable, lColumn);
 
         count = count + 1;
+
+        lColumn.setIdentity( null );
       }
     }
   }
