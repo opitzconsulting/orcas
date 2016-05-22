@@ -1,11 +1,11 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ibm.icu.math.BigDecimal;
 
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
@@ -204,12 +204,13 @@ public class OrcasDiff
 
   private boolean isIndexmovetablespace()
   {
-    // TODO Auto-generated method stub
-    return false;
+    return _parameters.isIndexmovetablespace();
   }
 
-  public DiffResult compare( Model pModelSoll, Model pModelIst )
+  public DiffResult compare( Model pModelSoll, Model pModelIst, Parameters pParameters )
   {
+    _parameters = pParameters;
+
     InitDiffRepository.init();
 
     DiffRepository.getModelMerge().cleanupValues( pModelIst );
@@ -227,8 +228,6 @@ public class OrcasDiff
     handleAllSequences( lModelDiff );
     //
     //    handleAllMviews();
-    //
-    //    executeAllStatements();
 
     return new DiffResult( pv_stmtList );
   }
@@ -572,7 +571,7 @@ public class OrcasDiff
         stmt_set( "alter table" );
         stmt_add( pTableDiff.nameNew );
         stmt_add( "move tablespace" );
-        stmt_add( pTableDiff.tablespaceNew );
+        stmt_add( nvl( pTableDiff.tablespaceNew, getDefaultTablespace() ) );
         stmt_done();
       }
     }
@@ -630,7 +629,8 @@ public class OrcasDiff
         if( pTableDiff.parallelNew == ParallelType.PARALLEL )
         {
           stmt_add( "parallel" );
-          if( pTableDiff.parallel_degreeNew > 1 )
+          if( pTableDiff.parallel_degreeNew != null &&
+              pTableDiff.parallel_degreeNew > 1 )
           {
             stmt_add( " " +
                       pTableDiff.parallel_degreeNew );
@@ -807,7 +807,7 @@ public class OrcasDiff
                   " " +
                   pTableDiff.tablespaceNew;
       }
-      if( pTableDiff.permanentnessNew == PermanentnessType.GLOBAL_TEMPORARY )
+      if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )
       {
         if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
         {
@@ -904,16 +904,20 @@ public class OrcasDiff
         if( v_fk_false_data_where_part != null )
         {
           v_fk_false_data_where_part = v_fk_false_data_where_part +
-                                       " || ";
+                                       " or ";
+        }
+        else
+        {
+          v_fk_false_data_where_part = "";
         }
         v_fk_false_data_where_part = v_fk_false_data_where_part +
                                      lColumnRefDiffSrc.column_nameNew +
-                                     " != null ";
+                                     " is not null ";
       }
 
       v_fk_false_data_where_part = "where (" +
                                    v_fk_false_data_where_part +
-                                   ") && (" +
+                                   ") and (" +
                                    get_column_list( pForeignKeyDiff.srcColumnsDiff ) +
                                    ") not in (select " +
                                    get_column_list( pForeignKeyDiff.destColumnsDiff ) +
@@ -1085,7 +1089,10 @@ public class OrcasDiff
         pIndexDiff.isRecreateNeeded == true )
     {
       stmt_set( "create" );
-      stmt_add( pIndexDiff.uniqueNew );
+      if( pIndexDiff.uniqueNew != null )
+      {
+        stmt_add( pIndexDiff.uniqueNew );
+      }
       if( pIndexDiff.bitmapNew != null )
       {
         stmt_add( "bitmap" );
@@ -1138,7 +1145,8 @@ public class OrcasDiff
           isIndexparallelcreate() )
       {
         stmt_add( "parallel" );
-        if( pIndexDiff.parallel_degreeNew > 1 )
+        if( pIndexDiff.parallel_degreeNew != null &&
+            pIndexDiff.parallel_degreeNew > 1 )
         {
           stmt_add( " " +
                     pIndexDiff.parallel_degreeNew );
@@ -1147,7 +1155,7 @@ public class OrcasDiff
 
       add_stmt();
 
-      if( pIndexDiff.parallelNew == ParallelType.NOPARALLEL &&
+      if( pIndexDiff.parallelNew != ParallelType.PARALLEL &&
           isIndexparallelcreate() )
       {
         add_stmt( "alter index " +
@@ -1157,7 +1165,7 @@ public class OrcasDiff
     }
     else
     {
-      if( pIndexDiff.parallel_degreeIsEqual == false ||
+      if( pIndexDiff.parallelIsEqual == false ||
           pIndexDiff.parallel_degreeIsEqual == false )
       {
         stmt_set( "alter index" );
@@ -1165,7 +1173,8 @@ public class OrcasDiff
         if( pIndexDiff.parallelNew == ParallelType.PARALLEL )
         {
           stmt_add( "parallel" );
-          if( pIndexDiff.parallel_degreeNew > 1 )
+          if( pIndexDiff.parallel_degreeNew != null &&
+              pIndexDiff.parallel_degreeNew > 1 )
           {
             stmt_add( " " +
                       pIndexDiff.parallel_degreeNew );
@@ -1211,14 +1220,12 @@ public class OrcasDiff
 
   private String getDefaultTablespace()
   {
-    // TODO Auto-generated method stub
-    return null;
+    return InitDiffRepository.getDefaultTablespace();
   }
 
   private boolean isIndexparallelcreate()
   {
-    // TODO Auto-generated method stub
-    return false;
+    return _parameters.isIndexparallelcreate();
   }
 
   private void handleConstraint( String pTablename, ConstraintDiff pConstraintDiff )
@@ -1673,8 +1680,7 @@ public class OrcasDiff
 
   private boolean is_tablemovetablespace()
   {
-    // TODO Auto-generated method stub
-    return false;
+    return _parameters.isTablemovetablespace();
   }
 
   private void stmt_add( String pString )
@@ -1731,11 +1737,12 @@ public class OrcasDiff
 
   private boolean is_dropmode()
   {
-    return false;
+    return _parameters.isDropmode();
   }
 
   private String pv_stmt;
   private List<String> pv_stmtList = new ArrayList<String>();
+  private Parameters _parameters;
 
   private void add_stmt()
   {
@@ -1754,13 +1761,6 @@ public class OrcasDiff
   }
 }
 
-//package de.opitzconsulting.orcas.diff;
-//
-//public class xy
-//{
-//
-//}
-//CREATE || REPLACE package body pa_orcas_compare_diff is
 //pv_model_diff od_orig_model;
 //
 //pv_stmt varchar2(32000);

@@ -36,6 +36,7 @@ class SyncWithDeleteTask extends DefaultTask
 dependencies 
 {
   compile project(':orcas_syex')
+  compile project(':orcas_diff')
 }
 
 task(createSqlplusDir, dependsOn: jar) 

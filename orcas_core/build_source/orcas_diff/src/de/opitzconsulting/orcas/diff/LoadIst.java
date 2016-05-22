@@ -1,6 +1,5 @@
 package de.opitzconsulting.orcas.diff;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,15 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.xmi.XMLResource;
-import org.eclipse.emf.ecore.xmi.impl.XMLResourceFactoryImpl;
 
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
-import de.opitzconsulting.orcas.orig.diff.ModelMerge;
 import de.opitzconsulting.orcas.sql.WrapperIteratorResultSet;
 import de.opitzconsulting.origOrcasDsl.BuildModeType;
 import de.opitzconsulting.origOrcasDsl.CharType;
@@ -67,29 +59,15 @@ import de.opitzconsulting.origOrcasDsl.impl.PrimaryKeyImpl;
 import de.opitzconsulting.origOrcasDsl.impl.SequenceImpl;
 import de.opitzconsulting.origOrcasDsl.impl.TableImpl;
 import de.opitzconsulting.origOrcasDsl.impl.UniqueKeyImpl;
-import oracle.jdbc.OracleDriver;
 
 public class LoadIst
 {
-  public static void main( String[] pArgs )
-  {
-    pArgs = new String[] { OracleDriver.class.getName(), "jdbc:oracle:thin:@localhost:1522:XE", "orcas_orderentry", "orcas_orderentry" };
-
-    JdbcConnectionHandler.initWithMainParameters( pArgs );
-
-    LoadIst lLoadIst = new LoadIst();
-
-    InitDiffRepository.init();
-
-    Model lModel = lLoadIst.loadModel();
-
-    DiffRepository.getModelMerge().cleanupValues( lModel );
-  }
-
   private Map<String,List<String>> excludeMap = new HashMap<String,List<String>>();
 
   private Map<String,Object> constraintMapForFK = new HashMap<String,Object>();
   private Map<String,String> constraintTableMapForFK = new HashMap<String,String>();
+
+  private Parameters _parameters;
 
   private void registerConstarintForeFK( String pConstraintname, String pTablename, Object pConstarint )
   {
@@ -97,8 +75,10 @@ public class LoadIst
     constraintTableMapForFK.put( pConstraintname, pTablename );
   }
 
-  public Model loadModel()
+  public Model loadModel( Parameters pParameters )
   {
+    _parameters = pParameters;
+
     Model pModel = new ModelImpl();
 
     loadSequencesIntoModel( pModel );
@@ -169,8 +149,8 @@ public class LoadIst
   }
 
   private boolean isIgnoredSequence( String pString )
-  { // TODO @
-    return isIgnored( pString, "@", "SEQUENCE" );
+  {
+    return isIgnored( pString, _parameters.getExcludewheresequence(), "SEQUENCE" );
   }
 
   private boolean isIgnoredMView( String pString )
@@ -179,8 +159,8 @@ public class LoadIst
   }
 
   private boolean isIgnoredTable( String pString )
-  { // TODO @
-    return isIgnored( pString, "@", "TABLE" );
+  {
+    return isIgnored( pString, _parameters.getExcludewheretable(), "TABLE" );
   }
 
   private int toInt( BigDecimal pBigDecimal )
@@ -544,7 +524,7 @@ public class LoadIst
           {
             lColumn.setDefault_value( lColumn.getDefault_value().trim() );
             if( lColumn.getDefault_value().length() == 0 ||
-                lColumn.getDefault_value().equals( "NULL" ) )
+                lColumn.getDefault_value().equalsIgnoreCase( "NULL" ) )
             {
               lColumn.setDefault_value( null );
             }
@@ -607,7 +587,7 @@ public class LoadIst
           {
             lColumn.setData_type( DataType.TIMESTAMP );
             lColumn.setPrecision( pResultSet.getInt( "data_scale" ) );
-            if( pResultSet.getString( "data_type" ).contains( "TIMESTAMP" ) )
+            if( pResultSet.getString( "data_type" ).contains( "WITH TIME ZONE" ) )
             {
               lColumn.setWith_time_zone( "with_time_zone" );
             }
@@ -634,7 +614,9 @@ public class LoadIst
             lColumn.setData_type( DataType.FLOAT );
             lColumn.setPrecision( pResultSet.getInt( "data_precision" ) );
           }
-          if( pResultSet.getString( "data_type_owner" ) != null )
+
+          if( lColumn.getData_type() == null &&
+              pResultSet.getString( "data_type_owner" ) != null )
           {
             lColumn.setData_type( DataType.OBJECT );
             lColumn.setObject_type( pResultSet.getString( "data_type" ) );
@@ -739,6 +721,15 @@ public class LoadIst
 
           if( "YES".equals( pResultSet.getString( "logging" ) ) )
           {
+            lIndex.setLogging( LoggingType.LOGGING );
+          }
+          else
+          {
+            lIndex.setLogging( LoggingType.NOLOGGING );
+          }
+
+          if( "NO".equals( pResultSet.getString( "partitioned" ) ) )
+          {
             if( !"BITMAP".equals( pResultSet.getString( "index_type" ) ) )
             {
               lIndex.setGlobal( IndexGlobalType.GLOBAL );
@@ -747,17 +738,8 @@ public class LoadIst
           else
           {
             lIndex.setGlobal( IndexGlobalType.LOCAL );
-            // TODO
+            // set logging; logging is not set in Data-Dictionary since it is enabled at partition level
             lIndex.setLogging( LoggingType.LOGGING );
-          }
-
-          if( "NO".equals( pResultSet.getString( "partitioned" ) ) )
-          {
-            lIndex.setLogging( LoggingType.LOGGING );
-          }
-          else
-          {
-            lIndex.setLogging( LoggingType.NOLOGGING );
           }
 
           if( "ENABLED".equals( pResultSet.getString( "compression" ) ) )
@@ -818,13 +800,30 @@ public class LoadIst
   {
     Index lIndex = findIndex( pModel, pTablename, pIndexName );
 
-    // TODO replace(replace( ltrim(p_expression,',') ,'"',NULL),' ',NULL);
-    lIndex.getIndex_columns().get( pColumnPosition ).setColumn_name( pExpression );
+    // TODO ltrim(p_expression,',')
+    lIndex.getIndex_columns().get( pColumnPosition -
+                                   1 )
+        .setColumn_name( pExpression.replace( "\"", "" ).replace( " ", "" ) );
 
     if( pColumnPosition == pMaxColumnPositionForInd )
     {
-      // TODO
-      // lIndex.setFunction_based_expression( v_orig_index.i_index_columns );
+      String lString = null;
+
+      for( ColumnRef lColumnRef : lIndex.getIndex_columns() )
+      {
+        if( lString == null )
+        {
+          lString = "";
+        }
+        else
+        {
+          lString += ",";
+        }
+
+        lString += lColumnRef.getColumn_name();
+      }
+
+      lIndex.setFunction_based_expression( lString );
       lIndex.getIndex_columns().clear();
     }
 
@@ -835,8 +834,8 @@ public class LoadIst
     String lSql = "" + //
                   " select user_ind_expressions.table_name," + //
                   "        user_ind_expressions.index_name," + //
-                  "        column_expression," + //
                   "        column_position," + //
+                  "        column_expression," + //
                   "        max (column_position)" + //
                   "        over" + //
                   "        (" + //
@@ -880,7 +879,6 @@ public class LoadIst
                   " select user_constraints.table_name," + //
                   "        constraint_name," + //
                   "        constraint_type," + //
-                  "        search_condition," + //
                   "        r_constraint_name," + //
                   "        delete_rule," + //
                   "        deferrable," + //
@@ -889,7 +887,8 @@ public class LoadIst
                   "        user_constraints.generated," + //
                   "        user_constraints.index_name," + //
                   "        user_indexes.tablespace_name," + //
-                  "        user_indexes.index_type" + //
+                  "        user_indexes.index_type," + //
+                  "        search_condition" + //                  
                   "   from user_constraints" + //
                   "   left outer join user_indexes on (user_constraints.index_name = user_indexes.index_name)" + //
                   "  order by table_name," + //

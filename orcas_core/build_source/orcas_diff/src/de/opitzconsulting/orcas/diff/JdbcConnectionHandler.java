@@ -10,13 +10,13 @@ public class JdbcConnectionHandler
 {
   private static Connection connection;
 
-  public static void initWithMainParameters( String[] pArgs )
+  public static void initWithMainParameters( Parameters pParameters )
   {
     try
     {
-      Class.forName( pArgs[0] );
+      Class.forName( pParameters.getJdbcDriver() );
 
-      connection = DriverManager.getConnection( pArgs[1], pArgs[2], pArgs[3] );
+      connection = DriverManager.getConnection( pParameters.getJdbcUrl(), pParameters.getJdbcUser(), pParameters.getJdbcPassword() );
     }
     catch( Exception e )
     {

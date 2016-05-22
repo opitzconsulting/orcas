@@ -69,7 +69,7 @@ public class InitDiffRepository
       lDefaultCharType = CharType.CHAR;
     }
 
-    final String lDefaultTablespace = (String)new WrapperReturnFirstValue( "select default_tablespace from user_users", JdbcConnectionHandler.getCallableStatementProvider() ).executeForValue();
+    final String lDefaultTablespace = getDefaultTablespace();
     String lDefaultTempTablespace = (String)new WrapperReturnFirstValue( "select temporary_tablespace from user_users", JdbcConnectionHandler.getCallableStatementProvider() ).executeForValue();
 
     DiffRepository.setIndexOrUniqueKeyMerge( new IndexOrUniqueKeyMerge()
@@ -622,5 +622,10 @@ public class InitDiffRepository
     DiffRepository.getTableMerge().tablespaceIsConvertToUpperCase = true;
     DiffRepository.getTableMerge().permanentnessDefaultValue = PermanentnessType.PERMANENT;
     DiffRepository.getTableMerge().transactionControlDefaultValue = PermanentnessTransactionType.ON_COMMIT_DELETE;
+  }
+
+  public static String getDefaultTablespace()
+  {
+    return (String)new WrapperReturnFirstValue( "select default_tablespace from user_users", JdbcConnectionHandler.getCallableStatementProvider() ).executeForValue();
   }
 }

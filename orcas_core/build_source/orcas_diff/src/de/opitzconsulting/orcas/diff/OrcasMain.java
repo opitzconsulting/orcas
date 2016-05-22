@@ -1,8 +1,11 @@
 package de.opitzconsulting.orcas.diff;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
@@ -14,6 +17,7 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.XMLResourceFactoryImpl;
 
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
+import de.opitzconsulting.orcas.diff.Parameters.ParameterTypeMode;
 import de.opitzconsulting.orcas.sql.WrapperExecuteStatement;
 import de.opitzconsulting.orcas.syex.trans.TransformSyexOrig;
 import de.opitzconsulting.orcasDsl.Model;
@@ -23,27 +27,44 @@ public class OrcasMain
 {
   public static void main( String[] pArgs ) throws Exception
   {
-    if( pArgs.length == 0 )
-    {
-      pArgs = new String[] { "oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@localhost:1522:XE", "orcas_orderentry", "orcas_orderentry", "D:\\2_orcas\\orcas\\examples\\orderentry\\distribution/../../../../bin_orderentry/tmp/orcas/statics/all.xml", "D:/2_orcas/sql.sql", "true" };
-    }
+    Parameters lParameters = new Parameters( pArgs, ParameterTypeMode.ORCAS_MAIN );
 
-    JdbcConnectionHandler.initWithMainParameters( pArgs );
+    JdbcConnectionHandler.initWithMainParameters( lParameters );
     InitDiffRepository.init();
 
-    Model lSyexModel = loadModel( pArgs[4] );
+    Model lSyexModel = loadModel( lParameters.getModelFile() );
 
-    DiffResult lDiffResult = new OrcasDiff().compare( TransformSyexOrig.convertModel( lSyexModel ), new LoadIst().loadModel() );
+    lSyexModel = new InlineCommentsExtension().transformModel( lSyexModel );
+    lSyexModel = new InlineIndexExtension().transformModel( lSyexModel );
 
-    PrintStream lPrintStream = new PrintStream( new FileOutputStream( pArgs[5] ) );
+    if( lParameters.isCreatemissingfkindexes() )
+    {
+      lSyexModel = new AddFkIndexExtension().transformModel( lSyexModel );
+    }
+
+    DiffResult lDiffResult = new OrcasDiff().compare( TransformSyexOrig.convertModel( lSyexModel ), new LoadIst().loadModel( lParameters ), lParameters );
+
+    PrintStream lPrintStream = new PrintStream( new FileOutputStream( lParameters.getSpoolfile() ) );
     for( String lLine : lDiffResult.getSqlStatements() )
     {
-      lPrintStream.println( lLine +
-                            ";" );
+      int lMaxLineLength = 2000;
 
-      System.out.println( lLine );
+      lLine = addLineBreaksIfNeeded( lLine, lMaxLineLength );
 
-      if( pArgs[6].equals( "false" ) )
+      if( lLine.endsWith( ";" ) )
+      {
+        lPrintStream.println( lLine );
+        lPrintStream.println( "/" );
+        System.out.println( lLine );
+        System.out.println( "/" );
+      }
+      else
+      {
+        lPrintStream.println( lLine + ";" );
+        System.out.println( lLine + ";" );
+      }
+
+      if( !lParameters.isLogonly() )
       {
         new WrapperExecuteStatement( lLine, JdbcConnectionHandler.getCallableStatementProvider() ).execute();
       }
@@ -52,7 +73,49 @@ public class OrcasMain
     lPrintStream.close();
   }
 
-  private static Model loadModel( String pFilename ) throws Exception
+  private static String addLineBreaksIfNeeded( String pLine, int pMaxLineLength )
+  {
+    if( pLine.length() > pMaxLineLength )
+    {
+      List<String> lSubstrings = new ArrayList<String>();
+
+      while( pLine.length() > 0 )
+      {
+        if( pLine.length() > pMaxLineLength )
+        {
+          lSubstrings.add( pLine.substring( 0, pMaxLineLength ) );
+          pLine = pLine.substring( pMaxLineLength );
+        }
+        else
+        {
+          lSubstrings.add( pLine );
+          pLine = "";
+        }
+      }
+
+      StringBuilder lStringBuilder = new StringBuilder();
+
+      for( String lLine : lSubstrings )
+      {
+        if( !lLine.contains( "\n" ) )
+        {
+          int lSpaceIndex = lLine.indexOf( " " );
+
+          lLine = lLine.substring( 0, lSpaceIndex ) + "\n" + lLine.substring( lSpaceIndex );
+        }
+
+        lStringBuilder.append( lLine );
+      }
+
+      return lStringBuilder.toString();
+    }
+    else
+    {
+      return pLine;
+    }
+  }
+
+  public static Model loadModel( String pFilename )
   {
     EPackage.Registry.INSTANCE.put( OrcasDslPackage.eNS_URI, OrcasDslPackage.eINSTANCE );
     Resource.Factory.Registry lRegistry = Resource.Factory.Registry.INSTANCE;
@@ -64,7 +127,14 @@ public class OrcasMain
 
     ((XMLResource)lResource).getDefaultSaveOptions();
 
-    lResource.load( Collections.EMPTY_MAP );
+    try
+    {
+      lResource.load( Collections.EMPTY_MAP );
+    }
+    catch( IOException e )
+    {
+      throw new RuntimeException( e );
+    }
 
     return (Model)lResource.getContents().get( 0 );
   }

@@ -251,7 +251,7 @@ public class JavaOdGenerator extends JavaGenerator
         pOut.println( "List<Integer> lReturn = new ArrayList();" );
         pOut.println( "for( int i=0; i<pOldValues.size(); i++ )" );
         pOut.println( "{" );
-        pOut.println( "if( i <= pNewDiffValues.size() )" );
+        pOut.println( "if( i < pNewDiffValues.size() )" );
         pOut.println( "{" );
         pOut.println( "lReturn.add(i);" );
         pOut.println( "}" );
@@ -1248,7 +1248,7 @@ public class JavaOdGenerator extends JavaGenerator
                 pOut.println( " }" );
                 pOut.println( " if( lIndexMap != null )" );
                 pOut.println( " {" );
-                pOut.println( " lValueDiff.oldParentIndex = lIndexMap.get( lIndex );" );
+                pOut.println( " lValueDiff.oldParentIndex = lIndexMap.get( i );" );
                 pOut.println( " }" );
                 pOut.println( " lValueDiff.mergeWithOldValue( lTypedList.get(i) );" );
                 pOut.println( " i++;" );
