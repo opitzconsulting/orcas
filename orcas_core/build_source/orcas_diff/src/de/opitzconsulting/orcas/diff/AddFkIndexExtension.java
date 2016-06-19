@@ -16,7 +16,6 @@ import de.opitzconsulting.orcasDsl.Model;
 import de.opitzconsulting.orcasDsl.ModelElement;
 import de.opitzconsulting.orcasDsl.Table;
 import de.opitzconsulting.orcasDsl.UniqueKey;
-import de.opitzconsulting.orcasDsl.impl.ColumnRefImpl;
 import de.opitzconsulting.orcasDsl.impl.IndexImpl;
 
 public class AddFkIndexExtension

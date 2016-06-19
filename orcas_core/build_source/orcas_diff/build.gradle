@@ -3,6 +3,7 @@ apply plugin: 'java'
 dependencies 
 {
   compile project(':orcas_generated_diff')
+  compile project(':orcas_extensions')
   compile fileTree(dir: System.getenv("ORACLE_HOME")+"/jdbc/lib", include: '*.jar')
   compile fileTree(dir: System.getenv("ORACLE_HOME"), include: '*.jar') // lookup jars directly inroot home-dir for instant clients
 //  compile "commons-logging:commons-logging:1.1.3"

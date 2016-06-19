@@ -5,7 +5,7 @@ create or replace package body pa_trigger_generator_helper is
   procedure add_stmt( p_stmt in varchar2 )
   is
   begin  
-    pa_orcas_exec_log.exec_stmt( p_stmt );
+    execute immediate p_stmt;
   end;  
 
   procedure add_stmt

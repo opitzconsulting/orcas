@@ -9,29 +9,62 @@ import java.util.List;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
 import de.opitzconsulting.orcas.orig.diff.ConstraintDiff;
-import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.orig.diff.ForeignKeyDiff;
+import de.opitzconsulting.orcas.orig.diff.HashPartitionDiff;
+import de.opitzconsulting.orcas.orig.diff.HashPartitionsDiff;
+import de.opitzconsulting.orcas.orig.diff.HashSubPartsDiff;
+import de.opitzconsulting.orcas.orig.diff.HashSubSubPartDiff;
 import de.opitzconsulting.orcas.orig.diff.IndexDiff;
 import de.opitzconsulting.orcas.orig.diff.IndexOrUniqueKeyDiff;
 import de.opitzconsulting.orcas.orig.diff.InlineCommentDiff;
+import de.opitzconsulting.orcas.orig.diff.ListPartitionDiff;
+import de.opitzconsulting.orcas.orig.diff.ListPartitionValueDiff;
+import de.opitzconsulting.orcas.orig.diff.ListPartitionsDiff;
+import de.opitzconsulting.orcas.orig.diff.ListSubPartDiff;
+import de.opitzconsulting.orcas.orig.diff.ListSubPartsDiff;
+import de.opitzconsulting.orcas.orig.diff.ListSubSubPartDiff;
 import de.opitzconsulting.orcas.orig.diff.LobStorageDiff;
 import de.opitzconsulting.orcas.orig.diff.ModelDiff;
+import de.opitzconsulting.orcas.orig.diff.MviewDiff;
+import de.opitzconsulting.orcas.orig.diff.RangePartitionDiff;
+import de.opitzconsulting.orcas.orig.diff.RangePartitionValueDiff;
+import de.opitzconsulting.orcas.orig.diff.RangePartitionsDiff;
+import de.opitzconsulting.orcas.orig.diff.RangeSubPartDiff;
+import de.opitzconsulting.orcas.orig.diff.RangeSubPartsDiff;
+import de.opitzconsulting.orcas.orig.diff.RangeSubSubPartDiff;
+import de.opitzconsulting.orcas.orig.diff.RefPartitionDiff;
+import de.opitzconsulting.orcas.orig.diff.RefPartitionsDiff;
 import de.opitzconsulting.orcas.orig.diff.SequenceDiff;
 import de.opitzconsulting.orcas.orig.diff.TableDiff;
 import de.opitzconsulting.orcas.orig.diff.UniqueKeyDiff;
+import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperReturnFirstValue;
 import de.opitzconsulting.orcas.sql.WrapperReturnValueFromResultSet;
+import de.opitzconsulting.origOrcasDsl.BuildModeType;
 import de.opitzconsulting.origOrcasDsl.CompressForType;
 import de.opitzconsulting.origOrcasDsl.CompressType;
 import de.opitzconsulting.origOrcasDsl.DataType;
+import de.opitzconsulting.origOrcasDsl.EnableType;
 import de.opitzconsulting.origOrcasDsl.FkDeleteRuleType;
 import de.opitzconsulting.origOrcasDsl.LoggingType;
 import de.opitzconsulting.origOrcasDsl.Model;
+import de.opitzconsulting.origOrcasDsl.NewValuesType;
 import de.opitzconsulting.origOrcasDsl.ParallelType;
 import de.opitzconsulting.origOrcasDsl.PermanentnessType;
+import de.opitzconsulting.origOrcasDsl.RefreshModeType;
+import de.opitzconsulting.origOrcasDsl.SynchronousType;
 
-public class OrcasDiff
+public class OrcasDiff extends AbstractStatementBuilder
 {
+  private CallableStatementProvider _callableStatementProvider;
+
+  public OrcasDiff( CallableStatementProvider pCallableStatementProvider, Parameters pParameters )
+  {
+    _callableStatementProvider = pCallableStatementProvider;
+    _parameters = pParameters;
+  }
+
+  private Parameters _parameters;
 
   private boolean isIndexRecreate( TableDiff pTableDiff, String pIndexname )
   {
@@ -183,8 +216,50 @@ public class OrcasDiff
             }
           }
         }
+
+        if( !lTableDiff.mviewLogDiff.columnsIsEqual //
+            || //
+            ("rowid".equalsIgnoreCase( lTableDiff.mviewLogDiff.rowidNew ) //                               
+             && //
+             !lTableDiff.mviewLogDiff.primaryKeyIsEqual //
+            ) //
+            || //
+            (lTableDiff.mviewLogDiff.rowidNew == null && //
+             !"primary".equalsIgnoreCase( lTableDiff.mviewLogDiff.primaryKeyOld ) // 
+            ) //
+            || !lTableDiff.mviewLogDiff.rowidIsEqual //
+            || !lTableDiff.mviewLogDiff.withSequenceIsEqual //
+            || !lTableDiff.mviewLogDiff.commitScnIsEqual //
+            || !lTableDiff.mviewLogDiff.tablespaceIsEqual )
+        {
+          lTableDiff.mviewLogDiff.isRecreateNeeded = true;
+        }
+
+        // these changes should by applied with alter statements, but it results in ORA-27476
+        if( lTableDiff.mviewLogDiff.startWithIsEqual == false || lTableDiff.mviewLogDiff.nextIsEqual == false || lTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
+        {
+          lTableDiff.mviewLogDiff.isRecreateNeeded = true;
+        }
       }
     }
+
+    for( MviewDiff lMviewDiff : pModelDiff.model_elementsMviewDiff )
+    {
+      if( lMviewDiff.isMatched )
+      {
+        if( !lMviewDiff.tablespaceIsEqual //
+            || !replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBNew ).equals( replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBOld ) ) //
+            || !lMviewDiff.buildModeIsEqual )
+        {
+          lMviewDiff.isRecreateNeeded = true;
+        }
+      }
+    }
+  }
+
+  private String replaceLinefeedBySpace( String pValue )
+  {
+    return pValue.replace( Character.toString( (char)13 ) + Character.toString( (char)10 ), " " ).replace( Character.toString( (char)10 ), " " ).replace( Character.toString( (char)13 ), " " );
   }
 
   private boolean isIndexmovetablespace()
@@ -192,29 +267,22 @@ public class OrcasDiff
     return _parameters.isIndexmovetablespace();
   }
 
-  public DiffResult compare( Model pModelSoll, Model pModelIst, Parameters pParameters )
+  public DiffResult compare( Model pModelSoll, Model pModelIst )
   {
-    _parameters = pParameters;
-
-    InitDiffRepository.init();
-
-    DiffRepository.getModelMerge().cleanupValues( pModelIst );
-    DiffRepository.getModelMerge().cleanupValues( pModelSoll );
-
     ModelDiff lModelDiff = new ModelDiff( pModelSoll );
     lModelDiff.mergeWithOldValue( pModelIst );
 
+    sortTablesForRefPart( lModelDiff );
+
     updateIsRecreateNeeded( lModelDiff );
 
-    // TODO dass sortieren der istdaten ist unnoetig, aber im moment die einfachste moeglichkeit die liste der tabellen zu ermitteln
-
     handleAllTables( lModelDiff );
-    //
-    handleAllSequences( lModelDiff );
-    //
-    //    handleAllMviews();
 
-    return new DiffResult( pv_stmtList );
+    handleAllSequences( lModelDiff );
+
+    handleAllMviews( lModelDiff );
+
+    return new DiffResult( getStmtList() );
   }
 
   public class DiffResult
@@ -240,7 +308,7 @@ public class OrcasDiff
     {
       if( pSequenceDiff.max_value_selectNew != null )
       {
-        lSollStartValue = (BigDecimal)new WrapperReturnFirstValue( pSequenceDiff.max_value_selectNew, JdbcConnectionHandler.getCallableStatementProvider() ).executeForValue();
+        lSollStartValue = (BigDecimal)new WrapperReturnFirstValue( pSequenceDiff.max_value_selectNew, getCallableStatementProvider() ).executeForValue();
 
         lSollStartValue = lSollStartValue.add( BigDecimal.valueOf( 1 ) );
       }
@@ -252,84 +320,84 @@ public class OrcasDiff
 
     if( pSequenceDiff.isMatched == false )
     {
-      pv_stmt = "create sequence " + pSequenceDiff.sequence_nameNew;
+      stmtStart( "create sequence " + pSequenceDiff.sequence_nameNew );
       if( pSequenceDiff.increment_byNew != null )
       {
-        pv_stmt = pv_stmt + " increment by " + pSequenceDiff.increment_byNew;
+        stmtAppend( "increment by " + pSequenceDiff.increment_byNew );
       }
 
       if( lSollStartValue != null )
       {
-        pv_stmt = pv_stmt + " start with " + lSollStartValue;
+        stmtAppend( "start with " + lSollStartValue );
       }
 
       if( pSequenceDiff.maxvalueNew != null )
       {
-        pv_stmt = pv_stmt + " maxvalue " + pSequenceDiff.maxvalueNew;
+        stmtAppend( "maxvalue " + pSequenceDiff.maxvalueNew );
       }
 
       if( pSequenceDiff.minvalueNew != null )
       {
-        pv_stmt = pv_stmt + " minvalue " + pSequenceDiff.minvalueNew;
+        stmtAppend( "minvalue " + pSequenceDiff.minvalueNew );
       }
 
       if( pSequenceDiff.cycleNew != null )
       {
-        pv_stmt = pv_stmt + " " + pSequenceDiff.cycleNew.getLiteral();
+        stmtAppend( pSequenceDiff.cycleNew.getLiteral() );
       }
 
       if( pSequenceDiff.cacheNew != null )
       {
-        pv_stmt = pv_stmt + " cache " + pSequenceDiff.cacheNew;
+        stmtAppend( "cache " + pSequenceDiff.cacheNew );
       }
 
       if( pSequenceDiff.orderNew != null )
       {
-        pv_stmt = pv_stmt + " " + pSequenceDiff.orderNew.getLiteral();
+        stmtAppend( pSequenceDiff.orderNew.getLiteral() );
       }
 
-      add_stmt();
+      stmtDone();
     }
     else
     {
       BigDecimal lIstValue = BigDecimal.valueOf( Long.valueOf( pSequenceDiff.max_value_selectOld ) );
       if( lSollStartValue != null && lIstValue != null && lSollStartValue.compareTo( lIstValue ) > 0 )
       {
-        add_stmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lSollStartValue.longValue() - lIstValue.longValue()) );
-        add_stmt( "declare v_dummy number; begin select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual; end;" );
-        add_stmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
+        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lSollStartValue.longValue() - lIstValue.longValue()) );
+        addStmt( "declare v_dummy number; begin select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual; end;" );
+        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
       }
       else
       {
         if( pSequenceDiff.increment_byIsEqual == false )
         {
-          add_stmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
+          addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
         }
       }
 
       if( pSequenceDiff.maxvalueIsEqual == false )
       {
-        add_stmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + pSequenceDiff.maxvalueNew );
+        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + pSequenceDiff.maxvalueNew );
       }
 
       if( pSequenceDiff.minvalueIsEqual == false )
       {
-        add_stmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " minvalue " + nvl( pSequenceDiff.minvalueNew, 1 ) );
+        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " minvalue " + nvl( pSequenceDiff.minvalueNew, 1 ) );
       }
 
       if( pSequenceDiff.cycleIsEqual == false )
       {
-        add_stmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() );
+        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() );
       }
 
       if( pSequenceDiff.cacheIsEqual == false )
       {
-        add_stmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " cache " + nvl( pSequenceDiff.cacheNew, 20 ) );
+        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " cache " + nvl( pSequenceDiff.cacheNew, 20 ) );
       }
 
       if( pSequenceDiff.orderIsEqual == false )
       {
-        add_stmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.orderNew.getLiteral() );
+        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.orderNew.getLiteral() );
       }
     }
   }
@@ -346,15 +414,15 @@ public class OrcasDiff
         }
         else
         {
-          add_stmt( "drop sequence " + lSequenceDiff.sequence_nameOld );
+          addStmt( "drop sequence " + lSequenceDiff.sequence_nameOld );
         }
       }
     }
   }
 
-  private void drop_table_constraint_by_name( String pTablename, String pCconstraintName )
+  private void dropTableConstraintByName( String pTablename, String pCconstraintName )
   {
-    add_stmt( "alter table " + pTablename + " drop constraint " + pCconstraintName );
+    addStmt( "alter table " + pTablename + " drop constraint " + pCconstraintName );
   }
 
   private void handleAllTables( ModelDiff pModelDiff )
@@ -365,7 +433,7 @@ public class OrcasDiff
       {
         if( lForeignKeyDiff.isOld == true && (lForeignKeyDiff.isMatched == false || lForeignKeyDiff.isRecreateNeeded == true) )
         {
-          drop_table_constraint_by_name( lTableDiff.nameOld, lForeignKeyDiff.consNameOld );
+          dropTableConstraintByName( lTableDiff.nameOld, lForeignKeyDiff.consNameOld );
         }
       }
     }
@@ -374,7 +442,7 @@ public class OrcasDiff
     {
       if( lTableDiff.isOld == true && (lTableDiff.isMatched == false || lTableDiff.isRecreateNeeded == true) )
       {
-        drop_with_dropmode_check( "select 1 from " + lTableDiff.nameOld, "drop table " + lTableDiff.nameOld );
+        dropWithDropmodeCheck( "select 1 from " + lTableDiff.nameOld, "drop table " + lTableDiff.nameOld );
       }
       else
       {
@@ -382,20 +450,20 @@ public class OrcasDiff
         {
           if( lConstraintDiff.isOld == true && (lConstraintDiff.isMatched == false || lConstraintDiff.isRecreateNeeded == true) )
           {
-            drop_table_constraint_by_name( lTableDiff.nameOld, lConstraintDiff.consNameOld );
+            dropTableConstraintByName( lTableDiff.nameOld, lConstraintDiff.consNameOld );
           }
         }
 
         if( lTableDiff.mviewLogDiff.isOld == true && (lTableDiff.mviewLogDiff.isMatched == false || lTableDiff.mviewLogDiff.isRecreateNeeded == true) )
         {
-          add_stmt( "drop materialized view log on " + lTableDiff.nameOld );
+          addStmt( "drop materialized view log on " + lTableDiff.nameOld );
         }
 
         for( UniqueKeyDiff lUniqueKeyDiff : lTableDiff.ind_uksUniqueKeyDiff )
         {
           if( lUniqueKeyDiff.isOld == true && (lUniqueKeyDiff.isMatched == false || lUniqueKeyDiff.isRecreateNeeded == true) )
           {
-            drop_table_constraint_by_name( lTableDiff.nameOld, lUniqueKeyDiff.consNameOld );
+            dropTableConstraintByName( lTableDiff.nameOld, lUniqueKeyDiff.consNameOld );
           }
         }
 
@@ -403,7 +471,7 @@ public class OrcasDiff
         {
           if( lIndexDiff.isOld == true && (lIndexDiff.isMatched == false || lIndexDiff.isRecreateNeeded == true) )
           {
-            add_stmt( "drop index " + lIndexDiff.consNameOld );
+            addStmt( "drop index " + lIndexDiff.consNameOld );
           }
         }
 
@@ -411,24 +479,24 @@ public class OrcasDiff
         {
           if( lCommentDiff.isOld == true && lCommentDiff.isMatched == false )
           {
-            stmt_set( "comment on" );
-            stmt_add( lCommentDiff.comment_objectOld.getName() );
-            stmt_add( " " );
-            stmt_add( lTableDiff.nameOld );
+            stmtStart( "comment on" );
+            stmtAppend( lCommentDiff.comment_objectOld.getName() );
+            stmtAppend( " " );
+            stmtAppend( lTableDiff.nameOld );
             if( lCommentDiff.column_nameOld != null )
             {
-              stmt_add( "." );
-              stmt_add( lCommentDiff.column_nameOld );
+              stmtAppend( "." );
+              stmtAppend( lCommentDiff.column_nameOld );
             }
-            stmt_add( "is ''" );
+            stmtAppend( "is ''" );
 
-            add_stmt();
+            stmtDone();
           }
         }
 
         if( lTableDiff.primary_keyDiff.isOld == true && (lTableDiff.primary_keyDiff.isMatched == false || lTableDiff.primary_keyDiff.isRecreateNeeded == true) )
         {
-          drop_table_constraint_by_name( lTableDiff.nameOld, lTableDiff.primary_keyDiff.consNameOld );
+          dropTableConstraintByName( lTableDiff.nameOld, lTableDiff.primary_keyDiff.consNameOld );
         }
       }
     }
@@ -448,9 +516,9 @@ public class OrcasDiff
       {
         if( lForeignKeyDiff.isNew == true && (lForeignKeyDiff.isMatched == false || lForeignKeyDiff.isRecreateNeeded == true) )
         {
-          if( lTableDiff.isOld == false && lTableDiff.tablePartitioningRefPartitionsDiff.isNew == true && lTableDiff.tablePartitioningRefPartitionsDiff.fkNameNew.equals( lForeignKeyDiff.consNameNew ) )
+          if( lTableDiff.isOld == false && lTableDiff.tablePartitioningRefPartitionsDiff.isNew == true && lTableDiff.tablePartitioningRefPartitionsDiff.fkNameNew.equalsIgnoreCase( lForeignKeyDiff.consNameNew ) )
           {
-            // in diesem Fall haben wir eine ref-partitionierte Tabelle die in diesem Lauf angelegt wurde, und damit ist der get_fk_for_ref_partitioning schon angelegt worden.
+            // fk for ref-partition created in create-table
           }
           else
           {
@@ -478,13 +546,13 @@ public class OrcasDiff
   {
     if( pTableDiff.isMatched == true )
     {
-      if( pTableDiff.tablespaceIsEqual == false && is_tablemovetablespace() == true )
+      if( pTableDiff.tablespaceIsEqual == false && isTablemovetablespace() == true )
       {
-        stmt_set( "alter table" );
-        stmt_add( pTableDiff.nameNew );
-        stmt_add( "move tablespace" );
-        stmt_add( nvl( pTableDiff.tablespaceNew, getDefaultTablespace() ) );
-        stmt_done();
+        stmtStart( "alter table" );
+        stmtAppend( pTableDiff.nameNew );
+        stmtAppend( "move tablespace" );
+        stmtAppend( nvl( pTableDiff.tablespaceNew, getDefaultTablespace() ) );
+        stmtDone();
       }
     }
 
@@ -502,7 +570,7 @@ public class OrcasDiff
         }
         else
         {
-          drop_with_dropmode_check( "select 1 from " + pTableDiff.nameOld + " where " + lColumnDiff.nameOld + " != null", "alter table " + pTableDiff.nameOld + " drop column " + lColumnDiff.nameOld );
+          dropWithDropmodeCheck( "select 1 from " + pTableDiff.nameOld + " where " + lColumnDiff.nameOld + " != null", "alter table " + pTableDiff.nameOld + " drop column " + lColumnDiff.nameOld );
         }
       }
 
@@ -510,58 +578,38 @@ public class OrcasDiff
       {
         if( pTableDiff.transactionControlNew == null )
         {
-          stmt_set( "alter table" );
-          stmt_add( pTableDiff.nameNew );
+          stmtStart( "alter table" );
+          stmtAppend( pTableDiff.nameNew );
           if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
           {
-            stmt_add( "nologging" );
+            stmtAppend( "nologging" );
           }
           else
           {
-            stmt_add( "logging" );
+            stmtAppend( "logging" );
           }
-          stmt_done();
+          stmtDone();
         }
       }
 
       if( pTableDiff.parallelIsEqual == false || pTableDiff.parallel_degreeIsEqual == false )
       {
-        stmt_set( "alter table" );
-        stmt_add( pTableDiff.nameNew );
-        if( pTableDiff.parallelNew == ParallelType.PARALLEL )
-        {
-          stmt_add( "parallel" );
-          if( pTableDiff.parallel_degreeNew != null && pTableDiff.parallel_degreeNew > 1 )
-          {
-            stmt_add( " " + pTableDiff.parallel_degreeNew );
-          }
-        }
-        else
-        {
-          stmt_add( "noparallel" );
-        }
+        stmtStart( "alter table" );
+        stmtAppend( pTableDiff.nameNew );
 
-        stmt_done();
+        handleParallel( pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, true );
+
+        stmtDone();
       }
 
-      if( pTableDiff.permanentnessNew == PermanentnessType.PERMANENT && (pTableDiff.compressionIsEqual == false || pTableDiff.compressionForIsEqual == false) )
+      if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY && (pTableDiff.compressionIsEqual == false || pTableDiff.compressionForIsEqual == false) )
       {
-        stmt_set( "alter table" );
-        stmt_add( pTableDiff.nameNew );
-        if( pTableDiff.compressionNew == CompressType.NOCOMPRESS )
-        {
-          stmt_add( "compress" );
-          if( pTableDiff.compressionForNew != null )
-          {
-            stmt_add( "for " + adjust_compression_literal( pTableDiff.compressionForNew.getLiteral() ) );
-          }
-        }
-        else
-        {
-          stmt_add( "nocompress" );
-        }
+        stmtStart( "alter table" );
+        stmtAppend( pTableDiff.nameNew );
 
-        stmt_done();
+        handleCompression( pTableDiff.compressionNew, pTableDiff.compressionForNew, true );
+
+        stmtDone();
       }
     }
 
@@ -599,216 +647,232 @@ public class OrcasDiff
       handleCmment( nvl( pTableDiff.nameNew, pTableDiff.nameOld ), lInlineCommentDiff );
     }
 
-    //        if( pTableDiff.c_mviewlog.is_equal == false )
-    //        {
-    //          handle_mviewlog( pTableDiff );
-    //        }
-
+    if( pTableDiff.mviewLogDiff.isNew )
+    {
+      handleMviewlog( pTableDiff );
+    }
   }
 
   private String createColumnClause( List<ColumnDiff> pColumnListDiffList )
   {
-    String v_return = null;
+    String lReturn = null;
 
     for( ColumnDiff lColumnDiff : pColumnListDiffList )
     {
-      if( v_return != null )
+      if( lReturn != null )
       {
-        v_return = v_return + ",";
+        lReturn = lReturn + ",";
       }
       else
       {
-        v_return = "";
+        lReturn = "";
       }
 
       if( lColumnDiff.isNew == true )
       {
-        v_return = v_return + " " + create_column_create_part( lColumnDiff );
+        lReturn = lReturn + " " + createColumnCreatePart( lColumnDiff );
       }
     }
 
-    return v_return;
+    return lReturn;
   }
 
   private String createColumnStorageClause( List<LobStorageDiff> pLobStorageDiffList )
   {
-    String v_return = "";
+    String lReturn = "";
 
     for( LobStorageDiff lLobStorageDiff : pLobStorageDiffList )
     {
       if( lLobStorageDiff.isNew == true )
       {
-        v_return = v_return + " lob(" + lLobStorageDiff.column_nameNew + ") store as (tablespace " + lLobStorageDiff.tablespaceNew + ")";
+        lReturn = lReturn + " lob(" + lLobStorageDiff.column_nameNew + ") store as (tablespace " + lLobStorageDiff.tablespaceNew + ")";
       }
     }
 
-    return v_return;
+    return lReturn;
   }
 
   private void createTable( TableDiff pTableDiff )
   {
-    pv_stmt = "create";
+    stmtStart( "create" );
     if( pTableDiff.permanentnessNew == PermanentnessType.GLOBAL_TEMPORARY )
     {
-      pv_stmt = pv_stmt + " global " + pTableDiff.permanentnessNew.getLiteral();
+      stmtAppend( "global " + pTableDiff.permanentnessNew.getLiteral() );
     }
-    pv_stmt = pv_stmt + " " + "table";
-    pv_stmt = pv_stmt + " " + pTableDiff.nameNew;
-    pv_stmt = pv_stmt + " " + "(";
-    pv_stmt = pv_stmt + " " + createColumnClause( pTableDiff.columnsDiff );
-    //    pv_stmt = pv_stmt + " " + create_ref_fk_clause( p_orig_table ); 
-    pv_stmt = pv_stmt + " " + ")";
+    stmtAppend( "table" );
+    stmtAppend( pTableDiff.nameNew );
+    stmtAppend( "(" );
+    stmtAppend( createColumnClause( pTableDiff.columnsDiff ) );
+    stmtAppend( createRefFkClause( pTableDiff ) );
+    stmtAppend( ")" );
     if( pTableDiff.transactionControlNew != null )
     {
-      pv_stmt = pv_stmt + " " + "on commit ";
-      pv_stmt = pv_stmt + " " + pTableDiff.transactionControlNew.getLiteral();
-      pv_stmt = pv_stmt + " " + "rows nocache";
+      stmtAppend( "on commit " );
+      stmtAppend( pTableDiff.transactionControlNew.getLiteral() );
+      stmtAppend( "rows nocache" );
     }
     else
     {
-      pv_stmt = pv_stmt + " " + createColumnStorageClause( pTableDiff.lobStoragesDiff );
+      stmtAppend( createColumnStorageClause( pTableDiff.lobStoragesDiff ) );
       if( pTableDiff.tablespaceNew != null )
       {
-        pv_stmt = pv_stmt + " " + "tablespace";
-        pv_stmt = pv_stmt + " " + pTableDiff.tablespaceNew;
+        stmtAppend( "tablespace" );
+        stmtAppend( pTableDiff.tablespaceNew );
       }
       if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )
       {
         if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
         {
-          pv_stmt = pv_stmt + " " + "nologging";
+          stmtAppend( "nologging" );
         }
         else
         {
-          pv_stmt = pv_stmt + " " + "logging";
+          stmtAppend( "logging" );
         }
       }
-      if( pTableDiff.compressionNew == CompressType.COMPRESS )
-      {
-        pv_stmt = pv_stmt + " " + "compress";
-        if( pTableDiff.compressionForNew == CompressForType.ALL )
-        {
-          pv_stmt = pv_stmt + " " + "for all operations";
-        }
-        if( pTableDiff.compressionForNew == CompressForType.DIRECT_LOAD )
-        {
-          pv_stmt = pv_stmt + " " + "for direct_load operations";
-        }
-        if( pTableDiff.compressionForNew == CompressForType.QUERY_LOW )
-        {
-          pv_stmt = pv_stmt + " " + "for query low";
-        }
-        if( pTableDiff.compressionForNew == CompressForType.QUERY_HIGH )
-        {
-          pv_stmt = pv_stmt + " " + "for query high";
-        }
-        if( pTableDiff.compressionForNew == CompressForType.ARCHIVE_LOW )
-        {
-          pv_stmt = pv_stmt + " " + "for archive low";
-        }
-        if( pTableDiff.compressionForNew == CompressForType.ARCHIVE_HIGH )
-        {
-          pv_stmt = pv_stmt + " " + "for archive high";
-        }
-      }
-      if( pTableDiff.compressionNew == CompressType.NOCOMPRESS )
-      {
-        pv_stmt = pv_stmt + " " + "nocompress";
-      }
+      handleCompression( pTableDiff.compressionNew, pTableDiff.compressionForNew, false );
     }
-    if( pTableDiff.parallelNew == ParallelType.PARALLEL )
-    {
-      stmt_add( "parallel" );
-      if( pTableDiff.parallel_degreeNew != null && pTableDiff.parallel_degreeNew > 1 )
-      {
-        stmt_add( "" + pTableDiff.parallel_degreeNew );
-      }
-    }
-    if( pTableDiff.parallelNew == ParallelType.NOPARALLEL )
-    {
-      stmt_add( "noparallel" );
-    }
-    //      pv_stmt = pv_stmt + " " + create_partitioning_clause( p_orig_table.i_tablepartitioning );
+    handleParallel( pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, false );
+    stmtAppend( createPartitioningClause( pTableDiff ) );
 
-    add_stmt();
+    stmtDone();
+  }
+
+  private void handleParallel( ParallelType pParallelType, Integer pParallelDegree, boolean pWithDefault )
+  {
+    if( pParallelType == ParallelType.PARALLEL )
+    {
+      stmtAppend( "parallel" );
+      if( pParallelDegree != null && pParallelDegree > 1 )
+      {
+        stmtAppend( "" + pParallelDegree );
+      }
+    }
+    else
+    {
+      if( pWithDefault || pParallelType == ParallelType.NOPARALLEL )
+      {
+        stmtAppend( "noparallel" );
+      }
+    }
+  }
+
+  private void handleCompression( CompressType pCompressionType, CompressForType pCompressForType, boolean pWithDefault )
+  {
+    if( pCompressionType == CompressType.COMPRESS )
+    {
+      stmtAppend( "compress" );
+
+      if( pCompressForType == CompressForType.ALL )
+      {
+        stmtAppend( "for all operations" );
+      }
+      if( pCompressForType == CompressForType.DIRECT_LOAD )
+      {
+        stmtAppend( "for direct_load operations" );
+      }
+      if( pCompressForType == CompressForType.QUERY_LOW )
+      {
+        stmtAppend( "for query low" );
+      }
+      if( pCompressForType == CompressForType.QUERY_HIGH )
+      {
+        stmtAppend( "for query high" );
+      }
+      if( pCompressForType == CompressForType.ARCHIVE_LOW )
+      {
+        stmtAppend( "for archive low" );
+      }
+      if( pCompressForType == CompressForType.ARCHIVE_HIGH )
+      {
+        stmtAppend( "for archive high" );
+      }
+    }
+    else
+    {
+      if( pWithDefault || pCompressionType == CompressType.NOCOMPRESS )
+      {
+        stmtAppend( "nocompress" );
+      }
+    }
   }
 
   private void createForeignKey( TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff )
   {
-    String v_fk_false_data_select;
-    String v_fk_false_data_where_part;
+    String lFkFalseDataSelect;
+    String lFkFalseDataWherePart;
 
-    if( is_dropmode() == true && pTableDiff.isOld == true )
+    if( isDropmode() == true && pTableDiff.isOld == true )
     {
-      v_fk_false_data_where_part = null;
+      lFkFalseDataWherePart = null;
       for( ColumnRefDiff lColumnRefDiffSrc : pForeignKeyDiff.srcColumnsDiff )
       {
-        if( v_fk_false_data_where_part != null )
+        if( lFkFalseDataWherePart != null )
         {
-          v_fk_false_data_where_part = v_fk_false_data_where_part + " or ";
+          lFkFalseDataWherePart = lFkFalseDataWherePart + " or ";
         }
         else
         {
-          v_fk_false_data_where_part = "";
+          lFkFalseDataWherePart = "";
         }
-        v_fk_false_data_where_part = v_fk_false_data_where_part + lColumnRefDiffSrc.column_nameNew + " is not null ";
+        lFkFalseDataWherePart = lFkFalseDataWherePart + lColumnRefDiffSrc.column_nameNew + " is not null ";
       }
 
-      v_fk_false_data_where_part = "where (" + v_fk_false_data_where_part + ") and (" + get_column_list( pForeignKeyDiff.srcColumnsDiff ) + ") not in (select " + get_column_list( pForeignKeyDiff.destColumnsDiff ) + "  from " + pForeignKeyDiff.destTableNew + ")";
-      v_fk_false_data_select = "select 1 from " + pTableDiff.nameNew + " " + v_fk_false_data_where_part;
+      lFkFalseDataWherePart = "where (" + lFkFalseDataWherePart + ") and (" + getColumnList( pForeignKeyDiff.srcColumnsDiff ) + ") not in (select " + getColumnList( pForeignKeyDiff.destColumnsDiff ) + "  from " + pForeignKeyDiff.destTableNew + ")";
+      lFkFalseDataSelect = "select 1 from " + pTableDiff.nameNew + " " + lFkFalseDataWherePart;
 
-      if( has_rows( v_fk_false_data_select ) == true )
+      if( hasRowsIgnoreExceptions( lFkFalseDataSelect ) == true )
       {
         if( pForeignKeyDiff.delete_ruleNew == FkDeleteRuleType.CASCADE )
         {
-          add_stmt( "delete " + pTableDiff.nameNew + " " + v_fk_false_data_where_part );
-          add_stmt( "commit" );
+          addStmt( "delete " + pTableDiff.nameNew + " " + lFkFalseDataWherePart );
+          addStmt( "commit" );
         }
         else
         {
           if( pForeignKeyDiff.delete_ruleNew == FkDeleteRuleType.SET_NULL )
           {
-            add_stmt( "update " + pTableDiff.nameNew + " set " + get_column_list( pForeignKeyDiff.srcColumnsDiff ) + " = null " + v_fk_false_data_where_part );
-            add_stmt( "commit" );
+            addStmt( "update " + pTableDiff.nameNew + " set " + getColumnList( pForeignKeyDiff.srcColumnsDiff ) + " = null " + lFkFalseDataWherePart );
+            addStmt( "commit" );
           }
           else
           {
-            throw new RuntimeException( "Fehler beim FK Aufbau " + pForeignKeyDiff.consNameNew + " auf tabelle " + pTableDiff.nameNew + " Datenbereinigung nicht möglich, da keine delete rule. " + v_fk_false_data_select );
+            throw new RuntimeException( "Fehler beim FK Aufbau " + pForeignKeyDiff.consNameNew + " auf tabelle " + pTableDiff.nameNew + " Datenbereinigung nicht möglich, da keine delete rule. " + lFkFalseDataSelect );
           }
         }
       }
     }
 
-    stmt_set( "alter table " + pTableDiff.nameNew );
-    stmt_add( "add" );
-    stmt_add( createForeignKeyClause( pForeignKeyDiff ) );
-    stmt_done();
+    stmtStart( "alter table " + pTableDiff.nameNew );
+    stmtAppend( "add" );
+    stmtAppend( createForeignKeyClause( pForeignKeyDiff ) );
+    stmtDone();
   }
 
   private String createForeignKeyClause( ForeignKeyDiff pForeignKeyDiff )
   {
-    String v_return;
+    String lReturn;
 
-    v_return = "constraint " + pForeignKeyDiff.consNameNew + " foreign key (" + get_column_list( pForeignKeyDiff.srcColumnsDiff ) + ") references " + pForeignKeyDiff.destTableNew + "(" + get_column_list( pForeignKeyDiff.destColumnsDiff ) + ")";
+    lReturn = "constraint " + pForeignKeyDiff.consNameNew + " foreign key (" + getColumnList( pForeignKeyDiff.srcColumnsDiff ) + ") references " + pForeignKeyDiff.destTableNew + "(" + getColumnList( pForeignKeyDiff.destColumnsDiff ) + ")";
 
     if( pForeignKeyDiff.delete_ruleNew != null )
     {
       if( pForeignKeyDiff.delete_ruleNew == FkDeleteRuleType.CASCADE )
       {
-        v_return = v_return + " on delete cascade";
+        lReturn = lReturn + " on delete cascade";
       }
       if( pForeignKeyDiff.delete_ruleNew == FkDeleteRuleType.SET_NULL )
       {
-        v_return = v_return + " on delete set null";
+        lReturn = lReturn + " on delete set null";
       }
     }
 
     if( pForeignKeyDiff.deferrtypeNew != null )
     {
-      v_return = v_return + " deferrable initially  " + pForeignKeyDiff.deferrtypeNew.getName();
+      lReturn = lReturn + " deferrable initially  " + pForeignKeyDiff.deferrtypeNew.getName();
     }
 
-    return v_return;
+    return lReturn;
   }
 
   private void handleCmment( String pTablename, InlineCommentDiff pInlineCommentDiff )
@@ -817,33 +881,33 @@ public class OrcasDiff
     {
       if( pInlineCommentDiff.isNew == true )
       {
-        stmt_set( "comment on" );
-        stmt_add( pInlineCommentDiff.comment_objectNew.getName() );
-        stmt_add( " " );
-        stmt_add( pTablename );
+        stmtStart( "comment on" );
+        stmtAppend( pInlineCommentDiff.comment_objectNew.getName() );
+        stmtAppend( " " );
+        stmtAppend( pTablename );
         if( pInlineCommentDiff.column_nameNew != null )
         {
-          stmt_add( "." );
-          stmt_add( pInlineCommentDiff.column_nameNew );
+          stmtAppend( "." );
+          stmtAppend( pInlineCommentDiff.column_nameNew );
         }
-        stmt_add( "is" );
-        stmt_add( "'" + pInlineCommentDiff.commentNew.replace( "'", "''" ) + "'" );
-        add_stmt();
+        stmtAppend( "is" );
+        stmtAppend( "'" + pInlineCommentDiff.commentNew.replace( "'", "''" ) + "'" );
+        stmtDone();
       }
       else
       {
-        stmt_set( "comment on" );
-        stmt_add( pInlineCommentDiff.comment_objectOld.getName() );
-        stmt_add( " " );
-        stmt_add( pTablename );
+        stmtStart( "comment on" );
+        stmtAppend( pInlineCommentDiff.comment_objectOld.getName() );
+        stmtAppend( " " );
+        stmtAppend( pTablename );
         if( pInlineCommentDiff.column_nameOld != null )
         {
-          stmt_add( "." );
-          stmt_add( pInlineCommentDiff.column_nameOld );
+          stmtAppend( "." );
+          stmtAppend( pInlineCommentDiff.column_nameOld );
         }
-        stmt_add( "is" );
-        stmt_add( "''" );
-        add_stmt();
+        stmtAppend( "is" );
+        stmtAppend( "''" );
+        stmtDone();
       }
     }
   }
@@ -852,24 +916,24 @@ public class OrcasDiff
   {
     if( pUniqueKeyDiff.isMatched == false || pUniqueKeyDiff.isRecreateNeeded == true )
     {
-      stmt_set( "alter table " + pTablename + " add constraint " + pUniqueKeyDiff.consNameNew + " unique (" + get_column_list( pUniqueKeyDiff.uk_columnsDiff ) + ")" );
+      stmtStart( "alter table " + pTablename + " add constraint " + pUniqueKeyDiff.consNameNew + " unique (" + getColumnList( pUniqueKeyDiff.uk_columnsDiff ) + ")" );
       if( pUniqueKeyDiff.tablespaceNew != null )
       {
-        stmt_add( "using index tablespace " + pUniqueKeyDiff.tablespaceNew );
+        stmtAppend( "using index tablespace " + pUniqueKeyDiff.tablespaceNew );
       }
       else
       {
         if( pUniqueKeyDiff.indexnameNew != null && !pUniqueKeyDiff.indexnameNew.equals( pUniqueKeyDiff.consNameNew ) )
         {
-          stmt_add( "using index " + pUniqueKeyDiff.indexnameNew );
+          stmtAppend( "using index " + pUniqueKeyDiff.indexnameNew );
         }
       }
       if( pUniqueKeyDiff.statusNew != null )
       {
-        stmt_add( pUniqueKeyDiff.statusNew.getName() );
+        stmtAppend( pUniqueKeyDiff.statusNew.getName() );
       }
 
-      add_stmt();
+      stmtDone();
     }
   }
 
@@ -877,119 +941,119 @@ public class OrcasDiff
   {
     if( pIndexDiff.isMatched == false || pIndexDiff.isRecreateNeeded == true )
     {
-      stmt_set( "create" );
+      stmtStart( "create" );
       if( pIndexDiff.uniqueNew != null )
       {
-        stmt_add( pIndexDiff.uniqueNew );
+        stmtAppend( pIndexDiff.uniqueNew );
       }
       if( pIndexDiff.bitmapNew != null )
       {
-        stmt_add( "bitmap" );
+        stmtAppend( "bitmap" );
       }
-      stmt_add( "index" );
-      stmt_add( pIndexDiff.consNameNew );
-      stmt_add( "on" );
-      stmt_add( pTablename );
-      stmt_add( "(" );
+      stmtAppend( "index" );
+      stmtAppend( pIndexDiff.consNameNew );
+      stmtAppend( "on" );
+      stmtAppend( pTablename );
+      stmtAppend( "(" );
       if( pIndexDiff.function_based_expressionNew != null )
       {
-        stmt_add( pIndexDiff.function_based_expressionNew );
+        stmtAppend( pIndexDiff.function_based_expressionNew );
       }
       else
       {
-        stmt_add( get_column_list( pIndexDiff.index_columnsDiff ) );
+        stmtAppend( getColumnList( pIndexDiff.index_columnsDiff ) );
       }
-      stmt_add( ")" );
+      stmtAppend( ")" );
       if( pIndexDiff.domain_index_expressionNew != null )
       {
-        stmt_add( pIndexDiff.domain_index_expressionNew );
+        stmtAppend( pIndexDiff.domain_index_expressionNew );
       }
       else
       {
         if( pIndexDiff.loggingNew != null )
         {
-          stmt_add( pIndexDiff.loggingNew.getLiteral() );
+          stmtAppend( pIndexDiff.loggingNew.getLiteral() );
         }
       }
       if( pIndexDiff.tablespaceNew != null )
       {
-        stmt_add( "tablespace" );
-        stmt_add( pIndexDiff.tablespaceNew );
+        stmtAppend( "tablespace" );
+        stmtAppend( pIndexDiff.tablespaceNew );
       }
       if( pIndexDiff.globalNew != null )
       {
-        stmt_add( pIndexDiff.globalNew.getLiteral() );
+        stmtAppend( pIndexDiff.globalNew.getLiteral() );
       }
       if( pIndexDiff.bitmapNew == null && pIndexDiff.compressionNew == CompressType.COMPRESS )
       {
-        stmt_add( "compress" );
+        stmtAppend( "compress" );
       }
       if( pIndexDiff.compressionNew == CompressType.NOCOMPRESS )
       {
-        stmt_add( "nocompress" );
+        stmtAppend( "nocompress" );
       }
 
       if( pIndexDiff.parallelNew == ParallelType.PARALLEL || isIndexparallelcreate() )
       {
-        stmt_add( "parallel" );
+        stmtAppend( "parallel" );
         if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
         {
-          stmt_add( " " + pIndexDiff.parallel_degreeNew );
+          stmtAppend( " " + pIndexDiff.parallel_degreeNew );
         }
       }
 
-      add_stmt();
+      stmtDone();
 
       if( pIndexDiff.parallelNew != ParallelType.PARALLEL && isIndexparallelcreate() )
       {
-        add_stmt( "alter index " + pIndexDiff.consNameNew + " noparallel" );
+        addStmt( "alter index " + pIndexDiff.consNameNew + " noparallel" );
       }
     }
     else
     {
       if( pIndexDiff.parallelIsEqual == false || pIndexDiff.parallel_degreeIsEqual == false )
       {
-        stmt_set( "alter index" );
-        stmt_add( pIndexDiff.consNameNew );
+        stmtStart( "alter index" );
+        stmtAppend( pIndexDiff.consNameNew );
         if( pIndexDiff.parallelNew == ParallelType.PARALLEL )
         {
-          stmt_add( "parallel" );
+          stmtAppend( "parallel" );
           if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
           {
-            stmt_add( " " + pIndexDiff.parallel_degreeNew );
+            stmtAppend( " " + pIndexDiff.parallel_degreeNew );
           }
         }
         else
         {
-          stmt_add( "noparallel" );
+          stmtAppend( "noparallel" );
         }
 
-        stmt_done();
+        stmtDone();
       }
 
       if( pIndexDiff.loggingIsEqual == false )
       {
-        stmt_set( "alter index" );
-        stmt_add( pIndexDiff.consNameNew );
+        stmtStart( "alter index" );
+        stmtAppend( pIndexDiff.consNameNew );
         if( pIndexDiff.loggingNew == LoggingType.NOLOGGING )
         {
-          stmt_add( "nologging" );
+          stmtAppend( "nologging" );
         }
         else
         {
-          stmt_add( "logging" );
+          stmtAppend( "logging" );
         }
 
-        stmt_done();
+        stmtDone();
       }
 
       if( pIndexDiff.tablespaceIsEqual == false && !(pIndexDiff.tablespaceOld == null && pIndexDiff.tablespaceNew == null) && isIndexmovetablespace() == true )
       {
-        stmt_set( "alter index" );
-        stmt_add( pIndexDiff.consNameNew );
-        stmt_add( "rebuild tablespace" );
-        stmt_add( nvl( pIndexDiff.tablespaceNew, getDefaultTablespace() ) );
-        stmt_done();
+        stmtStart( "alter index" );
+        stmtAppend( pIndexDiff.consNameNew );
+        stmtAppend( "rebuild tablespace" );
+        stmtAppend( nvl( pIndexDiff.tablespaceNew, getDefaultTablespace() ) );
+        stmtDone();
       }
     }
   }
@@ -1008,17 +1072,17 @@ public class OrcasDiff
   {
     if( pConstraintDiff.isMatched == false || pConstraintDiff.isRecreateNeeded == true )
     {
-      stmt_set( "alter table " + pTablename + " add constraint " + pConstraintDiff.consNameNew + " check (" + pConstraintDiff.ruleNew + ")" );
+      stmtStart( "alter table " + pTablename + " add constraint " + pConstraintDiff.consNameNew + " check (" + pConstraintDiff.ruleNew + ")" );
       if( pConstraintDiff.deferrtypeNew != null )
       {
-        stmt_add( "deferrable initially " + pConstraintDiff.deferrtypeNew.getName() );
+        stmtAppend( "deferrable initially " + pConstraintDiff.deferrtypeNew.getName() );
       }
       if( pConstraintDiff.statusNew != null )
       {
-        stmt_add( pConstraintDiff.statusNew.getName() );
+        stmtAppend( pConstraintDiff.statusNew.getName() );
       }
 
-      add_stmt();
+      stmtDone();
     }
   }
 
@@ -1026,102 +1090,102 @@ public class OrcasDiff
   {
     if( pTableDiff.primary_keyDiff.isMatched == false || pTableDiff.primary_keyDiff.isRecreateNeeded == true )
     {
-      pv_stmt = "alter table " + pTableDiff.nameNew + " add";
+      stmtStart( "alter table " + pTableDiff.nameNew + " add" );
       if( pTableDiff.primary_keyDiff.consNameNew != null )
       {
-        pv_stmt = pv_stmt + " " + "constraint " + pTableDiff.primary_keyDiff.consNameNew;
+        stmtAppend( "constraint " + pTableDiff.primary_keyDiff.consNameNew );
       }
-      pv_stmt = pv_stmt + " " + "primary key (" + get_column_list( pTableDiff.primary_keyDiff.pk_columnsDiff ) + ")";
+      stmtAppend( "primary key (" + getColumnList( pTableDiff.primary_keyDiff.pk_columnsDiff ) + ")" );
 
       if( pTableDiff.primary_keyDiff.tablespaceNew != null || pTableDiff.primary_keyDiff.reverseNew != null )
       {
-        pv_stmt = pv_stmt + " " + "using index";
+        stmtAppend( "using index" );
 
         if( pTableDiff.primary_keyDiff.reverseNew != null )
         {
-          pv_stmt = pv_stmt + " " + "reverse";
+          stmtAppend( "reverse" );
         }
 
         if( pTableDiff.primary_keyDiff.tablespaceNew != null )
         {
-          pv_stmt = pv_stmt + " " + "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew;
+          stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
         }
       }
 
-      add_stmt();
+      stmtDone();
     }
   }
 
-  private String get_column_list( List<ColumnRefDiff> pColumnRefDiffList )
+  private String getColumnList( List<ColumnRefDiff> pColumnRefDiffList )
   {
-    String v_return = null;
+    String lReturn = null;
     for( ColumnRefDiff lColumnRefDiff : pColumnRefDiffList )
     {
       if( lColumnRefDiff.isNew )
       {
-        if( v_return != null )
+        if( lReturn != null )
         {
-          v_return = v_return + ",";
+          lReturn = lReturn + ",";
         }
         else
         {
-          v_return = "";
+          lReturn = "";
         }
 
-        v_return = v_return + lColumnRefDiff.column_nameNew;
+        lReturn = lReturn + lColumnRefDiff.column_nameNew;
       }
     }
 
-    return v_return;
+    return lReturn;
   }
 
-  private String get_column_datatype( ColumnDiff pColumnDiff )
+  private String getColumnDatatype( ColumnDiff pColumnDiff )
   {
-    String v_datatype = "";
+    String lDatatype = "";
     if( pColumnDiff.data_typeNew == DataType.OBJECT )
     {
-      v_datatype = pColumnDiff.object_typeNew;
+      lDatatype = pColumnDiff.object_typeNew;
     }
     else
     {
       if( pColumnDiff.data_typeNew == DataType.LONG_RAW )
       {
-        v_datatype = "long raw";
+        lDatatype = "long raw";
       }
       else
       {
-        v_datatype = pColumnDiff.data_typeNew.name().toUpperCase();
+        lDatatype = pColumnDiff.data_typeNew.name().toUpperCase();
       }
 
       if( pColumnDiff.precisionNew != null )
       {
-        v_datatype = v_datatype + "(" + pColumnDiff.precisionNew;
+        lDatatype = lDatatype + "(" + pColumnDiff.precisionNew;
 
         if( pColumnDiff.scaleNew != null )
         {
-          v_datatype = v_datatype + "," + pColumnDiff.scaleNew;
+          lDatatype = lDatatype + "," + pColumnDiff.scaleNew;
         }
 
         if( pColumnDiff.byteorcharNew != null )
         {
-          v_datatype = v_datatype + " " + pColumnDiff.byteorcharNew.getName().toUpperCase();
+          lDatatype = lDatatype + " " + pColumnDiff.byteorcharNew.getName().toUpperCase();
         }
 
-        v_datatype = v_datatype + ")";
+        lDatatype = lDatatype + ")";
       }
 
       if( "with_time_zone".equals( pColumnDiff.with_time_zoneNew ) )
       {
-        v_datatype = v_datatype + " with time zone";
+        lDatatype = lDatatype + " with time zone";
       }
     }
 
-    return v_datatype;
+    return lDatatype;
   }
 
-  private String create_column_create_part( ColumnDiff pColumnDiff )
+  private String createColumnCreatePart( ColumnDiff pColumnDiff )
   {
-    String lReturn = pColumnDiff.nameNew + " " + get_column_datatype( pColumnDiff );
+    String lReturn = pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff );
 
     if( pColumnDiff.default_valueNew != null )
     {
@@ -1197,14 +1261,14 @@ public class OrcasDiff
 
     if( pColumnDiff.isMatched == false )
     {
-      pv_stmt = "alter table " + pTableDiff.nameNew + " add " + create_column_create_part( pColumnDiff );
+      stmtStart( "alter table " + pTableDiff.nameNew + " add " + createColumnCreatePart( pColumnDiff ) );
 
       if( findLobstorage( pTableDiff, pColumnDiff.nameNew ) != null )
       {
-        pv_stmt = pv_stmt + " " + "lob (" + pColumnDiff.nameNew + ") store as ( tablespace " + findLobstorage( pTableDiff, pColumnDiff.nameNew ).tablespaceNew + " )";
+        stmtAppend( "lob (" + pColumnDiff.nameNew + ") store as ( tablespace " + findLobstorage( pTableDiff, pColumnDiff.nameNew ).tablespaceNew + " )" );
       }
 
-      add_stmt();
+      stmtDone();
     }
     else
     {
@@ -1216,37 +1280,37 @@ public class OrcasDiff
       {
         if( pColumnDiff.byteorcharIsEqual == false || pColumnDiff.precisionIsEqual == false || pColumnDiff.scaleIsEqual == false )
         {
-          add_stmt( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " " + get_column_datatype( pColumnDiff ) + ")" );
+          addStmt( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff ) + ")" );
         }
 
         if( pColumnDiff.default_valueIsEqual == false )
         {
-          pv_stmt = "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default";
+          stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default" );
           if( pColumnDiff.default_valueNew == null )
           {
-            pv_stmt = pv_stmt + " " + "null";
+            stmtAppend( "null" );
           }
           else
           {
-            pv_stmt = pv_stmt + " " + pColumnDiff.default_valueNew;
+            stmtAppend( pColumnDiff.default_valueNew );
           }
-          pv_stmt = pv_stmt + " " + ")";
-          add_stmt();
+          stmtAppend( ")" );
+          stmtDone();
         }
 
         if( pColumnDiff.notnullIsEqual == false )
         {
-          pv_stmt = "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew;
+          stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew );
           if( pColumnDiff.notnullNew == false )
           {
-            pv_stmt = pv_stmt + " " + "null";
+            stmtAppend( "null" );
           }
           else
           {
-            pv_stmt = pv_stmt + " " + "not null";
+            stmtAppend( "not null" );
           }
-          pv_stmt = pv_stmt + " " + ")";
-          add_stmt();
+          stmtAppend( ")" );
+          stmtDone();
         }
       }
     }
@@ -1254,10 +1318,10 @@ public class OrcasDiff
 
   private void recreateColumn( TableDiff pTableDiff, ColumnDiff pColumnDiff )
   {
-    String v_tmp_old_columnameNew = "DTO_" + pColumnDiff.nameNew;
-    String v_tmp_new_columnameNew = "DTN_" + pColumnDiff.nameNew;
+    String lTmpOldColumnameNew = "DTO_" + pColumnDiff.nameNew;
+    String lTmpNewColumnameNew = "DTN_" + pColumnDiff.nameNew;
 
-    add_stmt( "alter table " + pTableDiff.nameNew + " add " + v_tmp_new_columnameNew + " " + get_column_datatype( pColumnDiff ) );
+    addStmt( "alter table " + pTableDiff.nameNew + " add " + lTmpNewColumnameNew + " " + getColumnDatatype( pColumnDiff ) );
 
     //      TODO    for cur_trigger in
     //            (
@@ -1269,8 +1333,8 @@ public class OrcasDiff
     //            add_stmt( "alter trigger " + cur_trigger.trigger_name + " disable" );
     //          }
 
-    add_stmt( "update " + pTableDiff.nameNew + " set " + v_tmp_new_columnameNew + " = " + pColumnDiff.nameOld );
-    add_stmt( "commit" );
+    addStmt( "update " + pTableDiff.nameNew + " set " + lTmpNewColumnameNew + " = " + pColumnDiff.nameOld );
+    addStmt( "commit" );
 
     //          for cur_trigger in
     //            (
@@ -1282,81 +1346,68 @@ public class OrcasDiff
     //            add_stmt( "alter trigger " + cur_trigger.trigger_name + " enable" );
     //          }
 
-    add_stmt( "alter table " + pTableDiff.nameNew + " rename column " + pColumnDiff.nameOld + " to " + v_tmp_old_columnameNew );
-    add_stmt( "alter table " + pTableDiff.nameNew + " rename column " + v_tmp_new_columnameNew + " to " + pColumnDiff.nameNew );
-    add_stmt( "alter table " + pTableDiff.nameNew + " drop column " + v_tmp_old_columnameNew );
+    addStmt( "alter table " + pTableDiff.nameNew + " rename column " + pColumnDiff.nameOld + " to " + lTmpOldColumnameNew );
+    addStmt( "alter table " + pTableDiff.nameNew + " rename column " + lTmpNewColumnameNew + " to " + pColumnDiff.nameNew );
+    addStmt( "alter table " + pTableDiff.nameNew + " drop column " + lTmpOldColumnameNew );
 
     if( pColumnDiff.default_valueNew != null )
     {
-      pv_stmt = "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default";
-      pv_stmt = pv_stmt + " " + pColumnDiff.default_valueNew;
-      pv_stmt = pv_stmt + " " + ")";
-      add_stmt();
+      stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default" );
+      stmtAppend( pColumnDiff.default_valueNew );
+      stmtAppend( ")" );
+      stmtDone();
     }
 
     if( pColumnDiff.notnullNew == true )
     {
-      pv_stmt = "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew;
-      pv_stmt = pv_stmt + " " + "not null";
-      pv_stmt = pv_stmt + " " + ")";
-      add_stmt();
+      stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew );
+      stmtAppend( "not null" );
+      stmtAppend( ")" );
+      stmtDone();
     }
   }
 
-  private String adjust_compression_literal( String pLiteral )
+  private void dropWithDropmodeCheck( String pTestStatement, String pDropStatement )
   {
-    return pLiteral.replace( "_low", " low" ).replace( "_high", " high" ).replace( "_operations", " operations" );
-  }
-
-  private void stmt_done()
-  {
-    add_stmt();
-  }
-
-  private boolean is_tablemovetablespace()
-  {
-    return _parameters.isTablemovetablespace();
-  }
-
-  private void stmt_add( String pString )
-  {
-    pv_stmt = pv_stmt + " " + pString;
-  }
-
-  private void stmt_set( String pString )
-  {
-    pv_stmt = pString;
-  }
-
-  private void drop_with_dropmode_check( String pTestStatement, String pDropStatement )
-  {
-    if( is_dropmode() != true )
+    if( isDropmode() != true )
     {
-      if( has_rows( pTestStatement ) == true )
+      if( hasRows( pTestStatement ) == true )
       {
-        if( is_dropmode_ignore() != true )
+        if( isDropmodeIgnore() != true )
         {
           throw new RuntimeException( "drop mode ist nicht aktiv, daher kann folgendes statement nicht ausgefuehrt werden: " + pDropStatement );
         }
         else
         {
-          add_stmt( "-- dropmode-ignore: " + pDropStatement );
+          addStmt( "-- dropmode-ignore: " + pDropStatement );
           return;
         }
       }
     }
 
-    add_stmt( pDropStatement );
+    addStmt( pDropStatement );
   }
 
-  private boolean is_dropmode_ignore()
+  private boolean isDropmodeIgnore()
   {
     return false;
   }
 
-  private boolean has_rows( String pTestStatement )
+  private boolean hasRowsIgnoreExceptions( String pTestStatement )
   {
-    return (Boolean)new WrapperReturnValueFromResultSet( pTestStatement, JdbcConnectionHandler.getCallableStatementProvider() )
+    try
+    {
+      return hasRows( pTestStatement );
+    }
+    catch( Exception e )
+    {
+      return false;
+    }
+  }
+
+  private boolean hasRows( String pTestStatement )
+  {
+    return (Boolean)new WrapperReturnValueFromResultSet( pTestStatement, getCallableStatementProvider() )
     {
       @Override
       protected Object getValueFromResultSet( ResultSet pResultSet ) throws SQLException
@@ -1366,19 +1417,19 @@ public class OrcasDiff
     }.executeForValue();
   }
 
-  private boolean is_dropmode()
+  private CallableStatementProvider getCallableStatementProvider()
+  {
+    return _callableStatementProvider;
+  }
+
+  private boolean isDropmode()
   {
     return _parameters.isDropmode();
   }
 
-  private String pv_stmt;
-  private List<String> pv_stmtList = new ArrayList<String>();
-  private Parameters _parameters;
-
-  private void add_stmt()
+  private boolean isTablemovetablespace()
   {
-    add_stmt( pv_stmt );
-    pv_stmt = null;
+    return _parameters.isTablemovetablespace();
   }
 
   private <T> T nvl( T pObject, T pDefault )
@@ -1386,1028 +1437,780 @@ public class OrcasDiff
     return pObject == null ? pDefault : pObject;
   }
 
-  private void add_stmt( String pString )
+  private String adjustRefreshmethodLiteral( String pLiteral )
   {
-    pv_stmtList.add( pString );
+    return pLiteral.replace( "refresh_", " refresh " ).replace( "never_", "never " );
+  }
+
+  private ForeignKeyDiff getFkForRefPartitioning( TableDiff pTableDiff )
+  {
+    for( ForeignKeyDiff lForeignKeyDiff : pTableDiff.foreign_keysDiff )
+    {
+      if( lForeignKeyDiff.consNameNew.equalsIgnoreCase( pTableDiff.tablePartitioningRefPartitionsDiff.fkNameNew ) )
+      {
+        return lForeignKeyDiff;
+      }
+    }
+
+    throw new RuntimeException( "fk for refpartitioning not found" );
+  }
+
+  private boolean addTableList( List<TableDiff> pRemainingTableDiffList, List<String> pAddedTableNames, List<TableDiff> pOrderedList )
+  {
+    boolean lAddedAtLeastOne = false;
+
+    for( TableDiff lTableDiff : new ArrayList<TableDiff>( pRemainingTableDiffList ) )
+    {
+      String lRequiredTableName = null;
+
+      if( !lTableDiff.isOld && lTableDiff.tablePartitioningRefPartitionsDiff.isNew )
+      {
+        lRequiredTableName = getFkForRefPartitioning( lTableDiff ).destTableNew;
+      }
+
+      if( lRequiredTableName == null || pAddedTableNames.contains( lRequiredTableName ) )
+      {
+        pOrderedList.add( lTableDiff );
+        pAddedTableNames.add( lTableDiff.nameNew );
+        pRemainingTableDiffList.remove( lTableDiff );
+
+        lAddedAtLeastOne = true;
+      }
+    }
+
+    return lAddedAtLeastOne;
+  }
+
+  private void sortTablesForRefPart( ModelDiff pModelDiff )
+  {
+    List<TableDiff> lTableDiffList = pModelDiff.model_elementsTableDiff;
+
+    List<TableDiff> lRemainingTableDiffList = new ArrayList<TableDiff>( lTableDiffList );
+    List<String> lAddedTableNames = new ArrayList<String>();
+    List<TableDiff> lOrderedList = new ArrayList<TableDiff>();
+
+    while( addTableList( lRemainingTableDiffList, lAddedTableNames, lOrderedList ) )
+    {
+    }
+
+    if( !lRemainingTableDiffList.isEmpty() )
+    {
+      throw new RuntimeException( "possible table order not found " + lRemainingTableDiffList.get( 0 ).nameNew );
+    }
+
+    pModelDiff.model_elementsTableDiff = lOrderedList;
+  }
+
+  private void createMview( MviewDiff pMviewDiff )
+  {
+    stmtStart( "create materialized view" );
+    stmtAppend( pMviewDiff.mview_nameNew );
+
+    if( pMviewDiff.buildModeNew == BuildModeType.PREBUILT )
+    {
+      stmtAppend( "on prebuilt table" );
+    }
+    else
+    {
+      // Physical properties nur, wenn nicht prebuilt
+      if( pMviewDiff.tablespaceNew != null )
+      {
+        stmtAppend( "tablespace" );
+        stmtAppend( pMviewDiff.tablespaceNew );
+      }
+
+      handleCompression( pMviewDiff.compressionNew, pMviewDiff.compressionForNew, false );
+
+      handleParallel( pMviewDiff.parallelNew, pMviewDiff.parallel_degreeNew, false );
+
+      if( pMviewDiff.buildModeNew != null )
+      {
+        stmtAppend( "build" );
+        stmtAppend( pMviewDiff.buildModeNew.getLiteral() );
+      }
+    }
+
+    if( pMviewDiff.refreshMethodNew != null )
+    {
+      stmtAppend( adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) );
+
+      if( pMviewDiff.refreshModeNew != null )
+      {
+        stmtAppend( "on" );
+        stmtAppend( pMviewDiff.refreshModeNew.getLiteral() );
+      }
+    }
+
+    if( pMviewDiff.queryRewriteNew == EnableType.ENABLE )
+    {
+      stmtAppend( "enable query rewrite" );
+    }
+
+    stmtAppend( "as" );
+    stmtAppend( pMviewDiff.viewSelectCLOBNew );
+    stmtDone();
+  }
+
+  private void handleMview( MviewDiff pMviewDiff )
+  {
+    if( pMviewDiff.isMatched == false || pMviewDiff.isRecreateNeeded )
+    {
+      createMview( pMviewDiff );
+    }
+    else
+    {
+      if( !pMviewDiff.queryRewriteIsEqual )
+      {
+        EnableType lQueryRewriteNew = pMviewDiff.queryRewriteNew;
+
+        if( lQueryRewriteNew == null )
+        {
+          lQueryRewriteNew = EnableType.DISABLE;
+        }
+
+        addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + lQueryRewriteNew.getLiteral() + " query rewrite" );
+      }
+
+      if( !pMviewDiff.refreshModeIsEqual || !pMviewDiff.refreshMethodIsEqual )
+      {
+        RefreshModeType lRefreshModeType = pMviewDiff.refreshModeNew;
+        String lRefreshmode;
+        if( lRefreshModeType == null )
+        {
+          lRefreshmode = "";
+        }
+        else
+        {
+          lRefreshmode = " on " + lRefreshModeType.getLiteral();
+        }
+        addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) + lRefreshmode );
+      }
+
+      //     Physical parameters nur, wenn nicht prebuilt
+      if( pMviewDiff.buildModeNew != BuildModeType.PREBUILT )
+      {
+        if( pMviewDiff.parallelIsEqual == false || pMviewDiff.parallel_degreeIsEqual == false )
+        {
+          stmtStart( "alter materialized view" );
+          stmtAppend( pMviewDiff.mview_nameNew );
+
+          handleParallel( pMviewDiff.parallelNew, pMviewDiff.parallel_degreeNew, true );
+
+          stmtDone();
+        }
+
+        if( pMviewDiff.compressionIsEqual == false || pMviewDiff.compressionForIsEqual == false )
+        {
+          stmtStart( "alter materialized view" );
+          stmtAppend( pMviewDiff.mview_nameNew );
+
+          handleCompression( pMviewDiff.compressionNew, pMviewDiff.compressionForNew, true );
+
+          stmtDone();
+        }
+      }
+    }
+  }
+
+  private void handleAllMviews( ModelDiff pModelDiff )
+  {
+    for( MviewDiff lMviewDiff : pModelDiff.model_elementsMviewDiff )
+    {
+      if( !lMviewDiff.isEqual )
+      {
+        if( lMviewDiff.isRecreateNeeded || !lMviewDiff.isNew )
+        {
+          addStmt( "drop materialized view " + lMviewDiff.mview_nameOld );
+        }
+
+        if( lMviewDiff.isNew )
+        {
+          handleMview( lMviewDiff );
+        }
+      }
+    }
+  }
+
+  private String createRangeValuelist( List<RangePartitionValueDiff> pRangePartitionValueDiffList )
+  {
+    String lReturn = "";
+    for( int i = 0; i < pRangePartitionValueDiffList.size(); i++ )
+    {
+      RangePartitionValueDiff lRangePartitionValueDiff = pRangePartitionValueDiffList.get( i );
+      if( i != 0 )
+      {
+        lReturn = lReturn + ",";
+      }
+
+      if( lRangePartitionValueDiff.valueNew != null )
+      {
+        lReturn = lReturn + lRangePartitionValueDiff.valueNew;
+      }
+      else
+      {
+        lReturn = lReturn + "maxvalue";
+      }
+    }
+
+    return lReturn;
+  }
+
+  private String createListValuelist( List<ListPartitionValueDiff> pListPartitionValueDiffList )
+  {
+    String lReturn = "";
+
+    for( int i = 0; i < pListPartitionValueDiffList.size(); i++ )
+    {
+      ListPartitionValueDiff lListPartitionValueDiff = pListPartitionValueDiffList.get( i );
+      if( i != 0 )
+      {
+        lReturn = lReturn + ",";
+      }
+
+      if( lListPartitionValueDiff.valueNew != null )
+      {
+        lReturn = lReturn + lListPartitionValueDiff.valueNew;
+      }
+      else
+      {
+        lReturn = lReturn + "default";
+      }
+    }
+
+    return lReturn;
+  }
+
+  private String createSubRangeClause( RangeSubSubPartDiff pRangeSubSubPartDiff )
+  {
+    String lReturn = "";
+    lReturn = lReturn + "subpartition " + pRangeSubSubPartDiff.nameNew + " values less than (";
+
+    lReturn = lReturn + createRangeValuelist( pRangeSubSubPartDiff.valueDiff );
+
+    lReturn = lReturn + ")";
+
+    if( pRangeSubSubPartDiff.tablespaceNew != null )
+    {
+      lReturn = lReturn + " tablespace " + pRangeSubSubPartDiff.tablespaceNew;
+    }
+
+    return lReturn;
+  }
+
+  private String createSubListClause( ListSubSubPartDiff pListSubSubPartDiff )
+  {
+    String lReturn = "";
+    lReturn = lReturn + "subpartition " + pListSubSubPartDiff.nameNew + " values (";
+
+    lReturn = lReturn + createListValuelist( pListSubSubPartDiff.valueDiff );
+
+    lReturn = lReturn + ")";
+
+    if( pListSubSubPartDiff.tablespaceNew != null )
+    {
+      lReturn = lReturn + " tablespace " + pListSubSubPartDiff.tablespaceNew;
+    }
+
+    return lReturn;
+  }
+
+  private String createSubHashClause( HashSubSubPartDiff pHashSubSubPartDiff )
+  {
+    String lReturn = "";
+    lReturn = lReturn + "subpartition " + pHashSubSubPartDiff.nameNew;
+
+    if( pHashSubSubPartDiff.tablespaceNew != null )
+    {
+      lReturn = lReturn + " tablespace " + pHashSubSubPartDiff.tablespaceNew;
+    }
+
+    return lReturn;
+  }
+
+  private String createSubpartitions( List<HashSubSubPartDiff> pHashSubSubPartDiffList, List<ListSubSubPartDiff> pListSubSubPartDiffList, List<RangeSubSubPartDiff> pRangeSubSubPartDiffList )
+  {
+    String lReturn = "";
+
+    if( !pHashSubSubPartDiffList.isEmpty() )
+    {
+      lReturn = lReturn + "(";
+      for( int i = 0; i < pHashSubSubPartDiffList.size(); i++ )
+      {
+        HashSubSubPartDiff lHashSubSubPartDiff = pHashSubSubPartDiffList.get( i );
+
+        if( i != 0 )
+        {
+          lReturn = lReturn + ",";
+        }
+
+        lReturn = lReturn + createSubHashClause( lHashSubSubPartDiff );
+      }
+
+      lReturn = lReturn + ")";
+    }
+
+    if( !pListSubSubPartDiffList.isEmpty() )
+    {
+      lReturn = lReturn + "(";
+      for( int i = 0; i < pListSubSubPartDiffList.size(); i++ )
+      {
+        ListSubSubPartDiff lListSubSubPartDiff = pListSubSubPartDiffList.get( i );
+
+        if( i != 0 )
+        {
+          lReturn = lReturn + ",";
+        }
+
+        lReturn = lReturn + createSubListClause( lListSubSubPartDiff );
+      }
+
+      lReturn = lReturn + ")";
+    }
+
+    if( !pRangeSubSubPartDiffList.isEmpty() )
+    {
+      lReturn = lReturn + "(";
+      for( int i = 0; i < pRangeSubSubPartDiffList.size(); i++ )
+      {
+        RangeSubSubPartDiff lRangeSubSubPartDiff = pRangeSubSubPartDiffList.get( i );
+
+        if( i != 0 )
+        {
+          lReturn = lReturn + ",";
+        }
+
+        lReturn = lReturn + createSubRangeClause( lRangeSubSubPartDiff );
+      }
+
+      lReturn = lReturn + ")";
+    }
+
+    return lReturn;
+  }
+
+  private String createRangeSubParts( RangeSubPartsDiff pRangeSubPartsDiff )
+  {
+    String lReturn = "";
+    lReturn = lReturn + " subpartition by range (";
+    for( int i = 0; i < pRangeSubPartsDiff.columnsDiff.size(); i++ )
+    {
+      if( i != 0 )
+      {
+        lReturn = lReturn + ",";
+      }
+      lReturn = lReturn + pRangeSubPartsDiff.columnsDiff.get( i ).column_nameNew;
+    }
+    lReturn = lReturn + ")";
+
+    return lReturn;
+  }
+
+  private String createListSubParts( ListSubPartsDiff pListSubPartsDiff )
+  {
+    return " subpartition by list (" + pListSubPartsDiff.columnDiff.column_nameNew + ")";
+  }
+
+  private String createHashSubParts( HashSubPartsDiff pHashSubPartsDiff )
+  {
+    return " subpartition by hash (" + pHashSubPartsDiff.columnDiff.column_nameNew + ")";
+  }
+
+  private String createTableSubParts( HashSubPartsDiff pHashSubPartsDiff, ListSubPartsDiff pListSubPartsDiff, RangeSubPartsDiff pRangeSubPartsDiff )
+  {
+    if( pHashSubPartsDiff.isNew )
+    {
+      return createHashSubParts( pHashSubPartsDiff );
+    }
+    if( pListSubPartsDiff.isNew )
+    {
+      return createListSubParts( pListSubPartsDiff );
+    }
+    if( pRangeSubPartsDiff.isNew )
+    {
+      return createRangeSubParts( pRangeSubPartsDiff );
+    }
+
+    throw new RuntimeException( "subpartitionstyp unbekannt" );
+  }
+
+  private boolean hasSubpartitioning( HashSubPartsDiff pHashSubPartsDiff, ListSubPartsDiff pListSubPartsDiff, RangeSubPartsDiff pRangeSubPartsDiff )
+  {
+    return pHashSubPartsDiff.isNew || pListSubPartsDiff.isNew || pRangeSubPartsDiff.isNew;
+  }
+
+  private String createRangeClause( RangePartitionsDiff pRangePartitionsDiff )
+  {
+    String lReturn = "";
+    lReturn = lReturn + "partition by range (" + getColumnList( pRangePartitionsDiff.columnsDiff ) + ")";
+
+    if( pRangePartitionsDiff.intervalExpressionNew != null )
+    {
+      lReturn = lReturn + "interval (" + pRangePartitionsDiff.intervalExpressionNew + ")";
+    }
+
+    if( hasSubpartitioning( pRangePartitionsDiff.tableSubPartHashSubPartsDiff, pRangePartitionsDiff.tableSubPartListSubPartsDiff, pRangePartitionsDiff.tableSubPartRangeSubPartsDiff ) )
+    {
+      lReturn = lReturn + createTableSubParts( pRangePartitionsDiff.tableSubPartHashSubPartsDiff, pRangePartitionsDiff.tableSubPartListSubPartsDiff, pRangePartitionsDiff.tableSubPartRangeSubPartsDiff );
+
+      lReturn = lReturn + "(";
+
+      for( int i = 0; i < pRangePartitionsDiff.subPartitionListDiff.size(); i++ )
+      {
+        RangeSubPartDiff lRangeSubPartDiff = pRangePartitionsDiff.subPartitionListDiff.get( i );
+        if( i != 0 )
+        {
+          lReturn = lReturn + ",";
+        }
+        lReturn = lReturn + "partition " + lRangeSubPartDiff.nameNew + " values less than (";
+
+        lReturn = lReturn + createRangeValuelist( lRangeSubPartDiff.valueDiff );
+
+        lReturn = lReturn + ")";
+
+        lReturn = lReturn + createSubpartitions( lRangeSubPartDiff.subPartListHashSubSubPartDiff, lRangeSubPartDiff.subPartListListSubSubPartDiff, lRangeSubPartDiff.subPartListRangeSubSubPartDiff );
+      }
+      lReturn = lReturn + ")";
+    }
+    else
+    {
+      lReturn = lReturn + "(";
+      for( int i = 0; i < pRangePartitionsDiff.partitionListDiff.size(); i++ )
+      {
+        RangePartitionDiff lRangePartitionDiff = pRangePartitionsDiff.partitionListDiff.get( i );
+        if( i != 0 )
+        {
+          lReturn = lReturn + ",";
+        }
+        lReturn = lReturn + "partition " + lRangePartitionDiff.nameNew + " values less than (";
+
+        lReturn = lReturn + createRangeValuelist( lRangePartitionDiff.valueDiff );
+
+        lReturn = lReturn + ")";
+
+        if( lRangePartitionDiff.tablespaceNew != null )
+        {
+          lReturn = lReturn + " tablespace " + lRangePartitionDiff.tablespaceNew;
+        }
+      }
+      lReturn = lReturn + ")";
+    }
+
+    return lReturn;
+  }
+
+  private String createListClause( ListPartitionsDiff pListPartitionsDiff )
+  {
+    String lReturn = "";
+
+    lReturn = lReturn + "partition by list (" + pListPartitionsDiff.columnDiff.column_nameNew;
+    lReturn = lReturn + ")";
+
+    if( hasSubpartitioning( pListPartitionsDiff.tableSubPartHashSubPartsDiff, pListPartitionsDiff.tableSubPartListSubPartsDiff, pListPartitionsDiff.tableSubPartRangeSubPartsDiff ) )
+    {
+      lReturn = lReturn + createTableSubParts( pListPartitionsDiff.tableSubPartHashSubPartsDiff, pListPartitionsDiff.tableSubPartListSubPartsDiff, pListPartitionsDiff.tableSubPartRangeSubPartsDiff );
+
+      lReturn = lReturn + "(";
+
+      for( int i = 0; i < pListPartitionsDiff.subPartitionListDiff.size(); i++ )
+      {
+        ListSubPartDiff lListSubPartDiff = pListPartitionsDiff.subPartitionListDiff.get( i );
+        if( i != 0 )
+        {
+          lReturn = lReturn + ",";
+        }
+        lReturn = lReturn + "partition " + lListSubPartDiff.nameNew + " values (";
+
+        lReturn = lReturn + createListValuelist( lListSubPartDiff.valueDiff );
+
+        lReturn = lReturn + ")";
+
+        lReturn = lReturn + createSubpartitions( lListSubPartDiff.subPartListHashSubSubPartDiff, lListSubPartDiff.subPartListListSubSubPartDiff, lListSubPartDiff.subPartListRangeSubSubPartDiff );
+      }
+      lReturn = lReturn + ")";
+    }
+    else
+    {
+      lReturn = lReturn + "(";
+
+      for( int i = 0; i < pListPartitionsDiff.partitionListDiff.size(); i++ )
+      {
+        ListPartitionDiff lListPartitionDiff = pListPartitionsDiff.partitionListDiff.get( i );
+        if( i != 0 )
+        {
+          lReturn = lReturn + ",";
+        }
+        lReturn = lReturn + "partition " + lListPartitionDiff.nameNew + " values (";
+
+        lReturn = lReturn + createListValuelist( lListPartitionDiff.valueDiff );
+
+        lReturn = lReturn + ")";
+
+        if( lListPartitionDiff.tablespaceNew != null )
+        {
+          lReturn = lReturn + " tablespace " + lListPartitionDiff.tablespaceNew;
+        }
+      }
+      lReturn = lReturn + ")";
+    }
+
+    return lReturn;
+  }
+
+  private String createHashClause( HashPartitionsDiff pHashPartitionsDiff )
+  {
+    String lReturn = "";
+    lReturn = lReturn + "partition by hash (" + pHashPartitionsDiff.columnDiff.column_nameNew;
+    lReturn = lReturn + ")(";
+    for( int i = 0; i < pHashPartitionsDiff.partitionListDiff.size(); i++ )
+    {
+      HashPartitionDiff lHashPartitionDiff = pHashPartitionsDiff.partitionListDiff.get( i );
+      if( i != 0 )
+      {
+        lReturn = lReturn + ",";
+      }
+      lReturn = lReturn + "partition " + lHashPartitionDiff.nameNew;
+
+      if( lHashPartitionDiff.tablespaceNew != null )
+      {
+        lReturn = lReturn + " tablespace " + lHashPartitionDiff.tablespaceNew;
+      }
+    }
+    lReturn = lReturn + ")";
+
+    return lReturn;
+  }
+
+  private String createRefClause( RefPartitionsDiff pRefPartitionsDiff )
+  {
+    String lReturn = "";
+
+    lReturn = lReturn + "partition by reference (" + pRefPartitionsDiff.fkNameNew;
+    lReturn = lReturn + ")(";
+    for( int i = 0; i < pRefPartitionsDiff.partitionListDiff.size(); i++ )
+    {
+      RefPartitionDiff lRefPartitionDiff = pRefPartitionsDiff.partitionListDiff.get( i );
+      if( i != 0 )
+      {
+        lReturn = lReturn + ",";
+      }
+      lReturn = lReturn + "partition " + lRefPartitionDiff.nameNew;
+
+      if( lRefPartitionDiff.tablespaceNew != null )
+      {
+        lReturn = lReturn + " tablespace " + lRefPartitionDiff.tablespaceNew;
+      }
+    }
+    lReturn = lReturn + ")";
+
+    return lReturn;
+  }
+
+  private String createPartitioningClause( TableDiff pTableDiff )
+  {
+    String lReturn = "";
+
+    lReturn = lReturn + " ";
+
+    if( pTableDiff.tablePartitioningRangePartitionsDiff.isNew )
+    {
+      lReturn = lReturn + createRangeClause( pTableDiff.tablePartitioningRangePartitionsDiff );
+    }
+    if( pTableDiff.tablePartitioningListPartitionsDiff.isNew )
+    {
+      lReturn = lReturn + createListClause( pTableDiff.tablePartitioningListPartitionsDiff );
+    }
+    if( pTableDiff.tablePartitioningHashPartitionsDiff.isNew )
+    {
+      lReturn = lReturn + createHashClause( pTableDiff.tablePartitioningHashPartitionsDiff );
+    }
+    if( pTableDiff.tablePartitioningRefPartitionsDiff.isNew )
+    {
+      lReturn = lReturn + createRefClause( pTableDiff.tablePartitioningRefPartitionsDiff );
+    }
+
+    return lReturn;
+  }
+
+  private String createRefFkClause( TableDiff pTableDiff )
+  {
+    String lReturn = "";
+
+    if( pTableDiff.tablePartitioningRefPartitionsDiff.isNew )
+    {
+      ForeignKeyDiff lForeignKeyDiff = getFkForRefPartitioning( pTableDiff );
+
+      lReturn = lReturn + ", " + createForeignKeyClause( lForeignKeyDiff );
+    }
+    return lReturn;
+  }
+
+  private void createMviewlog( TableDiff pTableDiff )
+  {
+    String c_date_format = _parameters.getDateformat();
+    stmtStart( "create materialized view log on" );
+    stmtAppend( pTableDiff.nameNew );
+
+    if( pTableDiff.mviewLogDiff.tablespaceNew != null )
+    {
+      stmtAppend( "tablespace" );
+      stmtAppend( pTableDiff.mviewLogDiff.tablespaceNew );
+    }
+
+    handleParallel( pTableDiff.mviewLogDiff.parallelNew, pTableDiff.mviewLogDiff.parallel_degreeNew, false );
+
+    stmtAppend( "with" );
+
+    if( nvl( pTableDiff.mviewLogDiff.primaryKeyNew, "null" ).equals( "primary" ) || !nvl( pTableDiff.mviewLogDiff.rowidNew, "null" ).equals( "rowid" ) )
+    {
+      stmtAppend( "primary key" );
+      if( nvl( pTableDiff.mviewLogDiff.rowidNew, "null" ).equals( "rowid" ) )
+      {
+        stmtAppend( "," );
+      }
+    }
+
+    if( nvl( pTableDiff.mviewLogDiff.rowidNew, "null" ).equals( "rowid" ) )
+    {
+      stmtAppend( "rowid" );
+    }
+
+    if( nvl( pTableDiff.mviewLogDiff.withSequenceNew, "null" ).equals( "sequence" ) )
+    {
+      stmtAppend( "," );
+      stmtAppend( "sequence" );
+    }
+
+    if( pTableDiff.mviewLogDiff.columnsDiff.size() > 0 )
+    {
+      stmtAppend( "(" );
+      stmtAppend( getColumnList( pTableDiff.mviewLogDiff.columnsDiff ) );
+      stmtAppend( ")" );
+    }
+
+    if( nvl( pTableDiff.mviewLogDiff.commitScnNew, "null" ).equals( "commit_scn" ) )
+    {
+      stmtAppend( "," );
+      stmtAppend( "commit scn" );
+    }
+
+    if( pTableDiff.mviewLogDiff.newValuesNew != null )
+    {
+      stmtAppend( pTableDiff.mviewLogDiff.newValuesNew.getLiteral() );
+      stmtAppend( "new values" );
+    }
+
+    if( pTableDiff.mviewLogDiff.startWithNew != null || pTableDiff.mviewLogDiff.nextNew != null || (pTableDiff.mviewLogDiff.repeatIntervalNew != null && pTableDiff.mviewLogDiff.repeatIntervalNew != 0) )
+    {
+      stmtAppend( "purge" );
+      if( pTableDiff.mviewLogDiff.startWithNew != null )
+      {
+        stmtAppend( "start with" );
+        stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.startWithNew + "','" + c_date_format + "')" );
+      }
+      if( pTableDiff.mviewLogDiff.nextNew != null )
+      {
+        stmtAppend( "next" );
+        stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.nextNew + "','" + c_date_format + "')" );
+      }
+      else
+      {
+        if( pTableDiff.mviewLogDiff.repeatIntervalNew != null && pTableDiff.mviewLogDiff.repeatIntervalNew != 0 )
+        {
+          stmtAppend( "repeat interval" );
+          stmtAppend( "" + pTableDiff.mviewLogDiff.repeatIntervalNew );
+        }
+      }
+    }
+    else
+    {
+      if( pTableDiff.mviewLogDiff.synchronousNew == SynchronousType.ASYNCHRONOUS )
+      {
+        stmtAppend( "purge immediate asynchronous" );
+      }
+    }
+
+    stmtDone();
+  }
+
+  private void handleMviewlog( TableDiff pTableDiff )
+  {
+    if( !pTableDiff.mviewLogDiff.isOld || pTableDiff.mviewLogDiff.isRecreateNeeded )
+    {
+      createMviewlog( pTableDiff );
+    }
+    else
+    {
+      if( pTableDiff.mviewLogDiff.parallelIsEqual == false || pTableDiff.mviewLogDiff.parallel_degreeIsEqual == false )
+      {
+        stmtStart( "alter materialized view log on" );
+        stmtAppend( pTableDiff.nameNew );
+        handleParallel( pTableDiff.mviewLogDiff.parallelNew, pTableDiff.mviewLogDiff.parallel_degreeNew, true );
+
+        stmtDone();
+      }
+
+      if( pTableDiff.mviewLogDiff.newValuesIsEqual == false )
+      {
+        stmtStart( "alter materialized view log on" );
+        stmtAppend( pTableDiff.nameNew );
+
+        if( pTableDiff.mviewLogDiff.newValuesNew == NewValuesType.INCLUDING )
+        {
+          stmtAppend( "including" );
+        }
+        else
+        {
+          stmtAppend( "excluding" );
+        }
+        stmtAppend( "new values" );
+
+        stmtDone();
+      }
+
+      if( pTableDiff.mviewLogDiff.startWithIsEqual == false || pTableDiff.mviewLogDiff.nextIsEqual == false || pTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
+      {
+        stmtStart( "alter materialized view log on" );
+        stmtAppend( pTableDiff.nameNew );
+        stmtAppend( "purge" );
+        if( pTableDiff.mviewLogDiff.startWithIsEqual == false )
+        {
+          stmtAppend( "start with" );
+          stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.startWithNew + "','" + _parameters.getDateformat() + "')" );
+        }
+        if( pTableDiff.mviewLogDiff.nextIsEqual == false )
+        {
+          stmtAppend( "next" );
+          stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.nextNew + "','" + _parameters.getDateformat() + "')" );
+        }
+        else
+        {
+          if( pTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
+          {
+            stmtAppend( "repeat interval" );
+            stmtAppend( pTableDiff.mviewLogDiff.repeatIntervalNew + "" );
+          }
+        }
+
+        stmtDone();
+      }
+      else
+      {
+        if( pTableDiff.mviewLogDiff.synchronousIsEqual == false )
+        {
+          stmtAppend( "alter materialized view log on" );
+          stmtAppend( pTableDiff.nameNew );
+          if( pTableDiff.mviewLogDiff.synchronousNew == SynchronousType.ASYNCHRONOUS )
+          {
+            stmtAppend( "purge immediate asynchronous" );
+          }
+          else
+          {
+            stmtAppend( "purge immediate synchronous" );
+          }
+
+          stmtDone();
+        }
+      }
+    }
   }
 }
-
-//pv_model_diff od_orig_model;
-//
-//pv_stmt varchar2(32000);
-//type t_varchar_list is table of varchar2(32000);
-//pv_statement_list t_varchar_list;
-//pv_default_orig_chartype ot_orig_chartype;
-//pv_default_tablespace varchar2(30);
-//pv_temporary_tablespace varchar2(30); 
-//
-
-//
-//function replace_linefeed_by_space ( p_script in varchar2) return varchar2 is
-//{
-//return replace(replace(replace(p_script, chr(13) + chr(10)," "), chr(10)," "), chr(13)," ");
-//}
-//
-
-//
-//function adjust_refreshmethod_literal ( p_literal in varchar2 ) return varchar2 is
-//{
-//return replace(replace(p_literal, "refresh_"," refresh "), "never_","never ");
-//}    
-//
-
-//
-//function get_fk_for_ref_partitioning( p_orig_table in ot_orig_table ) return ot_orig_foreignkey
-//is
-//{
-//for i in 1..p_orig_table.i_foreign_keys.count()
-//{
-//  if( upper(p_orig_table.i_foreign_keys(i).i_consname) = upper(treat( p_orig_table.i_tablepartitioning as ot_orig_refpartitions ).i_fkname ))
-//  {
-//    return p_orig_table.i_foreign_keys(i);
-//  }
-//}
-//  
-//throw new RuntimeException( -20000, "fk for refpartitioning not found" );
-//}   
-//
-//
-//function get_mview_elements( p_model_elements in ct_orig_modelelement_list ) return ct_orig_mview_list
-//is
-//v_return ct_orig_mview_list = new ct_orig_mview_list();
-//{  
-//for i in 1 .. p_model_elements.count {
-//  if( p_model_elements(i) is of (ot_orig_mview) ) 
-//  {
-//    v_return.ext}
-//    v_return(v_return.count) = treat( p_model_elements(i) as ot_orig_mview );
-//  }
-//}    
-//
-//return v_return;
-//}
-//
-//function get_sequence_elements( p_model_elements in ct_orig_modelelement_list ) return ct_orig_sequence_list
-//is
-//v_return ct_orig_sequence_list = new ct_orig_sequence_list();
-//{  
-//for i in 1 .. p_model_elements.count {
-//  if( p_model_elements(i) is of (ot_orig_sequence) ) 
-//  {
-//    v_return.ext}
-//    v_return(v_return.count) = treat( p_model_elements(i) as ot_orig_sequence );
-//  }
-//}    
-//
-//return v_return;
-//}  
-//
-//function sort_tables_for_ref_part( p_model_elements in ct_orig_modelelement_list ) return ct_orig_table_list
-//is
-//v_orig_modelelement_list ct_orig_table_list = new ct_orig_table_list();
-//v_orig_table_list ct_orig_modelelement_list = new ct_orig_modelelement_list();    
-//v_orig_modelelement ot_orig_modelelement;
-//type t_varchar_set is table of number index by varchar2(100);
-//v_tab_set t_varchar_set;
-//
-//procedure clean_orig_table_list
-//is
-//  v_new_orig_table_list ct_orig_modelelement_list = new ct_orig_modelelement_list();  
-//{
-//  for i in 1..v_orig_table_list.count
-//  {
-//    if( v_orig_table_list(i) != null )
-//    {
-//      v_new_orig_table_list.extend(1);
-//      v_new_orig_table_list(v_new_orig_table_list.count) = v_orig_table_list(i);
-//    }
-//  }
-//  
-//  v_orig_table_list = v_new_orig_table_list;
-//}    
-//
-//function add_orig_table_list return number
-//is
-//  v_orig_table ot_orig_table;    
-//  v_required_table_name varchar2(100) = null; 
-//{
-//  for i in 1..v_orig_table_list.count
-//  {
-//    v_orig_table = treat( v_orig_table_list(i) as ot_orig_table );
-//    
-//    if( v_orig_table.i_tablepartitioning != null && v_orig_table.i_tablepartitioning is of (ot_orig_refpartitions) )
-//    {
-//      v_required_table_name = get_fk_for_ref_partitioning( v_orig_table ).i_desttable;
-//    } else {
-//      v_required_table_name = null;
-//    }
-//    
-//    if( v_required_table_name == null || v_tab_set.exists(v_required_table_name) )
-//    { 
-//      v_orig_modelelement_list.extend(1);
-//      v_orig_modelelement_list(v_orig_modelelement_list.count) = v_orig_table;    
-//      v_tab_set(upper(v_orig_table.i_name)) == true;
-//      v_orig_table_list(i) = null;
-//      clean_orig_table_list();
-//     
-//      return 1;
-//    }
-//  }
-//  
-//  return 0;      
-//}
-//
-//procedure add_orig_table_list_multi    
-//is
-//{
-//  {
-//    if( add_orig_table_list == false )
-//    {
-//      return;
-//    }
-//  }
-//}
-//{
-//for i in 1 .. p_model_elements.count()
-//{
-//  v_orig_modelelement = p_model_elements(i);
-//
-//  if( v_orig_modelelement is of (ot_orig_table) ) 
-//  {
-//    v_orig_table_list.extend(1);
-//    v_orig_table_list(v_orig_table_list.count) = treat( v_orig_modelelement as ot_orig_table );
-//    
-//    add_orig_table_list_multi();
-//  }
-//}  
-//
-//add_orig_table_list_multi();
-//
-//if( v_orig_table_list.count !== false )
-//{
-//  throw new RuntimeException( -20000, "possible table order not found " + v_orig_table_list.count );
-//}
-//
-//return v_orig_modelelement_list;
-//}  
-//
-
-//
-
-//
-//function has_rows_ignore_errors( p_test_stmt in varchar2 ) return number
-//is
-//{
-//return has_rows( p_test_stmt );
-//exception
-//when others {
-//  return 0; 
-//}    
-
-//
-//
-//procedure handle_mview( p_mview_diff od_orig_mview )
-//is     
-//v_orig_refreshmodetype ot_orig_refreshmodetype;
-//v_refreshmode varchar2(10);
-//  
-//procedure create_mview
-//is
-//{
-//  stmt_set( "create materialized view" );
-//  stmt_add( p_mview_diff.n_mview_name );
-//  
-//  if( ot_orig_buildmodetype.is_equal( p_mview_diff.n_buildmode, ot_orig_buildmodetype.c_prebuilt, ot_orig_buildmodetype.c_immediate ) == true )
-//  {
-//    stmt_add( "on prebuilt table" );
-//  } else {
-//    -- Physical properties nur, wenn nicht prebuilt
-//    if( p_mview_diff.n_tablespace != null )
-//    {
-//      stmt_add( "tablespace" ); 
-//      stmt_add( p_mview_diff.n_tablespace );            
-//    }   
-//
-//    if( ot_orig_compresstype.is_equal( p_mview_diff.n_compression, ot_orig_compresstype.c_compress, ot_orig_compresstype.c_nocompress ) == true )
-//    {
-//      stmt_add( "compress" );
-//      if( ot_orig_compressfortype.is_equal( p_mview_diff.n_compressionfor, ot_orig_compressfortype.c_all ) == true )
-//      {
-//        stmt_add( "for all operations" );
-//      elsif ( ot_orig_compressfortype.is_equal( p_mview_diff.n_compressionfor, ot_orig_compressfortype.c_direct_load ) == true )
-//        {
-//        stmt_add( "for direct_load operations" );
-//      elsif ( ot_orig_compressfortype.is_equal( p_mview_diff.n_compressionfor, ot_orig_compressfortype.c_query_low ) == true )
-//        {
-//        stmt_add( "for query low" );  
-//      elsif ( ot_orig_compressfortype.is_equal( p_mview_diff.n_compressionfor, ot_orig_compressfortype.c_query_high ) == true )
-//        {
-//        stmt_add( "for query high" );   
-//      elsif ( ot_orig_compressfortype.is_equal( p_mview_diff.n_compressionfor, ot_orig_compressfortype.c_archive_low ) == true )
-//        {
-//        stmt_add( "for archive low" );  
-//      elsif ( ot_orig_compressfortype.is_equal( p_mview_diff.n_compressionfor, ot_orig_compressfortype.c_archive_high ) == true )
-//        {
-//        stmt_add( "for archive high" );             
-//      }
-//    } else {
-//      stmt_add( "nocompress" );
-//    }
-//    
-//    if( ot_orig_paralleltype.is_equal( p_mview_diff.n_parallel, ot_orig_paralleltype.c_parallel ) == true )
-//    {
-//      stmt_add( "parallel" ); 
-//      if ( p_mview_diff.n_parallel_degree > 1 )
-//      {
-//        stmt_add( p_mview_diff.n_parallel_degree );
-//      }
-//    } else {
-//      stmt_add( "noparallel" );               
-//    }      
-//      
-//    if( p_mview_diff.n_buildmode != null )
-//    {   
-//      stmt_add( "build" );
-//      stmt_add( p_mview_diff.n_buildmode.i_literal );   
-//    }  
-//  }
-//    
-//  if( p_mview_diff.n_refreshmethod != null )
-//  {
-//    stmt_add( adjust_refreshmethod_literal(p_mview_diff.n_refreshmethod.i_literal) );    
-//    
-//    if( p_mview_diff.n_refreshmode != null )
-//    {
-//      stmt_add( "on" );
-//      stmt_add( p_mview_diff.n_refreshmode.i_literal );            
-//    } 
-//  }               
-//
-//  if( ot_orig_enabletype.is_equal( p_mview_diff.n_queryrewrite, ot_orig_enabletype.c_enable ) == true )
-//  {
-//    stmt_add( "enable query rewrite" ); 
-//  }  
-//    
-//  stmt_add( "as" ); 
-//  stmt_add( replace_linefeed_by_space(p_mview_diff.n_viewselectclob) );   
-//  add_stmt(); 
-//}
-//
-//{
-//if( p_mview_diff.isMatched == false )
-//{
-//  create_mview();
-//} else {
-//  if(    
-//       p_mview_diff.e_tablespace == false
-//    || p_mview_diff.e_viewselectclob == false 
-//    || p_mview_diff.e_buildmode == false 
-//    )                                        
-//  {
-//    add_stmt( "drop materialized view " + p_mview_diff.o_mview_name );   
-//        
-//    create_mview();
-//  } else { 
-//    if( p_mview_diff.e_queryrewrite == false )
-//    {
-//      add_stmt( "alter materialized view " + p_mview_diff.n_mview_name + " " + p_mview_diff.n_queryrewrite.i_literal + " query rewrite");  
-//    }
-//    
-//    if( p_mview_diff.e_refreshmode == false || p_mview_diff.e_refreshmethod == false )
-//    {
-//      v_orig_refreshmodetype = p_mview_diff.n_refreshmode;
-//      if ( v_orig_refreshmodetype == null ) 
-//      {
-//        v_refreshmode = "";
-//      } else {
-//        v_refreshmode = " on " + v_orig_refreshmodetype.i_literal;
-//      }
-//      add_stmt( "alter materialized view " + p_mview_diff.n_mview_name + " " + adjust_refreshmethod_literal(p_mview_diff.n_refreshmethod.i_literal) + v_refreshmode );  
-//    }
-//    
-//    -- Physical parameters nur, wenn nicht prebuilt
-//    if ( ot_orig_buildmodetype.is_equal(  p_mview_diff.n_buildmode,  ot_orig_buildmodetype.c_prebuilt, ot_orig_buildmodetype.c_immediate ) !== true )
-//    {        
-//      if( p_mview_diff.e_parallel == false || p_mview_diff.e_parallel_degree == false )
-//      {
-//        stmt_set( "alter materialized view" );
-//        stmt_add( p_mview_diff.n_mview_name );        
-//        if( ot_orig_paralleltype.is_equal( p_mview_diff.n_parallel, ot_orig_paralleltype.c_parallel ) == true )
-//        {
-//          stmt_add( "parallel" ); 
-//          if ( p_mview_diff.n_parallel_degree > 1 )
-//          {
-//            stmt_add( p_mview_diff.n_parallel_degree );
-//          }
-//        } else {
-//          stmt_add( "noparallel" );         
-//        }         
-//        
-//        stmt_done();
-//      }    
-//      
-//      if( p_mview_diff.e_compression == false || p_mview_diff.e_compressionfor == false )
-//      {
-//        stmt_set( "alter materialized view" );
-//        stmt_add( p_mview_diff.n_mview_name );        
-//        if( ot_orig_compresstype.is_equal( p_mview_diff.n_compression, ot_orig_compresstype.c_compress, ot_orig_compresstype.c_nocompress ) == true )
-//        {
-//          stmt_add( "compress" ); 
-//          if ( p_mview_diff.n_compressionFor != null )
-//          {
-//            stmt_add( "for " + adjust_compression_literal(p_mview_diff.n_compressionFor.i_literal));
-//          }
-//        } else {
-//          stmt_add( "nocompress" );         
-//        }         
-//        
-//        stmt_done();
-//      }  
-//    }  
-//  }     
-//}  
-//}            
-//
-//procedure handle_all_mviews
-//is
-//{      
-//for i in 1 .. pv_model_diff.c_model_elements_mview.count()
-//{
-//  if( pv_model_diff.c_model_elements_mview(i).is_equal == false )
-//  {        
-//    if( pv_model_diff.c_model_elements_mview(i).isNew == true )
-//    {                
-//      handle_mview( pv_model_diff.c_model_elements_mview(i) );
-//    } else {
-//      add_stmt( "drop materialized view " + pv_model_diff.c_model_elements_mview(i).o_mview_name );          
-//    }
-//  }
-//}  
-//}
-//
-
-//
-//procedure create_table( p_table_diff od_orig_table )
-//is
-
-//    
-//function create_range_valuelist( p_orig_rangepartitionval_list ct_orig_rangepartitionval_list ) return varchar2
-//is
-//  v_return varchar2(32000);
-//  v_orig_rangepartitionval ot_orig_rangepartitionval; 
-//{
-//  for j in 1..p_orig_rangepartitionval_list.count()
-//  {
-//    v_orig_rangepartitionval = p_orig_rangepartitionval_list(j);
-//    if(j!=1)
-//    {
-//      v_return = v_return + ",";              
-//    }
-//      
-//    if( v_orig_rangepartitionval.i_value != null )
-//    {
-//      v_return = v_return + v_orig_rangepartitionval.i_value;                    
-//    } else {
-//      v_return = v_return + "maxvalue";
-//    }
-//  }       
-//  
-//  return v_return;   
-//}  
-//
-//function create_list_valuelist( p_orig_listpartitionvalu_list ct_orig_listpartitionvalu_list ) return varchar2
-//is
-//  v_return varchar2(32000);
-//  v_orig_listpartitionvalu ot_orig_listpartitionvalu; 
-//{
-//  for j in 1..p_orig_listpartitionvalu_list.count()
-//  {
-//    v_orig_listpartitionvalu = p_orig_listpartitionvalu_list(j);
-//    if(j!=1)
-//    {
-//      v_return = v_return + ",";              
-//    }
-//      
-//    if( v_orig_listpartitionvalu.i_value != null )
-//    {
-//      v_return = v_return + v_orig_listpartitionvalu.i_value;                    
-//    } else {
-//      v_return = v_return + "default";
-//    }
-//  }       
-//  
-//  return v_return;   
-//}    
-//
-//function create_sub_range_clause( p_orig_rangesubsubpart ot_orig_rangesubsubpart ) return varchar2
-//is
-//  v_return varchar2(32000);
-//{  
-//  v_return = v_return + "subpartition " + p_orig_rangesubsubpart.i_name + " values less than (";
-//    
-//  v_return = v_return + create_range_valuelist(p_orig_rangesubsubpart.i_value );
-//    
-//  v_return = v_return + ")";                    
-//    
-//  if( p_orig_rangesubsubpart.i_tablespace != null )
-//  {
-//    v_return = v_return + " tablespace " + p_orig_rangesubsubpart.i_tablespace;
-//  }      
-//
-//  return v_return;
-//}  
-//
-//function create_sub_list_clause( p_orig_listsubsubpart ot_orig_listsubsubpart ) return varchar2
-//is
-//  v_return varchar2(32000);
-//{  
-//  v_return = v_return + "subpartition " + p_orig_listsubsubpart.i_name + " values (";
-//    
-//  v_return = v_return + create_list_valuelist(p_orig_listsubsubpart.i_value );
-//    
-//  v_return = v_return + ")";                    
-//    
-//  if( p_orig_listsubsubpart.i_tablespace != null )
-//  {
-//    v_return = v_return + " tablespace " + p_orig_listsubsubpart.i_tablespace;
-//  }      
-//
-//  return v_return;
-//}  
-//
-//function create_sub_hash_clause( p_orig_hashsubsubpart ot_orig_hashsubsubpart ) return varchar2
-//is
-//  v_return varchar2(32000);
-//{  
-//  v_return = v_return + "subpartition " + p_orig_hashsubsubpart.i_name;
-//          
-//  if( p_orig_hashsubsubpart.i_tablespace != null )
-//  {
-//    v_return = v_return + " tablespace " + p_orig_hashsubsubpart.i_tablespace;
-//  }      
-//
-//  return v_return;
-//}  
-//
-//function create_subpartitions( p_orig_subsubpart_list ct_orig_subsubpart_list ) return varchar2
-//is
-//  v_return varchar2(32000);
-//  v_orig_subsubpart ot_orig_subsubpart;
-//{
-//  v_return = v_return + "(";              
-//  for i in 1..p_orig_subsubpart_list.count
-//  {    
-//    v_orig_subsubpart = p_orig_subsubpart_list(i);
-//    
-//    if(i!=1)
-//    {
-//      v_return = v_return + ",";              
-//    }
-//    
-//    if( v_orig_subsubpart is of (ot_orig_rangesubsubpart) )
-//    {
-//      v_return = v_return + create_sub_range_clause( treat( v_orig_subsubpart as ot_orig_rangesubsubpart) );
-//    elsif( v_orig_subsubpart is of (ot_orig_listsubsubpart) )
-//    {
-//      v_return = v_return + create_sub_list_clause( treat( v_orig_subsubpart as ot_orig_listsubsubpart) );        
-//    elsif( v_orig_subsubpart is of (ot_orig_hashsubsubpart) )
-//    {
-//      v_return = v_return + create_sub_hash_clause( treat( v_orig_subsubpart as ot_orig_hashsubsubpart) );          
-//    } else {    
-//      throw new RuntimeException(-20000,"subpartitionstyp unbekannt");
-//    }
-//  }
-//  
-//  v_return = v_return + ")";              
-//
-//  return v_return;
-//}
-//
-//function create_range_sub_parts( p_orig_rangesubparts ot_orig_rangesubparts ) return varchar2
-//is
-//  v_return varchar2(32000);
-//{
-//  v_return = v_return + " subpartition by range (";              
-//  for i in 1..p_orig_rangesubparts.i_columns.count()
-//  {
-//    if(i!=1)
-//    {
-//      v_return = v_return + ",";              
-//    }
-//    v_return = v_return + p_orig_rangesubparts.i_columns(i).i_column_name;
-//  }
-//  v_return = v_return + ")";           
-//
-//  return v_return;
-//}  
-//
-//function create_list_sub_parts( p_orig_listsubparts ot_orig_listsubparts ) return varchar2
-//is
-//  v_return varchar2(32000);
-//{
-//  v_return = v_return + " subpartition by list (" + p_orig_listsubparts.i_column.i_column_name + ")";           
-//
-//  return v_return;
-//}    
-//
-//function create_hash_sub_parts( p_orig_hashsubparts ot_orig_hashsubparts ) return varchar2
-//is
-//  v_return varchar2(32000);
-//{
-//  v_return = v_return + " subpartition by hash (" + p_orig_hashsubparts.i_column.i_column_name + ")";           
-//
-//  return v_return;
-//}    
-//
-//function create_table_sub_parts( p_orig_tablesubpart ot_orig_tablesubpart ) return varchar2
-//is
-//  v_return varchar2(32000);
-//{
-//  if( p_orig_tablesubpart is of (ot_orig_rangesubparts) )
-//  {
-//    v_return = v_return + create_range_sub_parts( treat( p_orig_tablesubpart as ot_orig_rangesubparts) );
-//  elsif( p_orig_tablesubpart is of (ot_orig_listsubparts) )
-//  {
-//    v_return = v_return + create_list_sub_parts( treat( p_orig_tablesubpart as ot_orig_listsubparts) );
-//  elsif( p_orig_tablesubpart is of (ot_orig_hashsubparts) )
-//  {
-//    v_return = v_return + create_hash_sub_parts( treat( p_orig_tablesubpart as ot_orig_hashsubparts) );
-//  } else {    
-//    throw new RuntimeException(-20000,"subpartitionstyp unbekannt");
-//  }
-//  
-//  return v_return;
-//}
-//
-//function create_range_clause( p_orig_rangepartitions ot_orig_rangepartitions ) return varchar2
-//is
-//  v_return varchar2(32000);
-//  v_orig_rangepartition ot_orig_rangepartition;         
-//  v_orig_rangesubpart ot_orig_rangesubpart;
-//{
-//  v_return = v_return + "partition by range (";      
-//  for i in 1..p_orig_rangepartitions.i_columns.count()
-//  {
-//    if(i!=1)
-//    {
-//      v_return = v_return + ",";              
-//    }
-//    v_return = v_return + p_orig_rangepartitions.i_columns(i).i_column_name;
-//  }
-//  v_return = v_return + ")";      
-//  
-//  if( p_orig_rangepartitions.i_intervalexpression != null )
-//  {
-//    v_return = v_return + "interval (" + p_orig_rangepartitions.i_intervalexpression + ")";      
-//  }
-//  
-//  if( p_orig_rangepartitions.i_tablesubpart != null )
-//  {
-//    v_return = v_return + create_table_sub_parts( p_orig_rangepartitions.i_tablesubpart );
-//  
-//    v_return = v_return + "(";
-//          
-//    for i in 1..p_orig_rangepartitions.i_subpartitionlist.count()
-//    {
-//      v_orig_rangesubpart = p_orig_rangepartitions.i_subpartitionlist(i);
-//      if(i!=1)
-//      {
-//        v_return = v_return + ",";              
-//      }
-//      v_return = v_return + "partition " + v_orig_rangesubpart.i_name + " values less than (";
-//      
-//      v_return = v_return + create_range_valuelist(v_orig_rangesubpart.i_value );        
-//      
-//      v_return = v_return + ")";         
-//      
-//      v_return = v_return + create_subpartitions( v_orig_rangesubpart.i_subpartlist );        
-//    }
-//    v_return = v_return + ")";       
-//  } else {
-//    v_return = v_return + "(";
-//    for i in 1..p_orig_rangepartitions.i_partitionlist.count()
-//    { 
-//      v_orig_rangepartition = p_orig_rangepartitions.i_partitionlist(i);
-//      if(i!=1)
-//      {
-//        v_return = v_return + ",";              
-//      }
-//      v_return = v_return + "partition " + v_orig_rangepartition.i_name + " values less than (";
-//    
-//      v_return = v_return + create_range_valuelist(v_orig_rangepartition.i_value );
-//    
-//      v_return = v_return + ")";                    
-//    
-//      if( v_orig_rangepartition.i_tablespace != null )
-//      {
-//        v_return = v_return + " tablespace " + v_orig_rangepartition.i_tablespace;
-//      }      
-//    } 
-//    v_return = v_return + ")";        
-//  }             
-//
-//  return v_return; 
-//} 
-//
-//function create_list_clause( p_orig_listpartitions ot_orig_listpartitions ) return varchar2
-//is
-//  v_return varchar2(32000);
-//  v_orig_listpartition ot_orig_listpartition;
-//  v_orig_listpartitionvalu ot_orig_listpartitionvalu; 
-//  v_orig_listsubpart ot_orig_listsubpart;
-//{
-//  v_return = v_return + "partition by list (" + p_orig_listpartitions.i_column.i_column_name; 
-//  v_return = v_return + ")";   
-//  
-//  if( p_orig_listpartitions.i_tablesubpart != null )
-//  {
-//    v_return = v_return + create_table_sub_parts( p_orig_listpartitions.i_tablesubpart );
-//  
-//    v_return = v_return + "(";
-//          
-//    for i in 1..p_orig_listpartitions.i_subpartitionlist.count()
-//    {
-//      v_orig_listsubpart = p_orig_listpartitions.i_subpartitionlist(i);
-//      if(i!=1)
-//      {
-//        v_return = v_return + ",";              
-//      }
-//      v_return = v_return + "partition " + v_orig_listsubpart.i_name + " values (";
-//      
-//      v_return = v_return + create_list_valuelist(v_orig_listsubpart.i_value );        
-//      
-//      v_return = v_return + ")";         
-//      
-//      v_return = v_return + create_subpartitions( v_orig_listsubpart.i_subpartlist );        
-//    }
-//    v_return = v_return + ")";       
-//  } else {
-//    v_return = v_return + "(";    
-//  
-//    for i in 1..p_orig_listpartitions.i_partitionlist.count()
-//    {
-//      v_orig_listpartition = p_orig_listpartitions.i_partitionlist(i);
-//      if(i!=1)
-//      {
-//        v_return = v_return + ",";              
-//      }
-//      v_return = v_return + "partition " + v_orig_listpartition.i_name + " values (";
-//    
-//      v_return = v_return + create_list_valuelist( v_orig_listpartition.i_value );        
-//    
-//      v_return = v_return + ")";    
-//      
-//      if( v_orig_listpartition.i_tablespace != null )
-//      {
-//        v_return = v_return + " tablespace " + v_orig_listpartition.i_tablespace;
-//      }                      
-//    }      
-//    v_return = v_return + ")";                  
-//  }
-//
-//  return v_return; 
-//}   
-//
-//function create_hash_clause( p_orig_hashpartitions ot_orig_hashpartitions ) return varchar2
-//is
-//  v_return varchar2(32000);
-//  v_orig_hashpartition ot_orig_hashpartition;
-//{
-//  v_return = v_return + "partition by hash (" + p_orig_hashpartitions.i_column.i_column_name; 
-//  v_return = v_return + ")(";      
-//  for i in 1..p_orig_hashpartitions.i_partitionlist.count()
-//  {
-//    v_orig_hashpartition = p_orig_hashpartitions.i_partitionlist(i);
-//    if(i!=1)
-//    {
-//      v_return = v_return + ",";              
-//    }
-//    v_return = v_return + "partition " + v_orig_hashpartition.i_name;
-//    
-//    if( v_orig_hashpartition.i_tablespace != null )
-//    {
-//      v_return = v_return + " tablespace " + v_orig_hashpartition.i_tablespace;
-//    }
-//  }      
-//  v_return = v_return + ")";                  
-//
-//  return v_return; 
-//}     
-//
-//function create_ref_clause( p_orig_refpartitions ot_orig_refpartitions ) return varchar2
-//is
-//  v_return varchar2(32000);
-//  v_orig_refpartition ot_orig_refpartition;
-//{
-//  v_return = v_return + "partition by reference (" + p_orig_refpartitions.i_fkname; 
-//  v_return = v_return + ")(";      
-//  for i in 1..p_orig_refpartitions.i_partitionlist.count()
-//  {
-//    v_orig_refpartition = p_orig_refpartitions.i_partitionlist(i);
-//    if(i!=1)
-//    {
-//      v_return = v_return + ",";              
-//    }
-//    v_return = v_return + "partition " + v_orig_refpartition.i_name;
-//    
-//    if( v_orig_refpartition.i_tablespace != null )
-//    {
-//      v_return = v_return + " tablespace " + v_orig_refpartition.i_tablespace;
-//    }
-//  }      
-//  v_return = v_return + ")";                  
-//
-//  return v_return; 
-//}     
-//
-//function create_partitioning_clause( p_orig_tablepartitioning ot_orig_tablepartitioning ) return varchar2
-//is
-//  v_return varchar2(32000);
-//{
-//  if( p_orig_tablepartitioning == null )
-//  {
-//    return null;
-//  }
-//
-//  v_return = v_return + " ";
-//
-//  if( p_orig_tablepartitioning is of (ot_orig_rangepartitions) )
-//  {
-//    v_return = v_return + create_range_clause( treat( p_orig_tablepartitioning as ot_orig_rangepartitions) );
-//  elsif( p_orig_tablepartitioning is of (ot_orig_listpartitions) )
-//  {
-//    v_return = v_return + create_list_clause( treat( p_orig_tablepartitioning as ot_orig_listpartitions) );    
-//  elsif( p_orig_tablepartitioning is of (ot_orig_hashpartitions) )
-//  {
-//    v_return = v_return + create_hash_clause( treat( p_orig_tablepartitioning as ot_orig_hashpartitions) );          
-//  elsif( p_orig_tablepartitioning is of (ot_orig_refpartitions) )
-//  {
-//    v_return = v_return + create_ref_clause( treat( p_orig_tablepartitioning as ot_orig_refpartitions) );                
-//  } else {    
-//    throw new RuntimeException(-20000,"partitionstyp unbekannt");
-//  }
-//
-//  return v_return; 
-//}
-//
-//function create_ref_fk_clause( p_orig_table ot_orig_table ) return varchar2
-//is
-//  v_return varchar2(32000);
-//  v_orig_refpartition ot_orig_refpartition;
-//  v_orig_foreignkey ot_orig_foreignkey;
-//{
-//  if( p_orig_table.i_tablepartitioning is of (ot_orig_refpartitions) )
-//  {
-//    v_orig_foreignkey = get_fk_for_ref_partitioning( p_orig_table );
-//  
-//--        v_return = v_return + ", " + create_foreign_key_clause( v_orig_foreignkey );
-//  }
-//  return v_return; 
-//}   
-
-//procedure handle_mviewlog( p_table_diff in out nocopy od_orig_table )
-//is     
-//v_default_tablespace varchar2(30);
-//c_date_format constant varchar2(30) = pa_orcas_run_parameter.get_dateformat();
-//
-//procedure create_mviewlog
-//is
-//{
-//  stmt_set( "create materialized view log on" );       
-//  stmt_add( p_table_diff.n_name ); 
-//  
-//  if( p_table_diff.c_mviewlog.n_tablespace != null )
-//  {
-//    stmt_add( "tablespace" ); 
-//    stmt_add( p_table_diff.c_mviewlog.n_tablespace );            
-//  }   
-//  
-//  if( ot_orig_paralleltype.is_equal( p_table_diff.c_mviewlog.n_parallel, ot_orig_paralleltype.c_parallel ) == true )
-//  {
-//    stmt_add( "parallel" ); 
-//    if ( p_table_diff.c_mviewlog.n_parallel_degree > 1 )
-//    {
-//      stmt_add( p_table_diff.c_mviewlog.n_parallel_degree );
-//    }
-//  }
-//  
-//  stmt_add( "with" );
-//  
-//  if( nvl(p_table_diff.c_mviewlog.n_primarykey,"null") = "primary" 
-//      || nvl(p_table_diff.c_mviewlog.n_rowid,"null") != "rowid"
-//  )
-//  {
-//    stmt_add( "primary key" ); 
-//    if( nvl(p_table_diff.c_mviewlog.n_rowid,"null") = "rowid" )
-//    {
-//      stmt_add( "," );
-//    }     
-//  }  
-//  
-//  if( nvl(p_table_diff.c_mviewlog.n_rowid,"null") = "rowid" )
-//     { 
-//     stmt_add( "rowid" );
-//  }  
-//  
-//  if( nvl(p_table_diff.c_mviewlog.n_withsequence,"null") = "sequence" )
-//     {
-//     stmt_add( "," );
-//     stmt_add( "sequence" );
-//  }           
-//                    
-//  if( p_table_diff.c_mviewlog.c_columns.count() > 0 )
-//  {
-//    stmt_add( "(" );
-//    stmt_add( get_column_list( p_table_diff.c_mviewlog.c_columns ) ); 
-//    stmt_add( ")" ); 
-//  }     
-//           
-//  if( nvl(p_table_diff.c_mviewlog.n_commitscn,"null") = "commit_scn" )
-//     {
-//     stmt_add( "," );
-//     stmt_add( "commit scn" );
-//  }      
-//
-//  if( p_table_diff.c_mviewlog.n_newvalues != null )
-//     {
-//     stmt_add( p_table_diff.c_mviewlog.n_newvalues.i_literal );
-//     stmt_add( "new values" );
-//  }    
-//  
-//  if (   p_table_diff.c_mviewlog.n_startwith != null 
-//      || p_table_diff.c_mviewlog.n_next != null 
-//      || (p_table_diff.c_mviewlog.n_repeatInterval != null && p_table_diff.c_mviewlog.n_repeatInterval !== false))
-//    {
-//      stmt_add( "purge" );
-//      if (p_table_diff.c_mviewlog.n_startwith != null)
-//        {
-//          stmt_add( "start with" );
-//          stmt_add( "to_date(""" + p_table_diff.c_mviewlog.n_startwith + """,""" + c_date_format + """)" );
-//      }
-//      if (p_table_diff.c_mviewlog.n_next != null)
-//        {
-//          stmt_add( "next" );
-//          stmt_add( "to_date(""" + p_table_diff.c_mviewlog.n_next + """,""" + c_date_format + """)" );
-//        } else { 
-//          if (p_table_diff.c_mviewlog.n_repeatInterval != null && p_table_diff.c_mviewlog.n_repeatInterval !== false)
-//          {
-//              stmt_add( "repeat interval" );
-//              stmt_add( p_table_diff.c_mviewlog.n_repeatInterval );
-//          }
-//      }
-//    } else {
-//      if( ot_orig_synchronoustype.is_equal( p_table_diff.c_mviewlog.n_synchronous, ot_orig_synchronoustype.c_asynchronous ) == true )
-//        { 
-//         stmt_add( "purge immediate asynchronous" );
-//      }
-//  }
-//  
-//  add_stmt();
-//  
-//}
-//
-//{
-//if( p_table_diff.c_mviewlog.isMatched == false || p_table_diff.c_mviewlog.isOld == false )
-//{
-//  if( p_table_diff.c_mviewlog.isNew == true )
-//  {
-//    create_mviewlog();
-//  }
-//} else {
-//  select distinct(default_tablespace) into v_default_tablespace from user_users;
-//  if(   
-//     p_table_diff.c_mviewlog.e_columns == false
-//     || 
-//     (  is_equal_ignore_case(              "rowid",                              p_table_diff.c_mviewlog.n_rowid                                   ) == true and
-//        p_table_diff.c_mviewlog.e_primarykey == false
-//     ) 
-//     || 
-//     (  p_table_diff.c_mviewlog.n_rowid == null and
-//        is_equal_ignore_case(              p_table_diff.c_mviewlog.o_primarykey,     "primary"                                                  ) !== true 
-//     )    
-//     || p_table_diff.c_mviewlog.e_rowid == false
-//     || p_table_diff.c_mviewlog.e_withsequence == false
-//     || p_table_diff.c_mviewlog.e_commitscn == false
-//     || p_table_diff.c_mviewlog.e_tablespace == false              
-//    )                                        
-//  {
-//    add_stmt( "drop materialized view log on " + p_table_diff.o_name );   
-//    
-//    create_mviewlog();
-//  } else {
-//    if(    p_table_diff.c_mviewlog.e_parallel == false
-//        || p_table_diff.c_mviewlog.e_parallel_degree == false
-//      )
-//    {
-//      stmt_set( "alter materialized view log on" );
-//      stmt_add( p_table_diff.n_name );        
-//      if( ot_orig_paralleltype.is_equal( p_table_diff.c_mviewlog.n_parallel, ot_orig_paralleltype.c_parallel ) == true )
-//      {
-//        stmt_add( "parallel" ); 
-//        if ( p_table_diff.c_mviewlog.n_parallel_degree > 1 )
-//        {
-//          stmt_add( p_table_diff.c_mviewlog.n_parallel_degree );
-//        }
-//      } else {
-//        stmt_add( "noparallel" );         
-//      }         
-//      
-//      stmt_done();
-//    }
-//    
-//    if(  p_table_diff.c_mviewlog.e_newvalues == false
-//      )
-//    {
-//      stmt_set( "alter materialized view log on" );
-//      stmt_add( p_table_diff.n_name );       
-//      
-//      if( ot_orig_newvaluestype.is_equal( p_table_diff.c_mviewlog.n_newvalues, ot_orig_newvaluestype.c_including, ot_orig_newvaluestype.c_excluding ) == true )
-//      {
-//        stmt_add( "including" ); 
-//      } else {
-//        stmt_add( "excluding" );         
-//      }                    
-//      stmt_add( "new values" );
-//      
-//      stmt_done();
-//    }
-//    
-//    if (   p_table_diff.c_mviewlog.e_startwith == false
-//        || p_table_diff.c_mviewlog.e_next == false
-//        || p_table_diff.c_mviewlog.e_repeatInterval == false
-//        )
-//      {
-//          stmt_add( "alter materialized view log on" ); 
-//          stmt_add( p_table_diff.n_name );    
-//          stmt_add( "purge" );   
-//          if( p_table_diff.c_mviewlog.e_startwith == false )
-//          {
-//              stmt_add( "start with" );
-//              stmt_add( "to_date(""" + p_table_diff.c_mviewlog.n_startwith + """,""" + c_date_format + """)" );
-//          }
-//          if( p_table_diff.c_mviewlog.e_next == false )
-//          {
-//              stmt_add( "next" );
-//              stmt_add( "to_date(""" + p_table_diff.c_mviewlog.n_next + """,""" + c_date_format +""")" );
-//          } else { 
-//              if (p_table_diff.c_mviewlog.e_repeatInterval == false)
-//              {
-//                  stmt_add( "repeat interval" );
-//                  stmt_add( p_table_diff.c_mviewlog.n_repeatInterval );
-//              }
-//          }
-//         
-//      stmt_done();
-//    } else {
-//    
-//        if( p_table_diff.c_mviewlog.e_synchronous == false )
-//        {
-//          stmt_add( "alter materialized view log on" ); 
-//          stmt_add( p_table_diff.n_name );       
-//          if( ot_orig_synchronoustype.is_equal( p_table_diff.c_mviewlog.n_synchronous, ot_orig_synchronoustype.c_asynchronous, ot_orig_synchronoustype.c_synchronous ) == true )
-//          {
-//              stmt_add( "purge immediate asynchronous" ); 
-//          } else {
-//              stmt_add( "purge immediate synchronous" ); 
-//          }
-//          
-//          stmt_done();
-//        }
-//        
-//    }
-//    
-//  }
-//}        
-//}         
-//
-
-//
-
-//
-//procedure execute_all_statements is    
-//{
-//commit;
-//
-//for i in 1..pv_statement_list.count
-//{
-//--      dbms_output.put_line( pv_statement_list(i) );
-//  pa_orcas_exec_log.exec_stmt( pv_statement_list(i) );   
-//}
-//}
-//
-//
-//}
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//

@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
 import de.opitzconsulting.orcas.diff.Parameters.ParameterTypeMode;
+import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.syex.trans.TransformOrigSyex;
 import de.opitzconsulting.orcas.syex.xml.XmlExport;
 import de.opitzconsulting.orcasDsl.Model;
@@ -16,9 +17,9 @@ public class OrcasLoadExtract
     {
       Parameters lParameters = new Parameters( pArgs, ParameterTypeMode.ORCAS_LOAD_EXTRACT );
 
-      JdbcConnectionHandler.initWithMainParameters( lParameters );
+      CallableStatementProvider lCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( lParameters );
 
-      Model lModel = TransformOrigSyex.convertModel( new LoadIst().loadModel( lParameters ) );
+      Model lModel = TransformOrigSyex.convertModel( new LoadIst( lCallableStatementProvider, lParameters ).loadModel() );
 
       FileOutputStream lFileOutputStream = new FileOutputStream( lParameters.getModelFile() );
 

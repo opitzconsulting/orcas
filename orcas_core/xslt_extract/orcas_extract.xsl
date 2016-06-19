@@ -24,7 +24,7 @@
  <func:function name="myfunc:format-mview-filename">
     <param name="string_param" />
     <func:result>
-      <value-of select="java_string:concat('zzz_',java_string:toLowerCase(java_string:new($string_param)))" />
+      <value-of select="java_string:concat('mv_',java_string:toLowerCase(java_string:new($string_param)))" />
     </func:result>
   </func:function>  
   
@@ -566,7 +566,7 @@
     </if>
   </template>  
 
-  <template match="HashPartition | ListPartition | RangePartition">
+  <template match="HashPartition | ListPartition | RangePartition | RefPartition">
     <text>
   </text>
     <text>partition </text>
@@ -662,6 +662,15 @@
     <apply-templates select="tableSubPart" />
     <apply-templates select="partitionList" />
     <apply-templates select="subPartitionList" />
+  </template>
+
+  <template match="RefPartitions">
+    <text>
+</text>
+    <text>partition by reference (</text>
+    <apply-templates select="fkName" />
+    <text>)</text>
+    <apply-templates select="partitionList" />
   </template>
   
   <template match="MviewLog">
@@ -836,7 +845,9 @@
   
   <template match="viewSelectCLOB">
     <text> as </text> 
+    <text>"</text> 
     <value-of select="myfunc:split-by-linefeed(.)" />
+    <text>"</text> 
   </template>      
 
 </stylesheet>

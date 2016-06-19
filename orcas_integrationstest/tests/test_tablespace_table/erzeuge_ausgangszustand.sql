@@ -1,20 +1,3 @@
-create table tab_lob
-(
-  clob_column clob, 
-  blob_column blob,
-  clob_column_normal clob
-)
-lob( clob_column )
-store as 
-(
-        tablespace &2
-),
-lob( blob_column )
-store as 
-(
-        tablespace &2
-) tablespace &2;
-
 create table tab_mod_tablespace
  (
    id number(15) not null

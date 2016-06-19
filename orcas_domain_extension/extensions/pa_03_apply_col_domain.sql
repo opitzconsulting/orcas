@@ -75,7 +75,7 @@ create or replace package body pa_03_apply_col_domain is
             p_syex_table.i_primary_key.i_pk_columns(p_syex_table.i_primary_key.i_pk_columns.count) := v_syex_primarykey.i_pk_columns(1);
           end if;
           
-          if( v_syex_columndomain.i_generatepk.i_sequencenamerules is not null )
+          if( v_syex_columndomain.i_generatepk.i_sequencenamerules is not null and v_syex_columndomain.i_generatepk.i_sequencenamerules.count > 0 )
           then
             v_syex_sequence := new ot_syex_sequence();
           

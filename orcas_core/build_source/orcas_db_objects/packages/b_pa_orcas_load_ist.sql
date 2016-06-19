@@ -350,7 +350,7 @@ $IF DBMS_DB_VERSION.VERSION >= 12 $THEN
                 and user_tab_cols.table_name = user_tab_identity_cols.table_name)
 $END                
          where hidden_column = 'NO'
-         order by table_name, column_id, column_name
+         order by table_name, column_name, column_id
         )
         
       loop

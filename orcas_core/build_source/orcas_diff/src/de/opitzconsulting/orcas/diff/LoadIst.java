@@ -1,21 +1,30 @@
 package de.opitzconsulting.orcas.diff;
 
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.common.util.EList;
 
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
+import de.opitzconsulting.orcas.sql.CallableStatementProvider;
+import de.opitzconsulting.orcas.sql.WrapperCallableStatement;
 import de.opitzconsulting.orcas.sql.WrapperIteratorResultSet;
+import de.opitzconsulting.orcas.sql.WrapperReturnFirstValue;
 import de.opitzconsulting.origOrcasDsl.BuildModeType;
 import de.opitzconsulting.origOrcasDsl.CharType;
 import de.opitzconsulting.origOrcasDsl.Column;
+import de.opitzconsulting.origOrcasDsl.ColumnIdentity;
 import de.opitzconsulting.origOrcasDsl.ColumnRef;
 import de.opitzconsulting.origOrcasDsl.CommentObjectType;
 import de.opitzconsulting.origOrcasDsl.CompressForType;
@@ -27,41 +36,87 @@ import de.opitzconsulting.origOrcasDsl.DeferrType;
 import de.opitzconsulting.origOrcasDsl.EnableType;
 import de.opitzconsulting.origOrcasDsl.FkDeleteRuleType;
 import de.opitzconsulting.origOrcasDsl.ForeignKey;
+import de.opitzconsulting.origOrcasDsl.HashPartition;
+import de.opitzconsulting.origOrcasDsl.HashPartitions;
+import de.opitzconsulting.origOrcasDsl.HashSubParts;
+import de.opitzconsulting.origOrcasDsl.HashSubSubPart;
 import de.opitzconsulting.origOrcasDsl.Index;
 import de.opitzconsulting.origOrcasDsl.IndexGlobalType;
 import de.opitzconsulting.origOrcasDsl.IndexOrUniqueKey;
 import de.opitzconsulting.origOrcasDsl.InlineComment;
+import de.opitzconsulting.origOrcasDsl.ListPartition;
+import de.opitzconsulting.origOrcasDsl.ListPartitionValue;
+import de.opitzconsulting.origOrcasDsl.ListPartitions;
+import de.opitzconsulting.origOrcasDsl.ListSubPart;
+import de.opitzconsulting.origOrcasDsl.ListSubParts;
+import de.opitzconsulting.origOrcasDsl.ListSubSubPart;
 import de.opitzconsulting.origOrcasDsl.LobStorage;
 import de.opitzconsulting.origOrcasDsl.LoggingType;
 import de.opitzconsulting.origOrcasDsl.Model;
 import de.opitzconsulting.origOrcasDsl.ModelElement;
 import de.opitzconsulting.origOrcasDsl.Mview;
+import de.opitzconsulting.origOrcasDsl.MviewLog;
+import de.opitzconsulting.origOrcasDsl.NewValuesType;
 import de.opitzconsulting.origOrcasDsl.OrderType;
 import de.opitzconsulting.origOrcasDsl.ParallelType;
 import de.opitzconsulting.origOrcasDsl.PermanentnessTransactionType;
 import de.opitzconsulting.origOrcasDsl.PermanentnessType;
 import de.opitzconsulting.origOrcasDsl.PrimaryKey;
+import de.opitzconsulting.origOrcasDsl.RangePartition;
+import de.opitzconsulting.origOrcasDsl.RangePartitionValue;
+import de.opitzconsulting.origOrcasDsl.RangePartitions;
+import de.opitzconsulting.origOrcasDsl.RangeSubPart;
+import de.opitzconsulting.origOrcasDsl.RangeSubParts;
+import de.opitzconsulting.origOrcasDsl.RangeSubSubPart;
+import de.opitzconsulting.origOrcasDsl.RefPartition;
+import de.opitzconsulting.origOrcasDsl.RefPartitions;
 import de.opitzconsulting.origOrcasDsl.RefreshMethodType;
 import de.opitzconsulting.origOrcasDsl.RefreshModeType;
 import de.opitzconsulting.origOrcasDsl.Sequence;
+import de.opitzconsulting.origOrcasDsl.SubSubPart;
+import de.opitzconsulting.origOrcasDsl.SynchronousType;
 import de.opitzconsulting.origOrcasDsl.Table;
+import de.opitzconsulting.origOrcasDsl.TablePartitioning;
+import de.opitzconsulting.origOrcasDsl.TableSubPart;
 import de.opitzconsulting.origOrcasDsl.UniqueKey;
+import de.opitzconsulting.origOrcasDsl.impl.ColumnIdentityImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnRefImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ConstraintImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ForeignKeyImpl;
+import de.opitzconsulting.origOrcasDsl.impl.HashPartitionImpl;
+import de.opitzconsulting.origOrcasDsl.impl.HashPartitionsImpl;
+import de.opitzconsulting.origOrcasDsl.impl.HashSubPartsImpl;
+import de.opitzconsulting.origOrcasDsl.impl.HashSubSubPartImpl;
 import de.opitzconsulting.origOrcasDsl.impl.IndexImpl;
 import de.opitzconsulting.origOrcasDsl.impl.InlineCommentImpl;
+import de.opitzconsulting.origOrcasDsl.impl.ListPartitionImpl;
+import de.opitzconsulting.origOrcasDsl.impl.ListPartitionValueImpl;
+import de.opitzconsulting.origOrcasDsl.impl.ListPartitionsImpl;
+import de.opitzconsulting.origOrcasDsl.impl.ListSubPartImpl;
+import de.opitzconsulting.origOrcasDsl.impl.ListSubPartsImpl;
+import de.opitzconsulting.origOrcasDsl.impl.ListSubSubPartImpl;
 import de.opitzconsulting.origOrcasDsl.impl.LobStorageImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ModelImpl;
 import de.opitzconsulting.origOrcasDsl.impl.MviewImpl;
+import de.opitzconsulting.origOrcasDsl.impl.MviewLogImpl;
 import de.opitzconsulting.origOrcasDsl.impl.PrimaryKeyImpl;
+import de.opitzconsulting.origOrcasDsl.impl.RangePartitionImpl;
+import de.opitzconsulting.origOrcasDsl.impl.RangePartitionValueImpl;
+import de.opitzconsulting.origOrcasDsl.impl.RangePartitionsImpl;
+import de.opitzconsulting.origOrcasDsl.impl.RangeSubPartImpl;
+import de.opitzconsulting.origOrcasDsl.impl.RangeSubPartsImpl;
+import de.opitzconsulting.origOrcasDsl.impl.RangeSubSubPartImpl;
+import de.opitzconsulting.origOrcasDsl.impl.RefPartitionImpl;
+import de.opitzconsulting.origOrcasDsl.impl.RefPartitionsImpl;
 import de.opitzconsulting.origOrcasDsl.impl.SequenceImpl;
 import de.opitzconsulting.origOrcasDsl.impl.TableImpl;
 import de.opitzconsulting.origOrcasDsl.impl.UniqueKeyImpl;
 
 public class LoadIst
 {
+  Log _log = LogFactory.getLog( OrcasMain.class );
+
   private Map<String,List<String>> excludeMap = new HashMap<String,List<String>>();
 
   private Map<String,Object> constraintMapForFK = new HashMap<String,Object>();
@@ -69,15 +124,25 @@ public class LoadIst
 
   private Parameters _parameters;
 
+  private int _oracleMajorVersion;
+
+  private CallableStatementProvider _callableStatementProvider;
+
+  public LoadIst( CallableStatementProvider pCallableStatementProvider,Parameters pParameters  )
+  {
+    _callableStatementProvider = pCallableStatementProvider;
+    _parameters = pParameters;
+  }
+
   private void registerConstarintForeFK( String pConstraintname, String pTablename, Object pConstarint )
   {
     constraintMapForFK.put( pConstraintname, pConstarint );
     constraintTableMapForFK.put( pConstraintname, pTablename );
   }
 
-  public Model loadModel( Parameters pParameters )
+  public Model loadModel( )
   {
-    _parameters = pParameters;
+    _oracleMajorVersion = loadOracleMajorVersion();
 
     Model pModel = new ModelImpl();
 
@@ -87,6 +152,11 @@ public class LoadIst
 
     loadTablesIntoModel( pModel );
     loadTableColumnsIntoModel( pModel );
+
+    loadPartitioningIntoModel( pModel );
+
+    loadMViewsLogsIntoModel( pModel );
+    loadMViewsLogColumnsIntoModel( pModel );
 
     loadLobstorageIntoModel( pModel );
 
@@ -102,7 +172,76 @@ public class LoadIst
 
     updateForeignkeyDestdata( pModel );
 
+    removeNonePrebuildMviewTables( pModel );
+
     return pModel;
+  }
+
+  private int loadOracleMajorVersion()
+  {
+    try
+    {
+      final int[] lReturn = new int[1];
+      String lCallExtensions = "" + //
+                               " { " + //
+                               "   ? = call " +
+                               " DBMS_DB_VERSION.VERSION " + //
+                               " } " + //
+                               "";
+
+      new WrapperCallableStatement( lCallExtensions, getCallableStatementProvider() )
+      {
+        @Override
+        protected void useCallableStatement( CallableStatement pCallableStatement ) throws SQLException
+        {
+          pCallableStatement.registerOutParameter( 1, java.sql.Types.NUMERIC );
+
+          pCallableStatement.execute();
+
+          lReturn[0] = pCallableStatement.getInt( 1 );
+        }
+      }.execute();
+
+      return lReturn[0];
+    }
+    catch( Exception e )
+    {
+      _log.debug( e, e );
+
+      // should only happen if DBMS_DB_VERSION-Package does not exists
+      return 9;
+    }
+  }
+
+  private void removeNonePrebuildMviewTables( Model pModel )
+  {
+    List<String> lNonePrebuildMviewNames = new ArrayList<String>();
+
+    for( ModelElement lModelElement : pModel.getModel_elements() )
+    {
+      if( lModelElement instanceof Mview )
+      {
+        Mview lMview = (Mview)lModelElement;
+
+        if( lMview.getBuildMode() != BuildModeType.PREBUILT )
+        {
+          lNonePrebuildMviewNames.add( lMview.getMview_name() );
+        }
+      }
+    }
+
+    for( ModelElement lModelElement : new ArrayList<ModelElement>( pModel.getModel_elements() ) )
+    {
+      if( lModelElement instanceof Table )
+      {
+        Table lTable = (Table)lModelElement;
+
+        if( lNonePrebuildMviewNames.contains( lTable.getName() ) )
+        {
+          pModel.getModel_elements().remove( lTable );
+        }
+      }
+    }
   }
 
   private String getExcludeWhere( String pExcludeWhere )
@@ -123,11 +262,9 @@ public class LoadIst
     {
       excludeMap.put( pType, new ArrayList<String>() );
 
-      String lSql = "select object_name, case when ( " +
-                    getExcludeWhere( pExcludeWhere ) +
-                    " ) then 1 else 0 end is_exclude from user_objects where object_type=?";
+      String lSql = "select object_name, case when ( " + getExcludeWhere( pExcludeWhere ) + " ) then 1 else 0 end is_exclude from user_objects where object_type=?";
 
-      new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider(), Collections.singletonList( pType ) )
+      new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( pType ) )
       {
         @Override
         protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -187,7 +324,7 @@ public class LoadIst
                   "  order by sequence_name" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -230,8 +367,8 @@ public class LoadIst
   private void loadMViewsIntoModel( final Model pModel )
   {
     String lSql = "" + //
-                  " select mview_name," + //
-                  "        query," + //
+                  " select query," + //
+                  "        mview_name," + //
                   "        updatable," + //
                   "        rewrite_enabled," + //
                   "        refresh_mode," + //
@@ -250,23 +387,20 @@ public class LoadIst
                   "  order by mview_name" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
+        String lString = pResultSet.getString( "query" );
 
         if( !isIgnoredMView( pResultSet.getString( "mview_name" ) ) )
         {
           final Mview lMview = new MviewImpl();
 
-          lMview.setMview_name( pResultSet.getString( "mview_name" ) );
-          lMview.setViewSelectCLOB( "\"" +
-                                    pResultSet.getString( "query" ) +
-                                    "\"" );
+          lMview.setViewSelectCLOB( lString );
 
-          // -- Zeilenumbrüche entfernen für Vergleichbarkeit
-          // TODO v_orig_mview.i_viewselectclob := replace(replace(replace(v_orig_mview.i_viewselectclob, chr(13) || chr(10),' '), chr(10),' '), chr(13),' ');
+          lMview.setMview_name( pResultSet.getString( "mview_name" ) );
 
           if( "IMMEDIATE".equals( pResultSet.getString( "build_mode" ) ) )
           {
@@ -321,41 +455,14 @@ public class LoadIst
           {
             lMview.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
-            if( pResultSet.getString( "compression" ) != null )
+            handleCompression( pResultSet.getString( "compression" ), pResultSet.getString( "compress_for" ), new CompressionHandler()
             {
-              if( "ENABLED".equals( pResultSet.getString( "compression" ) ) )
+              public void setCompression( CompressType pCompressType, CompressForType pCompressForType )
               {
-                lMview.setCompression( CompressType.COMPRESS );
-                if( pResultSet.getString( "compress_for" ).contains( "OLTP" ) )
-                {
-                  lMview.setCompressionFor( CompressForType.ALL );
-                }
-                if( "BASIC".equals( pResultSet.getString( "compress_for" ) ) )
-                {
-                  lMview.setCompressionFor( CompressForType.DIRECT_LOAD );
-                }
-                if( "QUERY LOW".equals( pResultSet.getString( "compress_for" ) ) )
-                {
-                  lMview.setCompressionFor( CompressForType.QUERY_LOW );
-                }
-                if( "QUERY HIGH".equals( pResultSet.getString( "compress_for" ) ) )
-                {
-                  lMview.setCompressionFor( CompressForType.QUERY_HIGH );
-                }
-                if( "ARCHIVE LOW".equals( pResultSet.getString( "compress_for" ) ) )
-                {
-                  lMview.setCompressionFor( CompressForType.ARCHIVE_LOW );
-                }
-                if( "ARCHIVE HIGH".equals( pResultSet.getString( "compress_for" ) ) )
-                {
-                  lMview.setCompressionFor( CompressForType.ARCHIVE_HIGH );
-                }
+                lMview.setCompression( pCompressType );
+                lMview.setCompressionFor( pCompressForType );
               }
-              if( "DISABLED".equals( pResultSet.getString( "compression" ) ) )
-              {
-                lMview.setCompression( CompressType.NOCOMPRESS );
-              }
-            }
+            } );
 
             handleDegree( pResultSet.getString( "degree" ), new DegreeHandler()
             {
@@ -402,6 +509,59 @@ public class LoadIst
     }
   }
 
+  private interface CompressionHandler
+  {
+    void setCompression( CompressType pCompressType, CompressForType pCompressForType );
+  }
+
+  private void handleCompression( String pCompression, String pCompressFor, CompressionHandler pCompressionHandler )
+  {
+    if( pCompression != null )
+    {
+      CompressType lCompressType = null;
+      CompressForType lCompressForType = null;
+
+      if( "ENABLED".equalsIgnoreCase( pCompression ) )
+      {
+        lCompressType = CompressType.COMPRESS;
+
+        if( pCompressFor != null )
+        {
+          if( pCompressFor.contains( "OLTP" ) || pCompressFor.equals( "ADVANCED" ) )
+          {
+            lCompressForType = CompressForType.ALL;
+          }
+          if( pCompressFor.equals( "BASIC" ) )
+          {
+            lCompressForType = CompressForType.DIRECT_LOAD;
+          }
+          if( pCompressFor.equals( "QUERY LOW" ) )
+          {
+            lCompressForType = CompressForType.QUERY_LOW;
+          }
+          if( pCompressFor.equals( "QUERY HIGH" ) )
+          {
+            lCompressForType = CompressForType.QUERY_HIGH;
+          }
+          if( pCompressFor.equals( "ARCHIVE LOW" ) )
+          {
+            lCompressForType = CompressForType.ARCHIVE_LOW;
+          }
+          if( pCompressFor.equals( "ARCHIVE HIGH" ) )
+          {
+            lCompressForType = CompressForType.ARCHIVE_HIGH;
+          }
+        }
+      }
+      if( "DISABLED".equalsIgnoreCase( pCompression ) )
+      {
+        lCompressType = CompressType.NOCOMPRESS;
+      }
+
+      pCompressionHandler.setCompression( lCompressType, lCompressForType );
+    }
+  }
+
   private Table findTable( Model pModel, String pTablename )
   {
     for( ModelElement lModelElement : pModel.getModel_elements() )
@@ -415,8 +575,7 @@ public class LoadIst
       }
     }
 
-    throw new IllegalStateException( "Table not found: " +
-                                     pTablename );
+    throw new IllegalStateException( "Table not found: " + pTablename );
   }
 
   private Index findIndex( Model pModel, String pTablename, String pIndexname )
@@ -432,10 +591,7 @@ public class LoadIst
       }
     }
 
-    throw new IllegalStateException( "Index not found: " +
-                                     pTablename +
-                                     " " +
-                                     pIndexname );
+    throw new IllegalStateException( "Index not found: " + pTablename + " " + pIndexname );
   }
 
   private UniqueKey findUniqueKey( Model pModel, String pTablename, String pUniquekeyname )
@@ -451,10 +607,7 @@ public class LoadIst
       }
     }
 
-    throw new IllegalStateException( "UK not found: " +
-                                     pTablename +
-                                     " " +
-                                     pUniquekeyname );
+    throw new IllegalStateException( "UK not found: " + pTablename + " " + pUniquekeyname );
   }
 
   private ForeignKey findForeignKey( Model pModel, String pTablename, String pForeignkeyname )
@@ -467,48 +620,63 @@ public class LoadIst
       }
     }
 
-    throw new IllegalStateException( "FK not found: " +
-                                     pTablename +
-                                     " " +
-                                     pForeignkeyname );
+    throw new IllegalStateException( "FK not found: " + pTablename + " " + pForeignkeyname );
   }
 
   private void loadTableColumnsIntoModel( final Model pModel )
   {
-    String lSql = "" + //
-                  " select user_tab_cols.table_name," + //
-                  "        user_tab_cols.column_name," + //
-                  "        data_type," + //
-                  "        data_type_owner," + //
-                  "        data_length," + //
-                  "        data_precision," + //
-                  "        data_scale," + //
-                  "        char_length," + //
-                  "        nullable," + //
-                  "        char_used," + //
-                  "        data_default," + //
-                  "        column_id," + //
-                  // TODO $IF DBMS_DB_VERSION.VERSION >= 12 $THEN
-                  // default_on_null,
-                  // generation_type
-                  // $ELSE
-                  "        null default_on_null," + //
-                  "        null generation_type" + //
-                  // $END
-                  "   from user_tab_cols" + //
-                  // $IF DBMS_DB_VERSION.VERSION >= 12 $THEN
-                  // left outer join user_tab_identity_cols
-                  // on ( user_tab_cols.column_name = user_tab_identity_cols.column_name
-                  // and user_tab_cols.table_name = user_tab_identity_cols.table_name)
-                  // $END
-                  "  where hidden_column = 'NO'" + //
-                  "  order by table_name, column_id, column_name" + //
-                  "";
+    String lSql;
 
-    // TODO: default_on_null, generation_type
-    // TODO: left outer join user_tab_identity_cols on ( user_tab_cols.column_name = user_tab_identity_cols.column_name and user_tab_cols.table_name = user_tab_identity_cols.table_name)
+    if( _oracleMajorVersion >= 12 )
+    {
+      lSql = "" + //
+             " select user_tab_cols.table_name," + //
+             "        user_tab_cols.column_name," + //
+             "        data_type," + //
+             "        data_type_owner," + //
+             "        data_length," + //
+             "        data_precision," + //
+             "        data_scale," + //
+             "        char_length," + //
+             "        nullable," + //
+             "        char_used," + //
+             "        data_default," + //
+             "        column_id," + //
+             "        default_on_null, " + //
+             "        generation_type " + //
+             "   from user_tab_cols" + //
+             "   left outer join user_tab_identity_cols" + //
+             "       on (   user_tab_cols.column_name = user_tab_identity_cols.column_name" + //
+             "          and user_tab_cols.table_name  = user_tab_identity_cols.table_name " + //
+             "          )" + //
+             "  where hidden_column = 'NO'" + //
+             "  order by table_name, column_name, column_id" + //
+             "";
+    }
+    else
+    {
+      lSql = "" + //
+             " select user_tab_cols.table_name," + //
+             "        user_tab_cols.column_name," + //
+             "        data_type," + //
+             "        data_type_owner," + //
+             "        data_length," + //
+             "        data_precision," + //
+             "        data_scale," + //
+             "        char_length," + //
+             "        nullable," + //
+             "        char_used," + //
+             "        data_default," + //
+             "        column_id," + //
+             "        null default_on_null," + //
+             "        null generation_type" + //
+             "   from user_tab_cols" + //
+             "  where hidden_column = 'NO'" + //
+             "  order by table_name, column_name, column_id" + //
+             "";
+    }
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -523,8 +691,7 @@ public class LoadIst
           if( lColumn.getDefault_value() != null )
           {
             lColumn.setDefault_value( lColumn.getDefault_value().trim() );
-            if( lColumn.getDefault_value().length() == 0 ||
-                lColumn.getDefault_value().equalsIgnoreCase( "NULL" ) )
+            if( lColumn.getDefault_value().length() == 0 || lColumn.getDefault_value().equalsIgnoreCase( "NULL" ) )
             {
               lColumn.setDefault_value( null );
             }
@@ -615,45 +782,44 @@ public class LoadIst
             lColumn.setPrecision( pResultSet.getInt( "data_precision" ) );
           }
 
-          if( lColumn.getData_type() == null &&
-              pResultSet.getString( "data_type_owner" ) != null )
+          if( lColumn.getData_type() == null && pResultSet.getString( "data_type_owner" ) != null )
           {
             lColumn.setData_type( DataType.OBJECT );
             lColumn.setObject_type( pResultSet.getString( "data_type" ) );
 
             // TODO
             /*
-             * if( cur_tab_cols.data_type_owner not in (user,'PUBLIC') ) then v_orig_column.i_object_type := cur_tab_cols.data_type_owner || '.' || v_orig_column.i_object_type; end if;
+             * if( cur_tab_cols.data_type_owner not in (user,'PUBLIC') ) { v_orig_column.i_object_type := cur_tab_cols.data_type_owner || '.' || v_orig_column.i_object_type; };
              */
           }
 
-          // TODO
+          if( lColumn.getDefault_value() != null && lColumn.getDefault_value().contains( "ISEQ$$" ) )
+          {
+            lColumn.setDefault_value( null );
+          }
 
-          // if( instr(v_orig_column.i_default_value,'ISEQ$$') > 0 )
-          // then
-          // v_orig_column.i_default_value := null;
-          // end if;
-          //
-          // if( cur_tab_cols.generation_type is not null )
-          // then
-          // v_orig_column.i_default_value := null;
-          //
-          // v_orig_column.i_identity := new ot_orig_columnidentity();
-          //
-          // if( cur_tab_cols.generation_type = 'ALWAYS' )
-          // then
-          // v_orig_column.i_identity.i_always := 'always';
-          // end if;
-          // if( cur_tab_cols.generation_type = 'BY DEFAULT' )
-          // then
-          // v_orig_column.i_identity.i_by_default := 'default';
-          // end if;
-          //
-          // if( cur_tab_cols.default_on_null = 'YES' )
-          // then
-          // v_orig_column.i_identity.i_on_null := 'null';
-          // end if;
-          // end if;*/
+          String lGenerationType = pResultSet.getString( "generation_type" );
+          if( lGenerationType != null )
+          {
+            lColumn.setDefault_value( null );
+
+            ColumnIdentity lColumnIdentity = new ColumnIdentityImpl();
+            lColumn.setIdentity( lColumnIdentity );
+
+            if( lGenerationType.equals( "ALWAYS" ) )
+            {
+              lColumnIdentity.setAlways( "always" );
+            }
+            if( lGenerationType.equals( "BY DEFAULT" ) )
+            {
+              lColumnIdentity.setBy_default( "default" );
+            }
+
+            if( "YES".equals( pResultSet.getString( "default_on_null" ) ) )
+            {
+              lColumnIdentity.setOn_null( "null" );
+            }
+          }
 
           findTable( pModel, pResultSet.getString( "table_name" ) ).getColumns().add( lColumn );
         }
@@ -687,7 +853,7 @@ public class LoadIst
                   "           index_name" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -779,7 +945,7 @@ public class LoadIst
                   "            index_name," + //
                   "            column_position" + //
                   "";
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -801,9 +967,7 @@ public class LoadIst
     Index lIndex = findIndex( pModel, pTablename, pIndexName );
 
     // TODO ltrim(p_expression,',')
-    lIndex.getIndex_columns().get( pColumnPosition -
-                                   1 )
-        .setColumn_name( pExpression.replace( "\"", "" ).replace( " ", "" ) );
+    lIndex.getIndex_columns().get( pColumnPosition - 1 ).setColumn_name( pExpression.replace( "\"", "" ).replace( " ", "" ) );
 
     if( pColumnPosition == pMaxColumnPositionForInd )
     {
@@ -860,7 +1024,7 @@ public class LoadIst
                   "           column_position" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -895,7 +1059,7 @@ public class LoadIst
                   "           constraint_name" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -1047,7 +1211,7 @@ public class LoadIst
                   "         position" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -1087,7 +1251,7 @@ public class LoadIst
                   "  order by table_name" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -1118,7 +1282,7 @@ public class LoadIst
                   "           column_name" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -1150,7 +1314,7 @@ public class LoadIst
                   "           column_name" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -1163,8 +1327,26 @@ public class LoadIst
 
           lLobStorage.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
-          findTable( pModel, pResultSet.getString( "table_name" ) ).getLobStorages().add( lLobStorage );
+          Table lTable = findTable( pModel, pResultSet.getString( "table_name" ) );
+
+          if( findColumn( lTable, lLobStorage.getColumn_name() ) != null )
+          {
+            lTable.getLobStorages().add( lLobStorage );
+          }
         }
+      }
+
+      private Column findColumn( Table pTable, String pColumnName )
+      {
+        for( Column lColumn : pTable.getColumns() )
+        {
+          if( lColumn.getName().equals( pColumnName ) )
+          {
+            return lColumn;
+          }
+        }
+
+        return null;
       }
     }.execute();
   }
@@ -1226,7 +1408,7 @@ public class LoadIst
                   "  order by table_name" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, JdbcConnectionHandler.getCallableStatementProvider() )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -1284,728 +1466,607 @@ public class LoadIst
             lTable.setPermanentness( PermanentnessType.PERMANENT );
           }
 
-          // TODO
-          // if( cur_tables.compression is not null )
-          // then
-          // if ( upper(cur_tables.compression) = 'ENABLED' )
-          // then
-          // v_orig_table.i_compression := ot_orig_compresstype.c_compress;
-          // if ( upper(NVL(cur_tables.compress_for,'NULL')) like '%OLTP%' )
-          // then
-          // v_orig_table.i_compressionfor := ot_orig_compressfortype.c_all();
-          // elsif ( upper(NVL(cur_tables.compress_for,'NULL')) = 'BASIC' )
-          // then
-          // v_orig_table.i_compressionfor := ot_orig_compressfortype.c_direct_load();
-          // elsif ( upper(NVL(cur_tables.compress_for,'NULL')) = 'QUERY LOW' )
-          // then
-          // v_orig_table.i_compressionfor := ot_orig_compressfortype.c_query_low();
-          // elsif ( upper(NVL(cur_tables.compress_for,'NULL')) = 'QUERY HIGH' )
-          // then
-          // v_orig_table.i_compressionfor := ot_orig_compressfortype.c_query_high();
-          // elsif ( upper(NVL(cur_tables.compress_for,'NULL')) = 'ARCHIVE LOW' )
-          // then
-          // v_orig_table.i_compressionfor := ot_orig_compressfortype.c_archive_low();
-          // elsif ( upper(NVL(cur_tables.compress_for,'NULL')) = 'ARCHIVE HIGH' )
-          // then
-          // v_orig_table.i_compressionfor := ot_orig_compressfortype.c_archive_high();
-          // end if;
-          // elsif ( upper(cur_tables.compression) = 'DISABLED' )
-          // then
-          // v_orig_table.i_compression := ot_orig_compresstype.c_nocompress;
-          // end if;
-          // end if;
+          handleCompression( pResultSet.getString( "compression" ), pResultSet.getString( "compress_for" ), new CompressionHandler()
+          {
+            public void setCompression( CompressType pCompressType, CompressForType pCompressForType )
+            {
+              lTable.setCompression( pCompressType );
+              lTable.setCompressionFor( pCompressForType );
+            }
+          } );
         }
       }
     }.execute();
   }
-}
 
-//
-//
-//
-//procedure set_mviewlog( p_table_name in varchar2, p_orig_mviewlog in ot_orig_mviewlog )
-//is
-//  v_table_index number;
-//begin
-//  v_table_index := find_table_index( p_table_name );
-//  
-//  v_return( v_table_index ).i_mviewlog := p_orig_mviewlog;
-//end;    
-//
-//procedure add_mviewlog_column( p_table_name in varchar2, p_orig_columnref in ot_orig_columnref )
-//is
-//  v_table_index number;     
-//  v_orig_mviewlog ot_orig_mviewlog;
-//begin
-//  v_table_index := find_table_index( p_table_name );  
-//
-//  v_orig_mviewlog := v_return( v_table_index ).i_mviewlog;
-//  
-//  if ( v_orig_mviewlog.i_columns is null) 
-//  then
-//    v_orig_mviewlog.i_columns := new ct_orig_columnref_list();
-//  end if;
-//  
-//  v_orig_mviewlog.i_columns.extend(1);
-//  v_orig_mviewlog.i_columns( v_orig_mviewlog.i_columns.count ) := p_orig_columnref;
-//  
-//  v_return( v_table_index ).i_mviewlog := v_orig_mviewlog;
-//end;        
-//
-//procedure load_mviewlog_columns
-//is
-//  v_orig_columnref ot_orig_columnref;
-//begin            
-//  for cur_mviewlog_columns in
-//    (
-//    select master, column_name, column_id from(
-//
-//      select logs.master,
-//                     tab_columns.column_name,
-//                     tab_columns.column_id
-//                from user_mview_logs logs join
-//                     user_tab_columns tab_columns            
-//                  on logs.log_table = tab_columns.table_name 
-//                 and tab_columns.column_name not like '%$$'           
-//      minus            
-//      select logs.master,
-//                     tab_columns.column_name,
-//                     tab_columns.column_id
-//                from user_mview_logs logs 
-//                join user_tab_columns tab_columns 
-//                  on logs.log_table = tab_columns.table_name 
-//                 and tab_columns.column_name not like '%$$' 
-//                join user_constraints cons 
-//                  on logs.master = cons.table_name
-//                 and cons.constraint_type = 'P'
-//                join user_cons_columns cons_columns
-//                  on cons.constraint_name = cons_columns.constraint_name
-//                 and cons_columns.column_name = tab_columns.column_name
-//      )           
-//    order by master, column_id            
-//    )
-//  loop
-//    if( is_ignored_table(  cur_mviewlog_columns.master ) = 0 )
-//    then      
-//      v_orig_columnref := new ot_orig_columnref();         
-//      v_orig_columnref.i_column_name := cur_mviewlog_columns.column_name;                
-//      
-//      add_mviewlog_column( cur_mviewlog_columns.master, v_orig_columnref );
-//    end if;
-//  end loop;    
-//end;
-//
-//procedure load_mviewlogs
-//is
-//  c_date_format constant varchar2(30) := pa_orcas_run_parameter.get_dateformat();
-//  v_orig_mviewlog ot_orig_mviewlog;
-//begin    
-//  for cur_mviewlogs in
-//    (
-//    select master,
-//           log_table,
-//           rowids,
-//           primary_key,
-//           sequence,
-//           include_new_values,
-//           purge_asynchronous,
-//           purge_deferred,
-//           purge_start,
-//           case when instr(purge_interval, 'sysdate') > 0 then substr(purge_interval, 11) end purge_interval,
-//           case when purge_interval is not null and instr(purge_interval, 'to_date') > 0 
-//           then to_date(substr(purge_interval, instr(purge_interval, '''',1,1)+1, instr(purge_interval, '''',1,2)-instr(purge_interval, '''',1,1)-1),substr(purge_interval, instr(purge_interval, '''',1,3)+1, instr(purge_interval, '''',1,4)-instr(purge_interval, '''',1,3)-1))
-//           end purge_next,
-//           commit_scn_based,
-//           tablespace_name, 
-//           trim(degree) degree
-//      from user_mview_logs logs
-//      join user_tables tabs
-//        on logs.log_table = tabs.table_name
-//     order by master
-//    )
-//  loop
-//    if( is_ignored_table( cur_mviewlogs.master ) = 0 )
-//    then      
-//      v_orig_mviewlog  := new ot_orig_mviewlog();
-//      
-//      if (cur_mviewlogs.primary_key = 'YES')
-//      then
-//        v_orig_mviewlog.i_primarykey := 'primary';
-//      end if;  
-//      
-//      if (cur_mviewlogs.rowids = 'YES')
-//      then
-//        v_orig_mviewlog.i_rowid := 'rowid';
-//      end if;  
-//      
-//      if (cur_mviewlogs.sequence = 'YES')
-//      then
-//        v_orig_mviewlog.i_withsequence := 'sequence';
-//      end if;  
-//      
-//      if (cur_mviewlogs.commit_scn_based = 'YES')
-//      then
-//        v_orig_mviewlog.i_commitscn := 'commit_scn';
-//      end if;
-//      
-//      v_orig_mviewlog.i_purge := 'purge';
-//      if (cur_mviewlogs.purge_deferred = 'YES')
-//      then
-//        v_orig_mviewlog.i_startwith := to_char(cur_mviewlogs.purge_start, c_date_format);
-//        v_orig_mviewlog.i_repeatInterval := cur_mviewlogs.purge_interval;
-//        v_orig_mviewlog.i_next := to_char(cur_mviewlogs.purge_next, c_date_format);
-//      else 
-//        if ( cur_mviewlogs.purge_asynchronous = 'YES')
-//          then
-//            v_orig_mviewlog.i_synchronous := ot_orig_synchronoustype.c_asynchronous;
-//          else 
-//            v_orig_mviewlog.i_synchronous := ot_orig_synchronoustype.c_synchronous;
-//        end if; 
-//      end if; 
-//      
-//      if (cur_mviewlogs.include_new_values = 'YES')
-//      then
-//        v_orig_mviewlog.i_newvalues := ot_orig_newvaluestype.c_including;
-//      else
-//        v_orig_mviewlog.i_newvalues := ot_orig_newvaluestype.c_excluding;
-//      end if;  
-//      
-//      v_orig_mviewlog.i_tablespace := cur_mviewlogs.tablespace_name;
-//    
-//      if( cur_mviewlogs.degree = '1' )        
-//      then
-//        v_orig_mviewlog.i_parallel := ot_orig_paralleltype.c_noparallel;        
-//      else
-//        v_orig_mviewlog.i_parallel := ot_orig_paralleltype.c_parallel();
-//        if ( cur_mviewlogs.degree != 'DEFAULT' ) 
-//        then
-//          v_orig_mviewlog.i_parallel_degree := to_number(cur_mviewlogs.degree);
-//        end if;
-//      end if;   
-//      
-//      set_mviewlog( cur_mviewlogs.master, v_orig_mviewlog );
-//    end if;
-//  end loop;    
-//end;        
-//
-//
-//
-//procedure set_compression( p_table_name in varchar2, p_orig_compression ot_orig_compresstype, p_orig_compressionfor ot_orig_compressfortype )
-//is
-//  v_table_index number;
-//begin
-//  v_table_index := find_table_index( p_table_name );
-//  
-//  v_return( v_table_index ).i_compression := p_orig_compression;
-//  v_return( v_table_index ).i_compressionfor := p_orig_compressionfor;
-//end;       
-//
-//procedure set_partitioning( p_table_name in varchar2, p_orig_tablepartitioning ot_orig_tablepartitioning )
-//is
-//  v_table_index number;
-//begin
-//  v_table_index := find_table_index( p_table_name );
-//  
-//  v_return( v_table_index ).i_tablepartitioning := p_orig_tablepartitioning;
-//end;   
-//
-///**
-// * Partitionierung wird mit einzelselects geladen, da die Struktur sehr uneinheitlich ist und es erwatungsgemaess nur wenige Daten zu lesen gibt.
-// */
-//procedure load_partitioning
-//is
-//  v_orig_hashpartitions ot_orig_hashpartitions;
-//  v_orig_hashpartition ot_orig_hashpartition;
-//  
-//  v_orig_listpartitions ot_orig_listpartitions;
-//  v_orig_listpartition ot_orig_listpartition;
-//  v_orig_listpartitionvalu ot_orig_listpartitionvalu;      
-//  v_orig_listsubpart ot_orig_listsubpart;
-//  
-//  v_orig_rangepartitions ot_orig_rangepartitions;
-//  v_orig_rangepartition ot_orig_rangepartition;
-//  v_orig_rangepartitionval ot_orig_rangepartitionval;
-//  v_orig_rangesubpart ot_orig_rangesubpart;
-//  
-//  v_orig_compression ot_orig_compresstype;
-//  v_orig_compressionfor ot_orig_compressfortype;
-//  
-//  v_high_value varchar2(32000);
-//  v_exit_loop number;
-//  
-//  function load_tablesubpart( p_table_name in varchar2, p_subpartitioning_type in varchar2 ) return ot_orig_tablesubpart
-//  is
-//    v_orig_hashsubparts ot_orig_hashsubparts;
-//    v_orig_listsubparts ot_orig_listsubparts;
-//    v_orig_rangesubparts ot_orig_rangesubparts;
-//    
-//    v_orig_columnref ot_orig_columnref;
-//  begin
-//    if    ( p_subpartitioning_type = 'NONE' )
-//    then
-//      return null;
-//    elsif ( p_subpartitioning_type = 'HASH' )
-//    then
-//      v_orig_hashsubparts := new ot_orig_hashsubparts();
-//      
-//      v_orig_hashsubparts.i_column := new ot_orig_columnref();
-//      
-//      for cur_part_col in
-//        (
-//        select column_name
-//          from user_subpart_key_columns
-//         where name = p_table_name
-//           and object_type = 'TABLE'
-//        )
-//      loop
-//        v_orig_hashsubparts.i_column.i_column_name := cur_part_col.column_name;
-//      end loop;
-//      
-//      return v_orig_hashsubparts;
-//    elsif ( p_subpartitioning_type = 'LIST' )
-//    then
-//      v_orig_listsubparts := new ot_orig_listsubparts();
-//      
-//      v_orig_listsubparts.i_column := new ot_orig_columnref();
-//      
-//      for cur_part_col in
-//        (
-//        select column_name
-//          from user_subpart_key_columns
-//         where name = p_table_name
-//           and object_type = 'TABLE'
-//        )
-//      loop
-//        v_orig_listsubparts.i_column.i_column_name := cur_part_col.column_name;
-//      end loop;
-//      
-//      return v_orig_listsubparts;
-//    elsif ( p_subpartitioning_type = 'RANGE' )
-//    then
-//      v_orig_rangesubparts := new ot_orig_rangesubparts();
-//      
-//      v_orig_rangesubparts.i_columns := new ct_orig_columnref_list();
-//      
-//      for cur_part_col in
-//        (
-//        select column_name
-//          from user_subpart_key_columns
-//         where name = p_table_name
-//           and object_type = 'TABLE'
-//           order by column_position
-//        )
-//      loop
-//        v_orig_columnref := new ot_orig_columnref(cur_part_col.column_name);
-//        v_orig_rangesubparts.i_columns.extend;
-//        v_orig_rangesubparts.i_columns(v_orig_rangesubparts.i_columns.count) := v_orig_columnref;
-//      end loop;
-//      
-//      return v_orig_rangesubparts;  
-//    else
-//      --            raise_application_error( -20000, 'partitionstyp unbekannt: ' || cur_part_tables.partitioning_type || ' ' || cur_part_tables.subpartitioning_type );            
-//      return null;                
-//    end if;        
-//  end;
-//  
-//  function get_orig_listpart_valuelist(v_in_string varchar2)
-//    return ct_orig_listpartitionvalu_list is
-//    v_listpartitionvalu_list ct_orig_listpartitionvalu_list := new ct_orig_listpartitionvalu_list();
-//    v_listpartitionvalu ot_orig_listpartitionvalu := new ot_orig_listpartitionvalu();
-//    v_value_list varchar2(2000) := v_in_string;
-//    v_comma number;
-//    v_weiter boolean := true;
-//
-//  begin
-//
-//    while v_weiter loop
-//
-//      if instr(v_value_list, ',') > 0 then
-//        v_comma := instr(v_value_list, ',');
-//        v_listpartitionvalu.i_value := replace(substr(v_value_list, 1, v_comma - 1),'DEFAULT','default');
-//        v_value_list := substr(v_value_list, v_comma + 1);
-//      else
-//        v_listpartitionvalu.i_value := v_value_list;
-//        v_weiter := false;
-//      end if;
-//
-//      v_listpartitionvalu_list.extend;
-//      v_listpartitionvalu_list(v_listpartitionvalu_list.count) := v_listpartitionvalu;
-//
-//    end loop;
-//
-//    return v_listpartitionvalu_list;
-//  end;  
-//  
-//  function get_orig_rangepart_valuelist(v_in_string varchar2)
-//    return ct_orig_rangepartitionval_list is
-//    v_rangepartitionval_list ct_orig_rangepartitionval_list := new ct_orig_rangepartitionval_list();
-//    v_rangepartitionval ot_orig_rangepartitionval := new ot_orig_rangepartitionval();
-//    v_value_list varchar2(2000) := v_in_string;
-//    v_comma number;
-//    v_weiter boolean := true;
-//
-//  begin
-//
-//    while v_weiter loop
-//
-//      if instr(v_value_list, ',') > 0 then
-//        v_comma := instr(v_value_list, ',');
-//        v_rangepartitionval.i_value := replace(substr(v_value_list, 1, v_comma - 1),'MAXVALUE','maxvalue');
-//        v_value_list := substr(v_value_list, v_comma + 1);
-//      else
-//        v_rangepartitionval.i_value := v_value_list;
-//        v_weiter := false;
-//      end if;
-//
-//      v_rangepartitionval_list.extend;
-//      v_rangepartitionval_list(v_rangepartitionval_list.count) := v_rangepartitionval;
-//
-//    end loop;
-//
-//    return v_rangepartitionval_list;
-//  end;        
-//  
-//  function load_subpartlist( p_table_name in varchar2, p_partition_name in varchar2, p_subpartitioning_type in varchar2 ) return ct_orig_subsubpart_list
-//  is
-//    v_return ct_orig_subsubpart_list;
-//    
-//    v_orig_hashsubsubpart ot_orig_hashsubsubpart;
-//    v_orig_listsubsubpart ot_orig_listsubsubpart;
-//    v_orig_rangesubsubpart ot_orig_rangesubsubpart;
-//    
-//    v_orig_listpartitionvalu_list ct_orig_listpartitionvalu_list;
-//    v_orig_listpartitionvalu ot_orig_listpartitionvalu;
-//    v_orig_rangepartitionval_list ct_orig_rangepartitionval_list;
-//    v_orig_rangepartitionval ot_orig_rangepartitionval;
-//  begin
-//    v_return := new ct_orig_subsubpart_list();
-//    
-//    for cur_tab_subpartitions in        
-//      (
-//      select subpartition_name, 
-//             high_value, 
-//             tablespace_name
-//        from user_tab_subpartitions
-//       where table_name = p_table_name
-//         and partition_name = p_partition_name
-//       order by subpartition_position
-//      )
-//    loop
-//      v_return.extend;
-//  
-//      if    ( p_subpartitioning_type = 'HASH' )
-//      then
-//        v_orig_hashsubsubpart := new ot_orig_hashsubsubpart();
-//        
-//        v_orig_hashsubsubpart.i_name := cur_tab_subpartitions.subpartition_name;
-//        v_orig_hashsubsubpart.i_tablespace := cur_tab_subpartitions.tablespace_name;
-//        
-//        v_return(v_return.count) := v_orig_hashsubsubpart;
-//      elsif    ( p_subpartitioning_type = 'LIST' )
-//      then
-//        v_orig_listsubsubpart := new ot_orig_listsubsubpart();
-//        v_orig_listpartitionvalu_list := get_orig_listpart_valuelist(cur_tab_subpartitions.high_value);
-//          
-//        v_orig_listsubsubpart.i_value := v_orig_listpartitionvalu_list;
-//        v_orig_listsubsubpart.i_name := cur_tab_subpartitions.subpartition_name;
-//        v_orig_listsubsubpart.i_tablespace := cur_tab_subpartitions.tablespace_name;
-//          
-//        v_return(v_return.count) := v_orig_listsubsubpart;  
-//      elsif    ( p_subpartitioning_type = 'RANGE' )
-//      then
-//        v_orig_rangesubsubpart := new ot_orig_rangesubsubpart();
-//        v_orig_rangepartitionval_list := get_orig_rangepart_valuelist(cur_tab_subpartitions.high_value);
-//          
-//        v_orig_rangesubsubpart.i_value := v_orig_rangepartitionval_list;
-//        v_orig_rangesubsubpart.i_name := cur_tab_subpartitions.subpartition_name;
-//        v_orig_rangesubsubpart.i_tablespace := cur_tab_subpartitions.tablespace_name;
-//          
-//        v_return(v_return.count) := v_orig_rangesubsubpart;    
-//      else
-//        --            raise_application_error( -20000, 'subpartitionstyp unbekannt: ' || cur_part_tables.subpartitioning_type );            
-//        return null;                
-//      end if;        
-//    end loop;
-//    
-//    return v_return;
-//  end;      
-//begin            
-//  for cur_part_tables in
-//    (
-//    select table_name, 
-//           partitioning_type, 
-//           subpartitioning_type, 
-//           interval,
-//           def_tablespace_name,
-//           def_compression,
-//           def_compress_for
-//      from user_part_tables
-//    )
-//  loop
-//    if( is_ignored_table( cur_part_tables.table_name ) = 0 )
-//    then
-//      -- Read compression type, works only for one compression type for all partitions
-//      v_orig_compression := null;
-//      v_orig_compressionfor := null;
-//      if ( upper(NVL(cur_part_tables.def_compression,'NULL')) = 'ENABLED' )  
-//      then
-//        v_orig_compression := ot_orig_compresstype.c_compress;  
-//        if ( upper(NVL(cur_part_tables.def_compress_for,'NULL')) like '%OLTP%' ) 
-//        then
-//          v_orig_compressionfor := ot_orig_compressfortype.c_all;
-//        elsif ( upper(NVL(cur_part_tables.def_compress_for,'NULL')) = 'BASIC' ) 
-//        then
-//          v_orig_compressionfor := ot_orig_compressfortype.c_direct_load();  
-//        elsif ( upper(NVL(cur_part_tables.def_compress_for,'NULL')) = 'QUERY LOW' ) 
-//        then
-//          v_orig_compressionfor := ot_orig_compressfortype.c_query_low();  
-//        elsif ( upper(NVL(cur_part_tables.def_compress_for,'NULL')) = 'QUERY HIGH' ) 
-//        then
-//          v_orig_compressionfor := ot_orig_compressfortype.c_query_high();    
-//        elsif ( upper(NVL(cur_part_tables.def_compress_for,'NULL')) = 'ARCHIVE LOW' ) 
-//        then
-//          v_orig_compressionfor := ot_orig_compressfortype.c_archive_low();  
-//        elsif ( upper(NVL(cur_part_tables.def_compress_for,'NULL')) = 'ARCHIVE HIGH' ) 
-//        then
-//          v_orig_compressionfor := ot_orig_compressfortype.c_archive_high();      
-//        end if;
-//      end if;  
-//      if (v_orig_compression is not null) 
-//      then
-//        set_compression( cur_part_tables.table_name, v_orig_compression, v_orig_compressionfor );
-//      end if;  
-//         
-//      if    ( cur_part_tables.partitioning_type = 'HASH' and cur_part_tables.subpartitioning_type = 'NONE' )
-//      then
-//        v_orig_hashpartitions := ot_orig_hashpartitions();
-//        
-//        v_orig_hashpartitions.i_column := new ot_orig_columnref();
-//        for cur_part_col in
-//          (
-//          select column_name
-//            from user_part_key_columns
-//           where name = cur_part_tables.table_name
-//             and object_type = 'TABLE'
-//          )
-//        loop
-//          v_orig_hashpartitions.i_column.i_column_name := cur_part_col.column_name;
-//        end loop;
-//        
-//        v_orig_hashpartitions.i_partitionlist := new ct_orig_hashpartition_list();
-//        for cur_tab_partitions in
-//          (
-//          select partition_name,
-//                 tablespace_name
-//            from user_tab_partitions
-//           where table_name = cur_part_tables.table_name
-//           order by partition_position
-//          )
-//        loop
-//          v_orig_hashpartition := new ot_orig_hashpartition();
-//          
-//          v_orig_hashpartition.i_name := cur_tab_partitions.partition_name;
-//          v_orig_hashpartition.i_tablespace := cur_tab_partitions.tablespace_name;
-//          
-//          v_orig_hashpartitions.i_partitionlist.extend;
-//          v_orig_hashpartitions.i_partitionlist(v_orig_hashpartitions.i_partitionlist.count) := v_orig_hashpartition;
-//        end loop;            
-//      
-//        set_partitioning( cur_part_tables.table_name, v_orig_hashpartitions );
-//      elsif ( cur_part_tables.partitioning_type = 'LIST' )
-//      then
-//        v_orig_listpartitions := ot_orig_listpartitions();
-//        
-//        v_orig_listpartitions.i_tablesubpart := load_tablesubpart( cur_part_tables.table_name, cur_part_tables.subpartitioning_type );
-//        v_orig_listpartitions.i_column := new ot_orig_columnref();
-//        for cur_part_col in
-//          (
-//          select column_name
-//            from user_part_key_columns
-//           where name = cur_part_tables.table_name
-//             and object_type = 'TABLE'
-//          )
-//        loop
-//          v_orig_listpartitions.i_column.i_column_name := cur_part_col.column_name;
-//        end loop;
-//        
-//        v_orig_listpartitions.i_partitionlist := new ct_orig_listpartition_list();
-//        for cur_tab_partitions in
-//          (
-//          select partition_name,
-//                 tablespace_name,
-//                 high_value
-//            from user_tab_partitions
-//           where table_name = cur_part_tables.table_name
-//           order by partition_position               
-//          )
-//        loop
-//          v_high_value := cur_tab_partitions.high_value;
-//          v_orig_listpartition := new ot_orig_listpartition();
-//          
-//          v_orig_listpartition.i_name := cur_tab_partitions.partition_name;
-//          v_orig_listpartition.i_tablespace := cur_tab_partitions.tablespace_name;
-//          
-//          v_orig_listpartition.i_value := new ct_orig_listpartitionvalu_list();
-//          
-//          if( upper(v_high_value )= 'DEFAULT' )
-//          then
-//            v_orig_listpartitionvalu := new ot_orig_listpartitionvalu();
-//            v_orig_listpartitionvalu.i_default := 'default';
-//            
-//            v_orig_listpartition.i_value.extend();
-//            v_orig_listpartition.i_value( v_orig_listpartition.i_value.count ) := v_orig_listpartitionvalu;
-//          else
-//            v_exit_loop := 0;
-//            loop
-//              v_orig_listpartitionvalu := new ot_orig_listpartitionvalu();                
-//            
-//              if( instr( v_high_value, ',' ) = 0 )
-//              then
-//                v_orig_listpartitionvalu.i_value := trim( v_high_value );
-//                v_exit_loop := 1;
-//              else                    
-//                v_orig_listpartitionvalu.i_value := trim( substr( v_high_value, 1, instr( v_high_value, ',' ) - 1 ) );                  
-//                v_high_value := substr( v_high_value, instr( v_high_value, ',' ) + 1 );
-//              end if;
-//              
-//              v_orig_listpartition.i_value.extend();
-//              v_orig_listpartition.i_value( v_orig_listpartition.i_value.count ) := v_orig_listpartitionvalu;                                  
-//              
-//              if( v_exit_loop = 1 )
-//              then
-//                exit;
-//              end if;
-//            end loop;
-//          end if;
-//          
-//          v_orig_listpartitions.i_partitionlist.extend;
-//          v_orig_listpartitions.i_partitionlist(v_orig_listpartitions.i_partitionlist.count) := v_orig_listpartition;
-//        end loop;            
-//        
-//        if( v_orig_listpartitions.i_tablesubpart is not null )
-//        then
-//          v_orig_listpartitions.i_subpartitionlist := new ct_orig_listsubpart_list();
-//          
-//          for i in 1..v_orig_listpartitions.i_partitionlist.count
-//          loop
-//            v_orig_listpartition := v_orig_listpartitions.i_partitionlist(i);
-//            
-//            v_orig_listsubpart := new ot_orig_listsubpart();
-//            
-//            v_orig_listsubpart.i_name := v_orig_listpartition.i_name;
-//            v_orig_listsubpart.i_value := v_orig_listpartition.i_value;
-//            v_orig_listsubpart.i_subpartlist := load_subpartlist( cur_part_tables.table_name, v_orig_listsubpart.i_name, cur_part_tables.subpartitioning_type );
-//            
-//            v_orig_listpartitions.i_subpartitionlist.extend;
-//            v_orig_listpartitions.i_subpartitionlist(v_orig_listpartitions.i_subpartitionlist.count) := v_orig_listsubpart;
-//          end loop;
-//          
-//          v_orig_listpartitions.i_partitionlist := null;
-//        end if;
-//      
-//        set_partitioning( cur_part_tables.table_name, v_orig_listpartitions );
-//      elsif ( cur_part_tables.partitioning_type = 'RANGE' )
-//      then
-//        v_orig_rangepartitions := ot_orig_rangepartitions();
-//        
-//        v_orig_rangepartitions.i_intervalexpression := cur_part_tables.interval;
-//        
-//        v_orig_rangepartitions.i_tablesubpart := load_tablesubpart( cur_part_tables.table_name, cur_part_tables.subpartitioning_type );
-//        v_orig_rangepartitions.i_columns := new ct_orig_columnref_list();
-//        for cur_part_col in
-//          (
-//          select column_name
-//            from user_part_key_columns
-//           where name = cur_part_tables.table_name
-//             and object_type = 'TABLE'
-//           order by column_position
-//          )
-//        loop
-//          v_orig_rangepartitions.i_columns.extend;
-//          v_orig_rangepartitions.i_columns( v_orig_rangepartitions.i_columns.count ) := new ot_orig_columnref();
-//          v_orig_rangepartitions.i_columns( v_orig_rangepartitions.i_columns.count ).i_column_name := cur_part_col.column_name;              
-//        end loop;
-//        
-//        v_orig_rangepartitions.i_partitionlist := new ct_orig_rangepartition_list();
-//        for cur_tab_partitions in
-//          (
-//          select partition_name,
-//                 tablespace_name,
-//                 high_value
-//            from user_tab_partitions
-//           where table_name = cur_part_tables.table_name
-//           order by partition_position               
-//          )
-//        loop
-//          v_high_value := cur_tab_partitions.high_value;
-//          v_orig_rangepartition := new ot_orig_rangepartition();
-//          
-//          v_orig_rangepartition.i_name := cur_tab_partitions.partition_name;
-//          v_orig_rangepartition.i_tablespace := cur_tab_partitions.tablespace_name;
-//          
-//          v_orig_rangepartition.i_value := new ct_orig_rangepartitionval_list();
-//          
-//          v_exit_loop := 0;
-//          loop
-//            v_orig_rangepartitionval := new ot_orig_rangepartitionval();                
-//          
-//            if( instr( v_high_value, ',' ) = 0 )
-//            then
-//              v_orig_rangepartitionval.i_value := trim( v_high_value );
-//              v_exit_loop := 1;
-//            else                    
-//              v_orig_rangepartitionval.i_value := trim( substr( v_high_value, 1, instr( v_high_value, ',' ) - 1 ) );                 
-//              v_high_value := substr( v_high_value, instr( v_high_value, ',' ) + 1 );
-//            end if;
-//            
-//            if( upper(v_orig_rangepartitionval.i_value) = 'MAXVALUE' )
-//            then
-//              v_orig_rangepartitionval.i_maxvalue := 'maxvalue';
-//              v_orig_rangepartitionval.i_value := null;
-//            end if;                
-//            
-//            v_orig_rangepartition.i_value.extend();
-//            v_orig_rangepartition.i_value( v_orig_rangepartition.i_value.count ) := v_orig_rangepartitionval;                                  
-//            
-//            if( v_exit_loop = 1 )
-//            then
-//              exit;
-//            end if;
-//          end loop;
-//          
-//          v_orig_rangepartitions.i_partitionlist.extend;
-//          v_orig_rangepartitions.i_partitionlist(v_orig_rangepartitions.i_partitionlist.count) := v_orig_rangepartition;
-//        end loop;      
-//        
-//        -- SUBPARTIIONING
-//        if( v_orig_rangepartitions.i_tablesubpart is not null )
-//        then
-//          v_orig_rangepartitions.i_subpartitionlist := new ct_orig_rangesubpart_list();
-//          
-//          for i in 1..v_orig_rangepartitions.i_partitionlist.count
-//          loop
-//            v_orig_rangepartition := v_orig_rangepartitions.i_partitionlist(i);
-//            
-//            v_orig_rangesubpart := new ot_orig_rangesubpart();
-//            
-//            v_orig_rangesubpart.i_name := v_orig_rangepartition.i_name;
-//            v_orig_rangesubpart.i_value := v_orig_rangepartition.i_value;
-//            v_orig_rangesubpart.i_subpartlist := load_subpartlist( cur_part_tables.table_name, v_orig_rangesubpart.i_name, cur_part_tables.subpartitioning_type );
-//            
-//            v_orig_rangepartitions.i_subpartitionlist.extend;
-//            v_orig_rangepartitions.i_subpartitionlist(v_orig_rangepartitions.i_subpartitionlist.count) := v_orig_rangesubpart;
-//          end loop;
-//          
-//          v_orig_rangepartitions.i_partitionlist := null;
-//        end if;
-//      
-//        set_partitioning( cur_part_tables.table_name, v_orig_rangepartitions );            
-//      else
-//--            raise_application_error( -20000, 'partitionstyp unbekannt: ' || cur_part_tables.partitioning_type || ' ' || cur_part_tables.subpartitioning_type );            
-//        null;
-//      end if;
-//    end if;
-//  end loop;    
-//end;    
-//
-//begin
+  private void loadMViewsLogColumnsIntoModel( final Model pModel )
+  {
+    String lSql = "" + //
+                  " select master," + //
+                  "        column_name, " + //
+                  "        column_id " + //
+                  "  from  (" + //  
+                  "        select logs.master," + //
+                  "               tab_columns.column_name," + //
+                  "               tab_columns.column_id" + //
+                  "          from user_mview_logs logs " +
+                  "          join user_tab_columns tab_columns " + //         
+                  "            on     logs.log_table = tab_columns.table_name" + // 
+                  "               and tab_columns.column_name not like '%$$'" + //           
+                  "        minus" + //            
+                  "        select logs.master," + //
+                  "               tab_columns.column_name," + //
+                  "               tab_columns.column_id" + //
+                  "          from user_mview_logs logs " + //
+                  "          join user_tab_columns tab_columns" + // 
+                  "            on logs.log_table = tab_columns.table_name" + // 
+                  "           and tab_columns.column_name not like '%$$'" + // 
+                  "          join user_constraints cons" + // 
+                  "            on logs.master = cons.table_name" + //
+                  "           and cons.constraint_type = 'P'" + //
+                  "          join user_cons_columns cons_columns" + //
+                  "            on cons.constraint_name = cons_columns.constraint_name" + //
+                  "           and cons_columns.column_name = tab_columns.column_name" + //
+                  "        )" + //           
+                  "  order by master, column_id" + //            
+                  "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        String lTablename = pResultSet.getString( "master" );
+        if( !isIgnoredTable( lTablename ) )
+        {
+          ColumnRef lColumnRef = new ColumnRefImpl();
+          lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
+
+          findTable( pModel, lTablename ).getMviewLog().getColumns().add( lColumnRef );
+        }
+      }
+    }.execute();
+  }
+
+  private void loadMViewsLogsIntoModel( final Model pModel )
+  {
+    String lSql = "" + //
+                  " select master," + //
+                  "        log_table," + //
+                  "        rowids," + //
+                  "        primary_key," + //
+                  "        sequence," + //
+                  "        include_new_values," + //
+                  "        purge_asynchronous," + //
+                  "        purge_deferred," + //
+                  "        purge_start," + //
+                  "        case when instr(purge_interval, 'sysdate') > 0 then substr(purge_interval, 11) end purge_interval," + //
+                  "        case when purge_interval is not null and instr(purge_interval, 'to_date') > 0" + //
+                  "          then to_date(substr(purge_interval, instr(purge_interval, '''',1,1)+1, instr(purge_interval, '''',1,2)-instr(purge_interval, '''',1,1)-1),substr(purge_interval, instr(purge_interval, '''',1,3)+1, instr(purge_interval, '''',1,4)-instr(purge_interval, '''',1,3)-1))" + //
+                  "        end purge_next," + //
+                  "        commit_scn_based," + //
+                  "        tablespace_name, " + //
+                  "        trim(degree) degree" + //
+                  "   from user_mview_logs logs" + //
+                  "   join user_tables tabs" + //
+                  "     on logs.log_table = tabs.table_name" + //
+                  "  order by master" + //
+                  "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        String lTablename = pResultSet.getString( "master" );
+
+        if( !isIgnoredTable( lTablename ) )
+        {
+          final MviewLog lMviewLog = new MviewLogImpl();
+
+          if( pResultSet.getString( "primary_key" ).equals( "YES" ) )
+          {
+            lMviewLog.setPrimaryKey( "primary" );
+          }
+
+          if( pResultSet.getString( "rowids" ).equals( "YES" ) )
+          {
+            lMviewLog.setRowid( "rowid" );
+          }
+
+          if( pResultSet.getString( "sequence" ).equals( "YES" ) )
+          {
+            lMviewLog.setWithSequence( "sequence" );
+          }
+
+          if( pResultSet.getString( "commit_scn_based" ).equals( "YES" ) )
+          {
+            lMviewLog.setCommitScn( "commit_scn" );
+          }
+
+          lMviewLog.setPurge( "purge" );
+          if( pResultSet.getString( "purge_deferred" ).equals( "YES" ) )
+          {
+            lMviewLog.setStartWith( to_char( pResultSet.getDate( "purge_start" ) ) );
+            lMviewLog.setRepeatInterval( pResultSet.getInt( "purge_interval" ) );
+            lMviewLog.setNext( to_char( pResultSet.getDate( "purge_next" ) ) );
+          }
+          else
+          {
+            if( pResultSet.getString( "purge_asynchronous" ).equals( "YES" ) )
+            {
+              lMviewLog.setSynchronous( SynchronousType.ASYNCHRONOUS );
+            }
+            else
+            {
+              lMviewLog.setSynchronous( SynchronousType.SYNCHRONOUS );
+            }
+          }
+
+          if( pResultSet.getString( "include_new_values" ).equals( "YES" ) )
+          {
+            lMviewLog.setNewValues( NewValuesType.INCLUDING );
+          }
+          else
+          {
+            lMviewLog.setNewValues( NewValuesType.EXCLUDING );
+          }
+
+          lMviewLog.setTablespace( pResultSet.getString( "tablespace_name" ) );
+
+          handleDegree( pResultSet.getString( "degree" ), new DegreeHandler()
+          {
+            public void setDegree( ParallelType pParallelType, int pParallelDegree )
+            {
+              lMviewLog.setParallel( pParallelType );
+              lMviewLog.setParallel_degree( pParallelDegree );
+            }
+          } );
+
+          findTable( pModel, lTablename ).setMviewLog( lMviewLog );
+        }
+      }
+    }.execute();
+  }
+
+  private String to_char( Date pDate )
+  {
+    if( pDate == null )
+    {
+      return null;
+    }
+
+    return (String)new WrapperReturnFirstValue( "select to_char( ?, '" + _parameters.getDateformat() + "') from dual", getCallableStatementProvider(), Collections.singletonList( pDate ) ).executeForValue();
+  }
+
+  private TableSubPart load_tablesubpart( String pTablename, String pSubpartitioningType )
+  {
+    if( pSubpartitioningType.equals( "NONE" ) )
+    {
+      return null;
+    }
+
+    String lSql = "select column_name from user_subpart_key_columns where name = ? and object_type = 'TABLE' order by column_position";
+
+    if( pSubpartitioningType.equals( "HASH" ) )
+    {
+      HashSubParts lHashSubParts = new HashSubPartsImpl();
+
+      ColumnRef lColumnRefImpl = new ColumnRefImpl();
+      lHashSubParts.setColumn( lColumnRefImpl );
+
+      lColumnRefImpl.setColumn_name( (String)new WrapperReturnFirstValue( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) ).executeForValue() );
+
+      return lHashSubParts;
+    }
+    if( pSubpartitioningType.equals( "LIST" ) )
+    {
+      ListSubParts lListSubParts = new ListSubPartsImpl();
+
+      ColumnRefImpl lColumnRefImpl = new ColumnRefImpl();
+      lListSubParts.setColumn( lColumnRefImpl );
+
+      lColumnRefImpl.setColumn_name( (String)new WrapperReturnFirstValue( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) ).executeForValue() );
+
+      return lListSubParts;
+    }
+    if( pSubpartitioningType.equals( "RANGE" ) )
+    {
+      final RangeSubParts lRangeSubParts = new RangeSubPartsImpl();
+
+      new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) )
+      {
+        @Override
+        protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+        {
+          ColumnRefImpl lColumnRefImpl = new ColumnRefImpl();
+          lColumnRefImpl.setColumn_name( pResultSet.getString( "column_name" ) );
+
+          lRangeSubParts.getColumns().add( lColumnRefImpl );
+        }
+      }.execute();
+
+      return lRangeSubParts;
+    }
+
+    throw new RuntimeException( "partitionstyp unbekannt: " + pSubpartitioningType + " " + pTablename );
+  }
+
+  private CallableStatementProvider getCallableStatementProvider()
+  {
+    return _callableStatementProvider;
+  }
+
+  private List<ListPartitionValue> getOrigListpartValuelist( String pHighValue )
+  {
+    List<ListPartitionValue> lListPartitionValueList = new ArrayList<ListPartitionValue>();
+
+    if( "DEFAULT".equalsIgnoreCase( pHighValue ) )
+    {
+      ListPartitionValue lListPartitionValue = new ListPartitionValueImpl();
+      lListPartitionValue.setValue( "default" );
+      lListPartitionValueList.add( lListPartitionValue );
+    }
+    else
+    {
+      for( String lValue : separateStringList( pHighValue ) )
+      {
+        ListPartitionValue lListPartitionValue = new ListPartitionValueImpl();
+        lListPartitionValue.setValue( lValue );
+        lListPartitionValueList.add( lListPartitionValue );
+      }
+    }
+    return lListPartitionValueList;
+  }
+
+  private List<RangePartitionValue> getOrigRangepartValuelist( String pHighValue )
+  {
+    List<RangePartitionValue> lRangePartitionValueList = new ArrayList<RangePartitionValue>();
+
+    for( String lValue : separateStringList( pHighValue ) )
+    {
+      RangePartitionValue lRangePartitionValue = new RangePartitionValueImpl();
+
+      if( "MAXVALUE".equalsIgnoreCase( lValue ) )
+      {
+        lRangePartitionValue.setMaxvalue( "maxvalue" );
+      }
+      else
+      {
+        lRangePartitionValue.setValue( lValue );
+      }
+
+      lRangePartitionValueList.add( lRangePartitionValue );
+    }
+    return lRangePartitionValueList;
+  }
+
+  private List<SubSubPart> loadSubpartlist( String pTablename, String pPartitionName, final String pSubpartitioningType )
+  {
+    final List<SubSubPart> lReturn = new ArrayList<SubSubPart>();
+
+    String lSql = "" + //
+                  " select subpartition_name," + //
+                  "        tablespace_name," + //
+                  "        high_value" + //                  
+                  "   from user_tab_subpartitions" + //
+                  "  where table_name = ?" + //
+                  "    and partition_name = ?" + //
+                  "  order by subpartition_position" + //
+                  "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Arrays.asList( new Object[] { pTablename, pPartitionName } ) )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        if( pSubpartitioningType.equals( "HASH" ) )
+        {
+          HashSubSubPart lHashSubSubPart = new HashSubSubPartImpl();
+
+          lHashSubSubPart.setName( pResultSet.getString( "subpartition_name" ) );
+          lHashSubSubPart.setTablespace( pResultSet.getString( "tablespace_name" ) );
+
+          lReturn.add( lHashSubSubPart );
+        }
+        if( pSubpartitioningType.equals( "LIST" ) )
+        {
+          ListSubSubPart lListSubSubPart = new ListSubSubPartImpl();
+
+          lListSubSubPart.setName( pResultSet.getString( "subpartition_name" ) );
+          lListSubSubPart.setTablespace( pResultSet.getString( "tablespace_name" ) );
+
+          lListSubSubPart.getValue().addAll( getOrigListpartValuelist( pResultSet.getString( "high_value" ) ) );
+
+          lReturn.add( lListSubSubPart );
+        }
+        if( pSubpartitioningType.equals( "RANGE" ) )
+        {
+          RangeSubSubPart lRangeSubSubPart = new RangeSubSubPartImpl();
+
+          lRangeSubSubPart.setName( pResultSet.getString( "subpartition_name" ) );
+          lRangeSubSubPart.setTablespace( pResultSet.getString( "tablespace_name" ) );
+
+          lRangeSubSubPart.getValue().addAll( getOrigRangepartValuelist( pResultSet.getString( "high_value" ) ) );
+
+          lReturn.add( lRangeSubSubPart );
+        }
+      }
+    }.execute();
+
+    return lReturn;
+  }
+
+  /**
+   * note: partitioning details are loaded with single-selects.
+   */
+  private void loadPartitioningIntoModel( final Model pModel )
+  {
+    String lSql = "" + //
+                  " select table_name, " + //
+                  "        partitioning_type, " + //
+                  "        subpartitioning_type, " + //
+                  "        interval," + //
+                  "        ref_ptn_constraint_name," + //
+                  "        def_tablespace_name," + //                  
+                  "        def_compression," + //
+                  "        def_compress_for" + //
+                  "   from user_part_tables" + //       
+                  "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        final String lTablename = pResultSet.getString( "table_name" );
+        if( !isIgnoredTable( lTablename ) )
+        {
+          // Read compression type, works only for one compression type for all partitions
+          handleCompression( pResultSet.getString( "def_compression" ), pResultSet.getString( "def_compress_for" ), new CompressionHandler()
+          {
+            public void setCompression( CompressType pCompressType, CompressForType pCompressForType )
+            {
+              Table lTable = findTable( pModel, lTablename );
+              lTable.setCompression( pCompressType );
+              lTable.setCompressionFor( pCompressForType );
+            }
+          } );
+
+          if( pResultSet.getString( "partitioning_type" ).equals( "HASH" ) ) // and cur_part_tables.subpartitioning_type = 'NONE' 
+          {
+            final HashPartitions lHashPartitions = new HashPartitionsImpl();
+
+            setPartitioningForTable( pModel, lTablename, lHashPartitions );
+
+            lHashPartitions.setColumn( loadPartitionColumns( lTablename ).get( 0 ) );
+
+            String lSql = "" + //
+                          " select partition_name," + //
+                          "        tablespace_name" + //
+                          "   from user_tab_partitions" + //
+                          "  where table_name = ?" + //
+                          "  order by partition_position" + //
+                          "";
+
+            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( lTablename ) )
+            {
+              @Override
+              protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+              {
+                HashPartition lHashPartition = new HashPartitionImpl();
+
+                lHashPartition.setName( pResultSet.getString( "partition_name" ) );
+                lHashPartition.setTablespace( pResultSet.getString( "tablespace_name" ) );
+
+                lHashPartitions.getPartitionList().add( lHashPartition );
+              }
+            }.execute();
+          }
+
+          if( pResultSet.getString( "partitioning_type" ).equals( "LIST" ) )
+          {
+            final ListPartitions lListPartitions = new ListPartitionsImpl();
+
+            setPartitioningForTable( pModel, lTablename, lListPartitions );
+
+            lListPartitions.setTableSubPart( load_tablesubpart( pResultSet.getString( "table_name" ), pResultSet.getString( "subpartitioning_type" ) ) );
+
+            lListPartitions.setColumn( loadPartitionColumns( lTablename ).get( 0 ) );
+
+            String lSql = "" + //
+                          " select partition_name," + //
+                          "        tablespace_name," + //
+                          "        high_value" + //
+                          "   from user_tab_partitions" + //
+                          "  where table_name = ?" + //
+                          "  order by partition_position" + //
+                          "";
+
+            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( lTablename ) )
+            {
+              @Override
+              protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+              {
+                String lHighValue = pResultSet.getString( "high_value" );
+                ListPartition lListPartition = new ListPartitionImpl();
+
+                lListPartition.setName( pResultSet.getString( "partition_name" ) );
+                lListPartition.setTablespace( pResultSet.getString( "tablespace_name" ) );
+
+                lListPartition.getValue().addAll( getOrigListpartValuelist( lHighValue ) );
+
+                lListPartitions.getPartitionList().add( lListPartition );
+              }
+            }.execute();
+
+            if( lListPartitions.getTableSubPart() != null )
+            {
+              for( ListPartition lListPartition : lListPartitions.getPartitionList() )
+              {
+                ListSubPart lListSubPart = new ListSubPartImpl();
+
+                lListSubPart.setName( lListPartition.getName() );
+                lListSubPart.getValue().addAll( lListPartition.getValue() );
+                lListSubPart.getSubPartList().addAll( loadSubpartlist( lTablename, lListPartition.getName(), pResultSet.getString( "subpartitioning_type" ) ) );
+
+                lListPartitions.getSubPartitionList().add( lListSubPart );
+              }
+
+              lListPartitions.getPartitionList().clear();
+            }
+          }
+
+          if( pResultSet.getString( "partitioning_type" ).equals( "RANGE" ) )
+          {
+            final RangePartitions lRangePartitions = new RangePartitionsImpl();
+
+            setPartitioningForTable( pModel, lTablename, lRangePartitions );
+
+            lRangePartitions.setIntervalExpression( pResultSet.getString( "interval" ) );
+
+            lRangePartitions.setTableSubPart( load_tablesubpart( pResultSet.getString( "table_name" ), pResultSet.getString( "subpartitioning_type" ) ) );
+
+            lRangePartitions.getColumns().addAll( loadPartitionColumns( lTablename ) );
+
+            String lSql = "" + //
+                          " select partition_name," + //
+                          "        tablespace_name," + //
+                          "        high_value" + //
+                          "   from user_tab_partitions" + //
+                          "  where table_name = ?" + //
+                          "  order by partition_position" + //
+                          "";
+
+            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( lTablename ) )
+            {
+              @Override
+              protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+              {
+
+                String lHighValue = pResultSet.getString( "high_value" );
+                RangePartition lRangePartition = new RangePartitionImpl();
+
+                lRangePartition.setName( pResultSet.getString( "partition_name" ) );
+                lRangePartition.setTablespace( pResultSet.getString( "tablespace_name" ) );
+
+                lRangePartition.getValue().addAll( getOrigRangepartValuelist( lHighValue ) );
+
+                lRangePartitions.getPartitionList().add( lRangePartition );
+              }
+            }.execute();
+
+            if( lRangePartitions.getTableSubPart() != null )
+            {
+              for( RangePartition lRangePartition : lRangePartitions.getPartitionList() )
+              {
+                RangeSubPart lRangeSubPart = new RangeSubPartImpl();
+
+                lRangeSubPart.setName( lRangePartition.getName() );
+                lRangeSubPart.getValue().addAll( lRangePartition.getValue() );
+                lRangeSubPart.getSubPartList().addAll( loadSubpartlist( lTablename, lRangePartition.getName(), pResultSet.getString( "subpartitioning_type" ) ) );
+
+                lRangePartitions.getSubPartitionList().add( lRangeSubPart );
+              }
+
+              lRangePartitions.getPartitionList().clear();
+            }
+          }
+
+          if( pResultSet.getString( "partitioning_type" ).equals( "REFERENCE" ) )
+          {
+            final RefPartitions lRefPartitions = new RefPartitionsImpl();
+
+            setPartitioningForTable( pModel, lTablename, lRefPartitions );
+
+            lRefPartitions.setFkName( pResultSet.getString( "ref_ptn_constraint_name" ) );
+
+            String lSql = "" + //
+                          " select partition_name," + //
+                          "        tablespace_name" + //
+                          "   from user_tab_partitions" + //
+                          "  where table_name = ?" + //
+                          "  order by partition_position" + //
+                          "";
+
+            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( lTablename ) )
+            {
+              @Override
+              protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+              {
+                RefPartition lRefPartition = new RefPartitionImpl();
+
+                lRefPartition.setName( pResultSet.getString( "partition_name" ) );
+                lRefPartition.setTablespace( pResultSet.getString( "tablespace_name" ) );
+
+                lRefPartitions.getPartitionList().add( lRefPartition );
+              }
+            }.execute();
+          }
+        }
+      }
+    }.execute();
+  }
+
+  private List<String> separateStringList( String pValues )
+  {
+    List<String> lReturn = new ArrayList<String>();
+
+    boolean lExitLoop = false;
+
+    while( !lExitLoop )
+    {
+      String lValue;
+
+      int lIndexOf = pValues.indexOf( ',' );
+      if( lIndexOf == -1 )
+      {
+        lValue = pValues.trim();
+        lExitLoop = true;
+      }
+      else
+      {
+        lValue = pValues.substring( 0, lIndexOf ).trim();
+        pValues = pValues.substring( lIndexOf + 1 );
+      }
+
+      lReturn.add( lValue );
+    }
+
+    return lReturn;
+  }
+
+  private List<ColumnRef> loadPartitionColumns( final String pTablename )
+  {
+    final List<ColumnRef> lColumnRefList = new ArrayList<ColumnRef>();
+
+    String lSql = "" + //
+                  "  select column_name" + //
+                  "    from user_part_key_columns" + //
+                  "   where name = ?" + //
+                  "     and object_type = 'TABLE'" + //
+                  "   order by column_position" + //
+                  "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        ColumnRef lColumnRef = new ColumnRefImpl();
+
+        lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
+        lColumnRefList.add( lColumnRef );
+      }
+    }.execute();
+
+    return lColumnRefList;
+  }
+
+  private void setPartitioningForTable( Model pModel, String pTablename, TablePartitioning pTablePartitioning )
+  {
+    Table lTable = findTable( pModel, pTablename );
+    lTable.setTablePartitioning( pTablePartitioning );
+    lTable.setLogging( LoggingType.LOGGING );
+  }
+}

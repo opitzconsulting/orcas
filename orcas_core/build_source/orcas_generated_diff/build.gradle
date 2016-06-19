@@ -61,6 +61,17 @@ task(generateDataReader, dependsOn: createGenDirs, type: JavaExec)
   outputs.file args[0]
 }
 
+task(generateDataWriter, dependsOn: createGenDirs, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath 
+
+  main = "de.opitzconsulting.orcas.ot.JavaDataWriterGenerator"
+  args "${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/load"
+  args "syex"
+
+  outputs.file args[0]
+}
+
 task(generateXmlExport, dependsOn: createGenDirs, type: JavaExec) 
 {
   classpath configurations.generatorRunPath 
@@ -73,6 +84,6 @@ task(generateXmlExport, dependsOn: createGenDirs, type: JavaExec)
 }
 
 compileJava.source "${buildDir}/srcgen"
-compileJava.dependsOn generateDiffJava, generateTransformerJava, generateDataReader, generateXmlExport
+compileJava.dependsOn generateDiffJava, generateTransformerJava, generateDataReader, generateDataWriter, generateXmlExport
 
 

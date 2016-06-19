@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.eclipse.emf.common.util.Enumerator;
 
-import de.opitzconsulting.orcas.diff.JdbcConnectionHandler;
-import de.opitzconsulting.orcas.sql.WrapperExecuteStatement;
 import de.opitzconsulting.orcasDsl.Model;
 import de.opitzconsulting.orcasDsl.ModelElement;
 
@@ -58,59 +56,26 @@ public class DataWriter
     pOut.append( "begin\n" );
     for( int i = 0; i < lPackageIndex; i++ )
     {
-      pOut.append( "  " +
-                   getBuildPackageNameForIndex( i +
-                                                1 ) +
-                   ".build();\n" );
+      pOut.append( "  " + getBuildPackageNameForIndex( i + 1 ) + ".build();\n" );
     }
     pOut.append( "end;\n" );
     pOut.append( "end;\n" );
     pOut.append( "/\n" );
-  }
-
-  public void writeToDatabase( Model pModel )
-  {
-    _typeDataContainer = new ClassDataParser().parse();
-
-    int lMaxElementCountForCall = 100;
-
-    List<ModelElement> lModelElementsToProcess = new ArrayList<ModelElement>( pModel.getModel_elements() );
-
-    while( !lModelElementsToProcess.isEmpty() )
-    {
-      List<ModelElement> lModelElementsToProcessForCall;
-
-      if( lModelElementsToProcess.size() < lMaxElementCountForCall )
-      {
-        lModelElementsToProcessForCall = new ArrayList<ModelElement>( lModelElementsToProcess );
-      }
-      else
-      {
-        lModelElementsToProcessForCall = new ArrayList<ModelElement>( lModelElementsToProcess.subList( 0, lMaxElementCountForCall ) );
-      }
-      lModelElementsToProcess.removeAll( lModelElementsToProcessForCall );
-      writeModelElementsToDatabase( lModelElementsToProcessForCall );
-    }
   }
 
   private String getBuildPackageNameForIndex( int lPackageIndex )
   {
-    return "pa_orcas_xtext_" +
-           lPackageIndex;
+    return "pa_orcas_xtext_" + lPackageIndex;
   }
 
   private void writeModelElementsToPlSqlPackage( List<ModelElement> pModelElements, String pPackageName, StringBuilder pOut )
   {
-    pOut.append( "create or replace package " +
-                 pPackageName +
-                 " is\n" );
+    pOut.append( "create or replace package " + pPackageName + " is\n" );
     pOut.append( "procedure build;\n" );
     pOut.append( "end;\n" );
     pOut.append( "/\n" );
 
-    pOut.append( "create or replace package body " +
-                 pPackageName +
-                 " is\n" );
+    pOut.append( "create or replace package body " + pPackageName + " is\n" );
     pOut.append( "procedure build\n" );
     pOut.append( "is\n" );
     pOut.append( "begin\n" );
@@ -126,22 +91,6 @@ public class DataWriter
     pOut.append( "\n" );
   }
 
-  private void writeModelElementsToDatabase( List<ModelElement> pModelElements )
-  {
-    StringBuilder lStringBuilder = new StringBuilder();
-
-    lStringBuilder.append( "begin\n" );
-    for( ModelElement lModelElement : pModelElements )
-    {
-      lStringBuilder.append( "  pa_orcas_model_holder.add_model_element( " );
-      _writeRecursice( _getDataRecursive( lModelElement ), lStringBuilder );
-      lStringBuilder.append( ") ;\n" );
-    }
-    lStringBuilder.append( "end;\n" );
-
-    new WrapperExecuteStatement( lStringBuilder.toString(), JdbcConnectionHandler.getCallableStatementProvider() ).execute();
-  }
-
   private void _writeRecursice( DataWriterPartConstruktorCall pDataWriterPartConstruktorCall, StringBuilder pOut )
   {
     pDataWriterPartConstruktorCall.writeRecursive( pOut, 2 );
@@ -149,9 +98,7 @@ public class DataWriter
 
   private DataWriterPart _getDataWriterPart( Object pObject )
   {
-    if( pObject == null ||
-        (pObject.getClass().isEnum() &&
-         ((Enumerator)pObject).getName().equals( "null" )) )
+    if( pObject == null || (pObject.getClass().isEnum() && ((Enumerator)pObject).getName().equals( "null" )) )
     {
       return new DataWriterPartFixedValue( "null" );
     }
@@ -218,9 +165,7 @@ public class DataWriter
     {
       lFieldDataList.addAll( 0, lClassDataTypeSuper.getFiledDataList() );
 
-      if( lClassDataTypeSuper.isHasSubclasses() &&
-          lClassDataTypeSuper.getFiledDataList().isEmpty() &&
-          lClassDataTypeSuper.getSuperclass() == null )
+      if( lClassDataTypeSuper.isHasSubclasses() && lClassDataTypeSuper.getFiledDataList().isEmpty() && lClassDataTypeSuper.getSuperclass() == null )
       {
         lDummyConstruktorValueCount++;
       }
@@ -259,24 +204,18 @@ public class DataWriter
   {
     if( pValue instanceof String )
     {
-      return "'" +
-             ((String)pValue).replaceAll( "'", "''" ) +
-             "'";
+      return "'" + ((String)pValue).replaceAll( "'", "''" ) + "'";
     }
     if( pValue instanceof Integer )
     {
-      return "" +
-             pValue;
+      return "" + pValue;
     }
     if( pValue instanceof Boolean )
     {
       return ((Boolean)pValue) ? "1" : "0";
     }
 
-    throw new RuntimeException( "Value unbekannt: " +
-                                pValue +
-                                " " +
-                                pValue.getClass() );
+    throw new RuntimeException( "Value unbekannt: " + pValue + " " + pValue.getClass() );
   }
 
   private Class _findInterfaceClass( Class pImplementingClass )
@@ -319,7 +258,6 @@ public class DataWriter
       return pImplementingClass;
     }
 
-    throw new RuntimeException( "Class nicht gefunden: " +
-                                pImplementingClass );
+    throw new RuntimeException( "Class nicht gefunden: " + pImplementingClass );
   }
 }
