@@ -5,4 +5,4 @@ String quote_sql_string( String pInput ) :
   pInput.replaceAll("'","''");      
 
 String getSkript( Model pModel ) : JAVA
-  de.opitzconsulting.orcas.ot.DataWriter.getSkript( de.opitzconsulting.orcasDsl.Model );
+  de.opitzconsulting.orcas.ot.ModelWriter.getSkriptXml( de.opitzconsulting.orcasDsl.Model );

@@ -16,7 +16,7 @@
   </target>
 
   <target name="orcas_initialize" depends="show_location">
-    <orcas_initialize extensionfolder="../orcas_extensions"/>
+    <orcas_initialize extensionfolder="../orcas_extensions" orcasinternalinstalldb="false"/>
   </target>
 
   <target name="build_tables" depends="show_location,orcas_initialize">

@@ -8,7 +8,6 @@
 «ENDDEFINE»
 
 «DEFINE write_model FOR Model»
-  «FILE "all.sql"»
-«getSkript()»
+  «FILE "all.xml"»«getSkript()»
   «ENDFILE»  
 «ENDDEFINE»

@@ -27,8 +27,6 @@ SPOOL OFF;
 
 SPOOL &1
 
-select pa_orcas_xml_syex.get_model( pa_orcas_trans_orig_syex.trans_orig_syex( pa_orcas_load_ist.get_ist())) json_col from dual;
-
 PROMPT ****************************************************************************************TABELLEN DER DATENBANK******************************************************************************************;
 SELECT TABLE_NAME, logging, cache
 FROM USER_TABLES
