@@ -2133,7 +2133,7 @@ ${orcas_sql_output}
         </fileset>
       </copy>      
 
-      <orcas_extract_replaceables user="@{user}" password="@{password}" tnsname="@{tnsname}" outputfolder="@{tmpfolder}/sync_replaceables/src_db"/>
+      <orcas_extract_replaceables user="@{user}" password="@{password}" tnsname="@{tnsname}" outputfolder="@{tmpfolder}/sync_replaceables/src_db" jdbcurl="@{jdbcurl}" />
 
       <orcas_internal_extract_drop_replaceables user="@{user}" password="@{password}" tnsname="@{tnsname}"  outputfolder="@{tmpfolder}/sync_replaceables/src_db_drop"/>
 

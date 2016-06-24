@@ -14,8 +14,8 @@
   </target>
 
   <target name="orcas_initialize" depends="show_location">
-    <orcas_initialize extensionfolder="../orcas_extensions" user="${username_schemaowner_src}" password="${password_schemaowner_src}" userorcas="${username_orcas_src}" passwordorcas="${password_orcas_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" />
-    <orcas_initialize extensionfolder="../orcas_extensions" user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" userorcas="${username_orcas_dst}" passwordorcas="${password_orcas_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" />
+    <orcas_initialize extensionfolder="../orcas_extensions" user="${username_schemaowner_src}" password="${password_schemaowner_src}" userorcas="${username_orcas_src}" passwordorcas="${password_orcas_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" orcasinternalinstalldb="false" />
+    <orcas_initialize extensionfolder="../orcas_extensions" user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" userorcas="${username_orcas_dst}" passwordorcas="${password_orcas_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" orcasinternalinstalldb="false" />
   </target>
 
   <target name="schema_sync" depends="show_location,orcas_initialize">
