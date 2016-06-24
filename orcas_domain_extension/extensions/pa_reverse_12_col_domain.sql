@@ -2,6 +2,7 @@ create or replace package body pa_reverse_12_col_domain is
   pv_syex_columndomain_list ct_syex_columndomain_list;  
   type t_varchar_set is table of number index by varchar2(100);
   pv_remove_sequence_name_set t_varchar_set;  
+  pv_default_chartype ot_syex_chartype;
   
   function find_uk( p_table in ot_syex_table, p_uk_name in varchar2 ) return ot_syex_uniquekey
   is
@@ -132,7 +133,7 @@ create or replace package body pa_reverse_12_col_domain is
         ot_syex_datatype.is_equal(           v_columndomain.i_data_type,  p_column.i_data_type )   = 1 
     and pa_domain_extension_helper.is_equal( v_columndomain.i_precision,  p_column.i_precision )   = 1 
     and pa_domain_extension_helper.is_equal( v_columndomain.i_scale,      p_column.i_scale,       0                       ) = 1 
-    and ot_syex_chartype.is_equal(           v_columndomain.i_byteorchar, p_column.i_byteorchar,  ot_syex_chartype.c_byte ) = 1   
+    and ot_syex_chartype.is_equal(           v_columndomain.i_byteorchar, p_column.i_byteorchar,  pv_default_chartype ) = 1   
     )
     then
       v_return := 0;
@@ -186,7 +187,7 @@ create or replace package body pa_reverse_12_col_domain is
           
         v_return := v_return + 100;
       end if;      
-      
+
       if( v_columndomain.i_generateuk is not null )
       then
         v_syex_uniquekey := find_uk( p_table, pa_domain_extension_helper.get_generated_name_column( v_columndomain.i_generateuk.i_constraintnamerules, p_column.i_name, p_table.i_name, p_table.i_alias) );
@@ -361,6 +362,7 @@ create or replace package body pa_reverse_12_col_domain is
     v_new_modelelement_list ct_syex_modelelement_list;
     v_append number;
     v_sequence ot_syex_sequence;    
+    v_byte_char varchar2(100);
     
     procedure build_columndomain_list
     is
@@ -379,6 +381,18 @@ create or replace package body pa_reverse_12_col_domain is
   begin
     v_input := p_input;
     pv_remove_sequence_name_set.delete;
+    
+    select value 
+      into v_byte_char
+      from nls_instance_parameters 
+     where parameter = 'NLS_LENGTH_SEMANTICS';
+     
+    if( v_byte_char = 'BYTE' )
+    then
+      pv_default_chartype := ot_syex_chartype.c_byte;
+    else
+      pv_default_chartype := ot_syex_chartype.c_char;    
+    end if;
     
     build_columndomain_list();
   

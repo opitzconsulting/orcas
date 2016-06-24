@@ -10,6 +10,7 @@ import java.sql.Struct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperCallableStatement;
 import de.opitzconsulting.orcas.sql.WrapperReturnFirstValue;
@@ -47,7 +48,7 @@ public class PlSqlHandler
 
         pCallableStatement.execute();
 
-        DataReader.setIntNullValue( -1 );
+        DataReader.setIntNullValue( DiffRepository.getNullIntValue() );
         DataReader.loadIntoModel( lOutputModel, (Struct)pCallableStatement.getObject( 1 ) );
       }
     }.execute();
@@ -57,7 +58,7 @@ public class PlSqlHandler
 
   public static de.opitzconsulting.orcas.syex.load.DataWriter createDataWriter( final CallableStatementProvider pCallableStatementProvider )
   {
-    return new de.opitzconsulting.orcas.syex.load.DataWriter()
+    de.opitzconsulting.orcas.syex.load.DataWriter lReturn = new de.opitzconsulting.orcas.syex.load.DataWriter()
     {
       @Override
       protected Struct createStruct( String pTypeName, Object[] pAttributes )
@@ -77,6 +78,10 @@ public class PlSqlHandler
         return JdbcConnectionHandler.createClob( pValue, pCallableStatementProvider );
       }
     };
+
+    lReturn.setIntNullValue( DiffRepository.getNullIntValue() );
+
+    return lReturn;
   }
 
   public static void callTargetPlSql( final Model pModel, final Parameters pParameters, final CallableStatementProvider pCallableStatementProvider )

@@ -9,7 +9,7 @@ create or replace package body pa_02_apply_tab_domain is
     loop
       if( pv_syex_model.i_model_elements(i) is of (ot_syex_domain) )
       then
-        if( treat( pv_syex_model.i_model_elements(i) as ot_syex_domain ).i_name = p_domain_name )
+        if( upper( treat( pv_syex_model.i_model_elements(i) as ot_syex_domain ).i_name ) = upper( p_domain_name ) )
         then
           return treat( pv_syex_model.i_model_elements(i) as ot_syex_domain );
         end if;

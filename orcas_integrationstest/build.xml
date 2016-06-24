@@ -166,6 +166,7 @@
         <arg value="null"/>
         <arg value="break"/>        <!--  this turns off plsql extensions <arg value="${user_orcas}"/>-->
         <arg value="true"/>
+        <arg value="false"/>
       </java>      
 
       <concat destfile="@{logfile}" append="true">

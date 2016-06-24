@@ -1966,6 +1966,7 @@ ${orcas_sql_output}
     <attribute name="scriptprefix" default="null" />
     <attribute name="scriptpostfix" default=".sql" />
     <attribute name="scriptfolderrecursive" default="false" />
+    <attribute name="removedefaultvalues" default="true" />
     <sequential>
       <!--<orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="false" indexparallelcreate="false" indexmovetablespace="false" tablemovetablespace="false" createmissingfkindexes="false" logonly="false" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" dateformat="@{dateformat}"/>-->
       <delete dir="@{outputfolder}"/>
@@ -2008,6 +2009,7 @@ ${orcas_sql_output}
         <arg value="@{scriptpostfix}"/>
         <arg value="@{userorcas}"/>
         <arg value="false"/>
+        <arg value="@{removedefaultvalues}"/>
       </java>      
 
       <xslt basedir="@{tmpfolder}/load_extract" destdir="@{outputfolder}" extension=".xml" style="@{tmpfolder}/load_extract/orcas_internal_custom_extract.xsl" classpathref="orcas_internal_xslt_classpath">

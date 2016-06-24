@@ -25,28 +25,6 @@ task(createSqlplusDir, dependsOn: jar)
   outputs.file "${buildDir}/sqlplus/db/types"
 }
 
-task(generateObjectTypes, dependsOn: createSqlplusDir, type: JavaExec) 
-{
-  classpath configurations.generatorRunPath
-
-  main = "de.opitzconsulting.orcas.ot.OracleOtGenerator"
-  args "${buildDir}/sqlplus/db/types/ot_${project.ext.postfix}.sql"
-  args project.ext.postfix
-
-  outputs.file args[0]
-}
-
-task(generateXmlPackage, dependsOn: createSqlplusDir, type: JavaExec) 
-{
-  classpath configurations.generatorRunPath
-
-  main = "de.opitzconsulting.orcas.ot.OtXmlPackageGenerator"
-  args "${buildDir}/sqlplus/db/packages/xml_${project.ext.postfix}.sql"
-  args project.ext.postfix
-
-  outputs.file args[0]
-}
-
 task sqlplusJar( type: Zip ) {
     classifier = 'sqlplus'
     baseName = jar.baseName
@@ -58,8 +36,6 @@ artifacts
 {
   runtime sqlplusJar
 }
-
-sqlplusJar.dependsOn generateObjectTypes, generateXmlPackage
 
 build.dependsOn sqlplusJar
 

@@ -10,6 +10,17 @@ dependencies
    project(':orcas_xtext_extension.generator')
 }
 
+task(generateObjectTypes, dependsOn: createSqlplusDir, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath
+
+  main = "de.opitzconsulting.orcas.ot.OracleOtGenerator"
+  args "${buildDir}/sqlplus/db/types/ot_${project.ext.postfix}.sql"
+  args project.ext.postfix
+
+  outputs.file args[0]
+}
+
 task(copyGeneratedXtextFileToOriginalFilesToBuild, dependsOn: copyOriginalFilesToBuild, type: Copy)
 {
   from "${project(':orcas_xtext_extension.generator').buildDir}/xtext_syex"
@@ -19,5 +30,8 @@ task(copyGeneratedXtextFileToOriginalFilesToBuild, dependsOn: copyOriginalFilesT
 
 copyGeneratedXtextFileToOriginalFilesToBuild.dependsOn copyOriginalFilesToBuild
 copyGeneratedXtextFileToOriginalFilesToBuild.dependsOn ':orcas_xtext_extension.generator:build'
+
 generateXtext.dependsOn copyGeneratedXtextFileToOriginalFilesToBuild
+
+sqlplusJar.dependsOn generateObjectTypes
 

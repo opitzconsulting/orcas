@@ -148,7 +148,7 @@ public class OrcasMain
 
         pCallableStatement.execute();
 
-        DataReader.setIntNullValue( -1 );
+        DataReader.setIntNullValue( DiffRepository.getNullIntValue() );
         DataReader.loadIntoModel( lOutputModel, (Struct)pCallableStatement.getObject( 1 ) );
       }
     }.execute();

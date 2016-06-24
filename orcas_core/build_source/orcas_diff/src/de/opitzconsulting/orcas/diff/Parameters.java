@@ -62,10 +62,16 @@ public class Parameters
   private String _targetplsql;
   private Boolean _sqlplustable;
   private Boolean _orderColumnsByName;
+  private Boolean _removeDefaultValuesFromModel;
 
   public boolean isOrderColumnsByName()
   {
     return checkNull( _orderColumnsByName );
+  }
+
+  public boolean isRemoveDefaultValuesFromModel()
+  {
+    return checkNull( _removeDefaultValuesFromModel );
   }
 
   public Parameters( String[] pArgs, ParameterTypeMode pParameterTypeMode )
@@ -183,6 +189,8 @@ public class Parameters
       _orcasDbUser = getParameterString( lParameterMap.get( 13 ) );
 
       _orderColumnsByName = getParameterFlag( lParameterMap.get( 14 ) );
+
+      _removeDefaultValuesFromModel = getParameterFlag( lParameterMap.get( 15 ) );
     }
 
     LogManager.getRootLogger().setLevel( Level.toLevel( checkNull( _loglevel ).toUpperCase() ) );

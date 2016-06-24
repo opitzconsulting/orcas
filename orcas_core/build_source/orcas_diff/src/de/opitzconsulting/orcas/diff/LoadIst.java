@@ -115,7 +115,7 @@ import de.opitzconsulting.origOrcasDsl.impl.UniqueKeyImpl;
 
 public class LoadIst
 {
-  Log _log = LogFactory.getLog( OrcasMain.class );
+  private Log _log = LogFactory.getLog( OrcasMain.class );
 
   private Map<String,List<String>> excludeMap = new HashMap<String,List<String>>();
 
@@ -676,7 +676,7 @@ public class LoadIst
 
     if( _parameters.isOrderColumnsByName() )
     {
-      lSql += " order by table_name, column_name, column_id";      
+      lSql += " order by table_name, column_name, column_id";
     }
     else
     {
@@ -1151,10 +1151,7 @@ public class LoadIst
           {
             ForeignKey lForeignKey = new ForeignKeyImpl();
 
-            if( !lGeneratedName )
-            {
-              lForeignKey.setConsName( pResultSet.getString( "constraint_name" ) );
-            }
+            lForeignKey.setConsName( pResultSet.getString( "constraint_name" ) );
 
             lForeignKey.setStatus( lEnableType );
 
