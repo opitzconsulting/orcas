@@ -128,7 +128,7 @@ public class LoadIst
 
   private CallableStatementProvider _callableStatementProvider;
 
-  public LoadIst( CallableStatementProvider pCallableStatementProvider,Parameters pParameters  )
+  public LoadIst( CallableStatementProvider pCallableStatementProvider, Parameters pParameters )
   {
     _callableStatementProvider = pCallableStatementProvider;
     _parameters = pParameters;
@@ -140,7 +140,7 @@ public class LoadIst
     constraintTableMapForFK.put( pConstraintname, pTablename );
   }
 
-  public Model loadModel( )
+  public Model loadModel()
   {
     _oracleMajorVersion = loadOracleMajorVersion();
 
@@ -650,7 +650,6 @@ public class LoadIst
              "          and user_tab_cols.table_name  = user_tab_identity_cols.table_name " + //
              "          )" + //
              "  where hidden_column = 'NO'" + //
-             "  order by table_name, column_name, column_id" + //
              "";
     }
     else
@@ -672,8 +671,16 @@ public class LoadIst
              "        null generation_type" + //
              "   from user_tab_cols" + //
              "  where hidden_column = 'NO'" + //
-             "  order by table_name, column_name, column_id" + //
              "";
+    }
+
+    if( _parameters.isOrderColumnsByName() )
+    {
+      lSql += " order by table_name, column_name, column_id";      
+    }
+    else
+    {
+      lSql += " order by table_name, column_id, column_name";
     }
 
     new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )

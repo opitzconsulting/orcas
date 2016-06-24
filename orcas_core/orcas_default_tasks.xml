@@ -825,6 +825,7 @@ ${orcas_sql_output}
     <attribute name="orcasinternalsrcuser" default="null" />
     <attribute name="orcasinternalsrcpassword" default="null" />
     <attribute name="orcasinternalsrcjdbcurl" default="null" />
+    <attribute name="orcasinternalsqlplustable" default="false" />
     <sequential>
       <orcas_internal_log_action_start message="orcas_execute_statics" logname="@{logname}" />
      
@@ -869,6 +870,8 @@ ${orcas_sql_output}
         <arg value="@{orcasinternalsrcjdbcurl}"/>
         <arg value="@{orcasinternalsrcuser}"/>
         <arg value="@{orcasinternalsrcpassword}"/>
+        <arg value="@{orcasinternalsqlplustable}"/>
+        <arg value="false"/>
       </java>
       <orcas_internal_spool_java user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" spoolfile="@{tmpfolder}/spoolfile.sql" />
           
@@ -1959,6 +1962,10 @@ ${orcas_sql_output}
     <attribute name="orcasinternalloadxmlsql" default="load_extract.sql" />
     <attribute name="dateformat" default="dd.mm.yy" />
     <attribute name="loglevel" default="info" />
+    <attribute name="scriptfolder" default="null" />
+    <attribute name="scriptprefix" default="null" />
+    <attribute name="scriptpostfix" default=".sql" />
+    <attribute name="scriptfolderrecursive" default="false" />
     <sequential>
       <!--<orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="false" indexparallelcreate="false" indexmovetablespace="false" tablemovetablespace="false" createmissingfkindexes="false" logonly="false" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" dateformat="@{dateformat}"/>-->
       <delete dir="@{outputfolder}"/>
@@ -1985,16 +1992,22 @@ ${orcas_sql_output}
       </path>
 
       <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
-      <java classname="de.opitzconsulting.orcas.diff.OrcasLoadExtract" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="true" dir="@{tmpfolder}/load_extract/" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasLoadExtract" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="true" maxmemory="512m">
         <arg value="oracle.jdbc.OracleDriver"/>
         <arg value="@{jdbcurl}"/>
         <arg value="@{user}"/>
         <arg value="@{password}"/>
-        <arg value="load_extract.xml"/>
+        <arg value="@{scriptfolder}"/>
         <arg value="@{excludewheretable}"/>
         <arg value="@{excludewheresequence}"/>
         <arg value="@{dateformat}"/>
         <arg value="@{loglevel}"/>
+        <arg value="@{tmpfolder}/load_extract/load_extract.xml"/>
+        <arg value="@{scriptfolderrecursive}"/>
+        <arg value="@{scriptprefix}"/>
+        <arg value="@{scriptpostfix}"/>
+        <arg value="@{userorcas}"/>
+        <arg value="false"/>
       </java>      
 
       <xslt basedir="@{tmpfolder}/load_extract" destdir="@{outputfolder}" extension=".xml" style="@{tmpfolder}/load_extract/orcas_internal_custom_extract.xsl" classpathref="orcas_internal_xslt_classpath">

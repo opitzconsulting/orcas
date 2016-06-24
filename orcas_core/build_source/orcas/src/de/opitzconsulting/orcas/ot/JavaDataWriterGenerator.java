@@ -59,6 +59,7 @@ public class JavaDataWriterGenerator extends JavaGenerator
 
     pOut.println( "protected abstract Struct createStruct( String pTypeName, Object[] pAttributes );" );
     pOut.println( "protected abstract Array createArrayOf( String pTypeName, Object[] pElements );" );
+    pOut.println( "protected abstract Clob createClob( String pValue );" );
 
     for( ClassDataType lClassDataType : OracleOtGenerator.orderClassDataTypeList( lTypeDataContainer.getAllClassDataTypes(), lTypeDataContainer ) )
     {
@@ -126,7 +127,14 @@ public class JavaDataWriterGenerator extends JavaGenerator
 
                 if( lType.getJavaName().equals( "String" ) )
                 {
-                  lValueString = "pValue." + lFieldData.getJavaGetterCall();
+                  if( lType.getSqlName().equalsIgnoreCase( "clob" ) )
+                  {
+                    lValueString = "(pValue." + lFieldData.getJavaGetterCall() + "  == null ? null : createClob(pValue." + lFieldData.getJavaGetterCall() + "))";
+                  }
+                  else
+                  {
+                    lValueString = "pValue." + lFieldData.getJavaGetterCall();
+                  }
                 }
                 if( lType.getJavaName().equals( "int" ) )
                 {

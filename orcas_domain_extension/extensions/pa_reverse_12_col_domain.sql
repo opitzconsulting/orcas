@@ -177,20 +177,12 @@ create or replace package body pa_reverse_12_col_domain is
         if( p_table.i_primary_key.i_pk_columns(1).i_column_name != p_column.i_name )
         then
           return null;
+        end if;
+        
+        if( v_columndomain.i_generatepk.i_sequencenamerules is not null and v_columndomain.i_generatepk.i_sequencenamerules.count > 0 )
+        then
+          v_return := v_return + 1;
         end if;        
-               
-       /* if( v_syex_columndomain.i_generatepk.i_sequencenamerules is not null )
-          then
-            v_syex_sequence := new ot_syex_sequence();
-          
-            v_syex_sequence.i_sequence_name := pa_domain_extension_helper.get_generated_name( v_syex_columndomain.i_generatepk.i_sequencenamerules, v_syex_column.i_name, p_syex_table.i_alias);
-            v_syex_sequence.i_max_value_select := 'select max(' || v_syex_column.i_name || ') from ' || p_syex_table.i_name;
-          
-            pv_syex_sequence_list.extend;
-            pv_syex_sequence_list(pv_syex_sequence_list.count) := v_syex_sequence;          
-            
-                    v_return := v_return + 50;
-          end if;*/
           
         v_return := v_return + 100;
       end if;      
@@ -315,7 +307,7 @@ create or replace package body pa_reverse_12_col_domain is
     then
       p_table.i_primary_key := null;
       
-      if( v_columndomain.i_generatepk.i_sequencenamerules is not null )
+      if( v_columndomain.i_generatepk.i_sequencenamerules is not null and v_columndomain.i_generatepk.i_sequencenamerules.count > 0 )
       then
         pv_remove_sequence_name_set( upper( pa_domain_extension_helper.get_generated_name_column( v_columndomain.i_generatepk.i_sequencenamerules, p_column.i_name, p_table.i_name, p_table.i_alias) ) ) := 1;
       end if;

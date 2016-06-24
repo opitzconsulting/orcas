@@ -60,17 +60,54 @@ public class Parameters
   private String _scriptpostfix;
   private String _loglevel;
   private String _targetplsql;
+  private Boolean _sqlplustable;
+  private Boolean _orderColumnsByName;
+
+  public boolean isOrderColumnsByName()
+  {
+    return checkNull( _orderColumnsByName );
+  }
 
   public Parameters( String[] pArgs, ParameterTypeMode pParameterTypeMode )
   {
     if( pArgs.length == 0 )
     {
+      _jdbcConnectParameters = new JdbcConnectParameters();
+      _jdbcConnectParameters._jdbcDriver = "oracle.jdbc.OracleDriver";
+      _srcJdbcConnectParameters = null;
+      _logonly = true;
+      _dropmode = false;
+      _indexparallelcreate = true;
+      _indexmovetablespace = true;
+      _tablemovetablespace = true;
+      _createmissingfkindexes = true;
+      _modelFile = null;
+      _spoolfile = "";
+      _excludewheretable = "object_name like '%$%'";
+      _excludewheresequence = "object_name like '%$%'";
+      _dateformat = "dd.mm.yy";
+      _orcasDbUser = "";
+      _scriptfolderrecursive = false;
+      _scriptprefix = "";
+      _scriptpostfix = "";
+      _loglevel = "debug";
+      _targetplsql = "";
+      _sqlplustable = false;
+      _orderColumnsByName = false;
+
       if( pParameterTypeMode == ParameterTypeMode.ORCAS_MAIN )
       {
+        _jdbcConnectParameters._jdbcUrl = "jdbc:oracle:thin:@10.1.40.36:1521:ORCL";
+        _jdbcConnectParameters._jdbcUser = "ORCAS_ITT_UEBERFUEHRUNG";
+        _jdbcConnectParameters._jdbcPassword = "xxx";
+        _orcasDbUser = "ORCAS_ITT_SVW_USER";
+        _modelFile = "D:\\2_orcas\\orcas\\orcas_integrationstest\\tests\\test_comment\\tabellen";
       }
       if( pParameterTypeMode == ParameterTypeMode.ORCAS_LOAD_EXTRACT )
       {
       }
+
+      return;
     }
 
     Map<Integer,Object> lParameterMap = new HashMap<Integer,Object>();
@@ -120,6 +157,10 @@ public class Parameters
       _srcJdbcConnectParameters._jdbcUser = getParameterString( lParameterMap.get( 22 ) );
       _srcJdbcConnectParameters._jdbcPassword = getParameterString( lParameterMap.get( 23 ) );
 
+      _sqlplustable = getParameterFlag( lParameterMap.get( 24 ) );
+
+      _orderColumnsByName = getParameterFlag( lParameterMap.get( 25 ) );
+
       if( _srcJdbcConnectParameters._jdbcUrl.equals( "" ) )
       {
         _srcJdbcConnectParameters = null;
@@ -132,9 +173,24 @@ public class Parameters
       _excludewheresequence = cleanupExcludeWhere( lParameterMap.get( 6 ) );
       _dateformat = getParameterString( lParameterMap.get( 7 ) );
       _loglevel = getParameterString( lParameterMap.get( 8 ) );
+
+      _spoolfile = getParameterString( lParameterMap.get( 9 ) );
+
+      _scriptfolderrecursive = getParameterFlag( lParameterMap.get( 10 ) );
+      _scriptprefix = getParameterString( lParameterMap.get( 11 ) );
+      _scriptpostfix = getParameterString( lParameterMap.get( 12 ) );
+
+      _orcasDbUser = getParameterString( lParameterMap.get( 13 ) );
+
+      _orderColumnsByName = getParameterFlag( lParameterMap.get( 14 ) );
     }
 
     LogManager.getRootLogger().setLevel( Level.toLevel( checkNull( _loglevel ).toUpperCase() ) );
+  }
+
+  public Boolean getSqlplustable()
+  {
+    return checkNull( _sqlplustable );
   }
 
   public JdbcConnectParameters getSrcJdbcConnectParameters()

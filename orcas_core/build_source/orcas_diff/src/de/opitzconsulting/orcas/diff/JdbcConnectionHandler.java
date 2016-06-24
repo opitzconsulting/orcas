@@ -1,6 +1,9 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.Array;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -9,6 +12,7 @@ import java.sql.Struct;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.JdbcCallableStatementProvider;
 import oracle.jdbc.driver.OracleConnection;
+import oracle.sql.CLOB;
 
 public class JdbcConnectionHandler
 {
@@ -68,6 +72,33 @@ public class JdbcConnectionHandler
       return ((OracleConnection)lCallableStatementProviderImpl._connection).createARRAY( lCallableStatementProviderImpl._parameters.getOrcasDbUser().toUpperCase() + "." + pTypeName.toUpperCase(), pElements );
     }
     catch( SQLException e )
+    {
+      throw new RuntimeException( e );
+    }
+  }
+
+  public static Clob createClob( String pValue, CallableStatementProvider pCallableStatementProvider )
+  {
+    try
+    {
+      CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl)pCallableStatementProvider;
+
+      CLOB lClob = CLOB.createTemporary( (OracleConnection)lCallableStatementProviderImpl._connection, true, CLOB.DURATION_SESSION );
+
+      lClob.open( CLOB.MODE_READWRITE );
+
+      Writer lSetCharacterStream = lClob.setCharacterStream( 1 );
+      lSetCharacterStream.append( pValue );
+
+      lSetCharacterStream.close();
+
+      return lClob;
+    }
+    catch( SQLException e )
+    {
+      throw new RuntimeException( e );
+    }
+    catch( IOException e )
     {
       throw new RuntimeException( e );
     }

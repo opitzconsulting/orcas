@@ -20,3 +20,14 @@ create table tab_umlaut_comment
     col1		number(5),
     comment on table is "a_umlaut_is_ä";
 );
+
+create table tab_drop_column_comment
+( 	
+    col1		number(5)
+);
+
+create table tab_drop_col_and_comment
+( 	
+    col1		number(5)
+);
+

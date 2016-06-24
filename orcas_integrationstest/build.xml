@@ -155,11 +155,17 @@
         <arg value="${orcas.default_jdbcurl}"/>
         <arg value="@{user}"/>
         <arg value="@{password}"/>
-        <arg value="load_spool.xml"/>
+        <arg value="null"/>
         <arg value="object_name like ''%$%''"/>
         <arg value="object_name like ''%$%''"/>
         <arg value="dd.mm.yy"/>
         <arg value="info"/>
+        <arg value="load_spool.xml"/>
+        <arg value="null"/>
+        <arg value="null"/>
+        <arg value="null"/>
+        <arg value="${user_orcas}"/>
+        <arg value="true"/>
       </java>      
 
       <concat destfile="@{logfile}" append="true">
@@ -598,7 +604,7 @@ ${akt_verzeichnis}: @{message}</concat>
                   <then>
                     <log_testcase_start testname="test_run_sqlplus"/>
                     <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" userorcas="${user_orcas}" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
-                    <!--<orcas_grant user="${ueberfuehrung}" userorcas="${user_orcas}" />    -->
+                    <orcas_grant user="${ueberfuehrung}" userorcas="${user_orcas}" />
                     <orcas_execute_script user="${ueberfuehrung}" script="@{folder}/erzeuge_ausgangszustand.sql" parameter="${alternate_tablespace_1} ${alternate_tablespace_2}" userorcas="${user_orcas}"
                       logname="ausgangszustand_anlegen_ueberfuehrung" failonerror="true" />
                     <orcas_sqlplus_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen_sqlplus/" userorcas="${user_orcas}" scriptfolderrecursive="true"

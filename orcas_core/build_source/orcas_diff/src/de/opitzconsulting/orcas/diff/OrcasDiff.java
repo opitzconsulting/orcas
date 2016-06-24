@@ -479,18 +479,22 @@ public class OrcasDiff extends AbstractStatementBuilder
         {
           if( lCommentDiff.isOld == true && lCommentDiff.isMatched == false )
           {
-            stmtStart( "comment on" );
-            stmtAppend( lCommentDiff.comment_objectOld.getName() );
-            stmtAppend( " " );
-            stmtAppend( lTableDiff.nameOld );
-            if( lCommentDiff.column_nameOld != null )
+            boolean lIsColumnComment = lCommentDiff.column_nameOld != null;
+            if( !lIsColumnComment || columnIsNew( lTableDiff, lCommentDiff.column_nameOld ) )
             {
-              stmtAppend( "." );
-              stmtAppend( lCommentDiff.column_nameOld );
+              stmtStart( "comment on" );
+              stmtAppend( lCommentDiff.comment_objectOld.getName() );
+              stmtAppend( " " );
+              stmtAppend( lTableDiff.nameOld );
+              if( lIsColumnComment )
+              {
+                stmtAppend( "." );
+                stmtAppend( lCommentDiff.column_nameOld );
+              }
+              stmtAppend( "is" );
+              stmtAppend( "''" );
+              stmtDone();
             }
-            stmtAppend( "is ''" );
-
-            stmtDone();
           }
         }
 
@@ -644,7 +648,7 @@ public class OrcasDiff extends AbstractStatementBuilder
 
     for( InlineCommentDiff lInlineCommentDiff : pTableDiff.commentsDiff )
     {
-      handleCmment( nvl( pTableDiff.nameNew, pTableDiff.nameOld ), lInlineCommentDiff );
+      handleComment( pTableDiff, lInlineCommentDiff );
     }
 
     if( pTableDiff.mviewLogDiff.isNew )
@@ -724,10 +728,6 @@ public class OrcasDiff extends AbstractStatementBuilder
         if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
         {
           stmtAppend( "nologging" );
-        }
-        else
-        {
-          stmtAppend( "logging" );
         }
       }
       handleCompression( pTableDiff.compressionNew, pTableDiff.compressionForNew, false );
@@ -875,7 +875,7 @@ public class OrcasDiff extends AbstractStatementBuilder
     return lReturn;
   }
 
-  private void handleCmment( String pTablename, InlineCommentDiff pInlineCommentDiff )
+  private void handleComment( TableDiff pTableDiff, InlineCommentDiff pInlineCommentDiff )
   {
     if( pInlineCommentDiff.isEqual == false )
     {
@@ -884,7 +884,7 @@ public class OrcasDiff extends AbstractStatementBuilder
         stmtStart( "comment on" );
         stmtAppend( pInlineCommentDiff.comment_objectNew.getName() );
         stmtAppend( " " );
-        stmtAppend( pTablename );
+        stmtAppend( pTableDiff.nameNew );
         if( pInlineCommentDiff.column_nameNew != null )
         {
           stmtAppend( "." );
@@ -894,22 +894,23 @@ public class OrcasDiff extends AbstractStatementBuilder
         stmtAppend( "'" + pInlineCommentDiff.commentNew.replace( "'", "''" ) + "'" );
         stmtDone();
       }
-      else
+    }
+  }
+
+  private boolean columnIsNew( TableDiff pTableDiff, String pColumnName )
+  {
+    for( ColumnDiff lColumnDiff : pTableDiff.columnsDiff )
+    {
+      if( lColumnDiff.isNew )
       {
-        stmtStart( "comment on" );
-        stmtAppend( pInlineCommentDiff.comment_objectOld.getName() );
-        stmtAppend( " " );
-        stmtAppend( pTablename );
-        if( pInlineCommentDiff.column_nameOld != null )
+        if( lColumnDiff.nameNew.equals( pColumnName ) )
         {
-          stmtAppend( "." );
-          stmtAppend( pInlineCommentDiff.column_nameOld );
+          return true;
         }
-        stmtAppend( "is" );
-        stmtAppend( "''" );
-        stmtDone();
       }
     }
+
+    return false;
   }
 
   private void handleUniquekey( String pTablename, UniqueKeyDiff pUniqueKeyDiff )

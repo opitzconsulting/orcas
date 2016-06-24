@@ -41,6 +41,7 @@ public class JavaDataReaderGenerator extends JavaGenerator
     writePackage( pOut );
     pOut.println();
     pOut.println( "import java.util.*;" );
+    pOut.println( "import java.io.*;" );
     pOut.println( "import java.sql.*;" );
     pOut.println( "import de.opitzconsulting.orcasDsl.*;" );
     pOut.println( "import de.opitzconsulting.orcasDsl.impl.*;" );
@@ -49,9 +50,23 @@ public class JavaDataReaderGenerator extends JavaGenerator
     pOut.println();
     pOut.print( "public class DataReader" );
     pOut.println( "{" );
-    
+
     pOut.println( "private static int intNullValue;" );
-    
+
+    pOut.println();
+    pOut.println( "public static String clobToString( Clob pClob )" );
+    pOut.println( "{" );
+    pOut.println( "  try" );
+    pOut.println( "  {" );
+    pOut.println( "    return pClob.getSubString( 1L, (int)pClob.length() );" );
+    pOut.println( "  }" );
+    pOut.println( "  catch( Exception e )" );
+    pOut.println( "  {" );
+    pOut.println( "    throw new RuntimeException( e );" );
+    pOut.println( "  }" );
+    pOut.println( "}" );
+
+    pOut.println();
     pOut.println( "public static void setIntNullValue( int pIntNullValue )" );
     pOut.println( "{" );
     pOut.println( "intNullValue = pIntNullValue;" );
@@ -123,7 +138,14 @@ public class JavaDataReaderGenerator extends JavaGenerator
 
               if( lType.getJavaName().equals( "String" ) )
               {
-                lValueString = "(String)lAttributes[" + i + "]";
+                if( lType.getSqlName().equalsIgnoreCase( "clob" ) )
+                {
+                  lValueString = "( lAttributes[" + i + "] == null ? null : clobToString( (Clob)lAttributes[" + i + "] ) )";
+                }
+                else
+                {
+                  lValueString = "(String)lAttributes[" + i + "]";
+                }
               }
               if( lType.getJavaName().equals( "int" ) )
               {
