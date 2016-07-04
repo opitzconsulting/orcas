@@ -2,11 +2,6 @@
 <project default="build_all" basedir="." name="schema_sync">
   <import file="../distribution/ant_default_include.xml"/>
 
-  <target name="orcas_install" depends="show_location">
-    <orcas_install user="${username_dba_src}" password="${password_dba_src}" userorcas="${username_orcas_src}" passwordorcas="${password_orcas_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" />
-    <orcas_install user="${username_dba_dst}" password="${password_dba_dst}" userorcas="${username_orcas_dst}" passwordorcas="${password_orcas_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" />
-  </target>
-
   <target name="schema_sync_install" depends="show_location">
     <orcas_execute_script user="${username_dba_src}" password="${password_dba_src}" script="create_schemaowner.sql" parameter="${username_schemaowner_src} ${password_schemaowner_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" />
     <orcas_execute_script user="${username_schemaowner_src}" password="${password_schemaowner_src}" script="schema_vorlage.sql" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" />
@@ -14,26 +9,23 @@
   </target>
 
   <target name="orcas_initialize" depends="show_location">
-    <orcas_initialize extensionfolder="../orcas_extensions" user="${username_schemaowner_src}" password="${password_schemaowner_src}" userorcas="${username_orcas_src}" passwordorcas="${password_orcas_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" orcasinternalinstalldb="false" />
-    <orcas_initialize extensionfolder="../orcas_extensions" user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" userorcas="${username_orcas_dst}" passwordorcas="${password_orcas_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" orcasinternalinstalldb="false" />
+    <orcas_initialize />
   </target>
 
   <target name="schema_sync" depends="show_location,orcas_initialize">
-    <orcas_extract outputfolder="${binrundir}/extract_output/tables" user="${username_schemaowner_src}" password="${password_schemaowner_src}" userorcas="${username_orcas_src}" passwordorcas="${password_orcas_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" />
-    <orcas_extract_replaceables outputfolder="${binrundir}/extract_output/replaceables" user="${username_schemaowner_src}" password="${password_schemaowner_src}" userorcas="${username_orcas_src}" passwordorcas="${password_orcas_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" />
-    <orcas_execute_statics scriptfolder="${binrundir}/extract_output/tables" spoolfolder="${binrundir}/log" logname="tables" dropmode="false" user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" userorcas="${username_orcas_dst}" passwordorcas="${password_orcas_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" />
-    <orcas_sync_replaceables scriptfolder="${binrundir}/extract_output/replaceables" logname="sync_replaceables" user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" userorcas="${username_orcas_dst}" passwordorcas="${password_orcas_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" />
-    <orcas_compile_db_objects user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" userorcas="${username_orcas_dst}" passwordorcas="${password_orcas_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" />
+    <orcas_extract outputfolder="${binrundir}/extract_output/tables" user="${username_schemaowner_src}" password="${password_schemaowner_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" />
+    <orcas_extract_replaceables outputfolder="${binrundir}/extract_output/replaceables" user="${username_schemaowner_src}" password="${password_schemaowner_src}" tnsname="${database_src}" jdbcurl="${jdbc_url_src}" />
+    <orcas_execute_statics scriptfolder="${binrundir}/extract_output/tables" spoolfolder="${binrundir}/log" logname="tables" dropmode="false" user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" />
+    <orcas_sync_replaceables scriptfolder="${binrundir}/extract_output/replaceables" logname="sync_replaceables" user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" />
+    <orcas_compile_db_objects user="${username_schemaowner_dst}" password="${password_schemaowner_dst}" tnsname="${database_src}" jdbcurl="${jdbc_url_dst}" />
   </target>
 
   <target name="drop_users" depends="show_location">
     <orcas_execute_script user="${username_dba_src}" password="${password_dba_src}" tnsname="${database_src}" script="drop_user.sql" parameter="${username_schemaowner_src}"/>
-    <orcas_execute_script user="${username_dba_src}" password="${password_dba_src}" tnsname="${database_src}" script="drop_user.sql" parameter="${username_orcas_src}"/>
     <orcas_execute_script user="${username_dba_dst}" password="${password_dba_dst}" tnsname="${database_src}" script="drop_user.sql" parameter="${username_schemaowner_dst}"/>
-    <orcas_execute_script user="${username_dba_dst}" password="${password_dba_dst}" tnsname="${database_src}" script="drop_user.sql" parameter="${username_orcas_dst}"/>
   </target>
 
-  <target name="install_all" depends="show_location,orcas_install,schema_sync_install">
+  <target name="install_all" depends="show_location,schema_sync_install">
   </target>
 
   <target name="build_all" depends="show_location,schema_sync">

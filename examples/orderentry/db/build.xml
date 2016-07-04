@@ -16,7 +16,7 @@
   </target>
 
   <target name="orcas_initialize" depends="show_location">
-    <orcas_initialize extensionfolder="../orcas_extensions" orcasinternalinstalldb="false"/>
+    <orcas_initialize extensionfolder="../orcas_extensions"/>
   </target>
 
   <target name="build_tables" depends="show_location,orcas_initialize">
@@ -29,6 +29,10 @@
 
   <target name="extract" depends="show_location,orcas_initialize">
     <orcas_extract outputfolder="${binrundir}/extract_output"/>
+  </target>
+
+  <target name="clean_tables" depends="show_location,orcas_initialize">
+    <orcas_clean_tables excludewheretable="object_name in ('BUSINESS_PARTNERS')"/>
   </target>
 
   <target name="install_all" depends="show_location,orcas_install,orderentry_install">

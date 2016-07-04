@@ -297,7 +297,7 @@ public class LoadIst
 
   private boolean isIgnoredTable( String pString )
   {
-    return isIgnored( pString, _parameters.getExcludewheretable(), "TABLE" );
+    return isIgnored( pString, _parameters.getExcludewheretable(), "TABLE" ) || isIgnored( pString, "1=1", "VIEW" );
   }
 
   private int toInt( BigDecimal pBigDecimal )

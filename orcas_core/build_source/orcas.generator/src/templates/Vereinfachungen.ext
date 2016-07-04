@@ -1,9 +1,0 @@
-import de::opitzconsulting::orcasDsl;
-import de::opitzconsulting::orcas::extensions;
-
-      Model transformation_vereinfachung( Model pModel ) :
-      let lAllExtensions = new AllExtensions :
-      lAllExtensions.transformModel(pModel)
-  ;      
-      
-      

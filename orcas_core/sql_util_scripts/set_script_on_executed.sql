@@ -1,5 +1,31 @@
+set feedback off
+set verify off
+set term off
+
 begin
-  pa_orcas_updates.set_executed( '&1', '&2' );
+  insert into orcas_updates
+         (
+         scup_id,
+         scup_script_name,
+         scup_date,
+         scup_schema,
+         scup_logname
+         )
+  values (
+         nvl
+         (
+           (
+           select max( scup_id ) +1
+             from orcas_updates
+           ),
+           1
+         ),
+         substr( '&1', (instr( '&1', '/', 2 )+1) ),
+         sysdate,
+         user,
+         '&2'
+         );
+  commit;
 end;
 /
 

@@ -38,7 +38,7 @@ public class Parameters
 
   public static enum ParameterTypeMode
   {
-    ORCAS_MAIN, ORCAS_LOAD_EXTRACT
+    ORCAS_MAIN, ORCAS_LOAD_EXTRACT, ORCAS_EXTRACT_VIEWS, ORCAS_CHECK_CONNECTION
   }
 
   private JdbcConnectParameters _jdbcConnectParameters;
@@ -63,16 +63,7 @@ public class Parameters
   private Boolean _sqlplustable;
   private Boolean _orderColumnsByName;
   private Boolean _removeDefaultValuesFromModel;
-
-  public boolean isOrderColumnsByName()
-  {
-    return checkNull( _orderColumnsByName );
-  }
-
-  public boolean isRemoveDefaultValuesFromModel()
-  {
-    return checkNull( _removeDefaultValuesFromModel );
-  }
+  private String _viewExtractMode;
 
   public Parameters( String[] pArgs, ParameterTypeMode pParameterTypeMode )
   {
@@ -109,9 +100,6 @@ public class Parameters
         _orcasDbUser = "ORCAS_ITT_SVW_USER";
         _modelFile = "D:\\2_orcas\\orcas\\orcas_integrationstest\\tests\\test_comment\\tabellen";
       }
-      if( pParameterTypeMode == ParameterTypeMode.ORCAS_LOAD_EXTRACT )
-      {
-      }
 
       return;
     }
@@ -129,10 +117,10 @@ public class Parameters
     _jdbcConnectParameters._jdbcUser = getParameterString( lParameterMap.get( 2 ) );
     _jdbcConnectParameters._jdbcPassword = getParameterString( lParameterMap.get( 3 ) );
 
-    _modelFile = getParameterString( lParameterMap.get( 4 ) );
-
     if( pParameterTypeMode == ParameterTypeMode.ORCAS_MAIN )
     {
+      _modelFile = getParameterString( lParameterMap.get( 4 ) );
+
       _spoolfile = getParameterString( lParameterMap.get( 5 ) );
 
       _logonly = getParameterFlag( lParameterMap.get( 6 ) );
@@ -175,6 +163,8 @@ public class Parameters
 
     if( pParameterTypeMode == ParameterTypeMode.ORCAS_LOAD_EXTRACT )
     {
+      _modelFile = getParameterString( lParameterMap.get( 4 ) );
+
       _excludewheretable = cleanupExcludeWhere( lParameterMap.get( 5 ) );
       _excludewheresequence = cleanupExcludeWhere( lParameterMap.get( 6 ) );
       _dateformat = getParameterString( lParameterMap.get( 7 ) );
@@ -193,7 +183,28 @@ public class Parameters
       _removeDefaultValuesFromModel = getParameterFlag( lParameterMap.get( 15 ) );
     }
 
+    if( pParameterTypeMode == ParameterTypeMode.ORCAS_EXTRACT_VIEWS )
+    {
+      _viewExtractMode = getParameterString( lParameterMap.get( 4 ) );
+      _loglevel = "info";
+    }
+
+    if( pParameterTypeMode == ParameterTypeMode.ORCAS_CHECK_CONNECTION )
+    {
+      _loglevel = "info";
+    }
+
     LogManager.getRootLogger().setLevel( Level.toLevel( checkNull( _loglevel ).toUpperCase() ) );
+  }
+
+  public boolean isOrderColumnsByName()
+  {
+    return checkNull( _orderColumnsByName );
+  }
+
+  public boolean isRemoveDefaultValuesFromModel()
+  {
+    return checkNull( _removeDefaultValuesFromModel );
   }
 
   public Boolean getSqlplustable()
@@ -219,6 +230,11 @@ public class Parameters
   public String getTargetplsql()
   {
     return checkNull( _targetplsql );
+  }
+
+  public String getViewExtractMode()
+  {
+    return checkNull( _viewExtractMode );
   }
 
   public boolean getScriptfolderrecursive()
