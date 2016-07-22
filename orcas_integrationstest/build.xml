@@ -465,7 +465,7 @@ ${akt_verzeichnis}: @{message}</concat>
       </sequential>
     </for>    
 
-    <orcas_check_connection user="${username_dba}" password="${password_dba}" />
+    <!--<orcas_check_connection user="${username_dba}" password="${password_dba}" />-->
     <!--<orcas_initialize user="${ueberfuehrung}" userorcas="${user_orcas}"/> -->
     <delete dir="${tmpfolder}/" />
     <mkdir dir="${tmpfolder}/" />

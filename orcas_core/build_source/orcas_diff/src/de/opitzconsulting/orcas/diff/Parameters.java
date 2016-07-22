@@ -1,7 +1,10 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -38,7 +41,7 @@ public class Parameters
 
   public static enum ParameterTypeMode
   {
-    ORCAS_MAIN, ORCAS_LOAD_EXTRACT, ORCAS_EXTRACT_VIEWS, ORCAS_CHECK_CONNECTION
+    ORCAS_MAIN, ORCAS_LOAD_EXTRACT, ORCAS_EXTRACT_VIEWS, ORCAS_CHECK_CONNECTION, ORCAS_SCRIPT
   }
 
   private JdbcConnectParameters _jdbcConnectParameters;
@@ -64,6 +67,10 @@ public class Parameters
   private Boolean _orderColumnsByName;
   private Boolean _removeDefaultValuesFromModel;
   private String _viewExtractMode;
+  private List<String> _additionalParameters;
+  private String _logname;
+  private String _spoolfolder;
+  private String _prefix;
 
   public Parameters( String[] pArgs, ParameterTypeMode pParameterTypeMode )
   {
@@ -104,11 +111,16 @@ public class Parameters
       return;
     }
 
-    Map<Integer,Object> lParameterMap = new HashMap<Integer,Object>();
+    Map<Integer,String> lParameterMap = new HashMap<Integer,String>();
 
     for( int i = 0; i < pArgs.length; i++ )
     {
       lParameterMap.put( i, pArgs[i] );
+    }
+
+    if( pParameterTypeMode == ParameterTypeMode.ORCAS_SCRIPT )
+    {
+      _prefix = "prefix_";
     }
 
     _jdbcConnectParameters = new JdbcConnectParameters();
@@ -194,7 +206,37 @@ public class Parameters
       _loglevel = "info";
     }
 
-    LogManager.getRootLogger().setLevel( Level.toLevel( checkNull( _loglevel ).toUpperCase() ) );
+    if( pParameterTypeMode == ParameterTypeMode.ORCAS_SCRIPT )
+    {
+      _modelFile = getParameterString( lParameterMap.get( 4 ) );
+      _scriptfolderrecursive = getParameterFlag( lParameterMap.get( 5 ) );
+      _scriptprefix = getParameterString( lParameterMap.get( 6 ) );
+      _scriptpostfix = getParameterString( lParameterMap.get( 7 ) );
+      _loglevel = getParameterString( lParameterMap.get( 8 ) );
+      _logname = getParameterString( lParameterMap.get( 9 ) );
+      _spoolfolder = getParameterString( lParameterMap.get( 10 ) );
+
+      _additionalParameters = new ArrayList<String>();
+      String lAdditionalParameters = (String)lParameterMap.get( 11 );
+
+      if( lAdditionalParameters != null )
+      {
+        StringTokenizer lStringTokenizer = new StringTokenizer( lAdditionalParameters, " " );
+        while( lStringTokenizer.hasMoreTokens() )
+        {
+          _additionalParameters.add( lStringTokenizer.nextToken() );
+        }
+      }
+    }
+
+    if( "nologging".equals( _loglevel ) )
+    {
+      LogManager.getRootLogger().setLevel( Level.ERROR );
+    }
+    else
+    {
+      LogManager.getRootLogger().setLevel( Level.toLevel( checkNull( _loglevel ).toUpperCase() ) );
+    }
   }
 
   public boolean isOrderColumnsByName()
@@ -217,19 +259,26 @@ public class Parameters
     return _srcJdbcConnectParameters;
   }
 
-  private String getParameterString( Object pArg )
+  private String getParameterString( String pArg )
   {
-    if( "null".equals( pArg ) )
+    String lArg = removePrefix( pArg );
+
+    if( "null".equals( lArg ) )
     {
       return "";
     }
 
-    return (String)pArg;
+    return lArg;
   }
 
   public String getTargetplsql()
   {
     return checkNull( _targetplsql );
+  }
+
+  public List<String> getAdditionalParameters()
+  {
+    return checkNull( _additionalParameters );
   }
 
   public String getViewExtractMode()
@@ -247,6 +296,26 @@ public class Parameters
     return checkNull( _scriptprefix );
   }
 
+  public String getLogname()
+  {
+    return checkNull( _logname );
+  }
+
+  public boolean isLognameSet()
+  {
+    return _logname != null && !getLogname().equals( "" );
+  }
+
+  public String getSpoolfolder()
+  {
+    return checkNull( _spoolfolder );
+  }
+
+  public boolean isSpoolfolderSet()
+  {
+    return _spoolfolder != null && !getSpoolfolder().equals( "" );
+  }
+
   public String getScriptpostfix()
   {
     return checkNull( _scriptpostfix );
@@ -257,7 +326,7 @@ public class Parameters
     return checkNull( _orcasDbUser );
   }
 
-  private String cleanupExcludeWhere( Object pArg )
+  private String cleanupExcludeWhere( String pArg )
   {
     return getParameterString( pArg ).replace( "''", "'" );
   }
@@ -297,14 +366,24 @@ public class Parameters
     return checkNull( _spoolfile );
   }
 
-  private static Boolean getParameterFlag( Object pArg )
+  private Boolean getParameterFlag( String pArg )
   {
     if( pArg == null )
     {
       return null;
     }
 
-    return !pArg.equals( "false" );
+    return !removePrefix( pArg ).equals( "false" );
+  }
+
+  private String removePrefix( String pArg )
+  {
+    if( _prefix != null && pArg != null && pArg.startsWith( _prefix ) )
+    {
+      return pArg.substring( _prefix.length() );
+    }
+
+    return pArg;
   }
 
   public JdbcConnectParameters getJdbcConnectParameters()

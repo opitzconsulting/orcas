@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
@@ -54,26 +55,18 @@ public class XtextFileLoader
     return (Model)lResource.getContents().get( 0 );
   }
 
-  public static Model loadModelDslFolder( File pFolder, Parameters pParameters )
+  public static Model loadModelDslFolder( Parameters pParameters )
+  {
+    return loadModelDsl( FolderHandler.getModelFiles( pParameters ) );
+  }
+
+  private static Model loadModelDsl( List<File> pModelFiles )
   {
     Model lReturn = new ModelImpl();
 
-    for( File lFile : pFolder.listFiles() )
+    for( File lFile : pModelFiles )
     {
-      if( lFile.isDirectory() )
-      {
-        if( pParameters.getScriptfolderrecursive() )
-        {
-          lReturn.getModel_elements().addAll( loadModelDslFolder( lFile, pParameters ).getModel_elements() );
-        }
-      }
-      else
-      {
-        if( lFile.getName().startsWith( pParameters.getScriptprefix() ) && lFile.getName().endsWith( pParameters.getScriptpostfix() ) )
-        {
-          lReturn.getModel_elements().addAll( loadModelDslFile( lFile ).getModel_elements() );
-        }
-      }
+      lReturn.getModel_elements().addAll( loadModelDslFile( lFile ).getModel_elements() );
     }
 
     return lReturn;

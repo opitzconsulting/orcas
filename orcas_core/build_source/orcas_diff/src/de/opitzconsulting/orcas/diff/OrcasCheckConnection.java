@@ -16,15 +16,15 @@ public class OrcasCheckConnection extends Orcas
   }
 
   @Override
-  protected void run( Parameters pParameters ) throws Exception
+  protected void run() throws Exception
   {
     try
     {
-      JdbcConnectionHandler.createCallableStatementProvider( pParameters );
+      JdbcConnectionHandler.createCallableStatementProvider( getParameters() );
     }
     catch( Exception e )
     {
-      _log.error( "connection test failed: " + pParameters.getJdbcConnectParameters().getJdbcUrl() + " " + pParameters.getJdbcConnectParameters().getJdbcUser() );
+      _log.error( "connection test failed: " + getParameters().getJdbcConnectParameters().getJdbcUrl() + " " + getParameters().getJdbcConnectParameters().getJdbcUser() );
 
       throw e;
     }

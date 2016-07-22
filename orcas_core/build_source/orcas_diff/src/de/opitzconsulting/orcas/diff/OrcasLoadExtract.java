@@ -1,6 +1,5 @@
 package de.opitzconsulting.orcas.diff;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
@@ -25,14 +24,14 @@ public class OrcasLoadExtract extends Orcas
   }
 
   @Override
-  protected void run( Parameters pParameters ) throws Exception
+  protected void run() throws Exception
   {
-    CallableStatementProvider lCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( pParameters );
+    CallableStatementProvider lCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( getParameters() );
 
     _log.info( "loading database" );
-    de.opitzconsulting.origOrcasDsl.Model lOrigModel = new LoadIst( lCallableStatementProvider, pParameters ).loadModel();
+    de.opitzconsulting.origOrcasDsl.Model lOrigModel = new LoadIst( lCallableStatementProvider, getParameters() ).loadModel( true );
 
-    if( pParameters.isRemoveDefaultValuesFromModel() )
+    if( getParameters().isRemoveDefaultValuesFromModel() )
     {
       InitDiffRepository.init( lCallableStatementProvider );
       _log.info( "removing default values" );
@@ -41,21 +40,21 @@ public class OrcasLoadExtract extends Orcas
 
     Model lSyexModel = TransformOrigSyex.convertModel( lOrigModel );
 
-    if( !pParameters.getModelFile().equals( "" ) )
+    if( !getParameters().getModelFile().equals( "" ) )
     {
       _log.info( "loading additional model files" );
       XtextFileLoader.initXtext();
-      lSyexModel.getModel_elements().addAll( XtextFileLoader.loadModelDslFolder( new File( pParameters.getModelFile() ), pParameters ).getModel_elements() );
+      lSyexModel.getModel_elements().addAll( XtextFileLoader.loadModelDslFolder( getParameters() ).getModel_elements() );
     }
 
-    if( PlSqlHandler.isPlSqlEextensionsExistst( pParameters, lCallableStatementProvider ) )
+    if( PlSqlHandler.isPlSqlEextensionsExistst( getParameters(), lCallableStatementProvider ) )
     {
       _log.info( "calling pl/sql reverse-extensions" );
-      lSyexModel = PlSqlHandler.callPlSqlExtensions( lSyexModel, pParameters, lCallableStatementProvider, true );
+      lSyexModel = PlSqlHandler.callPlSqlExtensions( lSyexModel, getParameters(), lCallableStatementProvider, true );
     }
 
     _log.info( "writing xml" );
-    FileOutputStream lFileOutputStream = new FileOutputStream( pParameters.getSpoolfile() );
+    FileOutputStream lFileOutputStream = new FileOutputStream( getParameters().getSpoolfile() );
 
     OutputStreamWriter lOutputStreamWriter = new OutputStreamWriter( lFileOutputStream, "utf8" );
 

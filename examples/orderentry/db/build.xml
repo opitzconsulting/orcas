@@ -1,5 +1,7 @@
 <?xml version = '1.0' encoding = 'windows-1252'?>
 <project default="build_all" basedir="." name="orderentry">
+
+
   <import file="../distribution/ant_default_include.xml"/>
 
   <target name="orcas_install" depends="show_location">

@@ -9,6 +9,9 @@
   <property name="orcas_install_scripts" value="${orcas_util_scripts}/static" />
   <property name="orcas_at_value" value="@" />
   <property name="orcas_internal_no_clean_initialize" value="true" />
+  <property name="orcas.default_loglevel" value="info" />
+  <property name="orcas_internal.nologging_loglevel" value="nologging" />
+  <property name="orcas.default_scriptmode" value="sqlplus" />
 
   <tstamp>
     <format property="timestamp" pattern="dd_MM_yyyy_HH_mm_ss" />
@@ -75,7 +78,7 @@
     <attribute name="pre-line-9" default="" />
     <attribute name="batchmode" default="false" />
     <attribute name="rollbackonerror" default="false" />
-    <attribute name="loglevel" default="info" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="executiondir" default="${basedir}"/>
     <sequential>
     <if>
@@ -94,7 +97,7 @@
         </if>
       </then>
       <elseif>
-        <equals arg1="@{loglevel}" arg2="verbose"/>
+        <equals arg1="@{loglevel}" arg2="debug"/>
         <then>
         <echo level="info" message="Execute @{script} with Parameter: @{parameter}, failonerror: @{failonerror}, batchmode: @{batchmode}, spool-file: @{spool-file}, spool-append: @{spool-append}, rollbackonerror: @{rollbackonerror}," />
        
@@ -331,10 +334,36 @@ ${orcas_sql_output}
     <attribute name="script" />
     <attribute name="parameter" default="" />
     <attribute name="spoolparameter" default="@{parameter}" />
-    <attribute name="failonerror" default="false" />
-    <attribute name="loglevel" default="info" />
+    <attribute name="failonerror" default="true" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="executiondir" default="${basedir}"/>
+    <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
     <sequential>
+    <if>
+      <equals arg1="@{scriptmode}" arg2="jdbc"/>
+     
+      <then>
+     <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="@{failonerror}" maxmemory="512m" dir="@{executiondir}" >
+        <arg value="prefix_oracle.jdbc.OracleDriver"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{user}"/>
+        <arg value="prefix_@{password}"/>
+        <arg value="prefix_@{script}"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_@{loglevel}"/>
+        <arg value="prefix_@{logname}"/>
+        <arg value="prefix_@{spoolfolder}"/>
+        <arg value="prefix_@{parameter}"/>
+      </java>
+      </then>
+      <else>    
       <var name="orcas_internal_logging_active" unset="true" />
      <if>
         <equals arg1="@{logname}" arg2=""/>
@@ -375,6 +404,8 @@ ${orcas_sql_output}
           <orcas_internal_log_skript logname="@{logname}" script="@{script}" spoolparameter="@{spoolparameter}" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}" />
         </then>
       </if>
+      </else>
+    </if>      
     </sequential>
   </macrodef>
 
@@ -398,10 +429,36 @@ ${orcas_sql_output}
     <attribute name="scriptprefix" default="" />
     <attribute name="scriptpostfix" default=".sql" />
     <attribute name="scriptfolderrecursive" default="false" />
-    <attribute name="failonerror" default="false" />
-    <attribute name="loglevel" default="info" />
+    <attribute name="failonerror" default="true" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="executiondir" default="${basedir}"/>
+    <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
     <sequential>
+    <if>
+      <equals arg1="@{scriptmode}" arg2="jdbc"/>
+     
+      <then>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="@{failonerror}" maxmemory="512m">
+        <arg value="prefix_oracle.jdbc.OracleDriver"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{user}"/>
+        <arg value="prefix_@{password}"/>
+        <arg value="prefix_@{scriptfolder}"/>
+        <arg value="prefix_@{scriptfolderrecursive}"/>
+        <arg value="prefix_@{scriptprefix}"/>
+        <arg value="prefix_@{scriptpostfix}"/>
+        <arg value="prefix_@{loglevel}"/>
+        <arg value="prefix_@{logname}"/>
+        <arg value="prefix_@{spoolfolder}"/>
+      </java>      
+      </then>
+      <else>
      <if>
       <equals arg1="@{logname}" arg2=""/>
      
@@ -469,7 +526,9 @@ ${orcas_sql_output}
       </for>
       <orcas_internal_sql_plus loglevel="@{loglevel}" batchmode="done" script="batchmode" failonerror="@{failonerror}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
       <var name="orcas_internal_logging_active" unset="true" />
-    </sequential>
+      </else>
+    </if>    
+    </sequential>    
   </macrodef>
 
 
@@ -494,7 +553,8 @@ ${orcas_sql_output}
     <attribute name="scriptfolderrecursive" default="false" />
     <attribute name="failonerror" default="true" />
     <attribute name="noexecute" default="false" />
-    <attribute name="loglevel" default="info" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
     <sequential>
     <if>
       <equals arg1="@{logname}" arg2=""/>
@@ -531,8 +591,8 @@ ${orcas_sql_output}
 
       </if>
       <delete file="@{tmpfolder}/load_executed.txt" />
-      <orcas_internal_sql_plus loglevel="nologging" script="${orcas_util_scripts}/install_orcas_updates_if_needed.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
-      <orcas_internal_sql_plus loglevel="nologging" script="${orcas_util_scripts}/load_executed.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" use-define="true" spool-file="@{tmpfolder}/load_executed.txt" tmpfolder="@{tmpfolder}" failonerror="true" parameter="@{logname}" />
+      <orcas_internal_sql_plus loglevel="${orcas_internal.nologging_loglevel}" script="${orcas_util_scripts}/install_orcas_updates_if_needed.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
+      <orcas_internal_sql_plus loglevel="${orcas_internal.nologging_loglevel}" script="${orcas_util_scripts}/load_executed.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" use-define="true" spool-file="@{tmpfolder}/load_executed.txt" tmpfolder="@{tmpfolder}" failonerror="true" parameter="@{logname}" />
       <replace file="@{tmpfolder}/load_executed.txt" value="" token="${line.separator}" />
       <var name="orcas_internal_last_executed" unset="true" />
       <loadproperties srcFile="@{tmpfolder}/load_executed.txt">
@@ -779,7 +839,7 @@ ${orcas_sql_output}
     <attribute name="createmissingfkindexes" default="true" />
     <attribute name="excludewheretable" default="object_name like ''%$%''" />
     <attribute name="excludewheresequence" default="object_name like ''%$%''" />
-    <attribute name="loglevel" default="info" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="dateformat" default="dd.mm.yy" />
     <attribute name="srcuser" />
     <attribute name="srcpassword" />
@@ -815,7 +875,7 @@ ${orcas_sql_output}
     <attribute name="createmissingfkindexes" default="true" />
     <attribute name="excludewheretable" default="object_name like ''%$%''" />
     <attribute name="excludewheresequence" default="object_name like ''%$%''" />
-    <attribute name="loglevel" default="info" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="targetplsql" default="null" />
     <attribute name="dateformat" default="dd.mm.yy" />
     <attribute name="orcasinternalsrcuser" default="null" />
@@ -886,42 +946,6 @@ ${orcas_sql_output}
     <attribute name="excludewherefunction" default="object_name not like '%'" />
     <attribute name="excludewhereprocedure" default="object_name not like '%'" />
     <sequential>
-     <if>
-      <not>
-        <equals arg1="@{logname}" arg2=""/>
-      </not>
-      <then>
-        <echo message="orcas_drop_replacables"/>
-      </then>
-      <else>
-        <echo message="orcas_drop_replacables Logname: @{Logname}"/>
-      </else>
-    </if>
-      <var name="orcas_internal_logging_active" unset="true" />
-      <if>
-        <and>
-          <not>
-            <equals arg1="@{spoolfolder}" arg2="" />
-          </not>
-          <equals arg1="@{logname}" arg2="" />
-        </and>
-        <then>
-          <fail message="Wenn das Spooling aktiviert ist, muss ein Logname angegeben werden!" />
-        </then>
-        <elseif>
-          <and>
-            <not>
-              <equals arg1="@{spoolfolder}" arg2="" />
-            </not>
-            <not>
-              <equals arg1="@{logname}" arg2="" />
-            </not>
-          </and>
-          <then>
-            <property name="orcas_internal_logging_active" value="true" />
-          </then>
-        </elseif>
-      </if>
       <copy file="${orcas_util_scripts}/delete_replacable_objects.sql" tofile="@{tmpfolder}/delete_replacable_objects_tmp.sql" overwrite="true" />
       <copy file="${orcas_util_scripts}/drop_all_types.sql" tofile="@{tmpfolder}/drop_all_types_tmp.sql" overwrite="true" />
       <if>
@@ -930,7 +954,6 @@ ${orcas_sql_output}
           <equals arg1="@{orcasinternalinitialize}" arg2="true"/>  
         </and>          
         <then>
-          <echo message="installing orcas in existing schema"/>        
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="(@{excludewherepackage}) and (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;2" />
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;3" />
@@ -939,7 +962,6 @@ ${orcas_sql_output}
           <replace file="@{tmpfolder}/drop_all_types_tmp.sql" value="(@{excludewhereobjecttype}) and (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
         </then>
         <else>
-          <echo message="installing orcas in separate schema @{user} @{userorcas}"/>
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage}" token="&amp;1" />  
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewheretrigger}" token="&amp;2" />
           <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereview}" token="&amp;3" />
@@ -948,23 +970,10 @@ ${orcas_sql_output}
           <replace file="@{tmpfolder}/drop_all_types_tmp.sql" value="@{excludewhereobjecttype}" token="&amp;1" />        
         </else>
       </if>     
-      
-      <orcas_internal_sql_plus script="@{tmpfolder}/delete_replacable_objects_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
-      <if>
-        <isset property="orcas_internal_logging_active" />
-        <then>
-          <orcas_internal_log_skript script="@{tmpfolder}/delete_replacable_objects_tmp.sql" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" />
-        </then>
-      </if>
-            
-      <orcas_internal_sql_plus script="@{tmpfolder}/drop_all_types_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
-      <if>
-        <isset property="orcas_internal_logging_active" />
-        <then>
-          <orcas_internal_log_skript script="@{tmpfolder}/drop_all_types_tmp.sql" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" />
-        </then>
-      </if>      
-      <var name="orcas_internal_logging_active" unset="true" />
+     
+      <orcas_execute_script script="@{tmpfolder}/delete_replacable_objects_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+
+      <orcas_execute_script script="@{tmpfolder}/drop_all_types_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
     </sequential>
   </macrodef>
 
@@ -985,51 +994,10 @@ ${orcas_sql_output}
     <attribute name="autotimestamp" default="false" />
     <attribute name="excludewherejava" default="name like '%'" />
     <sequential>
-     <if>
-      <not>
-        <equals arg1="@{logname}" arg2=""/>
-      </not>
-      <then>
-        <echo message="orcas_drop_java"/>
-      </then>
-      <else>
-        <echo message="orcas_drop_java Logname: @{Logname}"/>
-      </else>
-    </if>
-      <if>
-        <and>
-          <not>
-            <equals arg1="@{spoolfolder}" arg2="" />
-          </not>
-          <equals arg1="@{logname}" arg2="" />
-        </and>
-        <then>
-          <fail message="Wenn das Spooling aktiviert ist, muss ein Logname angegeben werden!" />
-        </then>
-        <elseif>
-          <and>
-            <not>
-              <equals arg1="@{spoolfolder}" arg2="" />
-            </not>
-            <not>
-              <equals arg1="@{logname}" arg2="" />
-            </not>
-          </and>
-          <then>
-            <property name="orcas_internal_logging_active" value="true" />
-          </then>
-        </elseif>
-      </if>
       <copy file="${orcas_util_scripts}/drop_java_classes.sql" tofile="@{tmpfolder}/delete_java_tmp.sql" overwrite="true" />
       <replace file="@{tmpfolder}/delete_java_tmp.sql" value="@{excludewherejava}" token="&amp;1" />
-      <orcas_internal_sql_plus script="@{tmpfolder}/delete_java_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
-      <if>
-        <isset property="orcas_internal_logging_active" />
-        <then>
-          <orcas_internal_log_skript script="@{tmpfolder}/delete_java_tmp.sql" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" />
-        </then>
-      </if>
-      <var name="orcas_internal_logging_active" unset="true" />
+
+      <orcas_execute_script script="@{tmpfolder}/delete_java_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
     </sequential>
   </macrodef>
 
@@ -1049,49 +1017,10 @@ ${orcas_sql_output}
     <attribute name="autotimestamp" default="false" />
     <attribute name="excludewheretable" default="object_name like '%$%'" />
     <sequential>
-    <if>
-        <equals arg1="@{logname}" arg2=""/>
-      <then>
-        <echo message="orcas_drop_replacables"/>
-      </then>
-      <else>
-        <echo message="orcas_drop_replacables Logname: @{Logname}"/>
-      </else>
-    </if>
-      <if>
-        <and>
-          <not>
-            <equals arg1="@{spoolfolder}" arg2="" />
-          </not>
-          <equals arg1="@{logname}" arg2="" />
-        </and>
-        <then>
-          <fail message="Wenn das Spooling aktiviert ist, muss ein Logname angegeben werden!" />
-        </then>
-        <elseif>
-          <and>
-            <not>
-              <equals arg1="@{spoolfolder}" arg2="" />
-            </not>
-            <not>
-              <equals arg1="@{logname}" arg2="" />
-            </not>
-          </and>
-          <then>
-            <property name="orcas_internal_logging_active" value="true" />
-          </then>
-        </elseif>
-      </if>
       <copy file="${orcas_util_scripts}/clean_tables.sql" tofile="@{tmpfolder}/clean_tables_tmp.sql" overwrite="true" />
       <replace file="@{tmpfolder}/clean_tables_tmp.sql" value="@{excludewheretable}" token="&amp;1" />
-      <orcas_internal_sql_plus script="@{tmpfolder}/clean_tables_tmp.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
-      <if>
-        <isset property="orcas_internal_logging_active" />
-        <then>
-          <orcas_internal_log_skript script="@{tmpfolder}/clean_tables_tmp.sql" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" />
-        </then>
-      </if>
-      <var name="orcas_internal_logging_active" unset="true" />
+
+      <orcas_execute_script script="@{tmpfolder}/clean_tables_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
     </sequential>
   </macrodef>
   
@@ -1112,49 +1041,9 @@ ${orcas_sql_output}
     <attribute name="autotimestamp" default="false" />
     <attribute name="excludewherejobwhat" default="1=2" />
     <sequential>
-     <if>
-        <equals arg1="@{logname}" arg2=""/>
-      <then>
-        <echo message="orcas_kill_jobs"/>
-      </then>
-      <else>
-        <echo message="orcas_kill_jobs Logname: @{Logname}"/>
-      </else>
-    </if>
-      <if>
-        <and>
-          <not>
-            <equals arg1="@{spoolfolder}" arg2="" />
-          </not>
-          <equals arg1="@{logname}" arg2="" />
-        </and>
-        <then>
-          <fail message="Wenn das Spooling aktiviert ist, muss ein Logname angegeben werden!" />
-        </then>
-        <elseif>
-          <and>
-            <not>
-              <equals arg1="@{spoolfolder}" arg2="" />
-            </not>
-            <not>
-              <equals arg1="@{logname}" arg2="" />
-            </not>
-          </and>
-          <then>
-            <property name="orcas_internal_logging_active" value="true" />
-          </then>
-        </elseif>
-      </if>
       <copy file="${orcas_util_scripts}/kill_all_jobs.sql" tofile="@{tmpfolder}/kill_all_jobs_tmp.sql" overwrite="true" />
       <replace file="@{tmpfolder}/kill_all_jobs_tmp.sql" value="@{excludewherejobwhat}" token="&amp;1" />
-      <orcas_internal_sql_plus script="@{tmpfolder}/kill_all_jobs_tmp.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" failonerror="true" tmpfolder="@{tmpfolder}"/>
-      <if>
-        <isset property="orcas_internal_logging_active" />
-        <then>
-          <orcas_internal_log_skript logname="@{logname}" script="@{tmpfolder}/kill_all_jobs_tmp.sql" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}" />
-        </then>
-      </if>
-      <var name="orcas_internal_logging_active" unset="true" />
+      <orcas_execute_script script="@{tmpfolder}/kill_all_jobs_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
     </sequential>
   </macrodef>
 
@@ -1213,13 +1102,7 @@ ${orcas_sql_output}
       <if>
         <equals arg1="@{logsinglecompile}" arg2="false" />
         <then>
-          <orcas_internal_sql_plus script="${orcas_util_scripts}/compile_all_invalid.sql" user="@{user}" password="@{password}" parameter="false" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"  failonerror="@{failonerror}"/>
-          <if>
-            <isset property="orcas_internal_logging_active" />
-            <then>
-              <orcas_internal_log_skript  logname="@{logname}" script="${orcas_util_scripts}/compile_all_invalid.sql" spoolparameter="false" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}" />
-            </then>
-          </if>
+          <orcas_execute_script script="${orcas_util_scripts}/compile_all_invalid.sql" failonerror="@{failonerror}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
         </then>
         <else>
           <orcas_internal_sql_plus loglevel="@{loglevel}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" failonerror="true" script="${orcas_util_scripts}/delete_sql_script_from_db.sql" tmpfolder="@{tmpfolder}" />
@@ -1272,7 +1155,7 @@ ${orcas_sql_output}
     <attribute name="scriptprefix" default="" />
     <attribute name="scriptpostfix" default=".sql" />
     <attribute name="scriptfolderrecursive" default="true" />
-    <attribute name="loglevel" default="nologging" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="dateformat" default="dd.mm.yy" />
     <sequential>
       <orcas_internal_log_action_start message="orcas_upate_data" logname="@{logname}" />
@@ -1903,7 +1786,7 @@ ${orcas_sql_output}
     <attribute name="excludewheresequence" default="object_name like ''%$%''" />
     <attribute name="orcasinternalloadxmlsql" default="load_extract.sql" />
     <attribute name="dateformat" default="dd.mm.yy" />
-    <attribute name="loglevel" default="info" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="scriptfolder" default="null" />
     <attribute name="scriptprefix" default="null" />
     <attribute name="scriptpostfix" default=".sql" />
@@ -1977,13 +1860,13 @@ ${orcas_sql_output}
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
 
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz types/spec_ TYPE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz types/body_ TYPE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/body_ PACKAGE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz types/spec_ TYPE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz types/body_ TYPE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/body_ PACKAGE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
 
       <copy todir="@{outputfolder}" overwrite="true">
         <fileset dir="@{tmpfolder}/load_extract_replaceables/extract" includes="**/*.sql"/>
@@ -2028,12 +1911,12 @@ ${orcas_sql_output}
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
       <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
 
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz views/ VIEW %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz types/spec_ TYPE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="nologging" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz views/ VIEW %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz types/spec_ TYPE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
+      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
 
       <copy todir="@{outputfolder}" overwrite="true">
         <fileset dir="@{tmpfolder}/load_extract_replaceables/extract" includes="**/*.sql"/>

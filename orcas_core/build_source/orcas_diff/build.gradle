@@ -10,5 +10,6 @@ dependencies
 }
 
 compileJava.source "src"
+processResources.from "resources"
 
 

@@ -38,11 +38,11 @@ public class OrcasExtractViews extends Orcas
   }
 
   @Override
-  protected void run( Parameters pParameters )
+  protected void run()
   {
-    final boolean lFullMode = pParameters.getViewExtractMode().equals( "full" );
+    final boolean lFullMode = getParameters().getViewExtractMode().equals( "full" );
 
-    CallableStatementProvider lCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( pParameters );
+    CallableStatementProvider lCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( getParameters() );
 
     String lSql;
     if( lFullMode )

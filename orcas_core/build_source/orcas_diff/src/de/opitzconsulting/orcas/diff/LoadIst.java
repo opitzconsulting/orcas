@@ -140,13 +140,17 @@ public class LoadIst
     constraintTableMapForFK.put( pConstraintname, pTablename );
   }
 
-  public Model loadModel()
+  public Model loadModel( boolean pWithSequeneceMayValueSelect )
   {
+    isIgnoredSequence( "TEST" );
+    isIgnoredMView( "TEST");
+    isIgnoredTable( "TEST" );
+    
     _oracleMajorVersion = loadOracleMajorVersion();
 
     Model pModel = new ModelImpl();
 
-    loadSequencesIntoModel( pModel );
+    loadSequencesIntoModel( pModel, pWithSequeneceMayValueSelect );
 
     loadMViewsIntoModel( pModel );
 
@@ -309,7 +313,7 @@ public class LoadIst
     return pBigDecimal.intValue();
   }
 
-  private void loadSequencesIntoModel( final Model pModel )
+  private void loadSequencesIntoModel( final Model pModel, final boolean pWithSequeneceMayValueSelect )
   {
     String lSql = "" + //
                   " select sequence_name," + //
@@ -329,13 +333,16 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredSequence( pResultSet.getString( 1 ) ) )
+        if( !isIgnoredSequence( pResultSet.getString( "sequence_name" ) ) )
         {
           Sequence lSequence = new SequenceImpl();
 
           lSequence.setSequence_name( pResultSet.getString( "sequence_name" ) );
           lSequence.setIncrement_by( toInt( pResultSet.getBigDecimal( "increment_by" ) ) );
-          lSequence.setMax_value_select( pResultSet.getString( "last_number" ) );
+          if( pWithSequeneceMayValueSelect )
+          {
+            lSequence.setMax_value_select( pResultSet.getString( "last_number" ) );
+          }
           lSequence.setCache( toInt( pResultSet.getBigDecimal( "cache_size" ) ) );
           lSequence.setMinvalue( toInt( pResultSet.getBigDecimal( "min_value" ) ) );
           lSequence.setMaxvalue( toInt( pResultSet.getBigDecimal( "max_value" ) ) );

@@ -1,12 +1,14 @@
 <?xml version = '1.0' encoding = 'windows-1252'?>
 <project default="build_all" basedir="." name="replaceables">
+  <property name="orcas.default_scriptmode" value="jdbc" />
+
   <import file="../distribution/ant_default_include.xml"/>
 
-  <target name="orcas_install" depends="show_location">
+  <target name="orcas_install" depends="show_location,orcas_initialize">
     <orcas_install user="${username_dba}" password="${password_dba}"/>
   </target>
 
-  <target name="orderentry_install" depends="show_location">
+  <target name="orderentry_install" depends="show_location,orcas_initialize">
     <orcas_execute_script user="${username_dba}" password="${password_dba}" script="create_schemaowner.sql" parameter="${username_schemaowner} ${password_schemaowner}"/>
   </target>
 
@@ -24,16 +26,16 @@
   </target>
 
   <target name="build_replaceables" depends="show_location,orcas_initialize">
-    <orcas_drop_replaceables/>
-    <orcas_execute_scripts scriptfolder="replaceables/types" scriptprefix="spec"/>
-    <orcas_execute_scripts scriptfolder="replaceables/types" scriptprefix="body"/>
-    <orcas_execute_scripts scriptfolder="replaceables/views"/>
-    <orcas_execute_scripts scriptfolder="replaceables/triggers"/>
-    <orcas_execute_scripts scriptfolder="replaceables/packages" scriptprefix="spec"/>
-    <orcas_execute_scripts scriptfolder="replaceables/packages" scriptprefix="body"/>
-    <orcas_execute_scripts scriptfolder="replaceables/functions"/>
-    <orcas_execute_scripts scriptfolder="replaceables/procedures"/>
-    <orcas_compile_db_objects/>
+    <orcas_drop_replaceables logname="drop_replaceables"  />
+    <orcas_execute_scripts logname="types_spec"      scriptfolder="replaceables/types" scriptprefix="spec"/>
+    <orcas_execute_scripts logname="types_body"      scriptfolder="replaceables/types" scriptprefix="body"/>
+    <orcas_execute_scripts logname="views"           scriptfolder="replaceables/views"/>
+    <orcas_execute_scripts logname="triggers"        scriptfolder="replaceables/triggers"/>
+    <orcas_execute_scripts logname="packages_spec"   scriptfolder="replaceables/packages" scriptprefix="spec"/>
+    <orcas_execute_scripts logname="packages_body"   scriptfolder="replaceables/packages" scriptprefix="body"/>
+    <orcas_execute_scripts logname="functions"       scriptfolder="replaceables/functions"/>
+    <orcas_execute_scripts logname="procedures"      scriptfolder="replaceables/procedures"/>
+    <orcas_compile_db_objects logname="compile"  />
   </target>
 
   <target name="pre_tables" depends="show_location,orcas_initialize">
