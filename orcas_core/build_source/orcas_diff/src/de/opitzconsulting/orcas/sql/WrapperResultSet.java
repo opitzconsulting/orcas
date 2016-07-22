@@ -1,6 +1,7 @@
 package de.opitzconsulting.orcas.sql;
 
 import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 /**
  * This wrapper wrapps a resultset, usually a {@link WrapperReturnValueFromResultSet} or a {@link WrapperIteratorResultSet} is easier to use.
  */
-public abstract class WrapperResultSet extends WrapperCallableStatement
+public abstract class WrapperResultSet extends WrapperPreparedStatement
 {
   private List _parameters;
 
@@ -17,7 +18,7 @@ public abstract class WrapperResultSet extends WrapperCallableStatement
    */
   public WrapperResultSet( String pSqlString, CallableStatementProvider pCallableStatementProvider, List pParameters, String pClientContextName )
   {
-    super( pSqlString, pCallableStatementProvider, pClientContextName );
+    super( pSqlString, pCallableStatementProvider );
 
     _parameters = pParameters;
   }
@@ -49,15 +50,15 @@ public abstract class WrapperResultSet extends WrapperCallableStatement
   /**
    * Calls setParameter first, than executeQuery on the CallableStatement is called and the resultest is passed to useResultSet.
    */
-  protected final void useCallableStatement( CallableStatement pCallableStatement ) throws SQLException
+  protected final void usePreparedStatement( PreparedStatement pPreparedStatement ) throws SQLException
   {
     ResultSet lResultSet = null;
 
-    setParameter( pCallableStatement );
+    setParameter( pPreparedStatement );
 
     try
     {
-      lResultSet = pCallableStatement.executeQuery();
+      lResultSet = pPreparedStatement.executeQuery();
 
       useResultSet( lResultSet );
     }
@@ -78,13 +79,13 @@ public abstract class WrapperResultSet extends WrapperCallableStatement
   /**
    * Is called before the CallabelStatement is executed. It is usually used to set parameters. The CallableStatement may not be executed. The default implementaion does nothing.
    */
-  protected void setParameter( CallableStatement pCallableStatement ) throws SQLException
+  protected void setParameter( PreparedStatement pPreparedStatement ) throws SQLException
   {
     if( _parameters != null )
     {
       for( int i = 0; i < _parameters.size(); i++ )
       {
-        pCallableStatement.setObject( i + 1, _parameters.get( i ) );
+        pPreparedStatement.setObject( i + 1, _parameters.get( i ) );
       }
     }
   }
