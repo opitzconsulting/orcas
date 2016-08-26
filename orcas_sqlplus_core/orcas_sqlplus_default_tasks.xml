@@ -46,7 +46,7 @@
           </copy>      
         </then>
       </if>             
-      <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/drop_table_orcas_sqlplus_model.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" failonerror="false" />
+      <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/drop_table_orcas_sqlplus_model.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
       <orcas_initialize user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" autotimestamp="@{autotimestamp}" extensionfolder="@{tmpfolder}/orcas_sqlplus_core/extensions" extensionparameter="@{extensionparameter}"/>
       <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/h_pa_orcas_sqlplus_model_holder.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
       <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/b_pa_orcas_sqlplus_model_holder.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />

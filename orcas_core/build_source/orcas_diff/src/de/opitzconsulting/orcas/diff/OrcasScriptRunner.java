@@ -259,14 +259,14 @@ public class OrcasScriptRunner extends Orcas
       switch( getParameters().getFailOnErrorMode() )
       {
         case NEVER:
-          _log.error( e, e );
+          _log.warn( e, e );
           return;
         case ALWAYS:
           throw e;
         case IGNORE_DROP:
           if( pSql.toLowerCase().trim().startsWith( "drop " ) )
           {
-            _log.info( "ignoring: " + e.getMessage() + " [" + pSql + "]" );
+            _log.info( "ignoring: " + e.getMessage().trim() + " [" + pSql.trim() + "]" );
             return;
           }
           else
