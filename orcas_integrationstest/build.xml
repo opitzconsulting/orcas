@@ -471,6 +471,8 @@ ${akt_verzeichnis}: @{message}</concat>
     <mkdir dir="${tmpfolder}/" />
     <echo file="${tmpfolder}/${location}_Ergebnis.log" append="yes" message="Erfolgreiche Tests:${line.separator}" />
 
+    <orcas_initialize />
+
     <if>
       <equals arg1="${clean_mode}" arg2="once" />
       <then>

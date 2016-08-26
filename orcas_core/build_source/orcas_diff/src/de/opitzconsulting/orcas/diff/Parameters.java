@@ -224,7 +224,7 @@ public class Parameters
       _failonerror = getParameterString( lParameterMap.get( 11 ) );
 
       _additionalParameters = new ArrayList<String>();
-      String lAdditionalParameters = (String)lParameterMap.get( 12 );
+      String lAdditionalParameters = getParameterString( lParameterMap.get( 12 ) );
 
       if( lAdditionalParameters != null )
       {

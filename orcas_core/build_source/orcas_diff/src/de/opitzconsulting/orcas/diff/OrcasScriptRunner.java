@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.diff.Parameters.ParameterTypeMode;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperExecuteUpdate;
@@ -101,6 +100,22 @@ public class OrcasScriptRunner extends Orcas
 
     BufferedReader lBufferedReader = new BufferedReader( new InputStreamReader( new FileInputStream( pFile ) ) );
 
+    List<String> lLines = new ArrayList<String>();
+
+    boolean lHasPlSqlModeTerminator = false;
+
+    String lFileLine;
+    while( (lFileLine = lBufferedReader.readLine()) != null )
+    {
+      lLines.add( lFileLine );
+
+      if( lFileLine.trim().toLowerCase().equals( "/" ) )
+      {
+        lHasPlSqlModeTerminator = true;
+      }
+    }
+    lBufferedReader.close();
+
     boolean lPlSqlMode = false;
     boolean lNonPlSqlMultilineMode = false;
 
@@ -117,16 +132,15 @@ public class OrcasScriptRunner extends Orcas
         return pTrimedLine.startsWith( "set " ) || pTrimedLine.startsWith( "quit" );
       }
 
-      public void handleCommand( String pLine ) throws Exception
+      public void handleCommand( String pLine, File pCurrentFile ) throws Exception
       {
         _log.debug( "ignoring: " + pLine );
       }
     } );
     lCommandHandlerList.add( new StartHandler( pParameters, pCallableStatementProvider ) );
 
-    String lLine;
     StringBuffer lCurrent = new StringBuffer();
-    while( (lLine = lBufferedReader.readLine()) != null )
+    for( String lLine : lLines )
     {
       boolean lCurrentEnd = false;
       String lAppend = null;
@@ -150,7 +164,7 @@ public class OrcasScriptRunner extends Orcas
 
         if( !lNonPlSqlMultilineMode && lCommandHandler != null )
         {
-          lCommandHandler.handleCommand( lTrimedLine );
+          lCommandHandler.handleCommand( lTrimedLine, pFile );
         }
         else
         {
@@ -170,7 +184,7 @@ public class OrcasScriptRunner extends Orcas
             }
             else
             {
-              if( lTrimedLine.startsWith( "create " ) || lTrimedLine.startsWith( "replace " ) || lTrimedLine.startsWith( "begin" ) || lTrimedLine.startsWith( "declare" ) )
+              if( lHasPlSqlModeTerminator && (lTrimedLine.startsWith( "create " ) || lTrimedLine.startsWith( "replace " ) || lTrimedLine.startsWith( "begin" ) || lTrimedLine.startsWith( "declare" )) )
               {
                 lPlSqlMode = true;
                 lAppend = lLine;
@@ -232,8 +246,6 @@ public class OrcasScriptRunner extends Orcas
     }
 
     lSpoolHandler.spoolHandleFileEnd();
-
-    lBufferedReader.close();
   }
 
   private void executeSql( String pSql, CallableStatementProvider pCallableStatementProvider )
@@ -254,7 +266,7 @@ public class OrcasScriptRunner extends Orcas
         case IGNORE_DROP:
           if( pSql.toLowerCase().trim().startsWith( "drop " ) )
           {
-            _log.info( e, e );
+            _log.info( "ignoring: " + e.getMessage() + " [" + pSql + "]" );
             return;
           }
           else
@@ -317,7 +329,7 @@ public class OrcasScriptRunner extends Orcas
   {
     public boolean isCommand( String pTrimedLine );
 
-    public void handleCommand( String pLine ) throws Exception;
+    public void handleCommand( String pLine, File pCurrentFile ) throws Exception;
   }
 
   private class SpoolHandler implements CommandHandler
@@ -362,10 +374,12 @@ public class OrcasScriptRunner extends Orcas
       }
     }
 
-    public void handleCommand( String pLine ) throws Exception
+    public void handleCommand( String pLine, File pCurrentFile ) throws Exception
     {
       String lTrimedLine = pLine.toLowerCase().trim();
       String lFileName = doReplace( lTrimedLine.substring( "spool ".length() ), parameters ).trim();
+
+      lFileName = lFileName.replace( ";", "" );
 
       if( lFileName.equals( "off" ) )
       {
@@ -434,7 +448,7 @@ public class OrcasScriptRunner extends Orcas
       return pTrimedLine.startsWith( PROMPT );
     }
 
-    public void handleCommand( String pLine ) throws Exception
+    public void handleCommand( String pLine, File pCurrentFile ) throws Exception
     {
       String lTrimedLine = pLine.trim();
 
@@ -466,9 +480,22 @@ public class OrcasScriptRunner extends Orcas
       return pTrimedLine.startsWith( "@" );
     }
 
-    public void handleCommand( String pLine ) throws Exception
+    public void handleCommand( String pLine, File pCurrentFile ) throws Exception
     {
-      runFile( new File( doReplace( pLine.trim().substring( 1 ), parameters ) ), callableStatementProvider, parameters );
+      File lFile;
+
+      String lTrimLine = pLine.trim();
+
+      if( lTrimLine.startsWith( "@@" ) )
+      {
+        lFile = new File( pCurrentFile.getParent(), doReplace( lTrimLine.substring( 2 ).trim(), parameters ) );
+      }
+      else
+      {
+        lFile = new File( doReplace( lTrimLine.substring( 1 ).trim(), parameters ) );
+      }
+
+      runFile( lFile, callableStatementProvider, parameters );
     }
   }
 }
