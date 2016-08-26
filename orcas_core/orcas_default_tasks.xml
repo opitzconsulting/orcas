@@ -355,7 +355,7 @@ ${orcas_sql_output}
           <include name="*.jar" />
         </fileset>  
       </path>
-      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m" dir="@{executiondir}" >
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m" dir="@{executiondir}" failonerror="true" >
         <arg value="prefix_oracle.jdbc.OracleDriver"/>
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{user}"/>
@@ -452,7 +452,7 @@ ${orcas_sql_output}
         </fileset>  
       </path>
 
-      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m" failonerror="true" >
         <arg value="prefix_oracle.jdbc.OracleDriver"/>
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{user}"/>
