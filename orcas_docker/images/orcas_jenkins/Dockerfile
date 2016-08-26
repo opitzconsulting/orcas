@@ -16,6 +16,9 @@ COPY jenkins_startup.groovy /usr/share/jenkins/ref/init.groovy.d/jenkins_startup
 
 RUN echo job-dsl:1.44 > plugins.txt \
  && echo swarm:2.0 >> plugins.txt \
+ && echo structs:1.3 >> plugins.txt \
+ && echo junit:1.18 >> plugins.txt \
+ && echo ant:1.3 >> plugins.txt \
  && /usr/local/bin/plugins.sh plugins.txt
 
 RUN cp -R /tmp/jenkins_install/jobs /usr/share/jenkins/ref
