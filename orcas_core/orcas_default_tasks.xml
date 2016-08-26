@@ -12,6 +12,7 @@
   <property name="orcas.default_loglevel" value="info" />
   <property name="orcas_internal.nologging_loglevel" value="nologging" />
   <property name="orcas.default_scriptmode" value="sqlplus" />
+  <property name="orcas.default_failonerror" value="default" />
 
   <tstamp>
     <format property="timestamp" pattern="dd_MM_yyyy_HH_mm_ss" />
@@ -135,7 +136,10 @@
             <equals arg1="@{rollbackonerror}" arg2="false" />
           </not>
           <not>
-            <equals arg1="@{failonerror}" arg2="false"/> 
+            <or>
+              <equals arg1="@{failonerror}" arg2="false"/> 
+              <equals arg1="@{failonerror}" arg2="default"/> 
+            </or>
           </not>
         </or>
         <then>
@@ -174,7 +178,10 @@
                     <equals arg1="@{rollbackonerror}" arg2="false" />
                   </not>
                   <not>
-                    <equals arg1="@{failonerror}" arg2="false"/> 
+                    <or>
+                      <equals arg1="@{failonerror}" arg2="false"/> 
+                      <equals arg1="@{failonerror}" arg2="default"/> 
+                    </or>
                   </not>
                 </or>
                 <then>
@@ -334,7 +341,7 @@ ${orcas_sql_output}
     <attribute name="script" />
     <attribute name="parameter" default="" />
     <attribute name="spoolparameter" default="@{parameter}" />
-    <attribute name="failonerror" default="true" />
+    <attribute name="failonerror" default="${orcas.default_failonerror}" />
     <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="executiondir" default="${basedir}"/>
     <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
@@ -348,7 +355,7 @@ ${orcas_sql_output}
           <include name="*.jar" />
         </fileset>  
       </path>
-      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="@{failonerror}" maxmemory="512m" dir="@{executiondir}" >
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m" dir="@{executiondir}" >
         <arg value="prefix_oracle.jdbc.OracleDriver"/>
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{user}"/>
@@ -360,6 +367,7 @@ ${orcas_sql_output}
         <arg value="prefix_@{loglevel}"/>
         <arg value="prefix_@{logname}"/>
         <arg value="prefix_@{spoolfolder}"/>
+        <arg value="prefix_@{failonerror}"/>
         <arg value="prefix_@{parameter}"/>
       </java>
       </then>
@@ -429,7 +437,7 @@ ${orcas_sql_output}
     <attribute name="scriptprefix" default="" />
     <attribute name="scriptpostfix" default=".sql" />
     <attribute name="scriptfolderrecursive" default="false" />
-    <attribute name="failonerror" default="true" />
+    <attribute name="failonerror" default="${orcas.default_failonerror}" />
     <attribute name="loglevel" default="${orcas.default_loglevel}" />
     <attribute name="executiondir" default="${basedir}"/>
     <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
@@ -444,7 +452,7 @@ ${orcas_sql_output}
         </fileset>  
       </path>
 
-      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="@{failonerror}" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m">
         <arg value="prefix_oracle.jdbc.OracleDriver"/>
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{user}"/>
@@ -456,6 +464,7 @@ ${orcas_sql_output}
         <arg value="prefix_@{loglevel}"/>
         <arg value="prefix_@{logname}"/>
         <arg value="prefix_@{spoolfolder}"/>
+        <arg value="prefix_@{failonerror}"/>
       </java>      
       </then>
       <else>

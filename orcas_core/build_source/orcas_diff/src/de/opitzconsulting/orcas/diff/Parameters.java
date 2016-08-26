@@ -44,6 +44,11 @@ public class Parameters
     ORCAS_MAIN, ORCAS_LOAD_EXTRACT, ORCAS_EXTRACT_VIEWS, ORCAS_CHECK_CONNECTION, ORCAS_SCRIPT
   }
 
+  public static enum FailOnErrorMode
+  {
+    NEVER, ALWAYS, IGNORE_DROP
+  }
+
   private JdbcConnectParameters _jdbcConnectParameters;
   private JdbcConnectParameters _srcJdbcConnectParameters;
   private Boolean _logonly;
@@ -71,6 +76,7 @@ public class Parameters
   private String _logname;
   private String _spoolfolder;
   private String _prefix;
+  private String _failonerror;
 
   public Parameters( String[] pArgs, ParameterTypeMode pParameterTypeMode )
   {
@@ -215,9 +221,10 @@ public class Parameters
       _loglevel = getParameterString( lParameterMap.get( 8 ) );
       _logname = getParameterString( lParameterMap.get( 9 ) );
       _spoolfolder = getParameterString( lParameterMap.get( 10 ) );
+      _failonerror = getParameterString( lParameterMap.get( 11 ) );
 
       _additionalParameters = new ArrayList<String>();
-      String lAdditionalParameters = (String)lParameterMap.get( 11 );
+      String lAdditionalParameters = (String)lParameterMap.get( 12 );
 
       if( lAdditionalParameters != null )
       {
@@ -421,4 +428,21 @@ public class Parameters
     return checkNull( _createmissingfkindexes );
   }
 
+  public FailOnErrorMode getFailOnErrorMode()
+  {
+    if( checkNull( _failonerror ).equals( "true" ) )
+    {
+      return FailOnErrorMode.ALWAYS;
+    }
+    if( checkNull( _failonerror ).equals( "false" ) )
+    {
+      return FailOnErrorMode.NEVER;
+    }
+    if( checkNull( _failonerror ).equals( "ignore_drop" ) || checkNull( _failonerror ).equals( "default" ) )
+    {
+      return FailOnErrorMode.IGNORE_DROP;
+    }
+
+    throw new IllegalArgumentException( "unknown failonerror param: " + checkNull( _failonerror ) );
+  }
 }

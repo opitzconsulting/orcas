@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.diff.Parameters.ParameterTypeMode;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperExecuteUpdate;
@@ -237,7 +238,31 @@ public class OrcasScriptRunner extends Orcas
 
   private void executeSql( String pSql, CallableStatementProvider pCallableStatementProvider )
   {
-    new WrapperExecuteUpdate( pSql, pCallableStatementProvider ).execute();
+    try
+    {
+      new WrapperExecuteUpdate( pSql, pCallableStatementProvider ).execute();
+    }
+    catch( RuntimeException e )
+    {
+      switch( getParameters().getFailOnErrorMode() )
+      {
+        case NEVER:
+          _log.error( e, e );
+          return;
+        case ALWAYS:
+          throw e;
+        case IGNORE_DROP:
+          if( pSql.toLowerCase().trim().startsWith( "drop " ) )
+          {
+            _log.info( e, e );
+            return;
+          }
+          else
+          {
+            throw e;
+          }
+      }
+    }
   }
 
   private void executeSelect( String pSql, final SpoolHandler pSpoolHandler, CallableStatementProvider pCallableStatementProvider )
