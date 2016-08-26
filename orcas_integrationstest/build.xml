@@ -474,7 +474,7 @@ ${akt_verzeichnis}: @{message}</concat>
     <if>
       <equals arg1="${clean_mode}" arg2="once" />
       <then>
-        <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${user_orcas}" />
+        <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${user_orcas}" failonerror="false"/>
         <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${user_orcas}" />
       </then>
     </if>      
@@ -572,7 +572,7 @@ ${akt_verzeichnis}: @{message}</concat>
 
                 <!-- test_run_with_log -->
                 <log_testcase_start testname="test_run_with_log"/>
-                <orcas_execute_script executiondir="${tmpfolder}/${akt_verzeichnis}/Protokoll" user="${protokoll}" script="master_install.sql" userorcas="${user_orcas}" logname="ausfuehren_protokoll" />
+                <orcas_execute_script executiondir="${tmpfolder}/${akt_verzeichnis}/Protokoll" user="${protokoll}" script="master_install.sql" userorcas="${user_orcas}" logname="ausfuehren_protokoll" failonerror="false"/>
       
                 <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${protokoll}" logfile2="protokoll" testname="test_run_with_log" />
 
