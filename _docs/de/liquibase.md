@@ -11,7 +11,7 @@ Beide arbeiten im Prinzip mit einer Liste von auszuführenden Datenbankänderung
 
 Beide Tools sind grundsätzlich zu empfehlen und werden auch bei OPITZ CONSULTING in einigen Projekten genutzt. Der große Vorteil beider Tools ist, dass sie nicht nur mit Oracle-Datenbanken arbeiten können.
 
-##Warum also Orcas?
+## Warum also Orcas?
 
 ## Datenmodell in Skriptform
 Wichtig: es wird das Datenmodell selbst in Skriptform vorgehalten, nicht das Änderungslog des Datenmodells.
