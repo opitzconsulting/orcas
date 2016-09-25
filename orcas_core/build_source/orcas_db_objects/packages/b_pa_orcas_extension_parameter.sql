@@ -2,10 +2,19 @@ create or replace package body pa_orcas_extension_parameter is
   type t_parameter_map is table of varchar2(2000) index by varchar2(2000);
   pv_parameter_map t_parameter_map;
   pv_is_map_initialized number := 0;
+  pv_extension_parameter varchar2(32000) := '@extensionparameter@';
 
   function get_extension_parameter return varchar2 is
   begin
-    return '@extensionparameter@';
+    return pv_extension_parameter;
+  end;  
+
+  procedure set_extension_parameter( p_extension_parameter in varchar2 ) is
+  begin
+    if( p_extension_parameter is not null )
+    then
+      pv_extension_parameter := p_extension_parameter;
+    end if;
   end;  
   
   procedure handle_part( p_text_part in varchar2 )

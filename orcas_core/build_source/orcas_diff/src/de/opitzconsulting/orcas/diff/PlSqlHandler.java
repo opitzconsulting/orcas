@@ -32,7 +32,7 @@ public class PlSqlHandler
                              pParameters.getOrcasDbUser() +
                              ".pa_orcas_extensions." +
                              lMethodName +
-                             "( ? ) " + //
+                             "( ?, ? ) " + //
                              " } " + //
                              "";
 
@@ -45,6 +45,7 @@ public class PlSqlHandler
       {
         pCallableStatement.registerOutParameter( 1, java.sql.Types.STRUCT, (pParameters.getOrcasDbUser() + ".ot_syex_model").toUpperCase() );
         pCallableStatement.setObject( 2, createDataWriter( pCallableStatementProvider ).getStructModel( pModel ) );
+        pCallableStatement.setString( 3, pParameters.getExtensionParameter() );
 
         pCallableStatement.execute();
 

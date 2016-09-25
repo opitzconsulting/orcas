@@ -1,0 +1,30 @@
+    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+      <modelVersion>4.0.0</modelVersion>
+     
+      <groupId>com.opitzconsulting.orcas</groupId>
+      <artifactId>orcas-maven-example</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <packaging>orcas-database-deployment</packaging>
+     
+      <name>Orcas Maven Example</name>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.opitzconsulting.orcas</groupId>
+        <artifactId>orcas-maven-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <extensions>true</extensions>
+        <configuration>
+          <jdbcurl>jdbc:oracle:thin:@localhost:1522:XE</jdbcurl>
+          <username>orcas_orderentry</username>
+          <password>orcas_orderentry</password>
+          <loglevel>info</loglevel>
+        </configuration>        
+      </plugin>
+    </plugins>
+  </build>
+
+    </project>
+

@@ -8,7 +8,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import de.opitzconsulting.orcas.diff.Parameters.ParameterTypeMode;
+import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperIteratorResultSet;
 

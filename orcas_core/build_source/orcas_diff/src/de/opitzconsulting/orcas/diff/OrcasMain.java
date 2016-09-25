@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
-import de.opitzconsulting.orcas.diff.Parameters.ParameterTypeMode;
+import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.extensions.AllExtensions;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
@@ -213,9 +213,14 @@ public class OrcasMain extends Orcas
     _log.info( "done orcas statics schema sync" );
   }
 
-  private static Model callJavaExtensions( Model lSyexModel )
+  private Model callJavaExtensions( Model lSyexModel )
   {
-    lSyexModel = new AllExtensions().transformModel( lSyexModel );
+    AllExtensions lAllExtensions = new AllExtensions();
+    if( getParameters().getExtensionParameter().length() != 0 )
+    {
+      lAllExtensions.setParameter( getParameters().getExtensionParameter() );
+    }
+    lSyexModel = lAllExtensions.transformModel( lSyexModel );
     return lSyexModel;
   }
 

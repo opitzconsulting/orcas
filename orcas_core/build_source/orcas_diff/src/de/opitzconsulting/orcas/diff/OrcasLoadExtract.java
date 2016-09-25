@@ -3,7 +3,7 @@ package de.opitzconsulting.orcas.diff;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
-import de.opitzconsulting.orcas.diff.Parameters.ParameterTypeMode;
+import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.syex.trans.TransformOrigSyex;

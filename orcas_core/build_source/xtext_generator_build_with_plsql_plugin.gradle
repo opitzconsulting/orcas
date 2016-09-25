@@ -10,33 +10,18 @@ configurations
 
 dependencies 
 {
-  generatorRunPath files("${buildDir}/libs/${jar.archiveName}")
+  generatorRunPath files("${buildDir}/classes/main")
   compile "org.reflections:reflections:0.9.9-RC1" 
 }
 
-task(createSqlplusDir, dependsOn: jar) 
+task(createSqlplusDir, dependsOn: compileJava) 
 {
   doFirst
   {
-    new File("${buildDir}/sqlplus/db/packages").mkdirs();
-    new File("${buildDir}/sqlplus/db/types").mkdirs();
+    new File("${buildDir}/sqlplus/sql/replaceables/packages").mkdirs();
+    new File("${buildDir}/sqlplus/sql/replaceables/types").mkdirs();
   }
-  outputs.file "${buildDir}/sqlplus/db/packages"
-  outputs.file "${buildDir}/sqlplus/db/types"
+  outputs.file "${buildDir}/sqlplus/sql/replaceables/packages"
+  outputs.file "${buildDir}/sqlplus/sql/replaceables/types"
 }
-
-task sqlplusJar( type: Zip ) {
-    classifier = 'sqlplus'
-    baseName = jar.baseName
-    destinationDir = jar.destinationDir
-    from fileTree(dir: "${buildDir}/sqlplus")
-}
-
-artifacts
-{
-  runtime sqlplusJar
-}
-
-build.dependsOn sqlplusJar
-
 

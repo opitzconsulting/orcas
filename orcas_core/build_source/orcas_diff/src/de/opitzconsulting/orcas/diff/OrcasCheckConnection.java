@@ -1,6 +1,6 @@
 package de.opitzconsulting.orcas.diff;
 
-import de.opitzconsulting.orcas.diff.Parameters.ParameterTypeMode;
+import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 
 public class OrcasCheckConnection extends Orcas
 {

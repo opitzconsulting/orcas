@@ -11,6 +11,7 @@ subprojects
   project.ext.xtext_version = "2.5.1"
 
   project.version = "1.0"
+  project.group = "com.opitzconsulting.orcas"
 
   project.buildDir = project.ext.tmp_folder + "/" + project.path.replaceAll( ":", "_" )
 }

@@ -5,13 +5,3 @@ project.ext.xtext_project_name = "orcas"
 
 apply from: '../xtext_generator_build_with_plsql_plugin.gradle'
 
-configurations
-{
-  sqlplusJarConfig
-}
-
-artifacts
-{
-  sqlplusJarConfig sqlplusJar
-}
-

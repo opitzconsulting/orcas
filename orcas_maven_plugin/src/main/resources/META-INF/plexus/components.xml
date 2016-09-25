@@ -1,0 +1,39 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+      <role-hint>orcas-database-deployment</role-hint>
+      <implementation>
+        org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping
+      </implementation>
+    </component>
+    <component>
+      <role>org.apache.maven.lifecycle.Lifecycle</role>
+      <implementation>org.apache.maven.lifecycle.Lifecycle</implementation>
+      <role-hint>orcas-database-deployment</role-hint>
+      <configuration>
+         <id>orcas-database-deployment</id>
+         <phases>
+            <phase>clean-log</phase>
+            <phase>pre-statics</phase>
+            <phase>statics</phase>
+            <phase>drop-replaceables</phase>
+            <phase>install-replaceables</phase>
+            <phase>compile-replaceables</phase>
+            <phase>post-compile</phase>
+            <phase>database-deployment</phase>
+         </phases>
+         <default-phases>
+            <clean-log>com.opitzconsulting.orcas:orcas-maven-plugin:cleanLog</clean-log>
+            <pre-statics>com.opitzconsulting.orcas:orcas-maven-plugin:oneTimeScriptsPreStatics</pre-statics>
+            <statics>com.opitzconsulting.orcas:orcas-maven-plugin:updateStatics</statics>
+            <drop-replaceables>com.opitzconsulting.orcas:orcas-maven-plugin:dropReplaceablesIfReplaceablesExists</drop-replaceables>                        
+            <install-replaceables>com.opitzconsulting.orcas:orcas-maven-plugin:installReplaceables</install-replaceables>
+            <compile-replaceables>com.opitzconsulting.orcas:orcas-maven-plugin:compileAllInvalidIfReplaceablesExists</compile-replaceables>
+            <post-compile>com.opitzconsulting.orcas:orcas-maven-plugin:oneTimeScriptsPostCompile</post-compile>
+         </default-phases>
+      </configuration>
+    </component>
+  </components>
+</component-set>
+

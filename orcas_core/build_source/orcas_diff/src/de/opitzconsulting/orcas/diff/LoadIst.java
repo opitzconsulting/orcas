@@ -143,9 +143,9 @@ public class LoadIst
   public Model loadModel( boolean pWithSequeneceMayValueSelect )
   {
     isIgnoredSequence( "TEST" );
-    isIgnoredMView( "TEST");
+    isIgnoredMView( "TEST" );
     isIgnoredTable( "TEST" );
-    
+
     _oracleMajorVersion = loadOracleMajorVersion();
 
     Model pModel = new ModelImpl();
@@ -301,6 +301,11 @@ public class LoadIst
 
   private boolean isIgnoredTable( String pString )
   {
+    if( pString.equalsIgnoreCase( OrcasScriptRunner.ORCAS_UPDATES_TABLE ) )
+    {
+      return true;
+    }
+
     return isIgnored( pString, _parameters.getExcludewheretable(), "TABLE" ) || isIgnored( pString, "1=1", "VIEW" );
   }
 

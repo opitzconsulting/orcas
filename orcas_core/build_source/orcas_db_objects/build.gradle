@@ -1,10 +1,13 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
 task(createSqlplusDir) 
 {
   doFirst
   {
-    new File("${buildDir}/sqlplus/db").mkdirs();
+    new File("${buildDir}/sqlplus/sql/replaceables").mkdirs();
   }
-  outputs.file "${buildDir}/sqlplus/db"
+  outputs.file "${buildDir}/sqlplus/sql/replaceables"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -15,30 +18,14 @@ task(copyFiles, dependsOn: createSqlplusDir, type: Copy)
   from "tables"
   from "types"
   from "packages"
-  into "${buildDir}/sqlplus/db"
+  into "${buildDir}/sqlplus/sql/replaceables"
 
   filter(ReplaceTokens, tokens: [extensionparameter: project.ext.extensionparameter])
 }
 
-task sqlplusJar( type: Zip ) {
-  classifier = 'sqlplus'
-  baseName = project.name
-  version = project.version
-  destinationDir = file("${buildDir}/libs")
-  from fileTree(dir: "${buildDir}/sqlplus")
-}
+jar.dependsOn copyFiles
 
-configurations.create( "default" )
-
-artifacts.add( "default", sqlplusJar )
-
-sqlplusJar.dependsOn copyFiles
-
-task(build, dependsOn: sqlplusJar) 
-{
-}
-
-task clean(type: Delete) {
-  delete buildDir
+jar {
+  from "${buildDir}/sqlplus"
 }
 

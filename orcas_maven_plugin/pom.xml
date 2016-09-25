@@ -1,0 +1,64 @@
+
+<project>
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.opitzconsulting.orcas</groupId>
+	<artifactId>orcas-maven-plugin</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>maven-plugin</packaging>
+
+	<name>Orcas Maven Plugin</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.opitzconsulting.orcas</groupId>
+			<artifactId>orcas_diff</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc6</artifactId>
+			<version>11.1.0.7</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>xalan</groupId>
+			<artifactId>xalan</artifactId>
+			<version>2.7.2</version>
+		</dependency>		
+
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<version>3.4</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>../orcas_core/sql_util_scripts</directory>
+				<includes>
+					<include>**/*.sql</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>../orcas_core</directory>
+				<includes>
+					<include>xslt_extract/orcas_extract.xsl</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+	</build>
+</project>
+

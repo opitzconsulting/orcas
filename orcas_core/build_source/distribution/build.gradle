@@ -9,7 +9,7 @@ configurations
 
 dependencies 
 {
-  xtextDistribution project(path: ':orcas', configuration: 'sqlplusJarConfig')
+  xtextDistribution project(':orcas')
   xtextDistribution project(':orcas_diff')
   xtextDistribution project(':orcas_syex')
   xtextDistribution project(':orcas_extensions')

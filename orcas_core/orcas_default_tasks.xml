@@ -368,6 +368,11 @@ ${orcas_sql_output}
         <arg value="prefix_@{logname}"/>
         <arg value="prefix_@{spoolfolder}"/>
         <arg value="prefix_@{failonerror}"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
         <arg value="prefix_@{parameter}"/>
       </java>
       </then>
@@ -465,6 +470,11 @@ ${orcas_sql_output}
         <arg value="prefix_@{logname}"/>
         <arg value="prefix_@{spoolfolder}"/>
         <arg value="prefix_@{failonerror}"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
       </java>      
       </then>
       <else>
@@ -566,6 +576,37 @@ ${orcas_sql_output}
     <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
     <sequential>
     <if>
+      <equals arg1="@{scriptmode}" arg2="jdbc"/>
+     
+      <then>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m" failonerror="true" >
+        <arg value="prefix_oracle.jdbc.OracleDriver"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{user}"/>
+        <arg value="prefix_@{password}"/>
+        <arg value="prefix_@{scriptfolder}"/>
+        <arg value="prefix_@{scriptfolderrecursive}"/>
+        <arg value="prefix_@{scriptprefix}"/>
+        <arg value="prefix_@{scriptpostfix}"/>
+        <arg value="prefix_@{loglevel}"/>
+        <arg value="prefix_@{logname}"/>
+        <arg value="prefix_@{spoolfolder}"/>
+        <arg value="prefix_@{failonerror}"/>
+        <arg value="prefix_true"/>
+        <arg value="prefix_@{noexecute}"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{userorcas}"/>
+        <arg value="prefix_@{passwordorcas}"/>
+      </java>      
+      </then>
+      <else>    
+    <if>
       <equals arg1="@{logname}" arg2=""/>
       <then>
         <echo message="orcas_execute_one_time_scripts"/>
@@ -645,6 +686,8 @@ ${orcas_sql_output}
         </sequential>
       </for>
       <var name="orcas_internal_logging_active" unset="true" />
+      </else>
+      </if>
     </sequential>
   </macrodef>
 
@@ -667,7 +710,7 @@ ${orcas_sql_output}
     <sequential>
       <unzip dest="@{tmpfolder}/db_temp" overwrite="true">
         <fileset dir="@{tmpfolder}/gradle_build" >
-          <include name="**/orcas_db_objects-*-sqlplus.zip"/>
+          <include name="**/orcas_db_objects-*.jar"/>
         </fileset>
         <patternset>
           <include name="**/b_pa_orcas_run_parameter.sql"/>
@@ -891,6 +934,7 @@ ${orcas_sql_output}
     <attribute name="orcasinternalsrcpassword" default="null" />
     <attribute name="orcasinternalsrcjdbcurl" default="null" />
     <attribute name="orcasinternalsqlplustable" default="false" />
+    <attribute name="extensionparameter" default="" />
     <sequential>
       <orcas_internal_log_action_start message="orcas_execute_statics" logname="@{logname}" />
      
@@ -900,32 +944,33 @@ ${orcas_sql_output}
         </fileset>  
       </path>
       <java classname="de.opitzconsulting.orcas.diff.OrcasMain" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="true" maxmemory="512m">
-        <arg value="oracle.jdbc.OracleDriver"/>
-        <arg value="@{jdbcurl}"/>
-        <arg value="@{user}"/>
-        <arg value="@{password}"/>
-        <arg value="@{scriptfolder}"/>
-        <arg value="@{tmpfolder}/spoolfile.sql"/>
-        <arg value="@{logonly}"/>
-        <arg value="@{dropmode}"/>
-        <arg value="@{indexparallelcreate}"/>
-        <arg value="@{indexmovetablespace}"/>
-        <arg value="@{tablemovetablespace}"/>
-        <arg value="@{createmissingfkindexes}"/>
-        <arg value="@{excludewheretable}"/>
-        <arg value="@{excludewheresequence}"/>
-        <arg value="@{dateformat}"/>
-        <arg value="@{userorcas}"/>
-        <arg value="@{scriptfolderrecursive}"/>
-        <arg value="@{scriptprefix}"/>
-        <arg value="@{scriptpostfix}"/>
-        <arg value="@{loglevel}"/>
-        <arg value="@{targetplsql}"/>
-        <arg value="@{orcasinternalsrcjdbcurl}"/>
-        <arg value="@{orcasinternalsrcuser}"/>
-        <arg value="@{orcasinternalsrcpassword}"/>
-        <arg value="@{orcasinternalsqlplustable}"/>
-        <arg value="false"/>
+        <arg value="prefix_oracle.jdbc.OracleDriver"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{user}"/>
+        <arg value="prefix_@{password}"/>
+        <arg value="prefix_@{scriptfolder}"/>
+        <arg value="prefix_@{tmpfolder}/spoolfile.sql"/>
+        <arg value="prefix_@{logonly}"/>
+        <arg value="prefix_@{dropmode}"/>
+        <arg value="prefix_@{indexparallelcreate}"/>
+        <arg value="prefix_@{indexmovetablespace}"/>
+        <arg value="prefix_@{tablemovetablespace}"/>
+        <arg value="prefix_@{createmissingfkindexes}"/>
+        <arg value="prefix_@{excludewheretable}"/>
+        <arg value="prefix_@{excludewheresequence}"/>
+        <arg value="prefix_@{dateformat}"/>
+        <arg value="prefix_@{userorcas}"/>
+        <arg value="prefix_@{scriptfolderrecursive}"/>
+        <arg value="prefix_@{scriptprefix}"/>
+        <arg value="prefix_@{scriptpostfix}"/>
+        <arg value="prefix_@{loglevel}"/>
+        <arg value="prefix_@{targetplsql}"/>
+        <arg value="prefix_@{orcasinternalsrcjdbcurl}"/>
+        <arg value="prefix_@{orcasinternalsrcuser}"/>
+        <arg value="prefix_@{orcasinternalsrcpassword}"/>
+        <arg value="prefix_@{orcasinternalsqlplustable}"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_@{extensionparameter}"/>
       </java>
       <orcas_internal_spool_java user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" spoolfile="@{tmpfolder}/spoolfile.sql" />
        
@@ -1111,7 +1156,7 @@ ${orcas_sql_output}
       <if>
         <equals arg1="@{logsinglecompile}" arg2="false" />
         <then>
-          <orcas_execute_script script="${orcas_util_scripts}/compile_all_invalid.sql" failonerror="@{failonerror}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+          <orcas_execute_script script="${orcas_util_scripts}/compile_all_invalid.sql" parameter="false" failonerror="@{failonerror}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
         </then>
         <else>
           <orcas_internal_sql_plus loglevel="@{loglevel}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" failonerror="true" script="${orcas_util_scripts}/delete_sql_script_from_db.sql" tmpfolder="@{tmpfolder}" />
@@ -1329,8 +1374,13 @@ ${orcas_sql_output}
       <delete dir="@{tmpfolder}/gradle_sqlplus" />
       <unzip dest="@{tmpfolder}/gradle_sqlplus">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
-          <include name="*-sqlplus.zip"/>
+          <include name="orcas_db_objects-*.jar"/>
+          <include name="orcas_extensions-*.jar"/>
+          <include name="orcas_syex-*.jar"/>
         </fileset>
+        <patternset>
+          <include name="sql/**/*.sql" />
+        </patternset>        
       </unzip>
 
       <orcas_drop_replaceables user="@{userorcas}" password="@{passwordorcas}" userorcas="@{userorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" orcasinternalinitialize="false"/>
@@ -1348,13 +1398,16 @@ ${orcas_sql_output}
       <delete dir="@{tmpfolder}/gradle_sqlplus" />
       <unzip dest="@{tmpfolder}/gradle_sqlplus">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
-          <include name="*extensions*-sqlplus.zip"/>
+          <include name="orcas_extensions-*.jar"/>
         </fileset>
+        <patternset>
+          <include name="sql/**/*.sql" />
+        </patternset>        
       </unzip>
 
       <unzip dest="@{tmpfolder}/gradle_sqlplus">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
-          <include name="*-sqlplus.zip"/>
+          <include name="orcas_extensions-*.jar"/>
         </fileset>
         <patternset>
           <include name="**/b_pa_orcas_extension_parameter.sql" />

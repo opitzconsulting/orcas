@@ -39,7 +39,7 @@ public class WrapperExecuteUpdate
     }
     catch( SQLException e )
     {
-      _log.debug( e, e );
+      _log.debug( e + ": " + _sqlString, e );
 
       throw ExceptionManager.createException( e );
     }

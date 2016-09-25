@@ -9,7 +9,7 @@
   </target>
 
   <target name="orderentry_install" depends="show_location,orcas_initialize">
-    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="create_schemaowner.sql" parameter="${username_schemaowner} ${password_schemaowner}"/>
+    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="create_schemaowner.sql" parameter="${username_schemaowner} ${password_schemaowner}" spoolfolder=""/>
   </target>
 
   <target name="drop_users" depends="show_location">

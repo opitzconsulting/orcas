@@ -43,7 +43,10 @@ public abstract class WrapperPreparedStatement
     }
     catch( SQLException e )
     {
-      throw new RuntimeException( e );
+      if( !handleSQLException( e ) )
+      {
+        throw new RuntimeException( e );
+      }
     }
     finally
     {
@@ -59,6 +62,11 @@ public abstract class WrapperPreparedStatement
         }
       }
     }
+  }
+
+  protected boolean handleSQLException( SQLException pSQLException )
+  {
+    return false;
   }
 
   /**
