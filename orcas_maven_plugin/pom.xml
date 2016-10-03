@@ -4,10 +4,35 @@
 
 	<groupId>com.opitzconsulting.orcas</groupId>
 	<artifactId>orcas-maven-plugin</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>maven-plugin</packaging>
 
-	<name>Orcas Maven Plugin</name>
+        <name>com.opitzconsulting.orcas:orcas-maven-plugin</name>
+        <description>orcas maven plugin for orcas usage with maven</description>
+
+  <url>http://opitzconsulting.github.io/orcas</url>
+  <inceptionYear>2008</inceptionYear>
+  <scm>
+    <url>https://github.com/opitzconsulting/orcas</url>
+    <connection>scm:git:git://github.com/opitzconsulting/orcas.git</connection>
+    <developerConnection>scm:git:git://github.com/opitzconsulting/orcas.git</developerConnection>
+  </scm>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>llsand</id>
+      <name>Frank Sanders</name>
+      <email>frank.sanders@opitz-consulting.com</email>
+      <organization>Opitz Consulting</organization>
+      <organizationUrl>http://www.opitz-consulting.com</organizationUrl>
+    </developer>
+  </developers>
 
 	<dependencies>
 		<dependency>
@@ -17,16 +42,10 @@
 		</dependency>
 		<dependency>
 			<groupId>com.opitzconsulting.orcas</groupId>
-			<artifactId>orcas_diff</artifactId>
-			<version>1.0</version>
+			<artifactId>orcas-main</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>ojdbc6</artifactId>
-			<version>11.1.0.7</version>
-		</dependency>
-		
 		<dependency>
 			<groupId>xalan</groupId>
 			<artifactId>xalan</artifactId>

@@ -1,5 +1,8 @@
 apply plugin: 'java'
-apply plugin: 'maven'
+
+apply from: '../maven_publish.gradle'
+project.ext.maven_artifactId = 'orcas-db-objects'
+project.ext.maven_description = 'orcas database components'
 
 task(createSqlplusDir) 
 {

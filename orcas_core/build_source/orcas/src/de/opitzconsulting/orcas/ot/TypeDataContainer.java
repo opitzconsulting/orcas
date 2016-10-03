@@ -2,12 +2,12 @@ package de.opitzconsulting.orcas.ot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
 
 public class TypeDataContainer
 {
@@ -23,13 +23,12 @@ public class TypeDataContainer
     try
     {
       ClassLoader lClassLoader = Thread.currentThread().getContextClassLoader();
-      Reflections reflections = new Reflections( pPackage.getName(), new SubTypesScanner( false ) );
-      Iterator<String> allClasses = reflections.getStore().getSubTypesOf( Object.class.getName() ).iterator();
+      ImmutableSet<ClassInfo> lClasseInfosInPackage = ClassPath.from( lClassLoader ).getTopLevelClasses( pPackage.getName() );
       List<Class> lReturn = new ArrayList<Class>();
 
-      while( allClasses.hasNext() )
+      for(ClassInfo lClassInfo : lClasseInfosInPackage)
       {
-        Class lClass = Class.forName( allClasses.next() );
+        Class lClass = Class.forName( lClassInfo.getName() );
         if( lClass.isInterface() )
         {
           boolean lUse = false;

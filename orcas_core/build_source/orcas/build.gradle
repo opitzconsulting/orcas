@@ -5,3 +5,8 @@ project.ext.xtext_project_name = "orcas"
 
 apply from: '../xtext_generator_build_with_plsql_plugin.gradle'
 
+apply from: '../maven_publish.gradle'
+project.ext.maven_artifactId = 'orcas-orig'
+project.ext.maven_description = 'orcas original xtext-model (not modified by extensions)'
+
+

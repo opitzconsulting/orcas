@@ -1,9 +1,6 @@
 package de.opitzconsulting.orcas.diff;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Struct;
@@ -149,18 +146,10 @@ public class OrcasMain extends Orcas
     return lOutputModel;
   }
 
-  private static void handleDiffResult( Parameters pParameters, CallableStatementProvider pCallableStatementProvider, DiffResult pDiffResult ) throws FileNotFoundException
+  private void handleDiffResult( Parameters pParameters, CallableStatementProvider pCallableStatementProvider, DiffResult pDiffResult ) throws FileNotFoundException
   {
-    PrintStream lPrintStream;
-    if( !pParameters.getSpoolfile().equals( "" ) )
-    {
-      lPrintStream = new PrintStream( new FileOutputStream( pParameters.getSpoolfile() ) );
-    }
-    else
-    {
-      // null lPrintStream 
-      lPrintStream = new PrintStream( new ByteArrayOutputStream() );
-    }
+    List<String> lScriptLines = new ArrayList<String>();
+
     for( String lLine : pDiffResult.getSqlStatements() )
     {
       int lMaxLineLength = 2000;
@@ -169,14 +158,14 @@ public class OrcasMain extends Orcas
 
       if( lLine.endsWith( ";" ) )
       {
-        lPrintStream.println( lLine );
-        lPrintStream.println( "/" );
+        lScriptLines.add( lLine );
+        lScriptLines.add( "/" );
         _log.info( lLine );
         _log.info( "/" );
       }
       else
       {
-        lPrintStream.println( lLine + ";" );
+        lScriptLines.add( lLine + ";" );
         _log.info( lLine + ";" );
       }
 
@@ -186,10 +175,13 @@ public class OrcasMain extends Orcas
       }
     }
 
-    lPrintStream.close();
+    if( !lScriptLines.isEmpty() )
+    {
+      addSpoolfolderScriptIfNeeded( lScriptLines, pParameters.getLogname() + ".sql" );
+    }
   }
 
-  private static void doSchemaSync( Parameters pParameters ) throws FileNotFoundException
+  private void doSchemaSync( Parameters pParameters ) throws FileNotFoundException
   {
     _log.info( "starting orcas statics schema sync" );
 

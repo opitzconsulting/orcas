@@ -26,7 +26,7 @@
   <property name="orcas.default_tmpfolder" value="${bindir}/orcas_dir" />
   <property name="tmpfolder" value="${bindir}/tmp_dir" />
   <property name="keep_files_on_success" value="false" />
-  <property name="include_sqlplus_tests" value="false" />
+  <property name="include_sqlplus_tests" value="true" />
   <!-- clean_mode options: once, for_each_test, never -->
   <property name="clean_mode" value="once" />
   <property name="testexcludesfile" value="empty_excludesfile.txt" />

@@ -936,8 +936,6 @@ ${orcas_sql_output}
     <attribute name="orcasinternalsqlplustable" default="false" />
     <attribute name="extensionparameter" default="" />
     <sequential>
-      <orcas_internal_log_action_start message="orcas_execute_statics" logname="@{logname}" />
-     
       <path id="orcas_internal_orcas_diff_classpath">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
           <include name="*.jar" />
@@ -949,7 +947,7 @@ ${orcas_sql_output}
         <arg value="prefix_@{user}"/>
         <arg value="prefix_@{password}"/>
         <arg value="prefix_@{scriptfolder}"/>
-        <arg value="prefix_@{tmpfolder}/spoolfile.sql"/>
+        <arg value="prefix_@{spoolfolder}"/>
         <arg value="prefix_@{logonly}"/>
         <arg value="prefix_@{dropmode}"/>
         <arg value="prefix_@{indexparallelcreate}"/>
@@ -971,9 +969,8 @@ ${orcas_sql_output}
         <arg value="prefix_@{orcasinternalsqlplustable}"/>
         <arg value="prefix_false"/>
         <arg value="prefix_@{extensionparameter}"/>
+        <arg value="prefix_@{logname}"/>
       </java>
-      <orcas_internal_spool_java user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" spoolfile="@{tmpfolder}/spoolfile.sql" />
-       
     </sequential>
   </macrodef>
 

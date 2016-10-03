@@ -5,12 +5,34 @@ subprojects
     mavenCentral()
   }
 
-  project.ext.tmp_folder = getRootProject().orcas_tmp_folder
-  project.ext.extension_folder = getRootProject().orcas_extension_folder
-  project.ext.extensionparameter = getRootProject().orcas_extension_parameter
+  if( getRootProject().hasProperty('orcas_tmp_folder') )
+  {
+    project.ext.tmp_folder = getRootProject().orcas_tmp_folder
+  }
+  else
+  {
+    project.ext.tmp_folder = '../.gradle'
+  }
+  if( getRootProject().hasProperty('orcas_extension_folder') )
+  {
+    project.ext.extension_folder = getRootProject().orcas_extension_folder
+  }
+  else
+  {
+    project.ext.extension_folder = project.ext.tmp_folder + "/empty_extensions"
+    project.file(project.ext.extension_folder).mkdirs()
+  }
+  if( getRootProject().hasProperty('orcas_extension_parameter') )
+  {
+    project.ext.extensionparameter = getRootProject().orcas_extension_parameter
+  }
+  else
+  {
+    project.ext.extensionparameter = ''
+  }
   project.ext.xtext_version = "2.5.1"
 
-  project.version = "1.0"
+  project.version = "1.0.0"
   project.group = "com.opitzconsulting.orcas"
 
   project.buildDir = project.ext.tmp_folder + "/" + project.path.replaceAll( ":", "_" )

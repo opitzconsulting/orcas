@@ -5,6 +5,10 @@ project.ext.extension_package_name = "extensions"
 
 apply from: '../extension_build_plugin.gradle'
 
+apply from: '../maven_publish.gradle'
+project.ext.maven_artifactId = 'orcas-extenions'
+project.ext.maven_description = 'orcas custom extensions (contains only support classes and an empty-extension). If custom-extensions are provided, there will be a custom artifact.'
+
 class SyncWithDeleteTask extends DefaultTask 
 {
   @InputDirectory

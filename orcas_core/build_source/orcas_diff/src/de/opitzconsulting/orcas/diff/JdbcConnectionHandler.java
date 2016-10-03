@@ -11,8 +11,7 @@ import java.sql.Struct;
 
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.JdbcCallableStatementProvider;
-import oracle.jdbc.driver.OracleConnection;
-import oracle.sql.CLOB;
+import de.opitzconsulting.orcas.sql.oracle.OracleDriverSpecificHandler;
 
 public class JdbcConnectionHandler
 {
@@ -66,15 +65,8 @@ public class JdbcConnectionHandler
 
   public static Array createArrayOf( String pTypeName, Object[] pElements, CallableStatementProvider pCallableStatementProvider )
   {
-    try
-    {
-      CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl)pCallableStatementProvider;
-      return ((OracleConnection)lCallableStatementProviderImpl._connection).createARRAY( lCallableStatementProviderImpl._parameters.getOrcasDbUser().toUpperCase() + "." + pTypeName.toUpperCase(), pElements );
-    }
-    catch( SQLException e )
-    {
-      throw new RuntimeException( e );
-    }
+    CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl)pCallableStatementProvider;
+    return OracleDriverSpecificHandler.call_OracleConnection_createARRAY( lCallableStatementProviderImpl._connection, lCallableStatementProviderImpl._parameters.getOrcasDbUser().toUpperCase() + "." + pTypeName.toUpperCase(), pElements );
   }
 
   public static Clob createClob( String pValue, CallableStatementProvider pCallableStatementProvider )
@@ -83,9 +75,7 @@ public class JdbcConnectionHandler
     {
       CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl)pCallableStatementProvider;
 
-      CLOB lClob = CLOB.createTemporary( (OracleConnection)lCallableStatementProviderImpl._connection, true, CLOB.DURATION_SESSION );
-
-      lClob.open( CLOB.MODE_READWRITE );
+      Clob lClob = OracleDriverSpecificHandler.call_CLOB_createTemporary_MODE_READWRITE( lCallableStatementProviderImpl._connection );
 
       Writer lSetCharacterStream = lClob.setCharacterStream( 1 );
       lSetCharacterStream.append( pValue );

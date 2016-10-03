@@ -3,10 +3,10 @@ package de.opitzconsulting.orcas.sql;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import oracle.jdbc.OraclePreparedStatement;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import de.opitzconsulting.orcas.sql.oracle.OracleDriverSpecificHandler;
 
 /**
  * Dient zum ausfuehren von DML Operationen im Batch Modus.
@@ -25,11 +25,11 @@ public abstract class WrapperExecuteBatch extends WrapperPreparedStatement
 
   protected final void usePreparedStatement( PreparedStatement pPreparedStatement ) throws SQLException
   {
-    boolean lOracleMode = pPreparedStatement instanceof OraclePreparedStatement;
+    boolean lOracleMode = OracleDriverSpecificHandler.isInstanceofOraclePreparedStatement( pPreparedStatement );
 
     if( lOracleMode )
     {
-      ((OraclePreparedStatement)pPreparedStatement).setExecuteBatch( 10 );
+      OracleDriverSpecificHandler.call_OraclePreparedStatement_setExecuteBatch( pPreparedStatement, 10 );
     }
     else
     {
@@ -52,7 +52,7 @@ public abstract class WrapperExecuteBatch extends WrapperPreparedStatement
 
     if( lOracleMode )
     {
-      ((OraclePreparedStatement)pPreparedStatement).sendBatch();
+      OracleDriverSpecificHandler.call_OraclePreparedStatement_sendBatch( pPreparedStatement );
     }
     else
     {

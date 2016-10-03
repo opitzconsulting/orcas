@@ -47,7 +47,7 @@ public class ParametersCommandline extends Parameters
     {
       _modelFile = getParameterString( lParameterMap.get( lParameterIndex++ ) );
 
-      _spoolfile = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _spoolfolder = getParameterString( lParameterMap.get( lParameterIndex++ ) );
 
       _logonly = getParameterFlag( lParameterMap.get( lParameterIndex++ ) );
       _dropmode = getParameterFlag( lParameterMap.get( lParameterIndex++ ) );
@@ -85,6 +85,7 @@ public class ParametersCommandline extends Parameters
 
       _orderColumnsByName = getParameterFlag( lParameterMap.get( lParameterIndex++ ) );
       _extensionParameter = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _logname = getParameterString( lParameterMap.get( lParameterIndex++ ) );
     }
 
     if( pParameterTypeMode == ParameterTypeMode.ORCAS_LOAD_EXTRACT )
