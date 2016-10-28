@@ -1,66 +1,151 @@
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+ext {
+  pomFilePath = "${project.buildDir}/publications/mavenJava/pom-default.xml"
+  coolPomFilePath = "${project.buildDir}/publications/mavenJava/pom.xml"
+  pomFile = file(pomFilePath)
+  coolPomFile = file(coolPomFilePath)
+}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from compileJava.source
+  classifier = 'sources'
+  from compileJava.source
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+configurations {
+  pom
+}
+
+artifacts {
+  archives jar
+  archives sourcesJar
+  archives javadocJar
+  if (project.ext.pomFile.exists()) {
+    pom project.ext.coolPomFile
+  }
+}
+
+task signJars (type : Sign, dependsOn: [jar, javadocJar, sourcesJar]) {
+  sign configurations.archives
+}
+
+task signPom(type: Sign) {
+  sign configurations.pom
+}
+
+if (project.ext.pomFile.exists()) {
+  task pomExtremeMover(type: Copy) {
+    from project.ext.pomFile.parent
+    into project.ext.pomFile.parent
+    include "pom-default.xml"
+    rename { String fileName ->
+      "pom.xml"
+    }
+  }
+
+  signPom.dependsOn pomExtremeMover
+  task preparePublication (dependsOn : [signJars, signPom])
+} else {
+  task preparePublication (dependsOn : signJars)
+}
+
+def getSignatureFiles = {
+  def signedSources = "$project.tasks.sourcesJar.archivePath"
+  def signedJavadoc = "$project.tasks.javadocJar.archivePath"
+  def signedJar = "$project.tasks.jar.archivePath"
+
+  return [
+          [archive: signedSources, classifier: 'sources', extension: 'jar.asc'],
+          [archive: signedJavadoc, classifier: 'javadoc', extension: 'jar.asc'],
+          [archive: signedJar,     classifier: null,      extension: 'jar.asc']
+  ]
+}
+
+def getPomSignature = {
+  return project.tasks.signPom.signatureFiles.collect{it}[0]
 }
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            if( project.ext.extensiondependent )
-            {
-              artifactId project.ext.extensionname_external + "orcas-" + project.ext.extensionname_internal + project.ext.maven_artifactId_postfix
-              groupId project.ext.extensiongroup
-              version project.ext.extensionversion
-            }
-            else
-            {
-              artifactId "orcas-" + project.ext.maven_artifactId_postfix
-            }
-
-            pom.withXml {
-               def root = asNode()
-               root.appendNode('packaging', 'jar')
-               root.appendNode('name', groupId+':'+artifactId)
-               if( !project.ext.externalextension || !project.ext.extensiondependent )
-               {
-                   root.appendNode('description', project.ext.maven_description)
-                   root.appendNode('url', 'http://opitzconsulting.github.io/orcas')
-                   root.appendNode('inceptionYear', '2008')
-                   def scm = root.appendNode('scm')
-                   scm.appendNode('url', 'https://github.com/opitzconsulting/orcas')
-                   scm.appendNode('connection', 'scm:git:git://github.com/opitzconsulting/orcas.git')
-                   scm.appendNode('developerConnection', 'scm:git:git://github.com/opitzconsulting/orcas.git')
-                   def license = root.appendNode('licenses').appendNode('license')
-                   license.appendNode('name', 'The Apache Software License, Version 2.0')
-                   license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
-                   license.appendNode('distribution', 'repo')
-                   def developer = root.appendNode('developers').appendNode('developer')
-                   developer.appendNode('id', 'llsand')
-                   developer.appendNode('name', 'Frank Sanders')
-                   developer.appendNode('email', 'frank.sanders@opitz-consulting.com')
-                   developer.appendNode('organization', 'Opitz Consulting')
-                   developer.appendNode('organizationUrl', 'http://www.opitz-consulting.com')
-               }
-            }
-
-            from components.java
-
-            artifact sourcesJar {
-                classifier "sources"
-            }
-            artifact javadocJar {
-                classifier "javadoc"
-            }
+  repositories {
+    maven {
+      if (project.ext.pomFile.exists()) {
+        url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+        credentials {
+          username = sonatypeUsername
+          password = sonatypePassword
         }
+      } else {
+        url "file:/${project.projectDir}/artifacts"
+      }
     }
+  }
+  publications {
+    mavenJava(MavenPublication) {
+      getSignatureFiles().each {signature ->
+        artifact (signature.archive) {
+          classifier = signature.classifier
+          extension  = signature.extension
+        }
+      }
+
+      if (project.ext.pomFile.exists()) {
+        artifact (getPomSignature()) {
+          classifier = null
+          extension  = 'pom.asc'
+        }
+      }
+
+      if(project.ext.extensiondependent) {
+        artifactId project.ext.extensionname_external + "orcas-" + project.ext.extensionname_internal + project.ext.maven_artifactId_postfix
+        groupId project.ext.extensiongroup
+        version project.ext.extensionversion
+      } else {
+        artifactId "orcas-" + project.ext.maven_artifactId_postfix
+      }
+
+      pom.withXml {
+        def root = asNode()
+        root.packaging[0].value = 'jar'
+        root.appendNode('name', groupId+':'+artifactId)
+        if(!project.ext.externalextension || !project.ext.extensiondependent) {
+          root.appendNode('description', project.ext.maven_description)
+          root.appendNode('url', 'http://opitzconsulting.github.io/orcas')
+          root.appendNode('inceptionYear', '2008')
+
+          def scm = root.appendNode('scm')
+          scm.appendNode('url', 'https://github.com/opitzconsulting/orcas')
+          scm.appendNode('connection', 'scm:git:git://github.com/opitzconsulting/orcas.git')
+          scm.appendNode('developerConnection', 'scm:git:git://github.com/opitzconsulting/orcas.git')
+
+          def license = root.appendNode('licenses').appendNode('license')
+          license.appendNode('name', 'The Apache Software License, Version 2.0')
+          license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+          license.appendNode('distribution', 'repo')
+
+          def developer = root.appendNode('developers').appendNode('developer')
+          developer.appendNode('id', 'llsand')
+          developer.appendNode('name', 'Frank Sanders')
+          developer.appendNode('email', 'frank.sanders@opitz-consulting.com')
+          developer.appendNode('organization', 'Opitz Consulting')
+          developer.appendNode('organizationUrl', 'http://www.opitz-consulting.com')
+        }
+      }
+
+      from components.java
+
+      artifact sourcesJar {
+        classifier "sources"
+      }
+
+      artifact javadocJar {
+        classifier "javadoc"
+      }
+    }
+  }
 }
-
-
-
