@@ -56,9 +56,9 @@ if (project.ext.pomFile.exists()) {
 }
 
 def getSignatureFiles = {
-  def signedSources = "$project.tasks.sourcesJar.archivePath"
-  def signedJavadoc = "$project.tasks.javadocJar.archivePath"
-  def signedJar = "$project.tasks.jar.archivePath"
+  def signedSources = "${project.tasks.sourcesJar.archivePath}.asc"
+  def signedJavadoc = "${project.tasks.javadocJar.archivePath}.asc"
+  def signedJar = "${project.tasks.jar.archivePath}.asc"
 
   return [
           [archive: signedSources, classifier: 'sources', extension: 'jar.asc'],
