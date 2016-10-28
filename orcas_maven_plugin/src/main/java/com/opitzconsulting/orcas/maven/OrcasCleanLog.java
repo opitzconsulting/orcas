@@ -5,6 +5,7 @@ import java.io.File;
 import org.apache.maven.plugins.annotations.Mojo;
 
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import de.opitzconsulting.orcas.diff.Orcas;
 
 @Mojo( name = "cleanLog" )
 public class OrcasCleanLog extends BaseOrcasMojo
@@ -14,7 +15,7 @@ public class OrcasCleanLog extends BaseOrcasMojo
   {
     if( pParameters.getSpoolfolder().length() != 0 && new File( pParameters.getSpoolfolder() ).exists() )
     {
-      OrcasExtract.deleteRecursive( new File( pParameters.getSpoolfolder() ) );
+      Orcas.deleteRecursive( new File( pParameters.getSpoolfolder() ) );
     }
   }
 

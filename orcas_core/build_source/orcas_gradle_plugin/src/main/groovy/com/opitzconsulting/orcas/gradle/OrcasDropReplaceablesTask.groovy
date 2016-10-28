@@ -5,6 +5,7 @@ import java.util.List;
 
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
 
 public class OrcasDropReplaceablesTask extends BaseOrcasTask
 {
@@ -25,7 +26,7 @@ public class OrcasDropReplaceablesTask extends BaseOrcasTask
       List<String> lAdditionalParameters = new ArrayList<String>();
       pParameters.setAdditionalParameters( lAdditionalParameters );
 
-      pParameters.setScriptUrl( getClass().getResource( "/delete_replacable_objects.sql" ), "delete_replacable_objects.sql" );
+      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_delete_replacable_objects(), "delete_replacable_objects.sql" );
       lAdditionalParameters.clear();
       lAdditionalParameters.add( project.orcasconfiguration.excludewherepackage );
       lAdditionalParameters.add( project.orcasconfiguration.excludewheretrigger );
@@ -34,14 +35,14 @@ public class OrcasDropReplaceablesTask extends BaseOrcasTask
       lAdditionalParameters.add( project.orcasconfiguration.excludewhereprocedure );
       new OrcasScriptRunner().mainRun( pParameters );
 
-      pParameters.setScriptUrl( getClass().getResource( "/drop_all_types.sql" ), "drop_all_types.sql" );
+      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_drop_all_types(), "drop_all_types.sql" );
       lAdditionalParameters.clear();
       lAdditionalParameters.add( project.orcasconfiguration.excludewhereobjecttype );
       new OrcasScriptRunner().mainRun( pParameters );
     }
     else
     {
-      getLog().info( "no replaceables found" );
+      logInfo( "no replaceables found" );
     }
   }
 

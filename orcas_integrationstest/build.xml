@@ -24,12 +24,36 @@
   <property name="orcas.default_spoolfolder" value="" />
   <property name="orcas.default_logname" value="logfile" />
   <property name="orcas.default_tmpfolder" value="${bindir}/orcas_dir" />
+  <property name="orcas_dir_noextensions" value="${bindir}/orcas_dir_noextensions" />
   <property name="tmpfolder" value="${bindir}/tmp_dir" />
   <property name="keep_files_on_success" value="false" />
   <property name="include_sqlplus_tests" value="true" />
   <!-- clean_mode options: once, for_each_test, never -->
   <property name="clean_mode" value="once" />
+  <property name="orcas.default_scriptmode" value="jdbc" />
+  <property name="orcas.default_java_fork" value="false" />
   <property name="testexcludesfile" value="empty_excludesfile.txt" />
+
+  <macrodef name="orcas_grant_ref">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <sequential>
+      <if>
+        <equals arg1="@{user}" arg2="@{userorcas}"/>
+        <then>
+            <fail message="Grant is not possible when installing orcas in the application schema"/>
+        </then>
+        <else>
+          <echo message="installing orcas in separate schema granting references to @{user} by @{userorcas}"/>
+         <orcas_execute_script   script="grant_references.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+        </else>
+      </if>    
+    </sequential>
+  </macrodef>    
 
   <target name="show_location">
     <echo message="================= Location: ${location} ================="/>
@@ -133,10 +157,10 @@
       <if>
         <equals arg1="@{includedata}" arg2="true" />						
         <then>
-          <orcas_execute_script user="@{user}" password="@{password}" script="spool.sql" parameter="@{logfile} ${tmpfolder}/tabellen.log 1=1" failonerror="yes" logname="Struktur ermitteln" />
+          <orcas_execute_script user="@{user}" password="@{password}" script="spool.sql" parameter="@{logfile} ${tmpfolder}/tabellen.log 1=1" failonerror="true" logname="Struktur ermitteln" />
         </then>
         <else>
-          <orcas_execute_script user="@{user}" password="@{password}" script="spool.sql" parameter="@{logfile} ${tmpfolder}/tabellen.log 1=2" failonerror="yes" logname="Struktur ermitteln" />
+          <orcas_execute_script user="@{user}" password="@{password}" script="spool.sql" parameter="@{logfile} ${tmpfolder}/tabellen.log 1=2" failonerror="true" logname="Struktur ermitteln" />
           <!-- max_value_select nur uebernehmen, wenn es keine Zahl ist, denn sonst ist es nur der aktuelle wert der sequence -->
           <replaceregexp file="@{logfile}" match="\&lt;max_value_select\&gt;[0-9]+\&lt;\/max_value_select\&gt;" replace="" flags="g" />
           <!-- zusätzliche Leerzeichen können bei matviewselect durch die Ersetzung von linefeeds bei langen Zeilen verursacht sein und zu Unterschieden führen -->
@@ -150,7 +174,8 @@
         </fileset>  
       </path>
 
-      <java classname="de.opitzconsulting.orcas.diff.OrcasLoadExtract" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="true" dir="${tmpfolder}" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractStatics" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" dir="${tmpfolder}" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
         <arg value="oracle.jdbc.OracleDriver"/>
         <arg value="${orcas.default_jdbcurl}"/>
         <arg value="@{user}"/>
@@ -164,9 +189,14 @@
         <arg value="null"/>
         <arg value="null"/>
         <arg value="null"/>
-        <arg value="break"/>        <!--  this turns off plsql extensions <arg value="${user_orcas}"/>-->
+        <arg value="${user_orcas}"/> 
         <arg value="true"/>
         <arg value="false"/>
+        <arg value="false"/>
+        <arg value="${orcas.default_jdbcurl}"/>
+        <arg value="${user_orcas}"/>
+        <arg value="${password_testuser}"/>
+        <arg value="null"/>
       </java>      
 
       <concat destfile="@{logfile}" append="true">
@@ -394,7 +424,18 @@ ${akt_verzeichnis}: @{message}</concat>
       <var name="test_runnable" unset="true" />
       <var name="dateformat" unset="true" />
 
+      <var name="orcas.default_java_fork" unset="true" />
+
       <property file="@{folder}/parameter.properties" />
+      <if>
+        <isset property="extensionfolder" />
+        <then>
+          <property name="orcas.default_java_fork" value="true" />
+        </then>
+        <else>
+          <property name="orcas.default_java_fork" value="false" />
+        </else>
+      </if>
       <loadproperties srcfile="parameter.properties" />
 
       <propertyregex property="akt_verzeichnis" input="@{folder}" regexp=".*\\(.*)" select="\1" />
@@ -465,19 +506,19 @@ ${akt_verzeichnis}: @{message}</concat>
       </sequential>
     </for>    
 
-    <!--<orcas_check_connection user="${username_dba}" password="${password_dba}" />-->
-    <!--<orcas_initialize user="${ueberfuehrung}" userorcas="${user_orcas}"/> -->
+    <!--<orcas_check_connection user="${username_dba}" password="${password_dba}"  tmpfolder="${orcas_dir_noextensions}" />-->
+    <!--<orcas_initialize user="${ueberfuehrung}" userorcas="${user_orcas}" tmpfolder="${orcas_dir_noextensions}" /> -->
     <delete dir="${tmpfolder}/" />
     <mkdir dir="${tmpfolder}/" />
     <echo file="${tmpfolder}/${location}_Ergebnis.log" append="yes" message="Erfolgreiche Tests:${line.separator}" />
 
-    <orcas_initialize />
+    <orcas_initialize tmpfolder="${orcas_dir_noextensions}" />
 
     <if>
       <equals arg1="${clean_mode}" arg2="once" />
       <then>
-        <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${user_orcas}" />
-        <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${user_orcas}" />
+        <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${user_orcas}" tmpfolder="${orcas_dir_noextensions}" />
+        <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${user_orcas}" tmpfolder="${orcas_dir_noextensions}" />
       </then>
     </if>      
 
@@ -501,15 +542,15 @@ ${akt_verzeichnis}: @{message}</concat>
                 <mkdir dir="${tmpfolder}/${akt_verzeichnis}" />
 
                 <!-- User werden zurueckgesetzt -->
-                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
-                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${protokoll} ${password_testuser} ${tablespace_testuser}" />
-                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${zielskript} ${password_testuser} ${tablespace_testuser}" />
-                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${anotherSchema} ${password_testuser} ${tablespace_testuser}" />
+                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}"  tmpfolder="${orcas_dir_noextensions}" />
+                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${protokoll} ${password_testuser} ${tablespace_testuser}"  tmpfolder="${orcas_dir_noextensions}" />
+                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${zielskript} ${password_testuser} ${tablespace_testuser}"  tmpfolder="${orcas_dir_noextensions}" />
+                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${anotherSchema} ${password_testuser} ${tablespace_testuser}"  tmpfolder="${orcas_dir_noextensions}" />
 		            <if>
                   <equals arg1="${clean_mode}" arg2="for_each_test" />
                   <then>
-            		    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${user_orcas}" />
-            		    <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${user_orcas}" />
+            		    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${user_orcas}"  tmpfolder="${orcas_dir_noextensions}" />
+            		    <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${user_orcas}"  tmpfolder="${orcas_dir_noextensions}" />
                   </then>
                 </if>
             
@@ -520,12 +561,8 @@ ${akt_verzeichnis}: @{message}</concat>
                   </then>
                   <else>
                     <orcas_initialize extensionfolder="${extensionfolder}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" user="${ueberfuehrung}" userorcas="${user_orcas}" orcasinternalinstalldb="false" />
-                    <!--<orcas_grant user="${ueberfuehrung}" userorcas="${user_orcas}" />-->
                   </else>
                 </if>
-                
-<!--                <orcas_grant user="${protokoll}" userorcas="${user_orcas}" />
-                <orcas_grant user="${zielskript}" userorcas="${user_orcas}" />-->
                 
                 <if>
                   <available file="@{folder}/erzeuge_tabelle_in_extra_schema.sql" />
@@ -533,7 +570,6 @@ ${akt_verzeichnis}: @{message}</concat>
                     <orcas_execute_script user="${anotherSchema}" password="${password_testuser}" script="@{folder}/erzeuge_tabelle_in_extra_schema.sql" parameter="${anotherSchema}" />
                   </then>
                 </if>
-                <!--<orcas_grant user="${anotherSchema}" userorcas="${user_orcas}" />-->
                 <orcas_grant_ref user="${ueberfuehrung}" userorcas="${anotherSchema}" />
                 <orcas_grant_ref user="${zielskript}" userorcas="${anotherSchema}" />
                
@@ -552,7 +588,7 @@ ${akt_verzeichnis}: @{message}</concat>
                 <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                   dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
                   createmissingfkindexes="${createmissingfkindexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll"
-                  logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}"/>
+                  logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" />
                 <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${ueberfuehrung}" logfile2="ueberfuehrung" testname="test_run" />
 
                 <!-- second_run_does_nothing -->
@@ -560,7 +596,7 @@ ${akt_verzeichnis}: @{message}</concat>
                 <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                   dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
                   createmissingfkindexes="${createmissingfkindexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test"
-                  logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}"/> 
+                  logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" /> 
 
                 <if>
                   <available file="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test/master_install.sql" />
@@ -574,7 +610,7 @@ ${akt_verzeichnis}: @{message}</concat>
 
                 <!-- test_run_with_log -->
                 <log_testcase_start testname="test_run_with_log"/>
-                <orcas_execute_script executiondir="${tmpfolder}/${akt_verzeichnis}/Protokoll" user="${protokoll}" script="master_install.sql" userorcas="${user_orcas}" logname="ausfuehren_protokoll" failonerror="false"/>
+                <orcas_execute_script user="${protokoll}" script="${tmpfolder}/${akt_verzeichnis}/Protokoll/master_install.sql" userorcas="${user_orcas}" logname="ausfuehren_protokoll" failonerror="false"/>
       
                 <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${protokoll}" logfile2="protokoll" testname="test_run_with_log" />
 
@@ -586,10 +622,9 @@ ${akt_verzeichnis}: @{message}</concat>
                     <orcas_extract user="${zielskript}" userorcas="${user_orcas}" outputfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" dateformat="${dateformat}"/>
 
                     <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" userorcas="${user_orcas}" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
-                    <!--<orcas_grant user="${ueberfuehrung}" userorcas="${user_orcas}" />-->
                     <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" userorcas="${user_orcas}" scriptfolderrecursive="true"
                       dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
-                      createmissingfkindexes="${createmissingfkindexes}" logname="extract_output" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}"/>                
+                      createmissingfkindexes="${createmissingfkindexes}" logname="extract_output" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" />                
 
                     <check_struktur_equal user1="${zielskript}" logfile1="zielskript_extract_nodata" user2="${ueberfuehrung}" logfile2="ueberfuehrung_extract_nodata" includedata="false" testname="test_run_with_extract" />
                   </then>
@@ -607,12 +642,11 @@ ${akt_verzeichnis}: @{message}</concat>
                   <then>
                     <log_testcase_start testname="test_run_sqlplus"/>
                     <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" userorcas="${user_orcas}" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
-                    <orcas_grant user="${ueberfuehrung}" userorcas="${user_orcas}" />
                     <orcas_execute_script user="${ueberfuehrung}" script="@{folder}/erzeuge_ausgangszustand.sql" parameter="${alternate_tablespace_1} ${alternate_tablespace_2}" userorcas="${user_orcas}"
                       logname="ausgangszustand_anlegen_ueberfuehrung" failonerror="true" />
                     <orcas_sqlplus_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen_sqlplus/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                       dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="${createmissingfkindexes}" 
-                      logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_svw_test" dateformat="${dateformat}"/>                  
+                      logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_svw_test" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" />                  
 
                     <check_struktur_equal user1="${zielskript}" logfile1="zielskript_sqlplus" user2="${ueberfuehrung}" logfile2="ueberfuehrung_sqlplus" testname="test_run_sqlplus" />
 
@@ -620,7 +654,7 @@ ${akt_verzeichnis}: @{message}</concat>
                     <log_testcase_start testname="second_run_does_nothing_sqlplus"/>
                     <orcas_sqlplus_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen_sqlplus/" userorcas="${user_orcas}" scriptfolderrecursive="true"
                       dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="${createmissingfkindexes}" 
-                      logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test" dateformat="${dateformat}"/>                
+                      logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" />                
 
                     <if>
                       <available file="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test/master_install.sql" />

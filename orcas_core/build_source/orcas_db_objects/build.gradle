@@ -1,8 +1,11 @@
 apply plugin: 'java'
 
 apply from: '../maven_publish.gradle'
-project.ext.maven_artifactId = 'orcas-db-objects'
+project.ext.maven_artifactId_postfix = 'db-objects'
+project.ext.extensiondependent = false
 project.ext.maven_description = 'orcas database components'
+
+apply from: '../build_sqlplus_dir_acc.gradle'
 
 task(createSqlplusDir) 
 {
@@ -13,22 +16,31 @@ task(createSqlplusDir)
   outputs.file "${buildDir}/sqlplus/sql/replaceables"
 }
 
-import org.apache.tools.ant.filters.ReplaceTokens
-
 task(copyFiles, dependsOn: createSqlplusDir, type: Copy) 
 {
-  inputs.property("extensionparameter",project.ext.extensionparameter)
   from "tables"
   from "types"
   from "packages"
   into "${buildDir}/sqlplus/sql/replaceables"
-
-  filter(ReplaceTokens, tokens: [extensionparameter: project.ext.extensionparameter])
 }
 
-jar.dependsOn copyFiles
-
-jar {
-  from "${buildDir}/sqlplus"
+task(copyUtilFiles, dependsOn: createSqlplusDir, type: Copy) 
+{
+  from "scripts"
+  into "${buildDir}/sqlplus/scripts"
 }
+
+sourceSets {
+  main {
+    resources  {
+      srcDirs "${buildDir}/sqlplus"
+    }
+  }
+}
+
+generateJavaSqlplusDirAccessClass.dependsOn copyFiles, copyUtilFiles
+generateJavaSqlplusDirAccessClass.sqlplusDir = "${buildDir}/sqlplus"
+generateJavaSqlplusDirAccessClass.scriptsDir = "${buildDir}/sqlplus/scripts"
+
+
 

@@ -1,0 +1,108 @@
+
+task(generateJavaSqlplusDirAccessClass, type: GenerateJavaSqlplusDirAccessClassClass)
+{
+  //inputs.dir sqlplusDir
+  outputs.file accessClassFile
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs "${buildDir}/javagen"
+    }
+  }
+}
+
+compileJava.dependsOn generateJavaSqlplusDirAccessClass
+
+class GenerateJavaSqlplusDirAccessClassClass extends DefaultTask {
+  def sqlplusDir = null;
+  def scriptsDir = null;
+  def List<String> sqlplusDirFilenameList = new ArrayList<String>();
+  def className = project.ext.maven_artifactId_postfix.capitalize().replace("-","");
+  def packageName = className.toLowerCase();
+  def accessClassFile = new File("${project.buildDir}/javagen/de/opitzconsulting/orcas/${packageName}/SqlplusDirAccess${className}.java");
+
+    def getSqlplusDirFilenameList() {
+      if( sqlplusDir == null )
+      {
+        return sqlplusDirFilenameList;
+      }
+      else
+      {
+        def lSqlplusFolder = getSqlplusFolder();
+        List<String> lReturn = new ArrayList<String>();
+
+        lSqlplusFolder.eachFileRecurse
+        { 
+          if( !it.isDirectory() && (scriptsDir==null || !it.toString().contains( new File(scriptsDir).toString() ) ) )
+          {
+            lReturn.add( it.toString().replace(lSqlplusFolder.toString(),"").replace("\\","/") );
+          }
+        }
+        
+        return lReturn;
+      }
+    }
+
+    def sqlplusDirFilenameList( item )
+    {
+      sqlplusDirFilenameList.add(item);
+    }
+
+    @Optional
+    @InputDirectory
+    def getSqlplusFolder() 
+    {
+      return sqlplusDir == null ? null : new File(sqlplusDir);
+    }
+
+    @TaskAction
+    def generateAccessClass() {
+      new File("${project.buildDir}/javagen/de/opitzconsulting/orcas/${packageName}").mkdirs();
+      
+      accessClassFile.delete();
+      accessClassFile << """
+package com.opitzconsulting.orcas.${packageName};
+public class SqlplusDirAccess${className}
+{
+  public static java.util.List<java.net.URL> getFileURLs()
+  {
+    java.util.List<java.net.URL> lReturn = new java.util.ArrayList<java.net.URL>();
+"""
+      getSqlplusDirFilenameList().each
+      { 
+        accessClassFile << """ 
+      lReturn.add( SqlplusDirAccess${className}.class.getResource( "${it}" ) );
+"""
+      }
+
+      accessClassFile << """
+    return lReturn;
+  }
+"""
+
+      if( scriptsDir != null )
+      {
+        new File(scriptsDir).eachFileRecurse
+        { 
+          if( !it.isDirectory() )
+          {
+            def lSqlplusFolder = getSqlplusFolder();
+            accessClassFile << """ 
+  public static java.net.URL getURL_${it.name.replace(".sql","")}()
+  {
+    return SqlplusDirAccess${className}.class.getResource( "${it.toString().replace(lSqlplusFolder.toString(),"").replace("\\","/")}" );
+  }
+"""
+          }
+        }
+      }
+
+      accessClassFile << """
+}
+"""
+    }
+}
+
+

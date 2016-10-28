@@ -1,13 +1,17 @@
 apply plugin: 'java'
 
 apply from: '../maven_publish.gradle'
-project.ext.maven_artifactId = 'orcas-main'
+project.ext.maven_artifactId_postfix = 'main'
+project.ext.extensiondependent = true
 project.ext.maven_description = 'orcas main api'
 
 dependencies 
 {
   compile project(':orcas_generated_diff')
   compile project(':orcas_extensions')
+  compile project(':orcas_db_objects')
+  compile project(':orcas_xslt_extract')
+  compile "xalan:xalan:2.7.2"
 }
 
 compileJava.source "src"

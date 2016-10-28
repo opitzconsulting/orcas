@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+       mavenLocal()
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-domainextension-gradle-plugin',
+                  version: '1.0.0'
+
+        classpath "com.oracle:ojdbc6:11.1.0.7"
+
+
+			/*
+			  you need to provide the oracle jdbc driver here.
+			  please make sure you find a way that works with the oracle license terms
+
+                          you can install it to your local maven-repository:
+                          mvn install:install-file "-Dfile=C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar" -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.1.0.7 -Dpackaging=jar
+ 
+                          you can also provide a direct path to it:
+                          classpath file('C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar')
+
+                          the driver is also accessible via http://maven.oracle.com, note that this requires a login-configuration
+*/
+
+    }
+}
+
+apply plugin: 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+               
+orcasconfiguration {
+          jdbcurl = "jdbc:oracle:thin:@localhost:1522:XE"
+          username = "orcas_orderentry"
+          password = "orcas_orderentry"
+          loglevel = "info"
+          extractmodelinputfolder = "src/main/sql/statics/domains"
+}
+

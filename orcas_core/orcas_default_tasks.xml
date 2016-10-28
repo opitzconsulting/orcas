@@ -4,15 +4,15 @@
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
     ~~~~ Properties fuer den SCS User
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~** -->
-  <property name="orcas_util_scripts" value="${orcas_dir}/sql_util_scripts" />
-  <property name="orcas_initialze_scripts" value="${orcas_util_scripts}/replaceable" />
-  <property name="orcas_install_scripts" value="${orcas_util_scripts}/static" />
+  <property name="orcas_util_scripts" value="${orcas_dir}/build_source/orcas_db_objects/scripts/util" />
+  <property name="orcas_install_scripts" value="${orcas_dir}/sql_util_scripts/static" />
   <property name="orcas_at_value" value="@" />
   <property name="orcas_internal_no_clean_initialize" value="true" />
   <property name="orcas.default_loglevel" value="info" />
   <property name="orcas_internal.nologging_loglevel" value="nologging" />
   <property name="orcas.default_scriptmode" value="sqlplus" />
   <property name="orcas.default_failonerror" value="default" />
+  <property name="orcas.default_java_fork" value="true" />
 
   <tstamp>
     <format property="timestamp" pattern="dd_MM_yyyy_HH_mm_ss" />
@@ -23,36 +23,6 @@
     ~~~~ Taskdefinitionen aus externen Jar-Files
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <taskdef resource="net/sf/antcontrib/antlib.xml" />
-
-  <macrodef name="orcas_internal_xtext_statics">
-    <attribute name="tmpfolder" />
-    <attribute name="dslfilefolder" />
-    <attribute name="outfolder" />
-    <sequential>
-      <delete dir="@{tmpfolder}/xtext/generator/orcas.generator"/>
-      <copy todir="@{tmpfolder}/xtext/generator/orcas.generator">
-        <fileset dir="${orcas_dir}/build_source/orcas.generator" excludes="**/*.java"/>
-      </copy>
-      <mkdir dir="@{tmpfolder}/xtext/generator/orcas.generator/src/model"/>
-      <copy todir="@{tmpfolder}/xtext/generator/orcas.generator/src/model">
-        <fileset dir="@{dslfilefolder}" includes="*.orcasdsl"/>
-      </copy>
-      <path id="orcas_internal_xtext_classpath_generator">
-        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
-          <include name="*.jar" />
-        </fileset>  
-        <pathelement location="@{tmpfolder}/xtext/generator/orcas.generator/src"/>     
-      </path>
-      <java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="orcas_internal_xtext_classpath_generator" fork="true" failonerror="true" dir="@{tmpfolder}/xtext/generator/orcas.generator" maxmemory="512m">
-        <arg value="src/workflow/OrcasDslGenerator.mwe2"/>
-      </java>
-      <delete dir="@{outfolder}"/>
-      <mkdir dir="@{outfolder}"/>
-      <copy todir="@{outfolder}">
-        <fileset dir="@{tmpfolder}/xtext/generator/orcas.generator/src-gen" includes="*.*"/>
-      </copy>
-    </sequential>
-  </macrodef>
 
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
     ~~~~ Makro fuer den Aufruf von SQL-Plus
@@ -355,7 +325,8 @@ ${orcas_sql_output}
           <include name="*.jar" />
         </fileset>  
       </path>
-      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m" dir="@{executiondir}" failonerror="true" >
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" maxmemory="512m" dir="@{executiondir}" failonerror="true" >
+        <arg value="prefix_${orcas.default_java_fork}"/>
         <arg value="prefix_oracle.jdbc.OracleDriver"/>
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{user}"/>
@@ -457,7 +428,8 @@ ${orcas_sql_output}
         </fileset>  
       </path>
 
-      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m" failonerror="true" >
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" maxmemory="512m" failonerror="true" >
+        <arg value="prefix_${orcas.default_java_fork}"/>
         <arg value="prefix_oracle.jdbc.OracleDriver"/>
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{user}"/>
@@ -585,7 +557,8 @@ ${orcas_sql_output}
         </fileset>  
       </path>
 
-      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="true" maxmemory="512m" failonerror="true" >
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" maxmemory="512m" failonerror="true" >
+        <arg value="prefix_${orcas.default_java_fork}"/>
         <arg value="prefix_oracle.jdbc.OracleDriver"/>
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{user}"/>
@@ -842,37 +815,6 @@ ${orcas_sql_output}
     </sequential>
   </macrodef>
 
-  <macrodef name="orcas_internal_spool_java">
-    <attribute name="user" />
-    <attribute name="password" />
-    <attribute name="userorcas" />
-    <attribute name="passwordorcas" />
-    <attribute name="tnsname" />
-    <attribute name="tmpfolder" />
-    <attribute name="spoolfolder" />
-    <attribute name="logname" />
-    <attribute name="autotimestamp" />
-    <attribute name="spoolfile" />
-    <sequential>
-      <orcas_internal_set_logging_active spoolfolder="@{spoolfolder}" logname="@{logname}" />
-      <if>
-        <isset property="orcas_internal_logging_active" />
-        <then>
-          <delete dir="@{tmpfolder}/@{logname}" />
-          <mkdir dir="@{tmpfolder}/@{logname}" />
-          <copy file="@{spoolfile}" tofile="@{tmpfolder}/@{logname}/@{logname}.sql" overwrite="true" />
-          <if>
-            <length file="@{tmpfolder}/@{logname}/@{logname}.sql" when="greater" length="0" />
-            <then>
-              <orcas_internal_log_skript logname="@{logname}" script="@{tmpfolder}/@{logname}/@{logname}.sql" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}"/>
-            </then>
-          </if>
-        </then>
-      </if>
-      <var name="orcas_internal_logging_active" unset="true" />
-    </sequential>
-  </macrodef>
-
   <macrodef name="orcas_schema_sync_statics">
     <attribute name="user" default="${orcas.default_user}" />
     <attribute name="password" default="${orcas.default_password}" />
@@ -934,14 +876,15 @@ ${orcas_sql_output}
     <attribute name="orcasinternalsrcpassword" default="null" />
     <attribute name="orcasinternalsrcjdbcurl" default="null" />
     <attribute name="orcasinternalsqlplustable" default="false" />
-    <attribute name="extensionparameter" default="" />
+    <attribute name="extensionparameter" default="${orcas_internal_extensionparameter}" />
     <sequential>
       <path id="orcas_internal_orcas_diff_classpath">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
           <include name="*.jar" />
         </fileset>  
       </path>
-      <java classname="de.opitzconsulting.orcas.diff.OrcasMain" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="true" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasMain" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="prefix_${orcas.default_java_fork}"/>
         <arg value="prefix_oracle.jdbc.OracleDriver"/>
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{user}"/>
@@ -970,6 +913,9 @@ ${orcas_sql_output}
         <arg value="prefix_false"/>
         <arg value="prefix_@{extensionparameter}"/>
         <arg value="prefix_@{logname}"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{userorcas}"/>
+        <arg value="prefix_@{passwordorcas}"/>
       </java>
     </sequential>
   </macrodef>
@@ -1246,7 +1192,8 @@ ${orcas_sql_output}
       </path>
 
       <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
-      <java classname="de.opitzconsulting.orcas.diff.OrcasCheckConnection" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="true" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasCheckConnection" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
         <arg value="oracle.jdbc.OracleDriver"/>
         <arg value="@{jdbcurl}"/>
         <arg value="@{user}"/>
@@ -1255,49 +1202,6 @@ ${orcas_sql_output}
     </sequential>
   </macrodef>
 
-  <macrodef name="orcas_grant">
-    <attribute name="user" default="${orcas.default_user}" />
-    <attribute name="password" default="${orcas.default_password}" />
-    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
-    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
-    <attribute name="tnsname" default="${orcas.default_tnsname}" />
-    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
-    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
-    <sequential>
-      <if>
-        <equals arg1="@{user}" arg2="@{userorcas}"/>
-        <then>
-            <fail message="Grant is not possible when installing orcas in the application schema"/>
-        </then>
-        <else>
-          <echo message="installing orcas in separate schema granting to @{user} by @{userorcas}"/>
-          <orcas_execute_script   script="${orcas_util_scripts}/grant_to_schemaowner.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
-        </else>
-      </if>
-    </sequential>
-  </macrodef>    
-  
-  <macrodef name="orcas_grant_ref">
-    <attribute name="user" default="${orcas.default_user}" />
-    <attribute name="password" default="${orcas.default_password}" />
-    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
-    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
-    <attribute name="tnsname" default="${orcas.default_tnsname}" />
-    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
-    <sequential>
-      <if>
-        <equals arg1="@{user}" arg2="@{userorcas}"/>
-        <then>
-            <fail message="Grant is not possible when installing orcas in the application schema"/>
-        </then>
-        <else>
-          <echo message="installing orcas in separate schema granting references to @{user} by @{userorcas}"/>
-         <orcas_execute_script   script="${orcas_util_scripts}/grant_references.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
-        </else>
-      </if>    
-    </sequential>
-  </macrodef>    
-
   <macrodef name="orcas_internal_update_checksum">
     <attribute name="userorcas" />
     <attribute name="passwordorcas" />
@@ -1305,31 +1209,16 @@ ${orcas_sql_output}
     <attribute name="tmpfolder" />
     <attribute name="orcasinternalinstalldb" />
     <sequential>
-      <if>
-        <equals arg1="@{orcasinternalinstalldb}" arg2="true"/>
-        <then>
-          <orcas_execute_script script="${orcas_util_scripts}/update_checksum.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="${orcas_internal_total_checksum_new} ${orcas_internal_extension_checksum_plsql_new}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
-        </then>
-      </if>
       <concat destfile="@{tmpfolder}/orcas_internal_checksum_old.properties" append="no">orcas_internal_total_checksum_old=${orcas_internal_total_checksum_new}</concat>
       <concat destfile="@{tmpfolder}/orcas_internal_checksum_old.properties" append="yes">
         orcas_internal_extension_checksum_java_old=${orcas_internal_extension_checksum_java_new}</concat>
     </sequential>
   </macrodef>       
 
-  <macrodef name="orcas_internal_generate_b_pa_orcas_extension_parameter">
-    <attribute name="tmpfolder" />
-    <attribute name="extensionparameter" />
-    <sequential>
-      <concat destfile="@{tmpfolder}/b_pa_orcas_extension_parameter.sql" append="false">"@{extensionparameter}
-      </concat>    
-    </sequential>
-  </macrodef>    
-
   <macrodef name="orcas_internal_gradle_build">
     <attribute name="tmpfolder" />
     <attribute name="extensionfolder" />
-    <attribute name="extensionparameter" />
+    <attribute name="extensionextractfile" />
     <sequential>
       <property environment="orcas_internal_environment" />
       <condition property="orcas_internal_gradle_path" value="${orcas_internal_environment.GRADLE_HOME}/bin/" else="">
@@ -1341,6 +1230,7 @@ ${orcas_sql_output}
 
       <var name="orcas_internal_tmpfolder" unset="true" />
       <var name="orcas_internal_extensionfolder" unset="true" />
+      <var name="orcas_internal_extensionextractfile" unset="true" />
       <property name="orcas_internal_tmpfolder" location="@{tmpfolder}"/>
       <if>
         <equals arg1="@{extensionfolder}" arg2=""/>
@@ -1352,12 +1242,21 @@ ${orcas_sql_output}
           <property name="orcas_internal_extensionfolder" location="@{extensionfolder}"/>
         </else>
       </if>
+      <if>
+        <equals arg1="@{extensionextractfile}" arg2=""/>
+        <then>        
+          <property name="orcas_internal_extensionextractfile" value=""/>
+        </then>
+        <else>        
+          <property name="orcas_internal_extensionextractfile" location="@{extensionextractfile}"/>
+        </else>
+      </if>      
       
       <exec executable="${orcas_internal_gradle_executable}" dir="${orcas_dir}/build_source" failonerror="true">
         <arg value="installDist" />
         <arg value="-Porcas_tmp_folder=${orcas_internal_tmpfolder}/gradle_build" />
         <arg value="-Porcas_extension_folder=${orcas_internal_extensionfolder}" />
-        <arg value="-Porcas_extension_parameter=@{extensionparameter}" />
+        <arg value="-Porcas_extension_extract_file=${orcas_internal_extensionextractfile}" />
       </exec>
     </sequential>
   </macrodef>       
@@ -1367,52 +1266,24 @@ ${orcas_sql_output}
     <attribute name="passwordorcas" />
     <attribute name="tnsname" />
     <attribute name="tmpfolder" />
+    <attribute name="jdbcurl" />
     <sequential>
-      <delete dir="@{tmpfolder}/gradle_sqlplus" />
-      <unzip dest="@{tmpfolder}/gradle_sqlplus">
+      <path id="orcas_internal_orcas_diff_classpath">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
-          <include name="orcas_db_objects-*.jar"/>
-          <include name="orcas_extensions-*.jar"/>
-          <include name="orcas_syex-*.jar"/>
-        </fileset>
-        <patternset>
-          <include name="sql/**/*.sql" />
-        </patternset>        
-      </unzip>
+          <include name="*.jar" />
+        </fileset>  
+      </path>
 
-      <orcas_drop_replaceables user="@{userorcas}" password="@{passwordorcas}" userorcas="@{userorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" orcasinternalinitialize="false"/>
-      <orcas_execute_scripts  scriptfolder="@{tmpfolder}/gradle_sqlplus" scriptfolderrecursive="true" failonerror="true" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
-      <orcas_compile_db_objects  user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
-    </sequential>
-  </macrodef>      
-
-  <macrodef name="orcas_internal_update_orcas_db_extension_only">
-    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
-    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
-    <attribute name="tnsname" default="${orcas.default_tnsname}" />
-    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
-    <sequential>
-      <delete dir="@{tmpfolder}/gradle_sqlplus" />
-      <unzip dest="@{tmpfolder}/gradle_sqlplus">
-        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
-          <include name="orcas_extensions-*.jar"/>
-        </fileset>
-        <patternset>
-          <include name="sql/**/*.sql" />
-        </patternset>        
-      </unzip>
-
-      <unzip dest="@{tmpfolder}/gradle_sqlplus">
-        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
-          <include name="orcas_extensions-*.jar"/>
-        </fileset>
-        <patternset>
-          <include name="**/b_pa_orcas_extension_parameter.sql" />
-        </patternset>        
-      </unzip>
-
-      <orcas_execute_scripts  scriptfolder="@{tmpfolder}/gradle_sqlplus" scriptfolderrecursive="true" failonerror="true" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
-      <orcas_compile_db_objects  user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <java classname="de.opitzconsulting.orcas.diff.OrcasInitializeOrcasDb" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
+        <arg value="oracle.jdbc.OracleDriver"/>
+        <arg value="@{jdbcurl}"/>
+        <arg value="@{userorcas}"/>
+        <arg value="@{passwordorcas}"/>
+        <arg value="${orcas_internal_total_checksum_new}"/>
+        <arg value="${orcas_internal_extension_checksum_plsql_new}"/>
+      </java>      
     </sequential>
   </macrodef>      
 
@@ -1434,6 +1305,7 @@ ${orcas_sql_output}
     <attribute name="prebuildmode" default="none" />
     <attribute name="prebuildfile" default="" />
     <attribute name="orcasinternalinstalldb" default="false" />
+    <attribute name="extensionextractfile" default="" />
     <sequential>
       <fail message="Unsupported Java version: ${ant.java.version}. Java version 1.7 or greater required.">
         <condition>
@@ -1453,6 +1325,8 @@ ${orcas_sql_output}
           </not>    
         </condition>
       </fail>      
+      <var name="orcas_internal_extensionparameter" unset="true" />
+      <property name="orcas_internal_extensionparameter" value="@{extensionparameter}" />
       <var name="orcas_internal_install_db" unset="true" />
       <if>
         <not>
@@ -1483,8 +1357,7 @@ ${orcas_sql_output}
         
           <mkdir dir="@{tmpfolder}" />
 
-          <orcas_internal_generate_b_pa_orcas_extension_parameter tmpfolder="@{tmpfolder}" extensionparameter="@{extensionparameter}" />
-
+          <touch file="@{tmpfolder}/dummyfile.txt"/>
           <var name="orcas_internal_total_checksum_new" unset="true" />
           <var name="orcas_internal_total_checksum_old" unset="true" />
           <var name="orcas_internal_total_checksum_db" unset="true" />
@@ -1504,11 +1377,11 @@ ${orcas_sql_output}
             <fileset dir="@{extensionfolder}" includes="*.java">
               <contains text="package de.opitzconsulting.orcas.extensions"/>              
             </fileset>
-            <fileset dir="@{tmpfolder}" includes="b_pa_orcas_extension_parameter.sql" />
+            <fileset dir="@{tmpfolder}" includes="dummyfile.txt" />
           </checksum>          
           <checksum toDir="@{tmpfolder}/extension_checksum_plsql_new" forceoverwrite="true" totalproperty="orcas_internal_extension_checksum_plsql_new">
             <fileset dir="@{extensionfolder}" includes="*.sql" />
-            <fileset dir="@{tmpfolder}" includes="b_pa_orcas_extension_parameter.sql" />
+            <fileset dir="@{tmpfolder}" includes="dummyfile.txt" />
           </checksum>               
           <property file="@{tmpfolder}/orcas_internal_checksum_old.properties"/>
 
@@ -1561,7 +1434,7 @@ ${orcas_sql_output}
                   <unzip src="@{prebuildfile}" dest="@{tmpfolder}/gradle_build" />
                 </then>      
                 <else>
-                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionparameter="@{extensionparameter}"/>                
+                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionextractfile="@{extensionextractfile}" />                
                 </else>
               </if>      
 
@@ -1570,7 +1443,7 @@ ${orcas_sql_output}
                 <then>  
                   <orcas_check_connection user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
                   <orcas_check_connection user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
-                  <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+                  <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" />
                 </then>
               </if>
               <if>
@@ -1579,19 +1452,6 @@ ${orcas_sql_output}
                   <orcas_liquibase changeLogFile="${orcas_dir}/sql_util_scripts/emptyChangeLog.xml" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" orcasinternalrundirect="true"/>  
                 </then>                  
               </if>   
-              <if>
-                <equals arg1="${orcas_internal_install_db}" arg2="true"/>
-                <then> 
-                  <if>
-                    <not>
-                      <equals arg1="@{user}" arg2="@{userorcas}"/>
-                    </not>              
-                    <then>  
-                      <orcas_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
-                    </then>
-                  </if>
-                </then>                  
-              </if>                    
               <orcas_internal_update_checksum userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" orcasinternalinstalldb="${orcas_internal_install_db}" />
             </then>      
             <else>      
@@ -1611,13 +1471,13 @@ ${orcas_sql_output}
                       <equals arg1="@{prebuildmode}" arg2="use"/>
                     </condition>
                   </fail>     
-                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionparameter="@{extensionparameter}"/>
+                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionextractfile="@{extensionextractfile}" />
                   <if>
                     <not>
                       <equals arg1="${orcas_internal_extension_checksum_plsql_new}" arg2="${orcas_internal_extension_checksum_plsql_db}"/>
                     </not>
                     <then>      
-                      <orcas_internal_update_orcas_db_extension_only userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+                      <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" />
                     </then>      
                     <else>      
                       <echo message="skipping orcas_initialize (no changes extension_plsql)"/>
@@ -1840,7 +1700,6 @@ ${orcas_sql_output}
     <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
     <attribute name="outputfolder" />
-    <attribute name="xsltfile" default="${orcas_dir}/xslt_extract/orcas_extract.xsl" />
     <attribute name="excludewheretable" default="object_name like ''%$%''" />
     <attribute name="excludewheresequence" default="object_name like ''%$%''" />
     <attribute name="orcasinternalloadxmlsql" default="load_extract.sql" />
@@ -1851,19 +1710,8 @@ ${orcas_sql_output}
     <attribute name="scriptpostfix" default=".sql" />
     <attribute name="scriptfolderrecursive" default="false" />
     <attribute name="removedefaultvalues" default="true" />
+    <attribute name="extensionparameter" default="null" />
     <sequential>
-      <!--<orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="false" indexparallelcreate="false" indexmovetablespace="false" tablemovetablespace="false" createmissingfkindexes="false" logonly="false" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" dateformat="@{dateformat}"/>-->
-      <delete dir="@{outputfolder}"/>
-      <delete dir="@{tmpfolder}/load_extract"/>  
-      <mkdir dir="@{outputfolder}"/>  
-      <mkdir dir="@{tmpfolder}/load_extract"/>  
-      <copy todir="@{tmpfolder}/load_extract">
-        <fileset dir="${orcas_dir}/xslt_extract">
-          <include name="**/*" />
-        </fileset>
-      </copy>
-      <copy file="@{xsltfile}" tofile="@{tmpfolder}/load_extract/orcas_internal_custom_extract.xsl" overwrite="true" />
-
       <path id="orcas_internal_orcas_diff_classpath">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
           <include name="*.jar" />
@@ -1871,7 +1719,8 @@ ${orcas_sql_output}
       </path>
 
       <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
-      <java classname="de.opitzconsulting.orcas.diff.OrcasLoadExtract" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="true" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractStatics" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
         <arg value="oracle.jdbc.OracleDriver"/>
         <arg value="@{jdbcurl}"/>
         <arg value="@{user}"/>
@@ -1881,21 +1730,20 @@ ${orcas_sql_output}
         <arg value="@{excludewheresequence}"/>
         <arg value="@{dateformat}"/>
         <arg value="@{loglevel}"/>
-        <arg value="@{tmpfolder}/load_extract/load_extract.xml"/>
+        <arg value="null"/>
         <arg value="@{scriptfolderrecursive}"/>
         <arg value="@{scriptprefix}"/>
         <arg value="@{scriptpostfix}"/>
         <arg value="@{userorcas}"/>
         <arg value="false"/>
         <arg value="@{removedefaultvalues}"/>
+        <arg value="true"/>
+        <arg value="@{jdbcurl}"/>
+        <arg value="@{userorcas}"/>
+        <arg value="@{passwordorcas}"/>        
+        <arg value="@{extensionparameter}"/>        
+        <arg value="@{outputfolder}"/>        
       </java>      
-
-      <xslt basedir="@{tmpfolder}/load_extract" destdir="@{outputfolder}" extension=".xml" style="@{tmpfolder}/load_extract/orcas_internal_custom_extract.xsl" classpathref="orcas_internal_orcas_diff_classpath">
-      </xslt>
-
-      <delete>
-        <fileset dir="@{outputfolder}" includes="**/*.xml" />
-      </delete>
     </sequential>
   </macrodef>
 
@@ -1910,32 +1758,6 @@ ${orcas_sql_output}
     <attribute name="viewmode" default="text" />
     <attribute name="outputfolder" />
     <sequential>
-      <delete dir="@{outputfolder}"/>
-      <delete dir="@{tmpfolder}/load_extract_replaceables"/>  
-      <mkdir dir="@{outputfolder}/views"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/triggers"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/types"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/packages"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
-
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz types/spec_ TYPE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz types/body_ TYPE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz packages/body_ PACKAGE_BODY %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_replaceables_sources.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-
-      <copy todir="@{outputfolder}" overwrite="true">
-        <fileset dir="@{tmpfolder}/load_extract_replaceables/extract" includes="**/*.sql"/>
-        <filterchain>
-          <tokenfilter>
-            <replaceregex pattern="^LINE_BEGIN" replace="" flags="g"/>
-          </tokenfilter>              
-        </filterchain>
-      </copy>
-
       <path id="orcas_internal_orcas_diff_classpath">
         <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
           <include name="*.jar" />
@@ -1943,52 +1765,19 @@ ${orcas_sql_output}
       </path>
 
       <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
-      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractViews" classpathref="orcas_internal_orcas_diff_classpath" fork="true" failonerror="true" dir="@{outputfolder}/views" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractReplaceables" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
         <arg value="oracle.jdbc.OracleDriver"/>
         <arg value="${orcas_internal_jdbc_url}"/>
         <arg value="@{user}"/>
         <arg value="@{password}"/>
         <arg value="@{viewmode}"/>
+        <arg value="@{outputfolder}"/>
       </java>      
     </sequential>
   </macrodef>
 
-  <macrodef name="orcas_internal_extract_drop_replaceables">
-    <attribute name="user" default="${orcas.default_user}" />
-    <attribute name="password" default="${orcas.default_password}" />
-    <attribute name="tnsname" default="${orcas.default_tnsname}" />
-    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
-    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
-    <attribute name="outputfolder" />
-    <sequential>
-      <delete dir="@{outputfolder}"/>
-      <delete dir="@{tmpfolder}/load_extract_replaceables"/>  
-      <mkdir dir="@{outputfolder}/views"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/triggers"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/types"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/packages"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/functions"/>  
-      <mkdir dir="@{tmpfolder}/load_extract_replaceables/extract/procedures"/>  
-
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz views/ VIEW %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz triggers/ TRIGGER %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz types/spec_ TYPE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz packages/spec_ PACKAGE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz functions/ FUNCTION %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-      <orcas_execute_script user="@{user}" password="@{password}" tnsname="@{tnsname}" loglevel="${orcas_internal.nologging_loglevel}" logname="" script="${orcas_util_scripts}/extract_drop_replaceables.sql" parameter="xy.zz procedures/ PROCEDURE %" executiondir="@{tmpfolder}/load_extract_replaceables/extract"/>
-
-      <copy todir="@{outputfolder}" overwrite="true">
-        <fileset dir="@{tmpfolder}/load_extract_replaceables/extract" includes="**/*.sql"/>
-        <filterchain>
-          <tokenfilter>
-            <replaceregex pattern="^LINE_BEGIN" replace="" flags="g"/>
-          </tokenfilter>              
-        </filterchain>
-      </copy>
-    </sequential>
-  </macrodef>
-
-  <macrodef name="orcas_sync_replaceables">
+  <macrodef name="orcas_update_replaceables">
     <attribute name="user" default="${orcas.default_user}" />
     <attribute name="password" default="${orcas.default_password}" />
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
@@ -1999,40 +1788,26 @@ ${orcas_sql_output}
     <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
     <attribute name="scriptfolder" />
     <attribute name="logname" default="" />
+    <attribute name="viewmode" default="text" />
     <sequential>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
 
-    <delete dir="@{tmpfolder}/sync_replaceables"/>
-      <mkdir dir="@{tmpfolder}/sync_replaceables/src_orig"/>
-      <mkdir dir="@{tmpfolder}/sync_replaceables/src_db"/>
-      <mkdir dir="@{tmpfolder}/sync_replaceables/src_db_drop"/>
-      <mkdir dir="@{tmpfolder}/sync_replaceables/result"/>
-
-      <copy todir="@{tmpfolder}/sync_replaceables/src_orig">
-        <fileset dir="@{scriptfolder}" includes="**/*.sql">
-        </fileset>
-      </copy>      
-
-      <orcas_extract_replaceables user="@{user}" password="@{password}" tnsname="@{tnsname}" outputfolder="@{tmpfolder}/sync_replaceables/src_db" jdbcurl="@{jdbcurl}" />
-
-      <orcas_internal_extract_drop_replaceables user="@{user}" password="@{password}" tnsname="@{tnsname}"  outputfolder="@{tmpfolder}/sync_replaceables/src_db_drop"/>
-
-      <fixcrlf srcdir="@{tmpfolder}/sync_replaceables" eol="lf" eof="remove" fixlast="true" />
-
-      <copy todir="@{tmpfolder}/sync_replaceables/result">
-        <fileset dir="@{tmpfolder}/sync_replaceables/src_orig" includes="**/*.sql">
-          <different targetdir="@{tmpfolder}/sync_replaceables/src_db" ignoreFileTimes="true"/>      
-        </fileset>
-      </copy>        
-
-      <copy todir="@{tmpfolder}/sync_replaceables/result">
-        <fileset dir="@{tmpfolder}/sync_replaceables/src_db_drop" includes="**/*.sql">
-          <not>
-            <present targetdir="@{tmpfolder}/sync_replaceables/src_orig"/>
-          </not>
-        </fileset>
-      </copy>        
-
-      <orcas_execute_scripts user="@{user}" password="@{password}" tnsname="@{tnsname}" scriptfolder="@{tmpfolder}/sync_replaceables/result" scriptfolderrecursive="true" logname="@{logname}" spoolfolder="@{spoolfolder}"/>
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <java classname="de.opitzconsulting.orcas.diff.OrcasUpdateReplaceables" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
+        <arg value="oracle.jdbc.OracleDriver"/>
+        <arg value="${orcas_internal_jdbc_url}"/>
+        <arg value="@{user}"/>
+        <arg value="@{password}"/>
+        <arg value="@{viewmode}"/>
+        <arg value="@{spoolfolder}"/>
+        <arg value="@{scriptfolder}"/>
+        <arg value="@{logname}"/>
+      </java>          
     </sequential>
   </macrodef>
 

@@ -25,7 +25,7 @@ public class OrcasInstallReplaceablesTask extends BaseOrcasTask
     }
     else
     {
-      getLog().info( "no replaceables found" );
+      logInfo( "no replaceables found" );
     }
   }
 }

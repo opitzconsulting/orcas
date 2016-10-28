@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperExecuteStatement;
@@ -41,124 +43,172 @@ public class OrcasScriptRunner extends Orcas
   }
 
   @Override
-  protected void run()
+  protected void run() throws Exception
   {
     if( getParameters().isOneTimeScriptMode() )
     {
-      _log.info( "execute one-time-script start: " + getParameters().getModelFile() );
+      logInfo( "execute one-time-script start: " + getParameters().getModelFile() );
     }
     else
     {
       if( getParameters().getScriptUrl() == null )
       {
-        _log.info( "execute script start: " + getParameters().getModelFile() );
+        logInfo( "execute script start: " + getParameters().getModelFile() );
       }
     }
 
-    final CallableStatementProvider lCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( getParameters() );
-    final CallableStatementProvider lOrcasCallableStatementProvider = !getParameters().isOneTimeScriptMode() ? null : JdbcConnectionHandler.createCallableStatementProvider( getParameters(), getParameters().getOrcasJdbcConnectParameters() );
-
-    final Map<String,Date> lExecutedFilesMap = new HashMap<String,Date>();
-
-    if( getParameters().isOneTimeScriptMode() )
+    JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), new RunWithCallableStatementProvider()
     {
-      new WrapperIteratorResultSet( "select scup_script_name, scup_date from " + ORCAS_UPDATES_TABLE + " where scup_logname = ?", lOrcasCallableStatementProvider, Collections.singletonList( getParameters().getLogname() ) )
+      public void run( final CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
-        protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+        RunWithCallableStatementProvider lRunWithCallableStatementProvider = new RunWithCallableStatementProvider()
         {
-          lExecutedFilesMap.put( pResultSet.getString( "scup_script_name" ), new Date( pResultSet.getTimestamp( "scup_date" ).getTime() ) );
-        }
+          public void run( final CallableStatementProvider pOrcasCallableStatementProvider ) throws Exception
+          {
+            final Map<String,Date> lExecutedFilesMap = new HashMap<String,Date>();
 
-        protected boolean handleSQLException( SQLException pSQLException )
+            if( getParameters().isOneTimeScriptMode() )
+            {
+              new WrapperIteratorResultSet( "select scup_script_name, scup_date from " + ORCAS_UPDATES_TABLE + " where scup_logname = ?", pOrcasCallableStatementProvider, Collections.singletonList( getParameters().getLogname() ) )
+              {
+                protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+                {
+                  lExecutedFilesMap.put( pResultSet.getString( "scup_script_name" ), new Date( pResultSet.getTimestamp( "scup_date" ).getTime() ) );
+                }
+
+                protected boolean handleSQLException( SQLException pSQLException )
+                {
+                  String lSql = "create table " + ORCAS_UPDATES_TABLE + " ( scup_id number(22) not null, scup_script_name varchar2(4000 byte) not null, scup_logname varchar2(100 byte) not null, scup_date date not null, scup_schema varchar2(30 byte) not null)";
+                  new WrapperExecuteStatement( lSql, pOrcasCallableStatementProvider ).execute();
+
+                  return true;
+                }
+              }.execute();
+            }
+
+            try
+            {
+              if( getParameters().getScriptUrl() != null )
+              {
+                runURL( getParameters().getScriptUrl(), pCallableStatementProvider, getParameters() );
+                addSpoolfolderScriptIfNeeded( getParameters().getScriptUrl(), getParameters().getScriptUrlFilename() );
+              }
+              else
+              {
+
+                for( File lFile : FolderHandler.getModelFiles( getParameters() ) )
+                {
+                  if( getParameters().isOneTimeScriptMode() )
+                  {
+                    String lScriptfolderAbsolutePath = new File( getParameters().getModelFile() ).getAbsolutePath();
+                    String lFileAbsolutePath = lFile.getAbsolutePath();
+
+                    String lFilePart = lFileAbsolutePath.substring( lScriptfolderAbsolutePath.length() );
+                    lFilePart = lFilePart.replace( "\\", "/" );
+                    lFilePart = lFilePart.substring( 1 );
+
+                    if( !lExecutedFilesMap.containsKey( lFilePart ) )
+                    {
+                      if( !getParameters().isOneTimeScriptLogonlyMode() )
+                      {
+                        logInfo( "execute one-time-script " + lFilePart );
+                        runFile( lFile, pCallableStatementProvider, getParameters() );
+                        addSpoolfolderScriptIfNeeded( lFile );
+                      }
+
+                      String lSql = "" + //
+                                    " insert into " +
+                                    ORCAS_UPDATES_TABLE +
+                                    "(" + //
+                                    "        scup_id," + //
+                                    "        scup_script_name," + //
+                                    "        scup_date," + //
+                                    "        scup_schema," + //
+                                    "        scup_logname" + //
+                                    "        )" + //
+                                    " values (" + //
+                                    "        nvl" + //
+                                    "          (" + //
+                                    "            (" + //
+                                    "            select max( scup_id ) + 1" + //
+                                    "              from orcas_updates" + //
+                                    "            )," + //
+                                    "          1" + //
+                                    "          )," + //
+                                    "        ?," + //
+                                    "        sysdate," + //
+                                    "        user," + //
+                                    "        ?" + //
+                                    "        )" + //
+                                    "";
+                      List<Object> lInsertParameters = new ArrayList<Object>();
+                      lInsertParameters.add( lFilePart );
+                      lInsertParameters.add( getParameters().getLogname() );
+                      new WrapperExecuteStatement( lSql, pOrcasCallableStatementProvider, lInsertParameters ).execute();
+                      new WrapperExecuteStatement( "commit", pOrcasCallableStatementProvider ).execute();
+                    }
+                    else
+                    {
+                      _log.debug( "Script already executed: " + lFilePart + " on: " + lExecutedFilesMap.get( lFilePart ) );
+                    }
+                  }
+                  else
+                  {
+                    runFile( lFile, pCallableStatementProvider, getParameters() );
+                    addSpoolfolderScriptIfNeeded( lFile );
+                  }
+                }
+              }
+            }
+            catch( Exception e )
+            {
+              throw new RuntimeException( e );
+            }
+
+            _log.debug( "execute script done" );
+          }
+        };
+
+        if( !getParameters().isOneTimeScriptMode() )
         {
-          String lSql = "create table " + ORCAS_UPDATES_TABLE + " ( scup_id number(22) not null, scup_script_name varchar2(4000 byte) not null, scup_logname varchar2(100 byte) not null, scup_date date not null, scup_schema varchar2(30 byte) not null)";
-          new WrapperExecuteStatement( lSql, lOrcasCallableStatementProvider ).execute();
-
-          return true;
+          lRunWithCallableStatementProvider.run( null );
         }
-      }.execute();
+        else
+        {
+          JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), getParameters().getOrcasJdbcConnectParameters(), lRunWithCallableStatementProvider );
+        }
+      }
+    } );
+  }
+
+  public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters ) throws Exception
+  {
+    runReader( new InputStreamReader( pURL.openStream() ), pCallableStatementProvider, pParameters, null );
+  }
+
+  public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters, String... pAdditionalParameters ) throws Exception
+  {
+    setParameters( pParameters );
+
+    List<String> lAdditionalParameters = new ArrayList<String>();
+
+    for( String lAdditionalParameter : pAdditionalParameters )
+    {
+      lAdditionalParameters.add( lAdditionalParameter );
     }
+
+    List<String> lOriginalAdditionalParameters = pParameters._additionalParameters;
+
+    pParameters._additionalParameters = lAdditionalParameters;
 
     try
     {
-      if( getParameters().getScriptUrl() != null )
-      {
-        runReader( new InputStreamReader( getParameters().getScriptUrl().openStream() ), lCallableStatementProvider, getParameters(), null );
-        addSpoolfolderScriptIfNeeded( getParameters().getScriptUrl(), getParameters().getScriptUrlFilename() );
-      }
-      else
-      {
-
-        for( File lFile : FolderHandler.getModelFiles( getParameters() ) )
-        {
-          if( getParameters().isOneTimeScriptMode() )
-          {
-            String lScriptfolderAbsolutePath = new File( getParameters().getModelFile() ).getAbsolutePath();
-            String lFileAbsolutePath = lFile.getAbsolutePath();
-
-            String lFilePart = lFileAbsolutePath.substring( lScriptfolderAbsolutePath.length() );
-            lFilePart = lFilePart.replace( "\\", "/" );
-            lFilePart = lFilePart.substring( 1 );
-
-            if( !lExecutedFilesMap.containsKey( lFilePart ) )
-            {
-              if( !getParameters().isOneTimeScriptLogonlyMode() )
-              {
-                _log.info( "execute one-time-script " + lFilePart );
-                runFile( lFile, lCallableStatementProvider, getParameters() );
-                addSpoolfolderScriptIfNeeded( lFile );
-              }
-
-              String lSql = "" + //
-                            " insert into " +
-                            ORCAS_UPDATES_TABLE +
-                            "(" + //
-                            "        scup_id," + //
-                            "        scup_script_name," + //
-                            "        scup_date," + //
-                            "        scup_schema," + //
-                            "        scup_logname" + //
-                            "        )" + //
-                            " values (" + //
-                            "        nvl" + //
-                            "          (" + //
-                            "            (" + //
-                            "            select max( scup_id ) + 1" + //
-                            "              from orcas_updates" + //
-                            "            )," + //
-                            "          1" + //
-                            "          )," + //
-                            "        ?," + //
-                            "        sysdate," + //
-                            "        user," + //
-                            "        ?" + //
-                            "        )" + //
-                            "";
-              List<Object> lInsertParameters = new ArrayList<Object>();
-              lInsertParameters.add( lFilePart );
-              lInsertParameters.add( getParameters().getLogname() );
-              new WrapperExecuteStatement( lSql, lOrcasCallableStatementProvider, lInsertParameters ).execute();
-              new WrapperExecuteStatement( "commit", lOrcasCallableStatementProvider ).execute();
-            }
-            else
-            {
-              _log.debug( "Script already executed: " + lFilePart + " on: " + lExecutedFilesMap.get( lFilePart ) );
-            }
-          }
-          else
-          {
-            runFile( lFile, lCallableStatementProvider, getParameters() );
-            addSpoolfolderScriptIfNeeded( lFile );
-          }
-        }
-      }
+      runURL( pURL, pCallableStatementProvider, pParameters );
     }
-    catch( Exception e )
+    finally
     {
-      throw new RuntimeException( e );
+      pParameters._additionalParameters = lOriginalAdditionalParameters;
     }
-
-    _log.debug( "execute script done" );
   }
 
   private String doReplace( String pValue, Parameters pParameters )
@@ -214,30 +264,43 @@ public class OrcasScriptRunner extends Orcas
     runReader( new InputStreamReader( new FileInputStream( pFile ) ), pCallableStatementProvider, pParameters, pFile );
   }
 
-  private void runReader( Reader pReader, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile ) throws Exception
+  static List<String> parseReaderToLines( Reader pReader ) throws IOException
   {
     BufferedReader lBufferedReader = new BufferedReader( pReader );
 
     List<String> lLines = new ArrayList<String>();
 
-    boolean lHasPlSqlModeTerminator = false;
-
     String lFileLine;
     while( (lFileLine = lBufferedReader.readLine()) != null )
     {
       lLines.add( lFileLine );
+    }
+    lBufferedReader.close();
 
+    return lLines;
+  }
+
+  protected void runReader( Reader pReader, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile ) throws Exception
+  {
+    runLines( parseReaderToLines( pReader ), pCallableStatementProvider, pParameters, pFile );
+  }
+
+  void runLines( List<String> pLines, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile ) throws Exception
+  {
+    boolean lHasPlSqlModeTerminator = false;
+
+    for( String lFileLine : pLines )
+    {
       if( lFileLine.trim().toLowerCase().equals( "/" ) )
       {
         lHasPlSqlModeTerminator = true;
       }
     }
-    lBufferedReader.close();
 
     boolean lPlSqlMode = false;
     boolean lNonPlSqlMultilineMode = false;
 
-    SpoolHandler lSpoolHandler = new SpoolHandler( pParameters );
+    SpoolHandler lSpoolHandler = createSpoolHandler( pParameters );
 
     List<CommandHandler> lCommandHandlerList = new ArrayList<OrcasScriptRunner.CommandHandler>();
 
@@ -255,10 +318,10 @@ public class OrcasScriptRunner extends Orcas
         _log.debug( "ignoring: " + pLine );
       }
     } );
-    lCommandHandlerList.add( new StartHandler( pParameters, pCallableStatementProvider ) );
+    lCommandHandlerList.add( createStartHandler( pCallableStatementProvider, pParameters ) );
 
     StringBuffer lCurrent = new StringBuffer();
-    for( String lLine : lLines )
+    for( String lLine : pLines )
     {
       boolean lCurrentEnd = false;
       String lAppend = null;
@@ -282,7 +345,7 @@ public class OrcasScriptRunner extends Orcas
 
         if( !lNonPlSqlMultilineMode && lCommandHandler != null )
         {
-          lCommandHandler.handleCommand( lTrimedLine, pFile );
+          lCommandHandler.handleCommand( lLine, pFile );
         }
         else
         {
@@ -351,7 +414,7 @@ public class OrcasScriptRunner extends Orcas
         }
         else
         {
-          executeSql( lCurrent.toString(), pCallableStatementProvider );
+          executeSql( lCurrent.toString(), pCallableStatementProvider, pParameters );
         }
 
         lCurrent = null;
@@ -366,7 +429,17 @@ public class OrcasScriptRunner extends Orcas
     lSpoolHandler.spoolHandleFileEnd();
   }
 
-  private void executeSql( String pSql, CallableStatementProvider pCallableStatementProvider )
+  protected StartHandler createStartHandler( final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters )
+  {
+    return new StartHandler( pParameters, pCallableStatementProvider );
+  }
+
+  protected SpoolHandler createSpoolHandler( Parameters pParameters )
+  {
+    return new SpoolHandler( pParameters );
+  }
+
+  private void executeSql( String pSql, CallableStatementProvider pCallableStatementProvider, Parameters pParameters )
   {
     try
     {
@@ -374,7 +447,7 @@ public class OrcasScriptRunner extends Orcas
     }
     catch( RuntimeException e )
     {
-      switch( getParameters().getFailOnErrorMode() )
+      switch( pParameters.getFailOnErrorMode() )
       {
         case NEVER:
           _log.warn( e, e );
@@ -384,7 +457,7 @@ public class OrcasScriptRunner extends Orcas
         case IGNORE_DROP:
           if( pSql.toLowerCase().trim().startsWith( "drop " ) )
           {
-            _log.info( "ignoring: " + e.getMessage().trim() + " [" + pSql.trim() + "]" );
+            logInfo( "ignoring: " + e.getMessage().trim() + " [" + pSql.trim() + "]" );
             return;
           }
           else
@@ -431,11 +504,18 @@ public class OrcasScriptRunner extends Orcas
 
         lRowIndex[0]++;
 
-        _log.info( "select [" + lRowIndex[0] + "]: " + lLine );
+        logInfo( "select [" + lRowIndex[0] + "]: " + lLine );
       }
     }.execute();
 
-    _log.info( "select rowcount: " + lRowIndex[0] );
+    if( lRowIndex[0] != 0 )
+    {
+      logInfo( "select rowcount: " + lRowIndex[0] );
+    }
+    else
+    {
+      _log.debug( "select rowcount: " + lRowIndex[0] );
+    }
   }
 
   private boolean isSelect( String pSql )
@@ -450,10 +530,10 @@ public class OrcasScriptRunner extends Orcas
     public void handleCommand( String pLine, File pCurrentFile ) throws Exception;
   }
 
-  private class SpoolHandler implements CommandHandler
+  class SpoolHandler implements CommandHandler
   {
     private FileOutputStream spoolFile;
-    private Writer writer;
+    protected Writer writer;
     private Parameters parameters;
 
     public SpoolHandler( Parameters pParameters )
@@ -522,9 +602,9 @@ public class OrcasScriptRunner extends Orcas
       }
     }
 
-    private void openSpoolFile( String pFileName ) throws FileNotFoundException
+    protected void openSpoolFile( String pFileName ) throws FileNotFoundException
     {
-      _log.info( "start spooling: " + pFileName );
+      logInfo( "start spooling: " + pFileName );
       File lFile = new File( pFileName );
 
       if( lFile.getParentFile() != null )
@@ -538,12 +618,12 @@ public class OrcasScriptRunner extends Orcas
 
     private boolean isSpoolActive()
     {
-      return spoolFile != null;
+      return writer != null;
     }
 
-    private void closeSpoolFile() throws IOException
+    protected void closeSpoolFile() throws IOException
     {
-      _log.info( "stop spooling" );
+      logInfo( "stop spooling" );
       writer.close();
       writer = null;
       spoolFile.close();
@@ -577,12 +657,17 @@ public class OrcasScriptRunner extends Orcas
         lTrimedLine = lTrimedLine.substring( 0, lTrimedLine.length() - 1 );
       }
 
-      _log.info( lTrimedLine );
+      if( getParameters().getRemovePromptPrefix() != null && lTrimedLine.startsWith( getParameters().getRemovePromptPrefix() ) )
+      {
+        lTrimedLine = lTrimedLine.substring( getParameters().getRemovePromptPrefix().length() );
+      }
+
+      logInfo( lTrimedLine );
       spoolHandler.spoolIfActive( lTrimedLine );
     }
   }
 
-  private class StartHandler implements CommandHandler
+  class StartHandler implements CommandHandler
   {
     private Parameters parameters;
     private CallableStatementProvider callableStatementProvider;

@@ -3,7 +3,6 @@ package com.opitzconsulting.orcas.gradle
 import java.io.File;
 
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
-import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 
 public abstract class BaseOrcasOneTimeScriptsTask extends BaseOrcasTask
@@ -13,20 +12,6 @@ public abstract class BaseOrcasOneTimeScriptsTask extends BaseOrcasTask
   {
     if( !isCheckFolderExists() || getScriptfolder().exists() )
     {
-      if( project.orcasconfiguration.orcasusername != null )
-      {
-        JdbcConnectParameters lOrcasJdbcConnectParameters = new JdbcConnectParameters();
-        lOrcasJdbcConnectParameters.setJdbcDriver( project.orcasconfiguration.orcasjdbcdriver );
-        lOrcasJdbcConnectParameters.setJdbcUrl( project.orcasconfiguration.orcasjdbcurl == null ? pParameters.getJdbcConnectParameters().getJdbcUrl() : project.orcasconfiguration.orcasjdbcurl );
-        lOrcasJdbcConnectParameters.setJdbcUser( project.orcasconfiguration.orcasusername );
-        lOrcasJdbcConnectParameters.setJdbcPassword( project.orcasconfiguration.orcaspassword );
-        pParameters.setOrcasJdbcConnectParameters( lOrcasJdbcConnectParameters );
-      }
-      else
-      {
-        pParameters.setOrcasJdbcConnectParameters( pParameters.getJdbcConnectParameters() );
-      }
-
       pParameters.setModelFile( getScriptfolder().toString() );
       pParameters.setIsOneTimeScriptMode( true );
       pParameters.setAdditionalParameters( null );
@@ -36,7 +21,7 @@ public abstract class BaseOrcasOneTimeScriptsTask extends BaseOrcasTask
     }
     else
     {
-      getLog().info( "no " + getLogname() + " found" );
+      logInfo( "no " + getLogname() + " found" );
     }
   }
 

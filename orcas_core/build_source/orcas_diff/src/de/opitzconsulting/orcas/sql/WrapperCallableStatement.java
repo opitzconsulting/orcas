@@ -52,7 +52,7 @@ public abstract class WrapperCallableStatement
     {
       _log.debug( e + ": " + _sqlString, e );
 
-      throw ExceptionManager.createException( e );
+      throw ExceptionManager.createException( e, _sqlString );
     }
     finally
     {
@@ -66,7 +66,7 @@ public abstract class WrapperCallableStatement
         {
           _log.debug( e, e );
 
-          throw ExceptionManager.createException( e );
+          throw ExceptionManager.createException( e, _sqlString );
         }
       }
     }

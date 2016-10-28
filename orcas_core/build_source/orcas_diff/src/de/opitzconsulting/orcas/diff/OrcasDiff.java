@@ -1376,7 +1376,7 @@ public class OrcasDiff extends AbstractStatementBuilder
       {
         if( isDropmodeIgnore() != true )
         {
-          throw new RuntimeException( "drop mode ist nicht aktiv, daher kann folgendes statement nicht ausgefuehrt werden: " + pDropStatement );
+          throw new RuntimeException( "drop mode not active, the following statement has to be executed but would result in data-loss: " + pDropStatement );
         }
         else
         {

@@ -5,6 +5,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
 
 @Mojo( name = "compileAllInvalid" )
 public class OrcasCompileAllInvalid extends BaseOrcasMojo
@@ -23,7 +24,7 @@ public class OrcasCompileAllInvalid extends BaseOrcasMojo
   {
     if( !isRunOnlyIfReplaceablesExists() || replaceablesfolder.exists() )
     {
-      pParameters.setScriptUrl( getClass().getResource( "/compile_all_invalid.sql" ), "compile_all_invalid.sql" );
+      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql" );
       pParameters.setIsOneTimeScriptMode( false );
       pParameters.setAdditionalParameters( null );
 

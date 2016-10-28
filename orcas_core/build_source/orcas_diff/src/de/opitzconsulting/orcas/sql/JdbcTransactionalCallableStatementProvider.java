@@ -25,7 +25,7 @@ public class JdbcTransactionalCallableStatementProvider extends JdbcCallableStat
     }
     catch( SQLException e )
     {
-      throw ExceptionManager.createException( e );
+      throw ExceptionManager.createException( e, "commit" );
     }
   }
 
@@ -37,7 +37,7 @@ public class JdbcTransactionalCallableStatementProvider extends JdbcCallableStat
     }
     catch( SQLException e )
     {
-      throw ExceptionManager.createException( e );
+      throw ExceptionManager.createException( e, "rollback" );
     }
   }
 }

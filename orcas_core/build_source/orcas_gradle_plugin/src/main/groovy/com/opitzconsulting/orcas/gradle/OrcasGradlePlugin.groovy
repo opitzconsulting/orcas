@@ -11,7 +11,9 @@ class OrcasGradlePlugin implements Plugin<Project> {
 
         pProject.task('cleanLog', type:  OrcasCleanLogTask)
 
-        pProject.task('preStatics', dependsOn: 'cleanLog', type: OrcasOneTimeScriptsPreStaticsTask)
+        pProject.task('initializeOrcasDb', dependsOn: 'cleanLog', type: OrcasInitializeOrcasDbTask)
+
+        pProject.task('preStatics', dependsOn: 'initializeOrcasDb', type: OrcasOneTimeScriptsPreStaticsTask)
 
         pProject.task('statics', dependsOn: 'preStatics', type:  OrcasUpdateStaticsTask)
 
@@ -27,6 +29,12 @@ class OrcasGradlePlugin implements Plugin<Project> {
 
 
         pProject.task('checkConnection', type: OrcasCheckConnectionTask)
+
+        pProject.task('extractStatics', type: OrcasExtractStaticsTask)
+        pProject.task('extractReplaceables', type: OrcasExtractReplaceablesTask)
+        pProject.task('extract')
+
+        pProject.extract.dependsOn pProject.extractStatics,  pProject.extractReplaceables
     }
 }
 
@@ -68,6 +76,12 @@ class OrcasGradlePluginExtension {
   def String excludewheretrigger = 'object_name not like \'%\'';
   def String excludewherefunction = 'object_name not like \'%\'';
   def String excludewhereprocedure = 'object_name not like \'%\'';
+
+  def String extractstaticsoutfolder;
+  def String extractmodelinputfolder;
+  def boolean extractremovedefaultvaluesfrommodel = true;
+  def String extractreplaceablesoutfolder;
+  def String viewextractmode = "text";
 }
 
 

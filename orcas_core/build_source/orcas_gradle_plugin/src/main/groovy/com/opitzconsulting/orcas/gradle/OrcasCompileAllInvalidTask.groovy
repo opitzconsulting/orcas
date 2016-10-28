@@ -2,6 +2,7 @@ package com.opitzconsulting.orcas.gradle;
 
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
 
 public class OrcasCompileAllInvalidTask extends BaseOrcasTask
 {
@@ -18,7 +19,7 @@ public class OrcasCompileAllInvalidTask extends BaseOrcasTask
   {
     if( !isRunOnlyIfReplaceablesExists() || project.file(project.orcasconfiguration.replaceablesfolder).exists() )
     {
-      pParameters.setScriptUrl( getClass().getResource( "/compile_all_invalid.sql" ), "compile_all_invalid.sql" );
+      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql" );
       pParameters.setIsOneTimeScriptMode( false );
       pParameters.setAdditionalParameters( null );
 
@@ -26,7 +27,7 @@ public class OrcasCompileAllInvalidTask extends BaseOrcasTask
     }
     else
     {
-      getLog().info( "no replaceables found" );
+      logInfo( "no replaceables found" );
     }
   }
 

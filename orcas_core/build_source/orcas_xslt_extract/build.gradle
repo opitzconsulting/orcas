@@ -1,0 +1,81 @@
+apply plugin: 'java'
+
+apply from: '../maven_publish.gradle'
+project.ext.maven_artifactId_postfix = 'xslt-extract'
+project.ext.extensiondependent = true
+project.ext.maven_description = 'orcas xslt files for extract from database'
+
+task(copyFiles, type: Copy) 
+{
+  from "xslt_extract"
+  into "${buildDir}/res/xslt_extract"
+  if( project.ext.extension_extract_file != null )
+  {
+    from project.ext.extension_extract_file
+  }
+  
+  doFirst
+  {
+    new File("${buildDir}/res/xslt_extract").mkdirs();
+    new File("${buildDir}/res/xslt_extract").deleteDir();
+    new File("${buildDir}/res/xslt_extract").mkdirs();
+  }
+}
+
+task(generateJavaXsltExtractDirAccessClass, dependsOn: copyFiles, type: GenerateJavaXsltExtractDirAccessClassClass) 
+{
+  inputs.dir "${buildDir}/res/xslt_extract"
+}
+
+sourceSets {
+  main {
+    java  {
+      srcDirs "${buildDir}/javagen"
+    }
+    resources  {
+      srcDirs "${buildDir}/res"
+    }
+  }
+}
+
+compileJava.dependsOn generateJavaXsltExtractDirAccessClass
+processResources.dependsOn copyFiles
+
+class GenerateJavaXsltExtractDirAccessClassClass extends DefaultTask {
+    @OutputFile
+    def accessClassFile = new File("${project.buildDir}/javagen/de/opitzconsulting/orcas/xslt/XsltExtractDirAccessClass.java");
+
+    @TaskAction
+    def generateAccessClass() {
+      def lExtractXsltFile = "orcas_extract.xsl";
+
+      if( project.ext.extension_extract_file != null )
+      {
+        lExtractXsltFile = new File(project.ext.extension_extract_file).getName();
+      }  
+
+      new File("${project.buildDir}/javagen/de/opitzconsulting/orcas/xslt").mkdirs();
+      
+      accessClassFile.delete();
+      accessClassFile << """
+package com.opitzconsulting.orcas.xslt;
+public class XsltExtractDirAccessClass
+{
+  public static java.net.URL getXsltExtractFileURL()
+  {
+    return getUriResolverURLForImport( "${lExtractXsltFile}" );
+  }
+
+  public static java.net.URL getUriResolverURLForImport( String pHref )
+  {
+    return XsltExtractDirAccessClass.class.getResource( "/xslt_extract/" + pHref );
+  }
+}
+"""
+    }
+}
+
+
+
+
+

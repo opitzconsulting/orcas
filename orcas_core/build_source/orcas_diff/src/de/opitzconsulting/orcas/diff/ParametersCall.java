@@ -166,4 +166,14 @@ public class ParametersCall extends Parameters
     _scriptUrl = pScriptUrl;
     _scriptUrlFilename = pFilename;
   }
+
+  public void setInitializeChecksumTotal( String pInitializeChecksumTotal )
+  {
+    _initializeChecksumTotal = pInitializeChecksumTotal;
+  }
+
+  public void setInitializeChecksumExtension( String pInitializeChecksumExtension )
+  {
+    _initializeChecksumExtension = pInitializeChecksumExtension;
+  }
 }

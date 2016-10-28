@@ -1,7 +1,8 @@
 apply plugin: 'java'
 
 apply from: '../maven_publish.gradle'
-project.ext.maven_artifactId = 'orcas-generated'
+project.ext.maven_artifactId_postfix = 'generated'
+project.ext.extensiondependent = true
 project.ext.maven_description = 'orcas generated code (besides from xtext)'
 
 configurations 

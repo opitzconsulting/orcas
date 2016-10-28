@@ -4,18 +4,6 @@
   <property name="orcas_domain_extension_dir" value="${orcas_sqlplus_dir}/../orcas_domain_extension"/>
   <import file="${orcas_dir}/orcas_default_tasks.xml"/>
 
-  <macrodef name="orcas_sqlplus_grant">
-    <attribute name="user" default="${orcas.default_user}" />
-    <attribute name="password" default="${orcas.default_password}" />
-    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
-    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
-    <attribute name="tnsname" default="${orcas.default_tnsname}" />
-    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
-    <sequential>
-      <orcas_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
-    </sequential>
-  </macrodef>    
-
   <macrodef name="orcas_sqlplus_initialize">
     <attribute name="user" default="${orcas.default_user}" />
     <attribute name="password" default="${orcas.default_password}" />
@@ -46,14 +34,13 @@
           </copy>      
         </then>
       </if>             
+      <orcas_initialize user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" autotimestamp="@{autotimestamp}" extensionfolder="@{tmpfolder}/orcas_sqlplus_core/extensions" extensionparameter="@{extensionparameter}" extensionextractfile="${orcas_domain_extension_dir}/xslt_extract/orcas_domain_extract.xsl"/>
       <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/drop_table_orcas_sqlplus_model.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
-      <orcas_initialize user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" autotimestamp="@{autotimestamp}" extensionfolder="@{tmpfolder}/orcas_sqlplus_core/extensions" extensionparameter="@{extensionparameter}"/>
       <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/h_pa_orcas_sqlplus_model_holder.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
       <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/b_pa_orcas_sqlplus_model_holder.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
       <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/h_pa_orcas_sqlplus_utils.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
       <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/b_pa_orcas_sqlplus_utils.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
       <orcas_execute_script script="${orcas_sqlplus_dir}/sql_util_scripts/replaceable/table_orcas_sqlplus_model.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
-      <orcas_sqlplus_grant user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
     </sequential>
   </macrodef>
 
@@ -83,6 +70,7 @@
     <attribute name="loglevel" default="info" />
     <attribute name="targetplsql" default="" />
     <attribute name="dateformat" default="dd.mm.yy" />
+    <attribute name="extensionparameter" default="null" />
     <sequential>
       <orcas_internal_log_action_start message="orcas_sqlplus_execute_statics" logname="@{logname}" />
       <orcas_internal_set_internal_dir_depth scriptfolderrecursive="@{scriptfolderrecursive}" />
@@ -119,9 +107,9 @@
             </fileset>
           </copy>      
 
-          <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/sqlplus/statics_concat/statics_concat.sql" parameter="@{targetplsql}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
+          <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/sqlplus/statics_concat/statics_concat.sql" parameter="@{targetplsql}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
 
-          <orcas_execute_statics user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" jdbcurl="@{jdbcurl}" tmpfolder="@{tmpfolder}" spoolfolder="@{spoolfolder}" logname="@{logname}" logonly="@{logonly}" dropmode="@{dropmode}" scriptfolder="null" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="@{indexmovetablespace}" tablemovetablespace="@{tablemovetablespace}" createmissingfkindexes="@{createmissingfkindexes}" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" loglevel="@{loglevel}" dateformat="@{dateformat}" orcasinternalsqlplustable="true" />
+          <orcas_execute_statics user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" jdbcurl="@{jdbcurl}" tmpfolder="@{tmpfolder}" spoolfolder="@{spoolfolder}" logname="@{logname}" logonly="@{logonly}" dropmode="@{dropmode}" scriptfolder="null" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="@{indexmovetablespace}" tablemovetablespace="@{tablemovetablespace}" createmissingfkindexes="@{createmissingfkindexes}" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" loglevel="@{loglevel}" dateformat="@{dateformat}" orcasinternalsqlplustable="true" extensionparameter="@{extensionparameter}"/>
         </then>
         <else>
           <echo message="Es wurden keine Tabellendaten gefunden"/>

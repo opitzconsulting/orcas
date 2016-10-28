@@ -1,2 +1,2 @@
-include "orcas", "orcas_xtext_extension", "orcas_syntax_extensions", "orcas_xtext_extension.generator", "orcas_syex", "orcas_extensions", "orcas_db_objects", "distribution", "liquibase_distribution", "orcas_generated_diff", "orcas_diff", "orcas_gradle_plugin"
+include "orcas", "orcas_xtext_extension", "orcas_syntax_extensions", "orcas_xtext_extension.generator", "orcas_syex", "orcas_extensions", "orcas_db_objects", "distribution", "liquibase_distribution", "orcas_generated_diff", "orcas_diff", "orcas_gradle_plugin", "orcas_xslt_extract"
 

@@ -45,6 +45,11 @@
 			<artifactId>orcas-main</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.opitzconsulting.orcas</groupId>
+			<artifactId>orcas-db-objects</artifactId>
+			<version>1.0.0</version>
+		</dependency>		
 
 		<dependency>
 			<groupId>xalan</groupId>
@@ -62,18 +67,6 @@
 
 	<build>
 		<resources>
-			<resource>
-				<directory>../orcas_core/sql_util_scripts</directory>
-				<includes>
-					<include>**/*.sql</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>../orcas_core</directory>
-				<includes>
-					<include>xslt_extract/orcas_extract.xsl</include>
-				</includes>
-			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
 			</resource>

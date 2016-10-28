@@ -47,7 +47,6 @@ task(copyExtensions, type: SyncWithDeleteTask)
 
 task(generateAll, dependsOn: copyExtensions)
 {
-  inputs.property("extensionparameter",project.ext.extensionparameter)
   inputs.dir "${buildDir}/extensions"
   outputs.dir new File("${buildDir}/all_extension")
 
@@ -72,7 +71,7 @@ public class All${project.ext.extension_interface_name}s extends BaseMulti${proj
     }
 
     allFile << """
-    setParameter( "${project.ext.extensionparameter}" );
+    setParameter( "" );
   }
 }
 """

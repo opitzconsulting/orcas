@@ -58,7 +58,7 @@ public abstract class WrapperPreparedStatement
         }
         catch( SQLException eSQLException )
         {
-          throw ExceptionManager.createException( eSQLException );
+          throw ExceptionManager.createException( eSQLException, _sqlString );
         }
       }
     }

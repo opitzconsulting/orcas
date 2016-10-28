@@ -27,7 +27,7 @@ public class OrcasUpdateStaticsTask extends BaseOrcasTask
     }
     else
     {
-      getLog().info( "no statics found" );
+      logInfo( "no statics found" );
     }
   }
 }

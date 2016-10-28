@@ -1,0 +1,731 @@
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<project name="integrationstest" default="Main" basedir=".">
+
+  <!--Laden der Properties -->
+  <property name="distributiondir" value="./distribution" />
+
+  <property file="${distributiondir}/../../../distribution/custom.properties"/>
+  <property file="${distributiondir}/../../../custom.properties"/>
+  <property file="${distributiondir}/default_location.properties"/>
+  <property file="${distributiondir}/../../../distribution/${ant.project.name}/${location}/location.properties"/>
+  <property file="${distributiondir}/../../../distribution/${location}/location.properties"/>
+  <property file="${distributiondir}/${location}/location.properties"/>
+  <property file="${distributiondir}/default.properties"/>
+
+  <property name="bindir" value="../../bin_integrationstest"/>
+  <property name="ueberfuehrung" value="${testuser_prefix}ueberfuehrung" />
+  <property name="zielskript" value="${testuser_prefix}zielskript" />
+  <property name="protokoll" value="${testuser_prefix}protokoll" />
+  <property name="anotherSchema" value="${testuser_prefix}anotherSchema" />
+  <property name="user_orcas" value="${testuser_prefix}svw_user" />
+  <property name="orcas.default_password" value="${password_testuser}" />
+  <property name="orcas.default_password_orcas" value="${password_testuser}" />
+  <property name="runfolder" value="${bindir}/run" />
+  <property name="orcas.default_spoolfolder" value="" />
+  <property name="orcas.default_logname" value="logfile" />
+  <property name="orcas.default_tmpfolder" value="${bindir}/orcas_dir" />
+  <property name="orcas_dir_noextensions" value="${bindir}/orcas_dir_noextensions" />
+  <property name="tmpfolder" value="${bindir}/tmp_dir" />
+  <property name="keep_files_on_success" value="false" />
+  <property name="include_sqlplus_tests" value="true" />
+  <!-- clean_mode options: once, for_each_test, never -->
+  <property name="clean_mode" value="once" />
+  <property name="orcas.default_scriptmode" value="jdbc" />
+  <property name="testexcludesfile" value="empty_excludesfile.txt" />
+
+  <macrodef name="orcas_grant_ref">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <sequential>
+      <if>
+        <equals arg1="@{user}" arg2="@{userorcas}"/>
+        <then>
+            <fail message="Grant is not possible when installing orcas in the application schema"/>
+        </then>
+        <else>
+          <echo message="installing orcas in separate schema granting references to @{user} by @{userorcas}"/>
+         <orcas_execute_script   script="grant_references.sql" user="@{userorcas}" password="@{passwordorcas}" parameter="@{user}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="" />
+        </else>
+      </if>    
+    </sequential>
+  </macrodef>    
+
+  <target name="show_location">
+    <echo message="================= Location: ${location} ================="/>
+    <if>
+      <not>
+        <or>
+          <available file="${distributiondir}/../../../distribution/${ant.project.name}/${location}/location.properties" />
+          <available file="${distributiondir}/../../../distribution/${location}/location.properties" />
+          <available file="${distributiondir}/${location}/location.properties" />
+        </or>
+      </not>
+      <then>
+        <fail message="location invalid: no location file exists: ${distributiondir}/../../../distribution/${ant.project.name}/${location}/location.properties; ${distributiondir}/../../../distribution/${location}/location.properties; ${distributiondir}/${location}/location.properties"/>
+      </then>
+    </if>    
+  </target>
+
+
+  <!-- Laden der Schemaverwaltung-Tasks -->
+  <import file="${orcas_sqlplus_dir}/orcas_sqlplus_default_tasks.xml" />
+
+  <!--Target zum installieren der Schemaverwaltung -->
+  <target name="orcas_install">
+    <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${user_orcas}" />
+  </target>
+
+  <!--loescht den temporaeren Ergebnisordner -->
+  <target name="delete_run">
+    <delete dir="${runfolder}" />
+  </target>
+
+
+  <!-- Target fuer den Jenkins-Aufruf, laedt die per "locationlist" uebergebenen Datenbanken -->
+  <target name="ci_jenkins">
+    <delete dir="${runfolderjenkins}" />
+    <for list="${locationlist}" param="locations">
+      <sequential>
+        <ant antfile="build.xml" target="integrationstest" inheritAll="false" inheritrefs="false">
+          <property name="location" value="@{locations}" />
+          <property name="runfolder" value="${runfolderjenkins}" />
+        </ant>
+      </sequential>
+    </for>
+    <ant antfile="build.xml" target="ergebnis" inheritAll="false" inheritrefs="false">
+      <property name="runfolder" value="${runfolderjenkins}" />
+    </ant>
+  </target>
+
+  <!-- Target fuer den lokalen Aufruf, laedt die per "locationlist" uebergebenen Datenbanken -->
+  <target name="local" depends="delete_run">
+    <for list="${locationlist}" param="locations">
+      <sequential>
+        <ant antfile="build.xml" target="integrationstest" inheritAll="false" inheritrefs="false">
+          <property name="location" value="@{locations}" />
+        </ant>
+      </sequential>
+    </for>
+    <ant antfile="build.xml" target="ergebnis" inheritAll="false" inheritrefs="false" />
+  </target>
+
+  <!-- Main Target, kann beim Aufruf durch die ladetest und locationlist Parameter gesteuert werden -->
+  <target name="Main" depends="show_location,delete_run,integrationstest,ergebnis">
+  </target>
+
+  <!--Ergebnisauswertung -->
+  <target name="ergebnis">
+    <fileset dir="${runfolder}/" casesensitive="no" id="failed-distribution">
+      <include name="*fehlgeschlagen.log" />
+    </fileset>
+    <pathconvert pathsep="&#xA;" property="failed" refid="failed-distribution">
+      <mapper type="flatten" />
+    </pathconvert>
+    <if>
+      <equals arg1="${failed}" arg2="" />
+      <then>
+        <echo message="Integrationstest erfolgreich" />
+      </then>
+      <else>
+        <fail message="Integrationstest fehlgeschlagen" />
+      </else>
+    </if>
+  </target>
+
+  <!-- Ermittelt das Betriebssystem zum festlegen des Difftools -->
+  <target name="checkos">
+    <condition property="isWindows" value="true">
+      <os family="windows" />
+    </condition>
+    <condition property="isLinux" value="true">
+      <os family="unix" />
+    </condition>
+  </target>
+
+  <!-- Exportiert die Datenbankstruktur/-saetze -->
+  <macrodef name="struktur_ermitteln">
+    <attribute name="user" />
+    <attribute name="password" default="${password_testuser}" />
+    <attribute name="logfile" />
+    <attribute name="includedata" default="true" />
+    <sequential>
+      <if>
+        <equals arg1="@{includedata}" arg2="true" />						
+        <then>
+          <orcas_execute_script user="@{user}" password="@{password}" script="spool.sql" parameter="@{logfile} ${tmpfolder}/tabellen.log 1=1" failonerror="true" logname="Struktur ermitteln" />
+        </then>
+        <else>
+          <orcas_execute_script user="@{user}" password="@{password}" script="spool.sql" parameter="@{logfile} ${tmpfolder}/tabellen.log 1=2" failonerror="true" logname="Struktur ermitteln" />
+          <!-- max_value_select nur uebernehmen, wenn es keine Zahl ist, denn sonst ist es nur der aktuelle wert der sequence -->
+          <replaceregexp file="@{logfile}" match="\&lt;max_value_select\&gt;[0-9]+\&lt;\/max_value_select\&gt;" replace="" flags="g" />
+          <!-- zusätzliche Leerzeichen können bei matviewselect durch die Ersetzung von linefeeds bei langen Zeilen verursacht sein und zu Unterschieden führen -->
+          <replaceregexp file="@{logfile}" match="viewSelectCLOB>.*[ ].*/viewSelectCLOB>" replace="viewSelectCLOB/>" flags="g" /> 
+        </else>
+      </if>
+
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="${orcas.default_tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractStatics" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" dir="${tmpfolder}" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
+        <arg value="oracle.jdbc.OracleDriver"/>
+        <arg value="${orcas.default_jdbcurl}"/>
+        <arg value="@{user}"/>
+        <arg value="@{password}"/>
+        <arg value="null"/>
+        <arg value="object_name like ''%$%''"/>
+        <arg value="object_name like ''%$%''"/>
+        <arg value="dd.mm.yy"/>
+        <arg value="info"/>
+        <arg value="load_spool.xml"/>
+        <arg value="null"/>
+        <arg value="null"/>
+        <arg value="null"/>
+        <arg value="${user_orcas}"/> 
+        <arg value="true"/>
+        <arg value="false"/>
+        <arg value="false"/>
+        <arg value="${orcas.default_jdbcurl}"/>
+        <arg value="${user_orcas}"/>
+        <arg value="${password_testuser}"/>
+        <arg value="null"/>
+      </java>      
+
+      <concat destfile="@{logfile}" append="true">
+        <filelist dir="${tmpfolder}" files="load_spool.xml"/>
+      </concat>
+
+      <if>
+        <equals arg1="@{includedata}" arg2="false" />						
+        <then>
+          <!-- max_value_select nur uebernehmen, wenn es keine Zahl ist, denn sonst ist es nur der aktuelle wert der sequence -->
+          <replaceregexp file="@{logfile}" match="\&lt;max_value_select\&gt;[0-9]+\&lt;\/max_value_select\&gt;" replace="" flags="g" />
+        </then>
+      </if>
+
+      <fixcrlf file="@{logfile}" />
+
+    </sequential>
+  </macrodef>
+
+  <macrodef name="set_timestamp">
+    <attribute name="property" />
+    <sequential>
+      <var name="property" unset="true" />
+      <var name="oc_svw_internal_script_value_property" unset="true" />
+      <property name="oc_svw_internal_script_value_property" value="@{property}" />
+      <script language="javascript">
+        project.setProperty(project.getProperty("oc_svw_internal_script_value_property"), new Date().getTime());
+      </script>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="set_duration">
+    <attribute name="startproperty" />
+    <attribute name="durationproperty" />
+    <sequential>
+      <var name="durationproperty" unset="true" />
+      <var name="oc_svw_internal_script_value_startproperty" unset="true" />
+      <var name="oc_svw_internal_script_value_durationproperty" unset="true" />
+      <property name="oc_svw_internal_script_value_startproperty" value="@{startproperty}" />
+      <property name="oc_svw_internal_script_value_durationproperty" value="@{durationproperty}" />
+      <script language="javascript">
+        project.setProperty(project.getProperty("oc_svw_internal_script_value_durationproperty"), (new Date().getTime() - project.getProperty(project.getProperty("oc_svw_internal_script_value_startproperty"))) / 1000 )
+      </script>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="log_start_test">
+    <sequential>
+      <set_timestamp property="ts_testsuite_start" />
+      <set_timestamp property="ts_test_start" />
+      <echo message="#############################                                      #############################" />
+      <echo message="                              now running test: ${akt_verzeichnis}" />
+      <echo message="#############################                                      #############################" />
+
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[<testsuite name="${location}.${akt_verzeichnis}" time="REPLACE_TIME" >]]></concat>
+    </sequential>
+  </macrodef>      
+
+  <macrodef name="log_skip_test">
+    <sequential>
+      <echo message="### Skipping ${akt_verzeichnis} due to required features: ${required_feature_list} ; available features: ${available_feature_list} ###" />
+
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="false"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]></concat>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[<testsuite name="${location}.${akt_verzeichnis}" time="0">]]></concat>
+      <log_skip testname="run"/>
+    </sequential>
+  </macrodef>      
+
+  <macrodef name="log_end_test">
+    <sequential>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[</testsuite>]]></concat>
+      <set_duration startproperty="ts_testsuite_start" durationproperty="duration_testsuite" />	 
+      <replace file="${tmpfolder}/${akt_verzeichnis}/testresult.xml" token="REPLACE_TIME" value="${duration_testsuite}" />
+    </sequential>
+  </macrodef>      
+
+  <macrodef name="log_error">
+    <attribute name="message" />
+    <attribute name="testname" />
+    <sequential>
+      <set_duration startproperty="ts_test_start" durationproperty="duration_test" />	 
+      <set_timestamp property="ts_test_start" />
+      <echo message="${akt_verzeichnis}: @{message}" />
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/error.txt" append="true">
+${akt_verzeichnis}: @{message}</concat>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[
+    <testcase name="@{testname}" time="${duration_test}" >
+      <failure type="@{testname}">@{message}</failure>
+    </testcase>]]></concat>
+    </sequential>
+  </macrodef>    
+
+  <macrodef name="log_testcase_start">
+    <attribute name="testname" />
+    <sequential>
+      <echo message="###" />
+      <echo message="### ${akt_verzeichnis}.@{testname}" />
+      <echo message="###" />    
+    </sequential>
+  </macrodef>    
+
+  <macrodef name="log_success">
+    <attribute name="testname" />
+    <sequential>
+      <set_duration startproperty="ts_test_start" durationproperty="duration_test" />	 
+      <set_timestamp property="ts_test_start" />
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[
+    <testcase name="@{testname}" time="${duration_test}" >
+    </testcase>]]></concat>
+    </sequential>
+  </macrodef>    
+
+  <macrodef name="log_skip">
+    <attribute name="testname" />
+    <sequential>
+      <concat destfile="${tmpfolder}/${akt_verzeichnis}/testresult.xml" append="true">
+<![CDATA[
+    <testcase name="@{testname}" time="0" >
+      <skipped/>
+    </testcase>]]></concat>
+    </sequential>
+  </macrodef>    
+
+  <macrodef name="check_struktur_equal">
+    <attribute name="testname" />
+    <attribute name="user1" />
+    <attribute name="logfile1" />
+    <attribute name="user2" />
+    <attribute name="logfile2" />
+    <attribute name="includedata" default="true" />
+    <sequential>
+      <struktur_ermitteln user="@{user1}" logfile="${tmpfolder}/${akt_verzeichnis}/struktur_@{logfile1}.log" includedata="@{includedata}" />
+      <struktur_ermitteln user="@{user2}" logfile="${tmpfolder}/${akt_verzeichnis}/struktur_@{logfile2}.log" includedata="@{includedata}" />
+
+      <var name="checksumme_1" unset="true" />
+      <var name="checksumme_2" unset="true" />         
+
+      <checksum file="${tmpfolder}/${akt_verzeichnis}/struktur_@{logfile1}.log" property="checksumme_1" />
+      <checksum file="${tmpfolder}/${akt_verzeichnis}/struktur_@{logfile2}.log" property="checksumme_2" />
+
+      <if>
+        <not>
+          <equals arg1="${checksumme_1}" arg2="${checksumme_2}" />                  
+        </not>
+        <then>                    
+          <log_error message="Diffvergleich fehlerhaft: @{user1}-@{logfile1} != @{user2}-@{logfile2}" testname="@{testname}" />                      
+          <diff_files datei1="struktur_@{logfile1}.log" datei2="struktur_@{logfile2}.log" logfile="diff_@{logfile1}_@{logfile2}.log" />
+        </then>                                                 
+        <else>
+          <log_success testname="@{testname}" />                      
+        </else>
+      </if>      
+    </sequential>
+  </macrodef>    
+
+  <!-- F�hrt einen Diffvergleich der exportierten Datenbankstruktur/-saetze unter Windows/Unix durch -->
+  <macrodef name="diff_files">
+    <attribute name="datei1" />
+    <attribute name="datei2" />
+    <attribute name="logfile" />
+    <attribute name="windowsdifftool" default="${difftool}" />
+    <attribute name="executiondir" default="${tmpfolder}/${akt_verzeichnis}/" />
+    <sequential>
+      <var name="diff_files_result" unset="true" />
+      <if>
+        <equals arg1="${isWindows}" arg2="true" />							<!-- Windows Diffvergleich -->
+        <then>
+          <exec dir="@{executiondir}" executable="cmd.exe" failonerror="false" resultproperty="diff_files_result">
+            <arg value="/c" />
+            <arg value="@{windowsdifftool} @{datei1} @{datei2} -b >@{logfile}" />
+          </exec>
+        </then>
+        <else>																<!-- Unix Diffvergleich -->
+          <exec dir="@{executiondir}" executable="diff" failonerror="false" resultproperty="diff_files_result" output="@{executiondir}@{logfile}">
+            <arg line="-b " />
+            <arg line="@{datei1}" />
+            <arg line="@{datei2}" />
+          </exec>
+        </else>
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="check_no_ora_errors">
+    <sequential>
+      <fileset dir="${tmpfolder}/${akt_verzeichnis}/" casesensitive="no" id="failed-spool">
+        <include name="*.log" />
+        <containsregexp expression="ORA-*" />
+      </fileset>
+
+      <pathconvert pathsep="&#xA;" property="failedspool" refid="failed-spool">
+        <mapper type="flatten" />
+      </pathconvert>
+
+      <if>
+        <not>
+          <equals arg1="${failedspool}" arg2="" />
+        </not>
+        <then>
+          <log_error message="spool fehlgeschlagen" testname="no_ora_errors" />
+        </then>
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="load_properties_for_test">
+    <attribute name="folder" />
+    <sequential>
+      <var name="dropmode" unset="true" />
+      <var name="indexparallelcreate" unset="true" />
+      <var name="indexmovetablespace" unset="true" />
+      <var name="tablemovetablespace" unset="true" />
+      <var name="createmissingfkindexes" unset="true" />
+      <var name="extensionfolder" unset="true" />
+      <var name="akt_verzeichnis" unset="true" />
+      <var name="excludewheresequence" unset="true" />
+      <var name="test_extract" unset="true" />
+      <var name="required_feature_list" unset="true" />
+      <var name="test_runnable" unset="true" />
+      <var name="dateformat" unset="true" />
+
+      <var name="orcas.default_java_fork" unset="true" />
+
+      <property file="@{folder}/parameter.properties" />
+      <if>
+        <available property="extensionfolder" />
+        <then>
+          <property name="orcas.default_java_fork" value="true" />
+        </then>
+      </if>
+      <loadproperties srcfile="parameter.properties" />
+
+      <propertyregex property="akt_verzeichnis" input="@{folder}" regexp=".*\\(.*)" select="\1" />
+      <propertyregex property="akt_verzeichnis" input="@{folder}" regexp=".*/(.*)" select="\1" />
+
+      <for list="${required_feature_list}" param="requiredfeature">
+        <sequential>
+          <if>
+            <not>
+              <contains string="${available_feature_list}" substring="@{requiredfeature}" />
+            </not>
+            <then>
+              <property name="test_runnable" value="false"/>
+            </then>
+          </if>
+        </sequential>
+      </for>
+          <property name="test_runnable" value="true"/>
+    </sequential>
+  </macrodef>
+
+  <!-- Ausfuehren des Integrationstests -->
+  <target name="integrationstest" depends="checkos">
+    <fail message="spool.sql not identical">
+      <condition>
+        <not>
+          <filesmatch file1="${distributiondir}/../spool.sql" file2="${distributiondir}/../testspool/spool.sql" />
+        </not>
+      </condition>
+    </fail>
+
+    <echo message="folgende tests werden ausgefuehrt (ladetest=${ladetest},testexcludesfile=${testexcludesfile}):" />
+    <for param="folder">
+      <path>
+        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests" excludesfile="${testexcludesfile}">
+          <include name="${ladetest}" />
+        </dirset>
+      </path>
+      <sequential>
+        <load_properties_for_test folder="@{folder}" />
+        <if>
+          <equals arg1="${test_runnable}" arg2="true" />
+          <then>
+            <echo message="### ${akt_verzeichnis} ###" />
+          </then>
+        </if>
+       
+      </sequential>
+    </for>
+    <echo message="folgende tests werden NICHT ausgefuehrt (ladetest=${ladetest},testexcludesfile=${testexcludesfile},available_features=${available_feature_list}):" />
+    <for param="folder">
+      <path>
+        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests" excludesfile="${testexcludesfile}">
+          <include name="${ladetest}" />
+        </dirset>
+      </path>
+      <sequential>
+        <load_properties_for_test folder="@{folder}" />
+        <if>
+          <equals arg1="${test_runnable}" arg2="true" />
+          <then>
+          </then>
+          <else>
+            <echo message="### Skipping ${akt_verzeichnis} due to required features: ${required_feature_list} ###" />
+          </else>
+        </if>
+       
+      </sequential>
+    </for>    
+
+    <!--<orcas_check_connection user="${username_dba}" password="${password_dba}"  tmpfolder="${orcas_dir_noextensions}" />-->
+    <!--<orcas_initialize user="${ueberfuehrung}" userorcas="${user_orcas}" tmpfolder="${orcas_dir_noextensions}" /> -->
+    <delete dir="${tmpfolder}/" />
+    <mkdir dir="${tmpfolder}/" />
+    <echo file="${tmpfolder}/${location}_Ergebnis.log" append="yes" message="Erfolgreiche Tests:${line.separator}" />
+
+    <orcas_initialize tmpfolder="${orcas_dir_noextensions}" />
+
+    <if>
+      <equals arg1="${clean_mode}" arg2="once" />
+      <then>
+        <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${user_orcas}" tmpfolder="${orcas_dir_noextensions}" />
+        <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${user_orcas}" tmpfolder="${orcas_dir_noextensions}" />
+      </then>
+    </if>      
+
+    <for param="folder">
+      <path>
+        <dirset dir="tests/" erroronmissingdir="true" id="alle-tests" excludesfile="${testexcludesfile}">
+          <include name="${ladetest}" />
+        </dirset>
+      </path>
+      <sequential>
+        <var name="single_run_exception" unset="true" />
+        <trycatch property="single_run_exception">
+          <try>
+            <load_properties_for_test folder="@{folder}" />
+
+            <if>
+              <equals arg1="${test_runnable}" arg2="true" />
+              <then>
+                <log_start_test/>
+
+                <mkdir dir="${tmpfolder}/${akt_verzeichnis}" />
+
+                <!-- User werden zurueckgesetzt -->
+                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}"  tmpfolder="${orcas_dir_noextensions}" />
+                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${protokoll} ${password_testuser} ${tablespace_testuser}"  tmpfolder="${orcas_dir_noextensions}" />
+                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${zielskript} ${password_testuser} ${tablespace_testuser}"  tmpfolder="${orcas_dir_noextensions}" />
+                <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" parameter="${anotherSchema} ${password_testuser} ${tablespace_testuser}"  tmpfolder="${orcas_dir_noextensions}" />
+		            <if>
+                  <equals arg1="${clean_mode}" arg2="for_each_test" />
+                  <then>
+            		    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="drop_user.sql" parameter="${user_orcas}"  tmpfolder="${orcas_dir_noextensions}" />
+            		    <orcas_install user="${username_dba}" password="${password_dba}" userorcas="${user_orcas}"  tmpfolder="${orcas_dir_noextensions}" />
+                  </then>
+                </if>
+            
+                <if>
+                  <equals arg1="${include_sqlplus_tests}" arg2="true" />
+                  <then>
+                    <orcas_sqlplus_initialize extensionfolder="${extensionfolder}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" user="${ueberfuehrung}" userorcas="${user_orcas}" />
+                  </then>
+                  <else>
+                    <orcas_initialize extensionfolder="${extensionfolder}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" user="${ueberfuehrung}" userorcas="${user_orcas}" orcasinternalinstalldb="false" />
+                  </else>
+                </if>
+                
+                <if>
+                  <available file="@{folder}/erzeuge_tabelle_in_extra_schema.sql" />
+                  <then>
+                    <orcas_execute_script user="${anotherSchema}" password="${password_testuser}" script="@{folder}/erzeuge_tabelle_in_extra_schema.sql" parameter="${anotherSchema}" />
+                  </then>
+                </if>
+                <orcas_grant_ref user="${ueberfuehrung}" userorcas="${anotherSchema}" />
+                <orcas_grant_ref user="${zielskript}" userorcas="${anotherSchema}" />
+               
+                <!-- Einspielen der Aus- und Zielzustand Skripte -->
+                <orcas_execute_script user="${ueberfuehrung}" script="@{folder}/erzeuge_ausgangszustand.sql" parameter="${alternate_tablespace_1} ${alternate_tablespace_2}" userorcas="${user_orcas}"
+                  logname="ausgangszustand_anlegen_ueberfuehrung" failonerror="true" />
+                <orcas_execute_script user="${protokoll}" script="@{folder}/erzeuge_ausgangszustand.sql" parameter="${alternate_tablespace_1} ${alternate_tablespace_2}" userorcas="${user_orcas}"
+                  logname="ausgangszustand_anlegen_protokoll" failonerror="true" />
+                <orcas_execute_script user="${zielskript}" script="@{folder}/erzeuge_zielzustand.sql" parameter="${alternate_tablespace_1} ${alternate_tablespace_2}" logname="tabellen_anlegen_zielskript"
+                  failonerror="true" />
+
+                <log_success testname="test_initialized" />  
+
+                <!-- test_run -->
+                <log_testcase_start testname="test_run"/>
+                <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen/" userorcas="${user_orcas}" scriptfolderrecursive="true"
+                  dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
+                  createmissingfkindexes="${createmissingfkindexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll"
+                  logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" />
+                <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${ueberfuehrung}" logfile2="ueberfuehrung" testname="test_run" />
+
+                <!-- second_run_does_nothing -->
+                <log_testcase_start testname="second_run_does_nothing"/>
+                <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen/" userorcas="${user_orcas}" scriptfolderrecursive="true"
+                  dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
+                  createmissingfkindexes="${createmissingfkindexes}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test"
+                  logname="protokoll" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" /> 
+
+                <if>
+                  <available file="${tmpfolder}/${akt_verzeichnis}/Protokoll_svw_test/master_install.sql" />
+                  <then>
+                    <log_error message="Zweiter Lauf der Tabellenskripte fehlgeschlagen (Abweichung zum ersten Lauf der SVW)" testname="second_run_does_nothing" />  
+                  </then>
+                  <else>
+                    <log_success testname="second_run_does_nothing" />  
+                  </else>                  
+                </if>                
+
+                <!-- test_run_with_log -->
+                <log_testcase_start testname="test_run_with_log"/>
+                <orcas_execute_script user="${protokoll}" script="${tmpfolder}/${akt_verzeichnis}/Protokoll/master_install.sql" userorcas="${user_orcas}" logname="ausfuehren_protokoll" failonerror="false"/>
+      
+                <check_struktur_equal user1="${zielskript}" logfile1="zielskript" user2="${protokoll}" logfile2="protokoll" testname="test_run_with_log" />
+
+                <!-- test_run_with_extract -->
+                <if>
+                  <equals arg1="${test_extract}" arg2="true" />
+                  <then>
+                    <log_testcase_start testname="test_run_with_extract"/>
+                    <orcas_extract user="${zielskript}" userorcas="${user_orcas}" outputfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" dateformat="${dateformat}"/>
+
+                    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" userorcas="${user_orcas}" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
+                    <orcas_execute_statics user="${ueberfuehrung}" scriptfolder="${tmpfolder}/${akt_verzeichnis}/extract_output" userorcas="${user_orcas}" scriptfolderrecursive="true"
+                      dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" 
+                      createmissingfkindexes="${createmissingfkindexes}" logname="extract_output" excludewheresequence="${excludewheresequence}" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" />                
+
+                    <check_struktur_equal user1="${zielskript}" logfile1="zielskript_extract_nodata" user2="${ueberfuehrung}" logfile2="ueberfuehrung_extract_nodata" includedata="false" testname="test_run_with_extract" />
+                  </then>
+                  <else>
+                    <log_skip testname="test_run_with_extract" />
+                  </else>
+                </if>
+
+                <!-- test_run_sqlplus -->
+                <if>
+                  <and>
+                    <available file="@{folder}/tabellen_sqlplus/tabelle.sql" />
+                    <equals arg1="${include_sqlplus_tests}" arg2="true" />
+                  </and>
+                  <then>
+                    <log_testcase_start testname="test_run_sqlplus"/>
+                    <orcas_execute_script user="${username_dba}" password="${password_dba}" script="reset_user.sql" userorcas="${user_orcas}" parameter="${ueberfuehrung} ${password_testuser} ${tablespace_testuser}" />
+                    <orcas_execute_script user="${ueberfuehrung}" script="@{folder}/erzeuge_ausgangszustand.sql" parameter="${alternate_tablespace_1} ${alternate_tablespace_2}" userorcas="${user_orcas}"
+                      logname="ausgangszustand_anlegen_ueberfuehrung" failonerror="true" />
+                    <orcas_sqlplus_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen_sqlplus/" userorcas="${user_orcas}" scriptfolderrecursive="true"
+                      dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="${createmissingfkindexes}" 
+                      logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_svw_test" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" />                  
+
+                    <check_struktur_equal user1="${zielskript}" logfile1="zielskript_sqlplus" user2="${ueberfuehrung}" logfile2="ueberfuehrung_sqlplus" testname="test_run_sqlplus" />
+
+                    <!-- second_run_does_nothing_sqlplus -->
+                    <log_testcase_start testname="second_run_does_nothing_sqlplus"/>
+                    <orcas_sqlplus_execute_statics user="${ueberfuehrung}" scriptfolder="@{folder}/tabellen_sqlplus/" userorcas="${user_orcas}" scriptfolderrecursive="true"
+                      dropmode="${dropmode}" indexparallelcreate="${indexparallelcreate}" indexmovetablespace="${indexmovetablespace}" tablemovetablespace="${tablemovetablespace}" createmissingfkindexes="${createmissingfkindexes}" 
+                      logname="protokoll" excludewheresequence="${excludewheresequence}" spoolfolder="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test" dateformat="${dateformat}" extensionparameter="[tablespace1:${alternate_tablespace_1},tablespace2:${alternate_tablespace_2}]" />                
+
+                    <if>
+                      <available file="${tmpfolder}/${akt_verzeichnis}/sqlplus_protokoll_svw_test/master_install.sql" />
+                      <then>
+                        <log_error message="Zweiter Lauf der Tabellenskripte (sqlplus) fehlgeschlagen (Abweichung zum ersten Lauf der SVW)" testname="second_run_does_nothing_sqlplus" />  
+                      </then>
+                      <else>
+                        <log_success testname="second_run_does_nothing_sqlplus" />  
+                      </else>                  
+                    </if>        
+                  </then>
+                  <else>
+                    <if>
+                      <and>
+                        <available file="@{folder}/tabellen_sqlplus/tabelle.sql" />
+                      </and>
+                      <then>
+                        <log_skip testname="test_run_sqlplus" />
+                        <log_skip testname="second_run_does_nothing_sqlplus" />
+                      </then>                      
+                    </if>
+                  </else>                  
+                </if>
+
+                <check_no_ora_errors/>
+              </then>
+              <else>
+                <log_skip_test/>
+              </else>
+            </if>            
+          </try>
+          <catch>
+            <log_error message="exception fehlgeschlagen ${single_run_exception}" testname="exception" />            
+          </catch>
+        </trycatch>
+        <log_end_test/>                
+      </sequential>
+    </for>
+
+    <!-- �berpr�fung ob Tests geladen wurden -->
+    <property name="testvorhanden" refid="alle-tests" />
+    <if>
+      <equals arg1="${testvorhanden}" arg2="" />
+      <then>
+        <fail message="Keine Tests vorhanden." />
+      </then>
+    </if>
+
+    <!-- Abfrage der fehlgeschlagenen Tests -->
+    <fileset dir="${tmpfolder}" id="failed-tests">
+      <include name="**/*error.txt" />
+    </fileset>
+
+    <pathconvert pathsep="&#xA;" property="tests" refid="failed-tests">
+    </pathconvert>
+
+    <orcas_delete_directory folder="${tmpfolder}/" backup-to-folder="${runfolder}/${location}/" />
+
+    <!-- Distribution-Testergebnis erstellen -->
+    <if>
+      <equals arg1="${tests}" arg2="" />
+      <then>
+        <echo message="${location} erfolgreich" />
+      </then>
+      <else>
+        <echo message="#############################                                      #############################" />
+        <echo message="Fehlgeschlagene Tests:" />
+        <echo message="${tests}" />
+        <echo message="#############################                                      #############################" />
+        <echo file="${tmpfolder}/${location}_Ergebnis.log" append="yes" message="${line.separator}Fehlgeschlagene Tests:${line.separator}" />
+        <echo file="${tmpfolder}/${location}_Ergebnis.log" append="yes" message="${tests}" />
+        <move file="${runfolder}/${location}/${location}_Ergebnis.log" tofile="${runfolder}/${location}_fehlgeschlagen.log" />
+      </else>
+    </if>
+
+  </target>
+</project>
+

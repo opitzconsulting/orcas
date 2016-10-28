@@ -14,7 +14,6 @@ dependencies
   xtextDistribution project(':orcas_syex')
   xtextDistribution project(':orcas_extensions')
   xtextDistribution project(':orcas_db_objects')
-  xtextDistribution "xalan:xalan:2.7.2"
   xtextDistribution fileTree(dir: System.getenv("ORACLE_HOME")+"/jdbc/lib", include: '*.jar')
   xtextDistribution fileTree(dir: System.getenv("ORACLE_HOME"), include: '*.jar') // lookup jars directly inroot home-dir for instant clients
 }

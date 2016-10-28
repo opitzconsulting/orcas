@@ -1,7 +1,8 @@
 apply plugin: 'groovy'
 
 apply from: '../maven_publish.gradle'
-project.ext.maven_artifactId = 'orcas-gradle-plugin'
+project.ext.maven_artifactId_postfix = 'gradle-plugin'
+project.ext.extensiondependent = true
 project.ext.maven_description = 'orcas gradle plugin'
 
 dependencies {

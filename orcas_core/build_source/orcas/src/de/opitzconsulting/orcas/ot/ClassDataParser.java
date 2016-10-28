@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.emf.common.util.EList;
 
+@SuppressWarnings( "rawtypes" )
 public class ClassDataParser
 {
   private TypeDataContainer _typeDataContainer = new TypeDataContainer();
@@ -151,6 +152,7 @@ public class ClassDataParser
     }
   }
 
+  @SuppressWarnings( "unchecked" )
   private void _parseEnum( ClassDataType lClassDataType, Class pClass )
   {
     try

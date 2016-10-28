@@ -8,6 +8,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import de.opitzconsulting.orcas.diff.ParametersCommandline;
+import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 
 public abstract class BaseOrcasMojo extends AbstractMojo
 {
@@ -86,6 +88,18 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   @Parameter( defaultValue = "src/main/sql/statics" )
   protected File staticsfolder;
 
+  @Parameter( defaultValue = "oracle.jdbc.OracleDriver" )
+  protected String orcasjdbcdriver;
+
+  @Parameter
+  protected String orcasjdbcurl;
+
+  @Parameter
+  protected String orcasusername;
+
+  @Parameter
+  protected String orcaspassword;
+
   public void execute() throws MojoExecutionException
   {
     ParametersCall lParametersCall = new ParametersCall();
@@ -94,8 +108,6 @@ public abstract class BaseOrcasMojo extends AbstractMojo
     lParametersCall.getJdbcConnectParameters().setJdbcUrl( jdbcurl );
     lParametersCall.getJdbcConnectParameters().setJdbcUser( username );
     lParametersCall.getJdbcConnectParameters().setJdbcPassword( password );
-
-    lParametersCall.setOrcasDbUser( usernameorcas );
 
     lParametersCall.setTargetplsql( targetplsql );
 
@@ -120,6 +132,38 @@ public abstract class BaseOrcasMojo extends AbstractMojo
     lParametersCall.setExcludewheresequence( excludewheresequence );
     lParametersCall.setDateformat( dateformat );
     lParametersCall.setExtensionParameter( extensionparameter );
+
+    if( usernameorcas != null && !usernameorcas.equals( "" ) )
+    {
+      lParametersCall.setOrcasDbUser( usernameorcas );
+    }
+    else
+    {
+      if( orcasusername != null )
+      {
+        lParametersCall.setOrcasDbUser( orcasusername );
+      }
+      else
+      {
+        lParametersCall.setOrcasDbUser( username );
+      }
+    }
+
+    if( orcasusername != null )
+    {
+      JdbcConnectParameters lOrcasJdbcConnectParameters = new JdbcConnectParameters();
+      lOrcasJdbcConnectParameters.setJdbcDriver( orcasjdbcdriver );
+      lOrcasJdbcConnectParameters.setJdbcUrl( orcasjdbcurl == null ? lParametersCall.getJdbcConnectParameters().getJdbcUrl() : orcasjdbcurl );
+      lOrcasJdbcConnectParameters.setJdbcUser( orcasusername );
+      lOrcasJdbcConnectParameters.setJdbcPassword( orcaspassword );
+      lParametersCall.setOrcasJdbcConnectParameters( lOrcasJdbcConnectParameters );
+    }
+    else
+    {
+      lParametersCall.setOrcasJdbcConnectParameters( lParametersCall.getJdbcConnectParameters() );
+    }
+
+    ParametersCommandline.setupLog4jLoglevel( lParametersCall );
 
     executeWithParameters( lParametersCall );
   }

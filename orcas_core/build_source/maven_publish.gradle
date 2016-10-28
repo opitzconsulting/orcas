@@ -13,29 +13,41 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId project.ext.maven_artifactId
+            if( project.ext.extensiondependent )
+            {
+              artifactId project.ext.extensionname_external + "orcas-" + project.ext.extensionname_internal + project.ext.maven_artifactId_postfix
+              groupId project.ext.extensiongroup
+              version project.ext.extensionversion
+            }
+            else
+            {
+              artifactId "orcas-" + project.ext.maven_artifactId_postfix
+            }
 
             pom.withXml {
                def root = asNode()
                root.appendNode('packaging', 'jar')
                root.appendNode('name', groupId+':'+artifactId)
-               root.appendNode('description', project.ext.maven_description)
-               root.appendNode('url', 'http://opitzconsulting.github.io/orcas')
-               root.appendNode('inceptionYear', '2008')
-               def scm = root.appendNode('scm')
-               scm.appendNode('url', 'https://github.com/opitzconsulting/orcas')
-               scm.appendNode('connection', 'scm:git:git://github.com/opitzconsulting/orcas.git')
-               scm.appendNode('developerConnection', 'scm:git:git://github.com/opitzconsulting/orcas.git')
-               def license = root.appendNode('licenses').appendNode('license')
-               license.appendNode('name', 'The Apache Software License, Version 2.0')
-               license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
-               license.appendNode('distribution', 'repo')
-               def developer = root.appendNode('developers').appendNode('developer')
-               developer.appendNode('id', 'llsand')
-               developer.appendNode('name', 'Frank Sanders')
-               developer.appendNode('email', 'frank.sanders@opitz-consulting.com')
-               developer.appendNode('organization', 'Opitz Consulting')
-               developer.appendNode('organizationUrl', 'http://www.opitz-consulting.com')
+               if( !project.ext.externalextension || !project.ext.extensiondependent )
+               {
+                   root.appendNode('description', project.ext.maven_description)
+                   root.appendNode('url', 'http://opitzconsulting.github.io/orcas')
+                   root.appendNode('inceptionYear', '2008')
+                   def scm = root.appendNode('scm')
+                   scm.appendNode('url', 'https://github.com/opitzconsulting/orcas')
+                   scm.appendNode('connection', 'scm:git:git://github.com/opitzconsulting/orcas.git')
+                   scm.appendNode('developerConnection', 'scm:git:git://github.com/opitzconsulting/orcas.git')
+                   def license = root.appendNode('licenses').appendNode('license')
+                   license.appendNode('name', 'The Apache Software License, Version 2.0')
+                   license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+                   license.appendNode('distribution', 'repo')
+                   def developer = root.appendNode('developers').appendNode('developer')
+                   developer.appendNode('id', 'llsand')
+                   developer.appendNode('name', 'Frank Sanders')
+                   developer.appendNode('email', 'frank.sanders@opitz-consulting.com')
+                   developer.appendNode('organization', 'Opitz Consulting')
+                   developer.appendNode('organizationUrl', 'http://www.opitz-consulting.com')
+               }
             }
 
             from components.java

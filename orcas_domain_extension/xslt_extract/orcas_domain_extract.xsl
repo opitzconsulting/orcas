@@ -38,6 +38,7 @@
       <apply-templates select="compressionFor" />
       <apply-templates select="logging" />
       <apply-templates select="parallel" />
+      <apply-templates select="mviewLog" />
       <text>;
 
 </text>
@@ -51,6 +52,7 @@
     <apply-templates select="domain" />     
     <apply-templates select="data_type" />
     <apply-templates select="precision" />
+    <apply-templates select="with_time_zone" />
     <apply-templates select="object_type" />
     <apply-templates select="identity" />
     <apply-templates select="default_value" />

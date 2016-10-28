@@ -30,4 +30,9 @@ public abstract class BaseMultiExtensions extends OrcasBaseExtensionWithParamete
 
     return lModel;
   }
+
+  public boolean hasExtension()
+  {
+    return !_extensions.isEmpty();
+  }
 }

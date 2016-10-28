@@ -1,6 +1,5 @@
 package de.opitzconsulting.orcas.diff;
 
-import java.io.Reader;
 import java.net.URL;
 import java.util.List;
 
@@ -15,7 +14,7 @@ public class Parameters
 
     public String getJdbcDriver()
     {
-      return checkNull( _jdbcDriver );
+      return _jdbcDriver;
     }
 
     public String getJdbcUrl()
@@ -88,11 +87,19 @@ public class Parameters
   protected List<String> _additionalParameters;
   protected String _logname;
   protected String _spoolfolder;
-  protected FailOnErrorMode _failOnErrorMode;
+  protected FailOnErrorMode _failOnErrorMode = FailOnErrorMode.ALWAYS;
   protected String _extensionParameter;
+  protected String _initializeChecksumTotal;
+  protected String _initializeChecksumExtension;
+  protected boolean _keepDriverClassLoadMessages = true;
 
   protected URL _scriptUrl;
   protected String _scriptUrlFilename;
+
+  protected Boolean _loadExtractWithReverseExtensions = true;
+
+  private InfoLogHandler _infoLogHandler;
+  private String _removePromptPrefix;
 
   public boolean isOrderColumnsByName()
   {
@@ -122,6 +129,16 @@ public class Parameters
   public String getTargetplsql()
   {
     return checkNull( _targetplsql );
+  }
+
+  public String getInitializeChecksumTotal()
+  {
+    return _initializeChecksumTotal;
+  }
+
+  public String getInitializeChecksumExtension()
+  {
+    return _initializeChecksumExtension;
   }
 
   public List<String> getAdditionalParameters()
@@ -246,7 +263,7 @@ public class Parameters
 
   public FailOnErrorMode getFailOnErrorMode()
   {
-    return _failOnErrorMode;
+    return checkNull( _failOnErrorMode );
   }
 
   public boolean isOneTimeScriptMode()
@@ -277,5 +294,40 @@ public class Parameters
   public String getScriptUrlFilename()
   {
     return _scriptUrlFilename;
+  }
+
+  public interface InfoLogHandler
+  {
+    void logInfo( String pLogMessage );
+  }
+
+  public InfoLogHandler getInfoLogHandler()
+  {
+    return _infoLogHandler;
+  }
+
+  public void setInfoLogHandler( InfoLogHandler pInfoLogHandler )
+  {
+    _infoLogHandler = pInfoLogHandler;
+  }
+
+  public boolean isLoadExtractWithReverseExtensions()
+  {
+    return checkNull( _loadExtractWithReverseExtensions );
+  }
+
+  public String getRemovePromptPrefix()
+  {
+    return _removePromptPrefix;
+  }
+
+  public void setRemovePromptPrefix( String pRemovePromptPrefix )
+  {
+    _removePromptPrefix = pRemovePromptPrefix;
+  }
+
+  public boolean isKeepDriverClassLoadMessages()
+  {
+    return _keepDriverClassLoadMessages;
   }
 }

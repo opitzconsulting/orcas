@@ -1,5 +1,10 @@
 subprojects 
 {
+  project.ext.xtext_version = "2.5.1"
+
+  project.group = "com.opitzconsulting.orcas"
+  project.version = "1.0.0"  
+
   repositories 
   {
     mavenCentral()
@@ -13,7 +18,8 @@ subprojects
   {
     project.ext.tmp_folder = '../.gradle'
   }
-  if( getRootProject().hasProperty('orcas_extension_folder') )
+
+  if( getRootProject().hasProperty('orcas_extension_folder') && !getRootProject().orcas_extension_folder.equals( "" ) )
   {
     project.ext.extension_folder = getRootProject().orcas_extension_folder
   }
@@ -22,18 +28,39 @@ subprojects
     project.ext.extension_folder = project.ext.tmp_folder + "/empty_extensions"
     project.file(project.ext.extension_folder).mkdirs()
   }
-  if( getRootProject().hasProperty('orcas_extension_parameter') )
+
+  if( getRootProject().hasProperty('orcas_extension_extract_file') && !getRootProject().orcas_extension_extract_file.equals( "" ) )
   {
-    project.ext.extensionparameter = getRootProject().orcas_extension_parameter
+    project.ext.extension_extract_file = getRootProject().orcas_extension_extract_file
   }
   else
   {
-    project.ext.extensionparameter = ''
+    project.ext.extension_extract_file = null
   }
-  project.ext.xtext_version = "2.5.1"
 
-  project.version = "1.0.0"
-  project.group = "com.opitzconsulting.orcas"
+  if( getRootProject().hasProperty('extensionname_internal') )
+  {
+    project.ext.extensionname_internal = getRootProject().extensionname_internal + "-"
+  }
+  else
+  {
+    project.ext.extensionname_internal = ""
+  }
+
+  if( getRootProject().hasProperty('extension_artifact_id_prefix') )
+  {
+    project.ext.extensionname_external = getRootProject().extension_artifact_id_prefix + "-"
+    project.ext.extensiongroup = getRootProject().extension_artifact_group
+    project.ext.extensionversion = getRootProject().extension_artifact_version
+    project.ext.externalextension = true
+  }
+  else
+  {
+    project.ext.extensionname_external = ""
+    project.ext.extensiongroup = project.group
+    project.ext.extensionversion = project.version
+    project.ext.externalextension = false
+  }
 
   project.buildDir = project.ext.tmp_folder + "/" + project.path.replaceAll( ":", "_" )
 }

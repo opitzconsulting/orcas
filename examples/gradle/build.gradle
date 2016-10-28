@@ -18,8 +18,7 @@ buildscript {
                           mvn install:install-file "-Dfile=C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar" -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.1.0.7 -Dpackaging=jar
  
                           you can also provide a direct path to it:
-                          <scope>system</scope> 
-                          <systemPath>C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar</systemPath>
+                          classpath file('C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar')
 
                           the driver is also accessible via http://maven.oracle.com, note that this requires a login-configuration
 */

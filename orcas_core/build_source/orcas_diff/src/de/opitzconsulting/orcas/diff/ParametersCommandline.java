@@ -1,6 +1,7 @@
 package de.opitzconsulting.orcas.diff;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -10,16 +11,32 @@ import org.apache.log4j.LogManager;
 
 public class ParametersCommandline extends Parameters
 {
+  public static void setupLog4jLoglevel( Parameters pParameters )
+  {
+    if( "nologging".equals( pParameters.getloglevel() ) )
+    {
+      LogManager.getRootLogger().setLevel( Level.ERROR );
+    }
+    else
+    {
+      LogManager.getRootLogger().setLevel( Level.toLevel( pParameters.getloglevel().toUpperCase() ) );
+    }
+  }
+
   public static enum ParameterTypeMode
   {
-    ORCAS_MAIN, ORCAS_LOAD_EXTRACT, ORCAS_EXTRACT_VIEWS, ORCAS_CHECK_CONNECTION, ORCAS_SCRIPT
+    ORCAS_MAIN, ORCAS_EXTRACT_STATICS, ORCAS_EXTRACT_REPLACEABLES, ORCAS_CHECK_CONNECTION, ORCAS_SCRIPT, ORCAS_INITIALIZE_ORCAS_DB, ORCAS_UPDATE_REPLACEABLES
   }
 
   private String _prefix;
 
   public static Parameters parseFromCommandLine( String[] pArgs, ParameterTypeMode pParameterTypeMode )
   {
-    return new ParametersCommandline( pArgs, pParameterTypeMode );
+    ParametersCommandline lReturn = new ParametersCommandline( pArgs, pParameterTypeMode );
+
+    setupLog4jLoglevel( lReturn );
+
+    return lReturn;
   }
 
   private ParametersCommandline( String[] pArgs, ParameterTypeMode pParameterTypeMode )
@@ -38,6 +55,7 @@ public class ParametersCommandline extends Parameters
 
     int lParameterIndex = 0;
 
+    _keepDriverClassLoadMessages = getParameterFlag( lParameterMap.get( lParameterIndex++ ) );
     _jdbcConnectParameters._jdbcDriver = getParameterString( lParameterMap.get( lParameterIndex++ ) );
     _jdbcConnectParameters._jdbcUrl = getParameterString( lParameterMap.get( lParameterIndex++ ) );
     _jdbcConnectParameters._jdbcUser = getParameterString( lParameterMap.get( lParameterIndex++ ) );
@@ -86,9 +104,15 @@ public class ParametersCommandline extends Parameters
       _orderColumnsByName = getParameterFlag( lParameterMap.get( lParameterIndex++ ) );
       _extensionParameter = getParameterString( lParameterMap.get( lParameterIndex++ ) );
       _logname = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+
+      _orcasJdbcConnectParameters = new JdbcConnectParameters();
+      _orcasJdbcConnectParameters._jdbcDriver = _jdbcConnectParameters._jdbcDriver;
+      _orcasJdbcConnectParameters._jdbcUrl = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _orcasJdbcConnectParameters._jdbcUser = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _orcasJdbcConnectParameters._jdbcPassword = getParameterString( lParameterMap.get( lParameterIndex++ ) );
     }
 
-    if( pParameterTypeMode == ParameterTypeMode.ORCAS_LOAD_EXTRACT )
+    if( pParameterTypeMode == ParameterTypeMode.ORCAS_EXTRACT_STATICS )
     {
       _modelFile = getParameterString( lParameterMap.get( lParameterIndex++ ) );
 
@@ -108,12 +132,38 @@ public class ParametersCommandline extends Parameters
       _orderColumnsByName = getParameterFlag( lParameterMap.get( lParameterIndex++ ) );
 
       _removeDefaultValuesFromModel = getParameterFlag( lParameterMap.get( lParameterIndex++ ) );
+
+      _loadExtractWithReverseExtensions = getParameterFlag( lParameterMap.get( lParameterIndex++ ) );
+
+      _orcasJdbcConnectParameters = new JdbcConnectParameters();
+      _orcasJdbcConnectParameters._jdbcDriver = _jdbcConnectParameters._jdbcDriver;
+      _orcasJdbcConnectParameters._jdbcUrl = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _orcasJdbcConnectParameters._jdbcUser = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _orcasJdbcConnectParameters._jdbcPassword = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+
+      _extensionParameter = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+
+      _spoolfolder = getParameterString( lParameterMap.get( lParameterIndex++ ) );
     }
 
-    if( pParameterTypeMode == ParameterTypeMode.ORCAS_EXTRACT_VIEWS )
+    if( pParameterTypeMode == ParameterTypeMode.ORCAS_EXTRACT_REPLACEABLES )
     {
       _viewExtractMode = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _spoolfolder = getParameterString( lParameterMap.get( lParameterIndex++ ) );
       _loglevel = "info";
+    }
+
+    if( pParameterTypeMode == ParameterTypeMode.ORCAS_UPDATE_REPLACEABLES )
+    {
+      _viewExtractMode = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _spoolfolder = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _modelFile = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _logname = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _scriptfolderrecursive = true;
+      _scriptpostfix = ".sql";
+      _scriptprefix = "";
+      _loglevel = "info";
+      _additionalParameters = Collections.emptyList();
     }
 
     if( pParameterTypeMode == ParameterTypeMode.ORCAS_CHECK_CONNECTION )
@@ -156,6 +206,18 @@ public class ParametersCommandline extends Parameters
         }
       }
     }
+
+    if( pParameterTypeMode == ParameterTypeMode.ORCAS_INITIALIZE_ORCAS_DB )
+    {
+      _initializeChecksumTotal = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+      _initializeChecksumExtension = getParameterString( lParameterMap.get( lParameterIndex++ ) );
+
+      _orcasJdbcConnectParameters = _jdbcConnectParameters;
+      _jdbcConnectParameters = null;
+
+      _loglevel = "error";
+      _additionalParameters = Collections.emptyList();
+    }
   }
 
   private void setFailOnError( String pFailonerror )
@@ -163,14 +225,17 @@ public class ParametersCommandline extends Parameters
     if( checkNull( pFailonerror ).equals( "true" ) )
     {
       _failOnErrorMode = FailOnErrorMode.ALWAYS;
+      return;
     }
     if( checkNull( pFailonerror ).equals( "false" ) )
     {
       _failOnErrorMode = FailOnErrorMode.NEVER;
+      return;
     }
     if( checkNull( pFailonerror ).equals( "ignore_drop" ) || checkNull( pFailonerror ).equals( "default" ) )
     {
       _failOnErrorMode = FailOnErrorMode.IGNORE_DROP;
+      return;
     }
 
     throw new IllegalArgumentException( "unknown failonerror param: " + checkNull( pFailonerror ) );

@@ -13,8 +13,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 
@@ -23,20 +21,21 @@ public abstract class Orcas
   protected static Log _log;
   private Parameters _parameters;
 
-  public void mainRun( String[] pArgs )
+  protected void logInfo( String pLogMessage )
   {
-    Parameters lParameters = ParametersCommandline.parseFromCommandLine( pArgs, getParameterTypeMode() );
-
-    mainRun( lParameters );
-
-    if( "nologging".equals( lParameters.getloglevel() ) )
+    if( getParameters().getInfoLogHandler() != null )
     {
-      LogManager.getRootLogger().setLevel( Level.ERROR );
+      getParameters().getInfoLogHandler().logInfo( pLogMessage );
     }
     else
     {
-      LogManager.getRootLogger().setLevel( Level.toLevel( lParameters.getloglevel().toUpperCase() ) );
+      _log.info( pLogMessage );
     }
+  }
+
+  void mainRun( String[] pArgs )
+  {
+    mainRun( ParametersCommandline.parseFromCommandLine( pArgs, getParameterTypeMode() ) );
   }
 
   public void mainRun( Parameters pParameters )
@@ -100,6 +99,19 @@ public abstract class Orcas
     } );
   }
 
+  public static void deleteRecursive( File pFile )
+  {
+    if( pFile.isDirectory() )
+    {
+      for( String temp : pFile.list() )
+      {
+        deleteRecursive( new File( pFile, temp ) );
+      }
+    }
+
+    pFile.delete();
+  }
+
   protected void addSpoolfolderScriptIfNeeded( FileHandlerForLog pFileHandlerForLog )
   {
     try
@@ -118,7 +130,7 @@ public abstract class Orcas
         {
           lSpoolfolder.mkdirs();
         }
-        
+
         if( !lSpoolfolderMainFile.exists() )
         {
           lSpoolfolderMainFile.createNewFile();
@@ -199,5 +211,10 @@ public abstract class Orcas
   private void fileAppendLine( File pFile, String pLine ) throws IOException
   {
     Files.write( pFile.toPath(), Collections.singletonList( pLine ), StandardOpenOption.APPEND );
+  }
+
+  protected void setParameters( Parameters pParameters )
+  {
+    _parameters = pParameters;
   }
 }

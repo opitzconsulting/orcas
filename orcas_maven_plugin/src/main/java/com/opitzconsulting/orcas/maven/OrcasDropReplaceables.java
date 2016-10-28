@@ -8,6 +8,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
 
 @Mojo( name = "dropReplaceables" )
 public class OrcasDropReplaceables extends BaseOrcasMojo
@@ -48,7 +49,7 @@ public class OrcasDropReplaceables extends BaseOrcasMojo
       List<String> lAdditionalParameters = new ArrayList<String>();
       pParameters.setAdditionalParameters( lAdditionalParameters );
 
-      pParameters.setScriptUrl( getClass().getResource( "/delete_replacable_objects.sql" ), "delete_replacable_objects.sql" );
+      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_delete_replacable_objects(), "delete_replacable_objects.sql" );
       lAdditionalParameters.clear();
       lAdditionalParameters.add( excludewherepackage );
       lAdditionalParameters.add( excludewheretrigger );
@@ -57,7 +58,7 @@ public class OrcasDropReplaceables extends BaseOrcasMojo
       lAdditionalParameters.add( excludewhereprocedure );
       new OrcasScriptRunner().mainRun( pParameters );
 
-      pParameters.setScriptUrl( getClass().getResource( "/drop_all_types.sql" ), "drop_all_types.sql" );
+      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_drop_all_types(), "drop_all_types.sql" );
       lAdditionalParameters.clear();
       lAdditionalParameters.add( excludewhereobjecttype );
       new OrcasScriptRunner().mainRun( pParameters );

@@ -6,8 +6,11 @@ project.ext.extension_package_name = "extensions"
 apply from: '../extension_build_plugin.gradle'
 
 apply from: '../maven_publish.gradle'
-project.ext.maven_artifactId = 'orcas-extenions'
+project.ext.maven_artifactId_postfix = 'extenions'
+project.ext.extensiondependent = true
 project.ext.maven_description = 'orcas custom extensions (contains only support classes and an empty-extension). If custom-extensions are provided, there will be a custom artifact.'
+
+apply from: '../build_sqlplus_dir_acc.gradle'
 
 class SyncWithDeleteTask extends DefaultTask 
 {
@@ -42,7 +45,7 @@ dependencies
   compile project(':orcas_syex')
 }
 
-task(createSqlplusDir, dependsOn: compileJava) 
+task(createSqlplusDir) 
 {
   doFirst
   {
@@ -83,9 +86,11 @@ task(generatePlsqlExtension)
   inputs.dir "${buildDir}/plsql_extensions"
   inputs.dir "${buildDir}/plsql_reverse_extensions"
   outputs.file new File("${buildDir}/sqlplus/sql/replaceables/packages/b_pa_orcas_extensions.sql")
+  outputs.file new File("${buildDir}/java_plsql/PlSqlExtensionInfo.java")
 
   doLast 
   {
+    def boolean lHasAnyExtensions = false;
     new File("${buildDir}/plsql_extensions").mkdirs();
     new File("${buildDir}/plsql_reverse_extensions").mkdirs();
     new File("${buildDir}/sqlplus/sql/replaceables/packages").mkdirs();
@@ -99,11 +104,13 @@ create or replace package body pa_orcas_extensions is
 """
     new File("${buildDir}/plsql_extensions").listFiles().sort{ it.name }.each
     { 
+      lHasAnyExtensions = true;
       allPlsqlFile << """    return 1; 
 """
     }
     new File("${buildDir}/plsql_reverse_extensions").listFiles().sort{ it.name }.each
     { 
+      lHasAnyExtensions = true;
       allPlsqlFile << """    return 1; 
 """
     }
@@ -153,6 +160,40 @@ create or replace package body pa_orcas_extensions is
 end;
 /
 """
+
+    new File("${buildDir}/java_plsql").mkdirs();
+    def lPlSqlExtensionInfoFile = new File("${buildDir}/java_plsql/PlSqlExtensionInfo.java");
+    lPlSqlExtensionInfoFile.delete();
+    lPlSqlExtensionInfoFile << """
+package de.opitzconsulting.orcas.${project.ext.extension_package_name};
+
+public class PlSqlExtensionInfo
+{
+  public static boolean hasExtensions()
+  {
+"""
+    if( lHasAnyExtensions )
+    { 
+      lPlSqlExtensionInfoFile << """    
+    return true; 
+"""
+    }
+    else
+    {
+      lPlSqlExtensionInfoFile << """
+    return false;
+"""
+    }
+
+    lPlSqlExtensionInfoFile << """
+  }
+
+  public static String getOrcasVersion()
+  {
+    return "${project.version}";
+  }
+}
+"""
   }
 }
 
@@ -170,7 +211,7 @@ task(generateExtensionHeader)
       def package_name = it.getName().split('\\.')[0];
       def plsqlHeaderFile = new File("${buildDir}/sqlplus/sql/replaceables/packages/${package_name}_spec.sql");
       plsqlHeaderFile.delete();
-      plsqlHeaderFile << """create or replace package ${package_name} authid current_user is
+      plsqlHeaderFile << """create or replace package ${package_name} is
 function run( p_input in ot_syex_model ) return ot_syex_model;
 end;
 /
@@ -179,12 +220,22 @@ end;
   }
 }
 
+compileJava.source new File("${buildDir}/java_plsql")
+compileJava.dependsOn generatePlsqlExtension
+
 generatePlsqlExtension.dependsOn copyPlsqlExtensions, copyPlsqlReverseExtensions, createSqlplusDir
 generateExtensionHeader.dependsOn copyPlsqlExtensions, copyPlsqlReverseExtensions, createSqlplusDir
 
 jar.dependsOn generatePlsqlExtension, generateExtensionHeader, copyAllPlsqlExtensions
 
-jar {
-  from "${buildDir}/sqlplus"
+sourceSets {
+  main {
+    resources  {
+      srcDirs "${buildDir}/sqlplus"
+    }
+  }
 }
+
+generateJavaSqlplusDirAccessClass.dependsOn generatePlsqlExtension, generateExtensionHeader, copyAllPlsqlExtensions
+generateJavaSqlplusDirAccessClass.sqlplusDir = "${buildDir}/sqlplus"
 

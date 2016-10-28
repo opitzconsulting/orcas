@@ -2,12 +2,17 @@ package com.opitzconsulting.orcas.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.LogLevel
 
 import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import de.opitzconsulting.orcas.diff.Parameters.InfoLogHandler;
+import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 
 public abstract class BaseOrcasTask extends DefaultTask 
 {
+  def boolean nologging;
+
   @TaskAction
   def executeOrcasTask()
   {
@@ -17,8 +22,6 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.getJdbcConnectParameters().setJdbcUrl( project.orcasconfiguration.jdbcurl );
     lParametersCall.getJdbcConnectParameters().setJdbcUser( project.orcasconfiguration.username );
     lParametersCall.getJdbcConnectParameters().setJdbcPassword( project.orcasconfiguration.password );
-
-    lParametersCall.setOrcasDbUser( project.orcasconfiguration.usernameorcas );
 
     lParametersCall.setTargetplsql( project.orcasconfiguration.targetplsql );
 
@@ -44,7 +47,57 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setDateformat( project.orcasconfiguration.dateformat );
     lParametersCall.setExtensionParameter( project.orcasconfiguration.extensionparameter );
 
+    if( !project.orcasconfiguration.usernameorcas.equals( "" ) )
+    {
+      lParametersCall.setOrcasDbUser( project.orcasconfiguration.usernameorcas );
+    }
+    else
+    {
+      if( project.orcasconfiguration.orcasusername != null )
+      {
+        lParametersCall.setOrcasDbUser( project.orcasconfiguration.orcasusername );
+      }
+      else
+      {
+        lParametersCall.setOrcasDbUser( project.orcasconfiguration.username );
+      }
+    }
+
+    if( project.orcasconfiguration.orcasusername != null )
+    {
+      JdbcConnectParameters lOrcasJdbcConnectParameters = new JdbcConnectParameters();
+      lOrcasJdbcConnectParameters.setJdbcDriver( project.orcasconfiguration.orcasjdbcdriver );
+      lOrcasJdbcConnectParameters.setJdbcUrl( project.orcasconfiguration.orcasjdbcurl == null ? pParameters.getJdbcConnectParameters().getJdbcUrl() : project.orcasconfiguration.orcasjdbcurl );
+      lOrcasJdbcConnectParameters.setJdbcUser( project.orcasconfiguration.orcasusername );
+      lOrcasJdbcConnectParameters.setJdbcPassword( project.orcasconfiguration.orcaspassword );
+      lParametersCall.setOrcasJdbcConnectParameters( lOrcasJdbcConnectParameters );
+    }
+    else
+    {
+      lParametersCall.setOrcasJdbcConnectParameters( lParametersCall.getJdbcConnectParameters() );
+    }
+
+    nologging = "nologging".equals( lParametersCall.getloglevel() ); 
+
+    lParametersCall.setInfoLogHandler(
+      new InfoLogHandler() 
+      {
+        void logInfo( String pLogMessage )
+        {
+          BaseOrcasTask.this.logInfo( pLogMessage );
+        }
+      }
+    );
+  
+    logger.log( nologging ? LogLevel.QUIET : LogLevel.ERROR, "" );
+
     executeOrcasTaskWithParameters( lParametersCall );
+  }
+
+  protected void logInfo( String pLogMessage )
+  {
+    LogLevel lLogLevel = nologging ? LogLevel.QUIET : LogLevel.ERROR;
+    logger.log( lLogLevel, getLogname() + ": " + pLogMessage );
   }
 
   protected abstract String getLogname();

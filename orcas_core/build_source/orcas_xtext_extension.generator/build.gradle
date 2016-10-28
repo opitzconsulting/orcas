@@ -54,6 +54,7 @@ task(build, type: JavaExec)
   classpath configurations.xtextConfiguration
   main = "org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher"
   args "src/workflow/OrcasXtextExtensionGenerator.mwe2"
+  logging.captureStandardOutput LogLevel.INFO
 }
 
 task clean(type: Delete) {

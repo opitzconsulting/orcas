@@ -6,10 +6,12 @@ project.ext.xtext_project_name = "orcas"
 apply from: '../xtext_generator_build_with_plsql_plugin.gradle'
 
 apply from: '../maven_publish.gradle'
-project.ext.maven_artifactId = 'orcas-syex'
+project.ext.maven_artifactId_postfix = 'syex'
+project.ext.extensiondependent = true
 project.ext.maven_description = 'orcas model modified by syntax extensions (contains the original model). If custom-syntax-extensions are provided, there will be a custom artifact.'
 
-
+apply from: '../build_sqlplus_dir_acc.gradle'
+generateJavaSqlplusDirAccessClass.sqlplusDirFilenameList "/sql/replaceables/types/ot_${project.ext.postfix}.sql"
 
 dependencies 
 {
@@ -39,9 +41,14 @@ copyGeneratedXtextFileToOriginalFilesToBuild.dependsOn ':orcas_xtext_extension.g
 
 generateXtext.dependsOn copyGeneratedXtextFileToOriginalFilesToBuild
 
-jar.dependsOn generateObjectTypes
+processResources.dependsOn generateObjectTypes
 
-jar {
-  from "${buildDir}/sqlplus"
+sourceSets {
+  main {
+    resources  {
+      srcDirs "${buildDir}/sqlplus"
+    }
+  }
 }
+
 

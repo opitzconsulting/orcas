@@ -5,7 +5,8 @@ create or replace package body pa_identity_col_trg_gen_helper is
   procedure add_stmt( p_stmt in varchar2 )
   is
   begin  
-    pa_orcas_exec_log.exec_stmt( p_stmt );
+    --pa_orcas_exec_log.exec_stmt( p_stmt );
+    null;
   end;  
 
   procedure add_stmt

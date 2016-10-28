@@ -1,0 +1,66 @@
+    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+      <modelVersion>4.0.0</modelVersion>
+     
+      <groupId>com.opitzconsulting.orcas</groupId>
+      <artifactId>orcas-maven-example</artifactId>
+      <version>1.0.0</version>
+      <packaging>orcas-database-deployment</packaging>
+     
+      <name>Orcas Maven Example with domain extensions</name>
+
+	
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.opitzconsulting.orcas</groupId>
+        <artifactId>orcas-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <extensions>true</extensions>
+
+ 
+
+        <dependencies>
+          <dependency>
+            <groupId>com.opitzconsulting.orcas</groupId>
+            <artifactId>orcas-domainextension-main</artifactId>
+            <version>1.0.0</version>
+          </dependency>
+
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc6</artifactId>
+			<version>11.1.0.7</version>
+			<!-- 
+			  you need to provide the oracle jdbc driver here.
+			  please make sure you find a way that works with the oracle license terms
+
+                          you can install it to your local maven-repository:
+                          mvn install:install-file "-Dfile=C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar" -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.1.0.7 -Dpackaging=jar
+ 
+                          you can also provide a direct path to it:
+                          <scope>system</scope> 
+                          <systemPath>C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar</systemPath>
+
+                          the driver is also accessible via http://maven.oracle.com, note that this requires a login-configuration
+                        -->
+		</dependency>
+	</dependencies>
+
+        <configuration>
+          <jdbcurl>jdbc:oracle:thin:@localhost:1522:XE</jdbcurl>
+          <username>orcas_orderentry</username>
+          <password>orcas_orderentry</password>
+          <orcasjdbcurl>jdbc:oracle:thin:@localhost:1522:XE</orcasjdbcurl>
+          <orcasusername>orcas_orderentry_orcas</orcasusername>
+          <orcaspassword>orcas_orderentry</orcaspassword>
+          <loglevel>info</loglevel>
+	  <extractmodelinputfolder>src/main/sql/statics/domains</extractmodelinputfolder>
+        </configuration>        
+      </plugin>
+    </plugins>
+  </build>
+
+    </project>
+

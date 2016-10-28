@@ -1,58 +1,57 @@
 package de.opitzconsulting.orcas.diff;
 
-import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Struct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
+import de.opitzconsulting.orcas.extensions.PlSqlExtensionInfo;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperCallableStatement;
-import de.opitzconsulting.orcas.sql.WrapperReturnFirstValue;
 import de.opitzconsulting.orcas.syex.load.DataReader;
 import de.opitzconsulting.orcasDsl.Model;
 import de.opitzconsulting.orcasDsl.impl.ModelImpl;
 
 public class PlSqlHandler
 {
-  private static Log _log = LogFactory.getLog( PlSqlHandler.class );
-
-  public static Model callPlSqlExtensions( final Model pModel, final Parameters pParameters, final CallableStatementProvider pCallableStatementProvider, boolean pReverse )
+  public static Model callPlSqlExtensions( final Model pModel, final Parameters pParameters, final boolean pReverse ) throws Exception
   {
-    String lMethodName = pReverse ? "call_reverse_extensions" : "call_extensions";
-
-    String lCallExtensions = "" + //
-                             " { " + //
-                             "   ? = call " +
-                             pParameters.getOrcasDbUser() +
-                             ".pa_orcas_extensions." +
-                             lMethodName +
-                             "( ?, ? ) " + //
-                             " } " + //
-                             "";
-
     final Model lOutputModel = new ModelImpl();
 
-    new WrapperCallableStatement( lCallExtensions, pCallableStatementProvider )
+    JdbcConnectionHandler.runWithCallableStatementProvider( pParameters, pParameters.getOrcasJdbcConnectParameters(), new RunWithCallableStatementProvider()
     {
-      @Override
-      protected void useCallableStatement( CallableStatement pCallableStatement ) throws SQLException
+      public void run( final CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
-        pCallableStatement.registerOutParameter( 1, java.sql.Types.STRUCT, (pParameters.getOrcasDbUser() + ".ot_syex_model").toUpperCase() );
-        pCallableStatement.setObject( 2, createDataWriter( pCallableStatementProvider ).getStructModel( pModel ) );
-        pCallableStatement.setString( 3, pParameters.getExtensionParameter() );
+        String lMethodName = pReverse ? "call_reverse_extensions" : "call_extensions";
+        String lCallExtensions = "" + //
+                                 " { " + //
+                                 "   ? = call " +
+                                 pParameters.getOrcasDbUser() +
+                                 ".pa_orcas_extensions." +
+                                 lMethodName +
+                                 "( ?, ? ) " + //
+                                 " } " + //
+                                 "";
+        new WrapperCallableStatement( lCallExtensions, pCallableStatementProvider )
+        {
+          @Override
+          protected void useCallableStatement( CallableStatement pCallableStatement ) throws SQLException
+          {
+            pCallableStatement.registerOutParameter( 1, java.sql.Types.STRUCT, (pParameters.getOrcasDbUser() + ".ot_syex_model").toUpperCase() );
+            pCallableStatement.setObject( 2, createDataWriter( pCallableStatementProvider ).getStructModel( pModel ) );
+            pCallableStatement.setString( 3, pParameters.getExtensionParameter() );
 
-        pCallableStatement.execute();
+            pCallableStatement.execute();
 
-        DataReader.setIntNullValue( DiffRepository.getNullIntValue() );
-        DataReader.loadIntoModel( lOutputModel, (Struct)pCallableStatement.getObject( 1 ) );
+            DataReader.setIntNullValue( DiffRepository.getNullIntValue() );
+            DataReader.loadIntoModel( lOutputModel, (Struct)pCallableStatement.getObject( 1 ) );
+          }
+        }.execute();
       }
-    }.execute();
+    } );
 
     return lOutputModel;
   }
@@ -108,19 +107,8 @@ public class PlSqlHandler
     }.execute();
   }
 
-  public static boolean isPlSqlEextensionsExistst( Parameters pParameters, CallableStatementProvider pCallableStatementProvider )
+  public static boolean isPlSqlEextensionsExistst()
   {
-    String lOrcasDbUser = pParameters.getOrcasDbUser();
-
-    try
-    {
-      return BigDecimal.valueOf( 1 ).equals( new WrapperReturnFirstValue( "select " + lOrcasDbUser + ".pa_orcas_extensions.is_extensions_exists() from dual", pCallableStatementProvider ).executeForValue() );
-    }
-    catch( Exception e )
-    {
-      // package pa_orcas_extensions may not be installed 
-      _log.debug( e, e );
-      return false;
-    }
+    return PlSqlExtensionInfo.hasExtensions();
   }
 }

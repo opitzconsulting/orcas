@@ -1,6 +1,8 @@
 package de.opitzconsulting.orcas.diff;
 
+import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
+import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 
 public class OrcasCheckConnection extends Orcas
 {
@@ -20,7 +22,12 @@ public class OrcasCheckConnection extends Orcas
   {
     try
     {
-      JdbcConnectionHandler.createCallableStatementProvider( getParameters() );
+      JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), new RunWithCallableStatementProvider()
+      {
+        public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
+        {
+        }
+      } );
     }
     catch( Exception e )
     {

@@ -7,6 +7,7 @@ import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.extensions.AllExtensions;
@@ -41,107 +42,121 @@ public class OrcasMain extends Orcas
     }
     else
     {
-      CallableStatementProvider lCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( getParameters() );
-      InitDiffRepository.init( lCallableStatementProvider );
-
-      _log.info( "starting orcas statics" );
-
-      Model lSyexModel;
-
-      if( getParameters().getModelFile().endsWith( "xml" ) )
+      JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), new RunWithCallableStatementProvider()
       {
-        lSyexModel = XtextFileLoader.loadModelXml( getParameters().getModelFile() );
-      }
-      else
-      {
-        if( getParameters().getSqlplustable() )
+        public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
         {
-          _log.info( "loading sqlplus data" );
-          lSyexModel = loadModelFromSqlplusTable( getParameters(), lCallableStatementProvider );
+          InitDiffRepository.init( pCallableStatementProvider );
+
+          logInfo( "starting orcas statics" );
+
+          Model lSyexModel;
+
+          if( getParameters().getModelFile().endsWith( "xml" ) )
+          {
+            lSyexModel = XtextFileLoader.loadModelXml( getParameters().getModelFile() );
+          }
+          else
+          {
+            if( getParameters().getSqlplustable() )
+            {
+              logInfo( "loading sqlplus data" );
+              lSyexModel = loadModelFromSqlplusTable( getParameters() );
+            }
+            else
+            {
+              logInfo( "loading files" );
+              XtextFileLoader.initXtext();
+              lSyexModel = XtextFileLoader.loadModelDslFolder( getParameters() );
+            }
+
+            if( new AllExtensions().hasExtension() )
+            {
+              logInfo( "calling java extensions" );
+              lSyexModel = callJavaExtensions( lSyexModel );
+            }
+
+            if( PlSqlHandler.isPlSqlEextensionsExistst() )
+            {
+              logInfo( "calling pl/sql extensions" );
+              lSyexModel = PlSqlHandler.callPlSqlExtensions( lSyexModel, getParameters(), false );
+            }
+          }
+
+          lSyexModel = new InlineCommentsExtension().transformModel( lSyexModel );
+          lSyexModel = new InlineIndexExtension().transformModel( lSyexModel );
+
+          if( getParameters().isCreatemissingfkindexes() )
+          {
+            lSyexModel = new AddFkIndexExtension().transformModel( lSyexModel );
+          }
+
+          if( getParameters().getTargetplsql().equals( "" ) )
+          {
+            logInfo( "loading database" );
+            de.opitzconsulting.origOrcasDsl.Model lDatabaseModel = new LoadIst( pCallableStatementProvider, getParameters() ).loadModel( true );
+
+            logInfo( "building diff" );
+            DiffRepository.getModelMerge().cleanupValues( lDatabaseModel );
+            de.opitzconsulting.origOrcasDsl.Model lSollModel = TransformSyexOrig.convertModel( lSyexModel );
+            DiffRepository.getModelMerge().cleanupValues( lSollModel );
+            DiffResult lDiffResult = new OrcasDiff( pCallableStatementProvider, getParameters() ).compare( lSollModel, lDatabaseModel );
+
+            handleDiffResult( getParameters(), pCallableStatementProvider, lDiffResult );
+          }
+          else
+          {
+            logInfo( "executing " + getParameters().getTargetplsql() );
+            PlSqlHandler.callTargetPlSql( lSyexModel, getParameters(), pCallableStatementProvider );
+          }
+
+          logInfo( "done orcas statics" );
         }
-        else
-        {
-          _log.info( "loading files" );
-          XtextFileLoader.initXtext();
-          lSyexModel = XtextFileLoader.loadModelDslFolder( getParameters() );
-        }
-
-        _log.info( "calling java extensions" );
-        lSyexModel = callJavaExtensions( lSyexModel );
-
-        if( PlSqlHandler.isPlSqlEextensionsExistst( getParameters(), lCallableStatementProvider ) )
-        {
-          _log.info( "calling pl/sql extensions" );
-          lSyexModel = PlSqlHandler.callPlSqlExtensions( lSyexModel, getParameters(), lCallableStatementProvider, false );
-        }
-      }
-
-      lSyexModel = new InlineCommentsExtension().transformModel( lSyexModel );
-      lSyexModel = new InlineIndexExtension().transformModel( lSyexModel );
-
-      if( getParameters().isCreatemissingfkindexes() )
-      {
-        lSyexModel = new AddFkIndexExtension().transformModel( lSyexModel );
-      }
-
-      if( getParameters().getTargetplsql().equals( "" ) )
-      {
-        _log.info( "loading database" );
-        de.opitzconsulting.origOrcasDsl.Model lDatabaseModel = new LoadIst( lCallableStatementProvider, getParameters() ).loadModel( true );
-
-        _log.info( "building diff" );
-        DiffRepository.getModelMerge().cleanupValues( lDatabaseModel );
-        de.opitzconsulting.origOrcasDsl.Model lSollModel = TransformSyexOrig.convertModel( lSyexModel );
-        DiffRepository.getModelMerge().cleanupValues( lSollModel );
-        DiffResult lDiffResult = new OrcasDiff( lCallableStatementProvider, getParameters() ).compare( lSollModel, lDatabaseModel );
-
-        handleDiffResult( getParameters(), lCallableStatementProvider, lDiffResult );
-      }
-      else
-      {
-        _log.info( "executing " + getParameters().getTargetplsql() );
-        PlSqlHandler.callTargetPlSql( lSyexModel, getParameters(), lCallableStatementProvider );
-      }
-
-      _log.info( "done orcas statics" );
+      } );
     }
   }
 
-  private static Model loadModelFromSqlplusTable( final Parameters pParameters, CallableStatementProvider pCallableStatementProvider )
+  private static Model loadModelFromSqlplusTable( final Parameters pParameters ) throws Exception
   {
-    String lCallExtensions = "" + //
-                             " declare" +
-                             " v_model " +
-                             pParameters.getOrcasDbUser() +
-                             ".ot_syex_model;" +
-                             " v_anydata SYS.ANYDATA;" +
-                             " begin " + //
-                             "   select model into v_anydata from " +
-                             pParameters.getOrcasDbUser() +
-                             ".orcas_sqlplus_model;" +
-                             " if( v_anydata.getObject( v_model ) = DBMS_TYPES.SUCCESS )" +
-                             " then " +
-                             "    null; " +
-                             " end if;" + //
-                             " ? := v_model;" + //
-                             " end; " + //
-                             "";
-
     final Model lOutputModel = new ModelImpl();
 
-    new WrapperCallableStatement( lCallExtensions, pCallableStatementProvider )
+    JdbcConnectionHandler.runWithCallableStatementProvider( pParameters, pParameters.getOrcasJdbcConnectParameters(), new RunWithCallableStatementProvider()
     {
-      @Override
-      protected void useCallableStatement( CallableStatement pCallableStatement ) throws SQLException
+      public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
-        pCallableStatement.registerOutParameter( 1, java.sql.Types.STRUCT, (pParameters.getOrcasDbUser() + ".ot_syex_model").toUpperCase() );
+        String lCallExtensions = "" + //
+                                 " declare" +
+                                 " v_model " +
+                                 pParameters.getOrcasDbUser() +
+                                 ".ot_syex_model;" +
+                                 " v_anydata SYS.ANYDATA;" +
+                                 " begin " + //
+                                 "   select model into v_anydata from " +
+                                 pParameters.getOrcasDbUser() +
+                                 ".orcas_sqlplus_model;" +
+                                 " if( v_anydata.getObject( v_model ) = DBMS_TYPES.SUCCESS )" +
+                                 " then " +
+                                 "    null; " +
+                                 " end if;" + //
+                                 " ? := v_model;" + //
+                                 " end; " + //
+                                 "";
 
-        pCallableStatement.execute();
+        new WrapperCallableStatement( lCallExtensions, pCallableStatementProvider )
+        {
+          @Override
+          protected void useCallableStatement( CallableStatement pCallableStatement ) throws SQLException
+          {
+            pCallableStatement.registerOutParameter( 1, java.sql.Types.STRUCT, (pParameters.getOrcasDbUser() + ".ot_syex_model").toUpperCase() );
 
-        DataReader.setIntNullValue( DiffRepository.getNullIntValue() );
-        DataReader.loadIntoModel( lOutputModel, (Struct)pCallableStatement.getObject( 1 ) );
+            pCallableStatement.execute();
+
+            DataReader.setIntNullValue( DiffRepository.getNullIntValue() );
+            DataReader.loadIntoModel( lOutputModel, (Struct)pCallableStatement.getObject( 1 ) );
+          }
+        }.execute();
       }
-    }.execute();
+    } );
 
     return lOutputModel;
   }
@@ -160,13 +175,13 @@ public class OrcasMain extends Orcas
       {
         lScriptLines.add( lLine );
         lScriptLines.add( "/" );
-        _log.info( lLine );
-        _log.info( "/" );
+        logInfo( lLine );
+        logInfo( "/" );
       }
       else
       {
         lScriptLines.add( lLine + ";" );
-        _log.info( lLine + ";" );
+        logInfo( lLine + ";" );
       }
 
       if( !pParameters.isLogonly() )
@@ -181,28 +196,41 @@ public class OrcasMain extends Orcas
     }
   }
 
-  private void doSchemaSync( Parameters pParameters ) throws FileNotFoundException
+  private void doSchemaSync( final Parameters pParameters ) throws Exception
   {
-    _log.info( "starting orcas statics schema sync" );
+    logInfo( "starting orcas statics schema sync" );
 
-    _log.info( "loading source database" );
-    CallableStatementProvider lSrcCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( pParameters, pParameters.getSrcJdbcConnectParameters() );
-    InitDiffRepository.init( lSrcCallableStatementProvider );
-    de.opitzconsulting.origOrcasDsl.Model lSrcModel = new LoadIst( lSrcCallableStatementProvider, pParameters ).loadModel( false );
-    DiffRepository.getModelMerge().cleanupValues( lSrcModel );
+    logInfo( "loading source database" );
+    final de.opitzconsulting.origOrcasDsl.Model[] lSrcModel = new de.opitzconsulting.origOrcasDsl.Model[1];
+    JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), pParameters.getSrcJdbcConnectParameters(), new RunWithCallableStatementProvider()
+    {
+      public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
+      {
+        CallableStatementProvider lSrcCallableStatementProvider = pCallableStatementProvider;
+        InitDiffRepository.init( lSrcCallableStatementProvider );
+        lSrcModel[0] = new LoadIst( lSrcCallableStatementProvider, pParameters ).loadModel( false );
+        DiffRepository.getModelMerge().cleanupValues( lSrcModel[0] );
+      }
+    } );
 
-    _log.info( "loading destination database" );
-    CallableStatementProvider lDestCallableStatementProvider = JdbcConnectionHandler.createCallableStatementProvider( pParameters, pParameters.getJdbcConnectParameters() );
-    InitDiffRepository.init( lDestCallableStatementProvider );
-    de.opitzconsulting.origOrcasDsl.Model lDstModel = new LoadIst( lDestCallableStatementProvider, pParameters ).loadModel( true );
-    DiffRepository.getModelMerge().cleanupValues( lDstModel );
+    logInfo( "loading destination database" );
+    JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), new RunWithCallableStatementProvider()
+    {
+      public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
+      {
+        CallableStatementProvider lDestCallableStatementProvider = pCallableStatementProvider;
+        InitDiffRepository.init( lDestCallableStatementProvider );
+        de.opitzconsulting.origOrcasDsl.Model lDstModel = new LoadIst( lDestCallableStatementProvider, pParameters ).loadModel( true );
+        DiffRepository.getModelMerge().cleanupValues( lDstModel );
 
-    _log.info( "building diff" );
-    DiffResult lDiffResult = new OrcasDiff( lDestCallableStatementProvider, pParameters ).compare( lSrcModel, lDstModel );
+        logInfo( "building diff" );
+        DiffResult lDiffResult = new OrcasDiff( lDestCallableStatementProvider, pParameters ).compare( lSrcModel[0], lDstModel );
 
-    handleDiffResult( pParameters, lDestCallableStatementProvider, lDiffResult );
+        handleDiffResult( pParameters, lDestCallableStatementProvider, lDiffResult );
 
-    _log.info( "done orcas statics schema sync" );
+        logInfo( "done orcas statics schema sync" );
+      }
+    } );
   }
 
   private Model callJavaExtensions( Model lSyexModel )

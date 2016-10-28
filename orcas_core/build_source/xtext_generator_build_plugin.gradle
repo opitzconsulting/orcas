@@ -49,6 +49,13 @@ task(generateXtext, dependsOn: copyFilesToBuild, type: JavaExec)
   classpath "${project.ext.copy_original_folder}/src"
   main = "org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher"
   args "${project.ext.mwe2_file_name}"
+  logging.captureStandardOutput LogLevel.INFO
+  logging.captureStandardError LogLevel.INFO
+
+  doFirst
+  {
+    new File("${project.ext.copy_folder_root}/xtext-generated").deleteDir();
+  }
 
   doLast
   {
