@@ -35,3 +35,7 @@ At the moment we need to issue the following command chain to deploy into the st
     gradle clean generatePomFileForMavenJavaPublication pomExtremeMover preparePublication publish
 
 At first we clean up temporary files with `clean` and generate the Maven POM files from the Gradle configuration with `generatePomFileForMavenJavaPublication`. These files are then renamed to meet the correct naming for Maven by `pomExtremeMover`. Finally the publication is prepared and performed by `preparePublication` and `publish`.
+
+
+https://oss.sonatype.org/
+

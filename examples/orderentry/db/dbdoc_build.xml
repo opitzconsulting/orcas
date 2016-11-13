@@ -1,4 +1,5 @@
-<?xml version = '1.0' encoding = 'windows-1252'?> <project default="dbdoc" basedir=".">
+<?xml version = '1.0' encoding = 'windows-1252'?> 
+<project default="dbdoc" basedir="." name="orderentrydbdoc">
   <import file="../distribution/ant_default_include.xml"/>
 
   <property name="orcas_dbdoc_dir" value="${distributiondir}/../../../orcas_dbdoc"/>

@@ -7,7 +7,7 @@
   </target>
 
   <target name="orcas_initialize" depends="show_location">
-    <orcas_initialize extensionfolder="../../../orcas_domain_extension/extensions" extensionextractfile="../../../orcas_domain_extension/xslt_extract/orcas_domain_extract.xsl"/>
+    <orcas_initialize orcasprebuildversion="com.opitzconsulting.orcas:orcas-domainextension-main:1.0.1"/>
   </target>
 
   <target name="install_schemaowner" depends="show_location">

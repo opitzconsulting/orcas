@@ -3,11 +3,12 @@ subprojects
   project.ext.xtext_version = "2.5.1"
 
   project.group = "com.opitzconsulting.orcas"
-  project.version = "1.0.0"  
+  project.version = "1.0.1"  
 
   repositories 
   {
     mavenCentral()
+    mavenLocal()
   }
 
   if( getRootProject().hasProperty('orcas_tmp_folder') )
@@ -36,6 +37,15 @@ subprojects
   else
   {
     project.ext.extension_extract_file = null
+  }
+
+  if( getRootProject().hasProperty('orcas_prebuild_version') && !getRootProject().orcas_prebuild_version.equals( "" ) )
+  {
+    project.ext.prebuildorcasversion = getRootProject().orcas_prebuild_version
+  }
+  else
+  {
+    project.ext.prebuildorcasversion = null
   }
 
   if( getRootProject().hasProperty('extensionname_internal') )

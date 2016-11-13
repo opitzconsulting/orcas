@@ -1,0 +1,31 @@
+
+change version in (remove snapshot marker):
+build_source/build.gradle
+orcas_maven_plugin/pom.xml (2 entries)
+upload_maven_central/build.gradle
+
+run this in orcas_core/build_source:
+gradle clean
+gradle publishToMavenLocal -Pextensionname_internal=domainextension-plsql -Porcas_extension_folder=../../../orcas_domain_extension_plsql/extensions -Porcas_extension_extract_file=../../../orcas_domain_extension_plsql/xslt_extract/orcas_domain_extract.xsl
+gradle publishToMavenLocal -Pextensionname_internal=domainextension -Porcas_extension_folder=../../../orcas_domain_extension_java/extensions -Porcas_extension_extract_file=../../../orcas_domain_extension_java/xslt_extract/orcas_domain_extract.xsl
+gradle publishToMavenLocal 
+
+in orcas_maven_plugin:
+mvn install
+
+run this in upload_maven_central:
+gradle clean
+gradle publish
+
+close repository on https://oss.sonatype.org/#stagingRepositories
+rlease repository on https://oss.sonatype.org/#stagingRepositories
+
+change version to a new snapshot-version:
+build_source/build.gradle
+orcas_maven_plugin/pom.xml (2 entries)
+upload_maven_central/build.gradle
+
+change version of examples to released version:
+examples/gradle*/build.gradle
+examples/maven*/pom.xml
+

@@ -9,11 +9,18 @@ configurations
 
 dependencies 
 {
-  xtextDistribution project(':orcas')
-  xtextDistribution project(':orcas_diff')
-  xtextDistribution project(':orcas_syex')
-  xtextDistribution project(':orcas_extensions')
-  xtextDistribution project(':orcas_db_objects')
+  if( project.ext.prebuildorcasversion != null )
+  {
+    xtextDistribution project.ext.prebuildorcasversion
+  }
+  else
+  {
+    xtextDistribution project(':orcas_diff')
+  }
+}
+
+dependencies 
+{
   xtextDistribution fileTree(dir: System.getenv("ORACLE_HOME")+"/jdbc/lib", include: '*.jar')
   xtextDistribution fileTree(dir: System.getenv("ORACLE_HOME"), include: '*.jar') // lookup jars directly inroot home-dir for instant clients
 }

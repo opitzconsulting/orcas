@@ -4,35 +4,35 @@
 
 	<groupId>com.opitzconsulting.orcas</groupId>
 	<artifactId>orcas-maven-plugin</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>maven-plugin</packaging>
 
-        <name>com.opitzconsulting.orcas:orcas-maven-plugin</name>
-        <description>orcas maven plugin for orcas usage with maven</description>
+	<name>com.opitzconsulting.orcas:orcas-maven-plugin</name>
+	<description>orcas maven plugin for orcas usage with maven</description>
 
-  <url>http://opitzconsulting.github.io/orcas</url>
-  <inceptionYear>2008</inceptionYear>
-  <scm>
-    <url>https://github.com/opitzconsulting/orcas</url>
-    <connection>scm:git:git://github.com/opitzconsulting/orcas.git</connection>
-    <developerConnection>scm:git:git://github.com/opitzconsulting/orcas.git</developerConnection>
-  </scm>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <developers>
-    <developer>
-      <id>llsand</id>
-      <name>Frank Sanders</name>
-      <email>frank.sanders@opitz-consulting.com</email>
-      <organization>Opitz Consulting</organization>
-      <organizationUrl>http://www.opitz-consulting.com</organizationUrl>
-    </developer>
-  </developers>
+	<url>http://opitzconsulting.github.io/orcas</url>
+	<inceptionYear>2008</inceptionYear>
+	<scm>
+		<url>https://github.com/opitzconsulting/orcas</url>
+		<connection>scm:git:git://github.com/opitzconsulting/orcas.git</connection>
+		<developerConnection>scm:git:git://github.com/opitzconsulting/orcas.git</developerConnection>
+	</scm>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>llsand</id>
+			<name>Frank Sanders</name>
+			<email>frank.sanders@opitz-consulting.com</email>
+			<organization>Opitz Consulting</organization>
+			<organizationUrl>http://www.opitz-consulting.com</organizationUrl>
+		</developer>
+	</developers>
 
 	<dependencies>
 		<dependency>
@@ -43,19 +43,19 @@
 		<dependency>
 			<groupId>com.opitzconsulting.orcas</groupId>
 			<artifactId>orcas-main</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opitzconsulting.orcas</groupId>
 			<artifactId>orcas-db-objects</artifactId>
-			<version>1.0.0</version>
-		</dependency>		
+			<version>1.0.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>xalan</groupId>
 			<artifactId>xalan</artifactId>
 			<version>2.7.2</version>
-		</dependency>		
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>
@@ -71,6 +71,46 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.0.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.3</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 </project>
 

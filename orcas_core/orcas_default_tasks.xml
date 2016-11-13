@@ -1207,7 +1207,6 @@ ${orcas_sql_output}
     <attribute name="passwordorcas" />
     <attribute name="tnsname" />
     <attribute name="tmpfolder" />
-    <attribute name="orcasinternalinstalldb" />
     <sequential>
       <concat destfile="@{tmpfolder}/orcas_internal_checksum_old.properties" append="no">orcas_internal_total_checksum_old=${orcas_internal_total_checksum_new}</concat>
       <concat destfile="@{tmpfolder}/orcas_internal_checksum_old.properties" append="yes">
@@ -1219,6 +1218,7 @@ ${orcas_sql_output}
     <attribute name="tmpfolder" />
     <attribute name="extensionfolder" />
     <attribute name="extensionextractfile" />
+    <attribute name="orcasprebuildversion" />
     <sequential>
       <property environment="orcas_internal_environment" />
       <condition property="orcas_internal_gradle_path" value="${orcas_internal_environment.GRADLE_HOME}/bin/" else="">
@@ -1257,6 +1257,7 @@ ${orcas_sql_output}
         <arg value="-Porcas_tmp_folder=${orcas_internal_tmpfolder}/gradle_build" />
         <arg value="-Porcas_extension_folder=${orcas_internal_extensionfolder}" />
         <arg value="-Porcas_extension_extract_file=${orcas_internal_extensionextractfile}" />
+        <arg value="-Porcas_prebuild_version=@{orcasprebuildversion}" />
       </exec>
     </sequential>
   </macrodef>       
@@ -1306,6 +1307,7 @@ ${orcas_sql_output}
     <attribute name="prebuildfile" default="" />
     <attribute name="orcasinternalinstalldb" default="false" />
     <attribute name="extensionextractfile" default="" />
+    <attribute name="orcasprebuildversion" default="" />
     <sequential>
       <fail message="Unsupported Java version: ${ant.java.version}. Java version 1.7 or greater required.">
         <condition>
@@ -1353,7 +1355,7 @@ ${orcas_sql_output}
           <equals arg1="${orcas_internal_skip_initialize}" arg2="true"/>
         </not>
         <then>        
-          <echo message="orcas_initialize (setup db: ${orcas_internal_install_db})"/>
+          <echo message="orcas_initialize"/>
         
           <mkdir dir="@{tmpfolder}" />
 
@@ -1434,25 +1436,18 @@ ${orcas_sql_output}
                   <unzip src="@{prebuildfile}" dest="@{tmpfolder}/gradle_build" />
                 </then>      
                 <else>
-                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionextractfile="@{extensionextractfile}" />                
+                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionextractfile="@{extensionextractfile}" orcasprebuildversion="@{orcasprebuildversion}" />                
                 </else>
               </if>      
 
-              <if>
-                <equals arg1="${orcas_internal_install_db}" arg2="true"/>
-                <then>  
-                  <orcas_check_connection user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
-                  <orcas_check_connection user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"/>
-                  <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" />
-                </then>
-              </if>
+              <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" />
               <if>
                 <equals arg1="@{setupliquibase}" arg2="true"/>
                 <then>        
                   <orcas_liquibase changeLogFile="${orcas_dir}/sql_util_scripts/emptyChangeLog.xml" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" orcasinternalrundirect="true"/>  
                 </then>                  
               </if>   
-              <orcas_internal_update_checksum userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" orcasinternalinstalldb="${orcas_internal_install_db}" />
+              <orcas_internal_update_checksum userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
             </then>      
             <else>      
               <if>
@@ -1471,18 +1466,8 @@ ${orcas_sql_output}
                       <equals arg1="@{prebuildmode}" arg2="use"/>
                     </condition>
                   </fail>     
-                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionextractfile="@{extensionextractfile}" />
-                  <if>
-                    <not>
-                      <equals arg1="${orcas_internal_extension_checksum_plsql_new}" arg2="${orcas_internal_extension_checksum_plsql_db}"/>
-                    </not>
-                    <then>      
-                      <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" />
-                    </then>      
-                    <else>      
-                      <echo message="skipping orcas_initialize (no changes extension_plsql)"/>
-                    </else>      
-                  </if>    
+                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionextractfile="@{extensionextractfile}" orcasprebuildversion="@{orcasprebuildversion}" />
+                  <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" />
                   <if>
                     <not>
                       <equals arg1="${orcas_internal_extension_checksum_java_new}" arg2="${orcas_internal_extension_checksum_java_old}"/>
@@ -1493,7 +1478,7 @@ ${orcas_sql_output}
                       <echo message="skipping orcas_initialize (no changes extension_java)"/>
                     </else>      
                   </if>                  
-                  <orcas_internal_update_checksum userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" orcasinternalinstalldb="${orcas_internal_install_db}" />
+                  <orcas_internal_update_checksum userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
                 </then>      
                 <else>      
                   <echo message="skipping orcas_initialize (no changes)"/>

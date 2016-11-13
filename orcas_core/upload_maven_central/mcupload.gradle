@@ -1,0 +1,123 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+project.ext.folder = "${project.buildDir}/tmpFolder"  
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+def copyFile( File pSrcFile, File pDstFile ) {
+  if( pDstFile.exists() )
+  { 
+    pDstFile.delete();
+  }
+  pDstFile.getParentFile().mkdirs();
+  pDstFile << pSrcFile.bytes
+}
+
+publishing {
+  repositories {
+    maven {
+      url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+      credentials {
+        username = sonatypeUsername
+        password = sonatypePassword
+      }
+    }
+  }
+}
+
+// The generatePom-Tasks are genearted by the maven-publish-plugin, they are modified here
+tasks.withType(GenerateMavenPom) { Task generatePom ->
+  def artifactId = getName().replace("generatePomFileFor","").replace("Publication","").toLowerCase()
+  
+  generatePom.doLast {        
+    //overwrite the generated pom with the pom from maven-local
+    copyFile file("${project.ext.folder}/"+artifactId+"-"+project.version+".pom"), getDestination()
+  }
+
+  //set dependency for the sign task, just to make sure it is executed (isnt needed for the generatePomFileFor.. task itself). Note, taht the pom is signed before it is generated, that is no problem, because the generated pom is ignored anyways
+  dependsOn tasks.getByName("sign-"+artifactId)
+}
+
+project.ext.mcupload = new CallMe(project)
+
+class CallMe {
+  CallMe(pProject)
+  {
+    project =pProject 
+  }
+
+  def project
+
+  def getSourceFile( File pJarFile, String pEnding ) {
+    String lFileName = pJarFile.getName().substring(0,pJarFile.getName().length()-".jar".length()) + pEnding
+
+    return new File(pJarFile.getParent(),lFileName)
+  }
+
+  def addArtifact(mavenPublication, String pEnding, String pClassifier, String pExtension ) {
+    mavenPublication.artifact(project.file("${project.ext.folder}/"+mavenPublication.artifactId+"-"+mavenPublication.version+pEnding)) {
+      classifier = pClassifier
+      extension  = pExtension
+    }
+  }
+
+  def initMavenPublication(mavenPublication ) {
+    mavenPublication.groupId =project.group
+    mavenPublication.artifactId=mavenPublication.getName()
+    mavenPublication.version =project.version
+
+    def lJarFile = getJarFile(mavenPublication.artifactId);
+
+    def lCopyTask = project.task( "copy-"+mavenPublication.artifactId, type: Copy ) {
+      from getSourceFile( lJarFile, ".pom" )
+      from getSourceFile( lJarFile, ".jar" )
+      from getSourceFile( lJarFile, "-javadoc.jar" )
+      from getSourceFile( lJarFile, "-sources.jar" )
+      into project.file(project.ext.folder)
+    }
+
+    //the pom is added as an artifact by the maven-publish plugin
+    addArtifact mavenPublication, ".pom.asc",         null,      "pom.asc"
+    addArtifact mavenPublication, ".jar",             null,      "jar"
+    addArtifact mavenPublication, ".jar.asc",         null,      "jar.asc"
+    addArtifact mavenPublication, "-javadoc.jar",     "javadoc", "jar"
+    addArtifact mavenPublication, "-javadoc.jar.asc", "javadoc", "jar.asc"
+    addArtifact mavenPublication, "-sources.jar",     "sources", "jar"
+    addArtifact mavenPublication, "-sources.jar.asc", "sources", "jar.asc"
+
+    def lSignTask = project.task( "sign-"+mavenPublication.artifactId, type: Sign, dependsOn: lCopyTask ) {
+      sign project.file("${project.ext.folder}/"+mavenPublication.artifactId+"-"+mavenPublication.version+".pom") 
+      sign project.file("${project.ext.folder}/"+mavenPublication.artifactId+"-"+mavenPublication.version+".jar") 
+      sign project.file("${project.ext.folder}/"+mavenPublication.artifactId+"-"+mavenPublication.version+"-javadoc.jar") 
+      sign project.file("${project.ext.folder}/"+mavenPublication.artifactId+"-"+mavenPublication.version+"-sources.jar") 
+      outputs.upToDateWhen { false }
+    }
+  }
+
+  // generates a configuration with a dependency to lookup the jar file from maven-local. The configuration is not needed elsewhere.
+  def getJarFile( String pArtifactId ) {
+    def lConfigurationName = "uploadMaven"+pArtifactId;
+    def lConfiguration = project.configurations.create(lConfigurationName);
+
+    project.dependencies
+    {
+      add(lConfigurationName, ""+project.group+":"+pArtifactId+":"+project.version)
+    }
+
+    return lConfiguration.fileCollection(lConfiguration.getDependencies().iterator().next()).filter {file-> file.getName().equals(pArtifactId+"-"+project.version+".jar") }.getSingleFile()
+  }
+
+
+  // call this to add the given artifact to the publication you want to upload. Version and group are taken from the project.
+  def publish( String pArtifactId ) {
+    project.publishing.publications.create(pArtifactId,MavenPublication)
+    initMavenPublication(project.publishing.publications.getByName(pArtifactId));
+  }
+}
+
+
+

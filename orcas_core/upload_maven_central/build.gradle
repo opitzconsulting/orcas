@@ -1,0 +1,26 @@
+project.buildDir = ".gradle/build"
+
+apply from: 'mcupload.gradle'
+
+project.group = "com.opitzconsulting.orcas"
+project.version = "1.0.1"  
+
+project.ext.mcupload.publish("orcas-db-objects")
+project.ext.mcupload.publish("orcas-orig")
+
+project.ext.mcupload.publish("orcas-maven-plugin")
+
+project.ext.mcupload.publish("orcas-extenions")
+project.ext.mcupload.publish("orcas-generated")
+project.ext.mcupload.publish("orcas-gradle-plugin")
+project.ext.mcupload.publish("orcas-main")
+project.ext.mcupload.publish("orcas-syex")
+project.ext.mcupload.publish("orcas-xslt-extract")
+
+project.ext.mcupload.publish("orcas-domainextension-plsql-extenions")
+project.ext.mcupload.publish("orcas-domainextension-plsql-generated")
+project.ext.mcupload.publish("orcas-domainextension-plsql-gradle-plugin")
+project.ext.mcupload.publish("orcas-domainextension-plsql-main")
+project.ext.mcupload.publish("orcas-domainextension-plsql-syex")
+project.ext.mcupload.publish("orcas-domainextension-plsql-xslt-extract")
+

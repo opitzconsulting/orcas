@@ -24,7 +24,7 @@
         <dependencies>
           <dependency>
             <groupId>com.opitzconsulting.orcas</groupId>
-            <artifactId>orcas-domainextension-main</artifactId>
+            <artifactId>orcas-domainextension-plsql-main</artifactId>
             <version>1.0.0</version>
           </dependency>
 
