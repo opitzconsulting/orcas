@@ -1,7 +1,7 @@
 
 change version in (remove snapshot marker):
 build_source/build.gradle
-orcas_maven_plugin/pom.xml (2 entries)
+orcas_maven_plugin/pom.xml (3 entries)
 upload_maven_central/build.gradle
 
 run this in orcas_core/build_source:
@@ -22,7 +22,7 @@ rlease repository on https://oss.sonatype.org/#stagingRepositories
 
 change version to a new snapshot-version:
 build_source/build.gradle
-orcas_maven_plugin/pom.xml (2 entries)
+orcas_maven_plugin/pom.xml (3 entries)
 upload_maven_central/build.gradle
 
 change version of examples to released version:
