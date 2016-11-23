@@ -4,7 +4,7 @@
 
 	<groupId>com.opitzconsulting.orcas</groupId>
 	<artifactId>orcas-maven-plugin</artifactId>
-	<version>2.6.0</version>
+	<version>2.6.1-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 
 	<name>com.opitzconsulting.orcas:orcas-maven-plugin</name>
@@ -43,12 +43,12 @@
 		<dependency>
 			<groupId>com.opitzconsulting.orcas</groupId>
 			<artifactId>orcas-main</artifactId>
-			<version>2.6.0</version>
+			<version>2.6.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opitzconsulting.orcas</groupId>
 			<artifactId>orcas-db-objects</artifactId>
-			<version>2.6.0</version>
+			<version>2.6.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
