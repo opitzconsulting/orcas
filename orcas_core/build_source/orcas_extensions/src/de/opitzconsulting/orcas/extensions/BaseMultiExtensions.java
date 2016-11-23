@@ -8,6 +8,7 @@ import de.opitzconsulting.orcasDsl.Model;
 public abstract class BaseMultiExtensions extends OrcasBaseExtensionWithParameter
 {
   private List<OrcasExtension> _extensions = new ArrayList<OrcasExtension>();
+  private boolean useReverseExtension = false;
 
   protected void addExtension( OrcasExtension pExtension )
   {
@@ -18,7 +19,7 @@ public abstract class BaseMultiExtensions extends OrcasBaseExtensionWithParamete
   {
     Model lModel = pModel;
 
-    for( OrcasExtension lOrcasExtension : _extensions )
+    for( OrcasExtension lOrcasExtension : getExtensions() )
     {
       if( lOrcasExtension instanceof OrcasExtensionWithParameter )
       {
@@ -31,8 +32,33 @@ public abstract class BaseMultiExtensions extends OrcasBaseExtensionWithParamete
     return lModel;
   }
 
+  private List<OrcasExtension> getExtensions()
+  {
+    List<OrcasExtension> lReturn = new ArrayList<OrcasExtension>();
+
+    for( OrcasExtension lOrcasExtension : _extensions )
+    {
+      if( isReverseExtension( lOrcasExtension ) == useReverseExtension )
+      {
+        lReturn.add( lOrcasExtension );
+      }
+    }
+
+    return lReturn;
+  }
+
+  private boolean isReverseExtension( OrcasExtension pOrcasExtension )
+  {
+    return pOrcasExtension instanceof OrcasReverseExtension;
+  }
+
   public boolean hasExtension()
   {
-    return !_extensions.isEmpty();
+    return !getExtensions().isEmpty();
+  }
+
+  public void setUseReverseExtension( boolean pUseReverseExtension )
+  {
+    useReverseExtension = pUseReverseExtension;
   }
 }

@@ -39,7 +39,7 @@ public class DomainExtension02ApplyTableDomains extends OrcasBaseExtensionWithPa
     {
       Column lColumn = EcoreUtil.copy( lDomainColumn.getColumn() );
 
-      lColumn.setName( DomainExtension01HandleExtends.getGeneratedNameColumn( lDomainColumn.getColumnNameRules(), lDomainColumn.getColumn().getName(), pTable.getName(), pTable.getAlias() ) );
+      lColumn.setName( DomainExtensionHelper.getGeneratedNameColumn( lDomainColumn.getColumnNameRules(), lDomainColumn.getColumn().getName(), pTable.getName(), pTable.getAlias() ) );
 
       if( lDomainColumn.isAppend_last() )
       {
@@ -72,7 +72,7 @@ public class DomainExtension02ApplyTableDomains extends OrcasBaseExtensionWithPa
   {
     if( pTable.getDomain() != null )
     {
-      Domain pDomain = DomainExtension01HandleExtends.getDomain( pTable.getDomain(), pModel );
+      Domain pDomain = DomainExtensionHelper.getDomain( pTable.getDomain(), pModel );
 
       applyDomain( pTable, pDomain );
 
@@ -80,8 +80,8 @@ public class DomainExtension02ApplyTableDomains extends OrcasBaseExtensionWithPa
       {
         Table lNewHistoryTable = new TableImpl();
 
-        lNewHistoryTable.setName( DomainExtension01HandleExtends.getGeneratedNameTable( pDomain.getHistoryTable().getTableNameRules(), pTable.getName(), pTable.getAlias() ) );
-        lNewHistoryTable.setAlias( DomainExtension01HandleExtends.getGeneratedNameTable( pDomain.getHistoryTable().getAliasNameRules(), pTable.getName(), pTable.getAlias() ) );
+        lNewHistoryTable.setName( DomainExtensionHelper.getGeneratedNameTable( pDomain.getHistoryTable().getTableNameRules(), pTable.getName(), pTable.getAlias() ) );
+        lNewHistoryTable.setAlias( DomainExtensionHelper.getGeneratedNameTable( pDomain.getHistoryTable().getAliasNameRules(), pTable.getName(), pTable.getAlias() ) );
         lNewHistoryTable.getColumns().addAll( EcoreUtil.copyAll( pTable.getColumns() ) );
 
         for( Column lColumn : lNewHistoryTable.getColumns() )
@@ -94,7 +94,7 @@ public class DomainExtension02ApplyTableDomains extends OrcasBaseExtensionWithPa
 
           if( lColumn.getDomain() != null )
           {
-            ColumnDomain lColumnDomain = DomainExtension01HandleExtends.getColumnDomain( lColumn.getDomain(), pModel );
+            ColumnDomain lColumnDomain = DomainExtensionHelper.getColumnDomain( lColumn.getDomain(), pModel );
 
             lColumn.setData_type( lColumnDomain.getData_type() );
             lColumn.setPrecision( lColumnDomain.getPrecision() );
@@ -121,7 +121,7 @@ public class DomainExtension02ApplyTableDomains extends OrcasBaseExtensionWithPa
 
         if( pDomain.getHistoryTable().getDomain() != null )
         {
-          applyDomain( lNewHistoryTable, DomainExtension01HandleExtends.getDomain( pDomain.getHistoryTable().getDomain(), pModel ) );
+          applyDomain( lNewHistoryTable, DomainExtensionHelper.getDomain( pDomain.getHistoryTable().getDomain(), pModel ) );
         }
 
         pModel.getModel_elements().add( lNewHistoryTable );

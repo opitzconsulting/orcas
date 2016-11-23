@@ -49,26 +49,30 @@ public class OrcasInitializeOrcasDb extends Orcas
           final boolean[] lIsFullInstallNeeded = new boolean[] { true };
           final boolean[] lIsExtensionInstallNeeded = new boolean[] { true };
 
-          try
+          boolean lIsSnapshot = getInitializeChecksumTotal().endsWith( "SNAPSHOT" ) || getInitializeChecksumExtension().endsWith( "SNAPSHOT" );
+          if( !lIsSnapshot )
           {
-            new WrapperIteratorResultSet( "select pa_orcas_checksum.get_total_checksum() total_checksum, pa_orcas_checksum.get_extension_checksum() extension_checksum from dual", pOrcasCallableStatementProvider )
+            try
             {
-              @Override
-              protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+              new WrapperIteratorResultSet( "select pa_orcas_checksum.get_total_checksum() total_checksum, pa_orcas_checksum.get_extension_checksum() extension_checksum from dual", pOrcasCallableStatementProvider )
               {
-                lIsFullInstallNeeded[0] = !pResultSet.getString( "total_checksum" ).equals( getInitializeChecksumTotal() );
-                lIsExtensionInstallNeeded[0] = !pResultSet.getString( "extension_checksum" ).equals( getInitializeChecksumExtension() );
-              }
-            }.execute();
-          }
-          catch( Exception e )
-          {
-            _log.debug( e, e );
+                @Override
+                protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+                {
+                  lIsFullInstallNeeded[0] = !pResultSet.getString( "total_checksum" ).equals( getInitializeChecksumTotal() );
+                  lIsExtensionInstallNeeded[0] = !pResultSet.getString( "extension_checksum" ).equals( getInitializeChecksumExtension() );
+                }
+              }.execute();
+            }
+            catch( Exception e )
+            {
+              _log.debug( e, e );
+            }
           }
 
           if( lIsFullInstallNeeded[0] )
           {
-            logInfo( "initialize orcas-db" );
+            logInfo( "initialize orcas-db" + (lIsSnapshot ? " (SNAPSHOT-version always needs to be updated)" : "") );
 
             installFull( lOrcasScriptRunner, pOrcasCallableStatementProvider );
           }

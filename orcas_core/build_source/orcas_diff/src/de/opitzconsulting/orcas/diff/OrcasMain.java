@@ -70,10 +70,12 @@ public class OrcasMain extends Orcas
               lSyexModel = XtextFileLoader.loadModelDslFolder( getParameters() );
             }
 
-            if( new AllExtensions().hasExtension() )
+            AllExtensions lAllExtensions = new AllExtensions();
+            lAllExtensions.setUseReverseExtension( false );
+            if( lAllExtensions.hasExtension() )
             {
               logInfo( "calling java extensions" );
-              lSyexModel = callJavaExtensions( lSyexModel );
+              lSyexModel = callJavaExtensions( lSyexModel, lAllExtensions, getParameters() );
             }
 
             if( PlSqlHandler.isPlSqlEextensionsExistst() )
@@ -233,14 +235,13 @@ public class OrcasMain extends Orcas
     } );
   }
 
-  private Model callJavaExtensions( Model lSyexModel )
+  public static Model callJavaExtensions( Model lSyexModel, AllExtensions pAllExtensions, Parameters pParameters )
   {
-    AllExtensions lAllExtensions = new AllExtensions();
-    if( getParameters().getExtensionParameter().length() != 0 )
+    if( pParameters.getExtensionParameter().length() != 0 )
     {
-      lAllExtensions.setParameter( getParameters().getExtensionParameter() );
+      pAllExtensions.setParameter( pParameters.getExtensionParameter() );
     }
-    lSyexModel = lAllExtensions.transformModel( lSyexModel );
+    lSyexModel = pAllExtensions.transformModel( lSyexModel );
     return lSyexModel;
   }
 
