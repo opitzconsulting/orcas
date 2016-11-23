@@ -4,8 +4,8 @@ buildscript {
        mavenCentral()
     }
     dependencies {
-        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-domainextension-plsql-gradle-plugin',
-                  version: '1.0.1'
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-domainextension-gradle-plugin',
+                  version: '2.6.0'
 
         classpath "com.oracle:ojdbc6:11.1.0.7"
 
