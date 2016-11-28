@@ -14,6 +14,11 @@ public class FolderHandler
 
   public static List<File> getModelFiles( Parameters pParameters )
   {
+    if( pParameters.getModelFiles() != null )
+    {
+      return pParameters.getModelFiles();
+    }
+
     return getModelFilesRecursive( new File( pParameters.getModelFile() ), pParameters );
   }
 

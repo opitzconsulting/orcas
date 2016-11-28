@@ -1,13 +1,17 @@
 package com.opitzconsulting.orcas.gradle;
 
 import java.io.File;
+import org.gradle.api.file.FileCollection;
 
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 
+
 public class ExecuteOrcasScriptsTask extends BaseOrcasTask
 {
   def scriptfolder;
+
+  FileCollection scriptFiles;
 
   def logname;
 
@@ -19,7 +23,14 @@ public class ExecuteOrcasScriptsTask extends BaseOrcasTask
   @Override
   protected void executeOrcasTaskWithParameters( ParametersCall pParameters )
   {
-    pParameters.setModelFile( project.file(scriptfolder) );
+    if( scriptFiles == null )
+    {
+      pParameters.setModelFile( project.file(scriptfolder) );
+    }
+    else
+    {
+      pParameters.setModelFiles( scriptFiles as List );
+    }
     pParameters.setIsOneTimeScriptMode( false );
     pParameters.setAdditionalParameters( null );
 

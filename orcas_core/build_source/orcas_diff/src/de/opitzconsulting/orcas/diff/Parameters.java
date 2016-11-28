@@ -1,5 +1,6 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 
@@ -92,6 +93,7 @@ public class Parameters
   protected String _initializeChecksumTotal;
   protected String _initializeChecksumExtension;
   protected boolean _keepDriverClassLoadMessages = true;
+  protected List<File> _modelFiles;
 
   protected URL _scriptUrl;
   protected String _scriptUrlFilename;
@@ -329,5 +331,10 @@ public class Parameters
   public boolean isKeepDriverClassLoadMessages()
   {
     return _keepDriverClassLoadMessages;
+  }
+
+  protected List<File> getModelFiles()
+  {
+    return _modelFiles;
   }
 }

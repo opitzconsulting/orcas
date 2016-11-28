@@ -2,11 +2,13 @@ package com.opitzconsulting.orcas.gradle
 
 import de.opitzconsulting.orcas.diff.OrcasMain;
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import org.gradle.api.file.FileCollection;
 
 public class OrcasUpdateStaticsTask extends BaseOrcasTask
 {
   private String logname = "update-statics";
 
+  FileCollection scriptFiles;
 
   @Override
   protected String getLogname()
@@ -17,9 +19,17 @@ public class OrcasUpdateStaticsTask extends BaseOrcasTask
   @Override
   protected void executeOrcasTaskWithParameters( ParametersCall pParameters )
   {
-    if( project.file(project.orcasconfiguration.staticsfolder).exists() )
+    if( scriptFiles == null )
     {
       pParameters.setModelFile( project.file(project.orcasconfiguration.staticsfolder).toString() );
+    }
+    else
+    {
+      pParameters.setModelFiles( scriptFiles as List );
+    }
+
+    if( project.file(project.orcasconfiguration.staticsfolder).exists() || scriptFiles != null )
+    {
       pParameters.setSqlplustable( false );
       pParameters.setOrderColumnsByName( false );
 

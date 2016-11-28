@@ -63,7 +63,7 @@ public class OrcasExtractStatics extends Orcas
 
         Model lSyexModel = TransformOrigSyex.convertModel( lOrigModel );
 
-        if( !getParameters().getModelFile().equals( "" ) )
+        if( getParameters().getModelFiles() != null || !getParameters().getModelFile().equals( "" ) )
         {
           logInfo( "loading additional model files" );
           XtextFileLoader.initXtext();

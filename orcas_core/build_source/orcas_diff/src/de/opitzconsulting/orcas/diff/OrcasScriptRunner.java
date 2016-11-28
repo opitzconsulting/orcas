@@ -47,13 +47,13 @@ public class OrcasScriptRunner extends Orcas
   {
     if( getParameters().isOneTimeScriptMode() )
     {
-      logInfo( "execute one-time-script start: " + getParameters().getModelFile() );
+      logInfo( "execute one-time-script start" + getLogMessageFileDetail() );
     }
     else
     {
       if( getParameters().getScriptUrl() == null )
       {
-        logInfo( "execute script start: " + getParameters().getModelFile() );
+        logInfo( "execute script start" + getLogMessageFileDetail() );
       }
     }
 
@@ -179,6 +179,11 @@ public class OrcasScriptRunner extends Orcas
         }
       }
     } );
+  }
+
+  private String getLogMessageFileDetail()
+  {
+    return getParameters().getModelFiles() == null ? (": " + getParameters().getModelFile()) : "";
   }
 
   public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters ) throws Exception

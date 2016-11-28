@@ -1,5 +1,6 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.io.File;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -175,5 +176,10 @@ public class ParametersCall extends Parameters
   public void setInitializeChecksumExtension( String pInitializeChecksumExtension )
   {
     _initializeChecksumExtension = pInitializeChecksumExtension;
+  }
+
+  protected void setModelFiles( List<File> pModelFiles )
+  {
+    _modelFiles = pModelFiles;
   }
 }
