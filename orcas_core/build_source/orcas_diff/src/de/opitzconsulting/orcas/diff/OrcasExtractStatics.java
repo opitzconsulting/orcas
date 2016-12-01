@@ -66,8 +66,7 @@ public class OrcasExtractStatics extends Orcas
         if( getParameters().getModelFiles() != null || !getParameters().getModelFile().equals( "" ) )
         {
           logInfo( "loading additional model files" );
-          XtextFileLoader.initXtext();
-          lSyexModel.getModel_elements().addAll( XtextFileLoader.loadModelDslFolder( getParameters() ).getModel_elements() );
+          lSyexModel.getModel_elements().addAll( getParameters().getModelLoader().loadModel( getParameters() ).getModel_elements() );
         }
 
         if( PlSqlHandler.isPlSqlEextensionsExistst() && getParameters().isLoadExtractWithReverseExtensions() )

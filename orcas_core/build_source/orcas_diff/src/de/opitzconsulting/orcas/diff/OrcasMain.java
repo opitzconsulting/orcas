@@ -66,8 +66,7 @@ public class OrcasMain extends Orcas
             else
             {
               logInfo( "loading files" );
-              XtextFileLoader.initXtext();
-              lSyexModel = XtextFileLoader.loadModelDslFolder( getParameters() );
+              lSyexModel = getParameters().getModelLoader().loadModel( getParameters() );
             }
 
             AllExtensions lAllExtensions = new AllExtensions();

@@ -287,4 +287,10 @@ public class ParametersCommandline extends Parameters
 
     return pArg;
   }
+
+  @Override
+  public boolean isAbortJvmOnExit()
+  {
+    return !_keepDriverClassLoadMessages;
+  }
 }

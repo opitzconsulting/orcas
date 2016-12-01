@@ -178,8 +178,19 @@ public class ParametersCall extends Parameters
     _initializeChecksumExtension = pInitializeChecksumExtension;
   }
 
-  protected void setModelFiles( List<File> pModelFiles )
+  public void setModelFiles( List<File> pModelFiles )
   {
     _modelFiles = pModelFiles;
+  }
+
+  public void setModelLoader( ModelLoader pModelLoader )
+  {
+    _modelLoader = pModelLoader;
+  }
+
+  @Override
+  public boolean isAbortJvmOnExit()
+  {
+    return false;
   }
 }

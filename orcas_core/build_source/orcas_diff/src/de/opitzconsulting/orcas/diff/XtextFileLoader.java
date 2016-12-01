@@ -57,22 +57,23 @@ public class XtextFileLoader
 
   public static Model loadModelDslFolder( Parameters pParameters )
   {
-    return loadModelDsl( FolderHandler.getModelFiles( pParameters ) );
+    return loadModelDsl( FolderHandler.getModelFiles( pParameters ), pParameters );
   }
 
-  private static Model loadModelDsl( List<File> pModelFiles )
+  public static Model loadModelDsl( List<File> pModelFiles, Parameters pParameters )
   {
+    XtextFileLoader.initXtext();
     Model lReturn = new ModelImpl();
 
     for( File lFile : pModelFiles )
     {
-      lReturn.getModel_elements().addAll( loadModelDslFile( lFile ).getModel_elements() );
+      lReturn.getModel_elements().addAll( loadModelDslFile( lFile, pParameters ).getModel_elements() );
     }
 
     return lReturn;
   }
 
-  private static Model loadModelDslFile( File pFile )
+  private static Model loadModelDslFile( File pFile, Parameters pParameters )
   {
     Resource lResource = resourceSet.createResource( URI.createURI( "dummy:/dummy" + counter++ + ".orcasdsl" ) );
     try
@@ -80,14 +81,21 @@ public class XtextFileLoader
       FileInputStream lInputStream = new FileInputStream( pFile );
       lResource.load( lInputStream, loadOptions );
       lInputStream.close();
-      return (Model)lResource.getContents().get( 0 );
+      Model lModel = (Model)lResource.getContents().get( 0 );
+
+      if( !lResource.getErrors().isEmpty() )
+      {
+        throw new RuntimeException( "parse errors" );
+      }
+
+      return lModel;
     }
     catch( Exception e )
     {
       for( Diagnostic lDiagnostic : lResource.getErrors() )
       {
-        System.err.println( "Error in File: " + pFile );
-        System.err.println( lDiagnostic );
+        Orcas.logError( "Error in File: " + pFile, pParameters );
+        Orcas.logError( lDiagnostic + "", pParameters );
       }
 
       throw new RuntimeException( e );

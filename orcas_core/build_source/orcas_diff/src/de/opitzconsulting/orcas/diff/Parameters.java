@@ -4,7 +4,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.List;
 
-public class Parameters
+import de.opitzconsulting.orcasDsl.Model;
+
+public abstract class Parameters
 {
   public static class JdbcConnectParameters
   {
@@ -94,7 +96,6 @@ public class Parameters
   protected String _initializeChecksumExtension;
   protected boolean _keepDriverClassLoadMessages = true;
   protected List<File> _modelFiles;
-
   protected URL _scriptUrl;
   protected String _scriptUrlFilename;
 
@@ -102,6 +103,14 @@ public class Parameters
 
   private InfoLogHandler _infoLogHandler;
   private String _removePromptPrefix;
+
+  protected ModelLoader _modelLoader = new ModelLoader()
+  {
+    public Model loadModel( Parameters pParameters )
+    {
+      return XtextFileLoader.loadModelDsl( FolderHandler.getModelFiles( pParameters ), pParameters );
+    }
+  };
 
   public boolean isOrderColumnsByName()
   {
@@ -333,8 +342,15 @@ public class Parameters
     return _keepDriverClassLoadMessages;
   }
 
-  protected List<File> getModelFiles()
+  public List<File> getModelFiles()
   {
     return _modelFiles;
   }
+
+  public ModelLoader getModelLoader()
+  {
+    return _modelLoader;
+  }
+
+  public abstract boolean isAbortJvmOnExit();
 }

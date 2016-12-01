@@ -33,6 +33,25 @@ public abstract class Orcas
     }
   }
 
+  public static void logError( String pLogMessage, Parameters pParameters )
+  {
+    if( pParameters.getInfoLogHandler() != null )
+    {
+      pParameters.getInfoLogHandler().logInfo( "error: " + pLogMessage );
+    }
+    else
+    {
+      if( _log != null )
+      {
+        _log.error( pLogMessage );
+      }
+      else
+      {
+        System.err.println( pLogMessage );
+      }
+    }
+  }
+
   void mainRun( String[] pArgs )
   {
     mainRun( ParametersCommandline.parseFromCommandLine( pArgs, getParameterTypeMode() ) );
@@ -50,15 +69,22 @@ public abstract class Orcas
     }
     catch( Exception e )
     {
-      if( _log != null )
+      if( pParameters.isAbortJvmOnExit() )
       {
-        _log.error( e, e );
+        if( _log != null )
+        {
+          _log.error( e, e );
+        }
+        else
+        {
+          e.printStackTrace();
+        }
+        System.exit( -1 );
       }
       else
       {
-        e.printStackTrace();
+        throw new RuntimeException( e );
       }
-      System.exit( -1 );
     }
   }
 
