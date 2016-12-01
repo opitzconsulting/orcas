@@ -11,11 +11,10 @@ gradle publishToMavenLocal -Pextensionname_internal=domainextension -Porcas_exte
 gradle publishToMavenLocal 
 
 in orcas_maven_plugin:
-mvn install
+mvn clean install
 
 run this in upload_maven_central:
-gradle clean
-gradle publish
+gradle clean publish
 
 close repository on https://oss.sonatype.org/#stagingRepositories
 rlease repository on https://oss.sonatype.org/#stagingRepositories
@@ -30,5 +29,6 @@ git commit/push github release
 change version to a new snapshot-version:
 build_source/build.gradle
 orcas_maven_plugin/pom.xml (3 entries)
-upload_maven_central/build.gradle
+
+git commit/push
 
