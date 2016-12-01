@@ -4,6 +4,8 @@ build_source/build.gradle
 orcas_maven_plugin/pom.xml (3 entries)
 upload_maven_central/build.gradle
 
+git commit/push github release
+
 run this in orcas_core/build_source:
 gradle clean
 gradle publishToMavenLocal -Pextensionname_internal=domainextension-plsql -Porcas_extension_folder=../../../orcas_domain_extension_plsql/extensions -Porcas_extension_extract_file=../../../orcas_domain_extension_plsql/xslt_extract/orcas_domain_extract.xsl
