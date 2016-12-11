@@ -23,7 +23,7 @@ public class OrcasCompileAllInvalidTask extends BaseOrcasTask
       pParameters.setIsOneTimeScriptMode( false );
       pParameters.setAdditionalParameters( null );
 
-      new OrcasScriptRunner().mainRun( pParameters );
+      new OrcasScriptRunner().mainRun( modifyParameters( pParameters ) );
     }
     else
     {

@@ -98,8 +98,10 @@ public abstract class Parameters
   protected List<File> _modelFiles;
   protected URL _scriptUrl;
   protected String _scriptUrlFilename;
-
   protected Boolean _loadExtractWithReverseExtensions = true;
+  protected Boolean _multiSchema = false;
+  protected Boolean _multiSchemaDbaViews = false;
+  protected String _multiSchemaExcludewhereowner;
 
   private InfoLogHandler _infoLogHandler;
   private String _removePromptPrefix;
@@ -353,4 +355,19 @@ public abstract class Parameters
   }
 
   public abstract boolean isAbortJvmOnExit();
+
+  public Boolean getMultiSchema()
+  {
+    return checkNull( _multiSchema );
+  }
+
+  public String getMultiSchemaExcludewhereowner()
+  {
+    return _multiSchemaExcludewhereowner;
+  }
+
+  public Boolean getMultiSchemaDbaViews()
+  {
+    return checkNull( _multiSchemaDbaViews );
+  }
 }

@@ -11,6 +11,7 @@ import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 
 public abstract class BaseOrcasTask extends DefaultTask 
 {
+  private def parameterModifier;
   def boolean nologging;
 
   @TaskAction
@@ -103,4 +104,20 @@ public abstract class BaseOrcasTask extends DefaultTask
   protected abstract String getLogname();
 
   protected abstract void executeOrcasTaskWithParameters( ParametersCall pParameters );
+
+  protected void parameters( def pParameterModifier )
+  {
+    parameterModifier = pParameterModifier;
+  }
+
+  protected ParametersCall modifyParameters( ParametersCall pParameters )
+  {
+    if( parameterModifier != null )
+    {
+      parameterModifier.setDelegate( pParameters );
+      parameterModifier();
+    }
+
+    return pParameters;
+  }
 }

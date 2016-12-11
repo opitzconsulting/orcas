@@ -16,6 +16,6 @@ public class OrcasCheckConnectionTask extends BaseOrcasTask
   @Override
   protected void executeOrcasTaskWithParameters( ParametersCall pParameters )
   {
-    new OrcasCheckConnection().mainRun( pParameters );
+    new OrcasCheckConnection().mainRun( modifyParameters( pParameters ) );
   }
 }

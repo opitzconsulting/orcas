@@ -33,7 +33,7 @@ public class OrcasDropReplaceablesTask extends BaseOrcasTask
       lAdditionalParameters.add( project.orcasconfiguration.excludewhereview );
       lAdditionalParameters.add( project.orcasconfiguration.excludewherefunction );
       lAdditionalParameters.add( project.orcasconfiguration.excludewhereprocedure );
-      new OrcasScriptRunner().mainRun( pParameters );
+      new OrcasScriptRunner().mainRun( modifyParameters( pParameters ) );
 
       pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_drop_all_types(), "drop_all_types.sql" );
       lAdditionalParameters.clear();

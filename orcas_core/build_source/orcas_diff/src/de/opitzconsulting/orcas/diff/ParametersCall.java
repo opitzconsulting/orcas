@@ -188,6 +188,21 @@ public class ParametersCall extends Parameters
     _modelLoader = pModelLoader;
   }
 
+  public void setMultiSchema( Boolean pMultiSchema )
+  {
+    _multiSchema = pMultiSchema;
+  }
+
+  public void setMultiSchemaExcludewhereowner( String pMultiSchemaExcludewhereowner )
+  {
+    _multiSchemaExcludewhereowner = pMultiSchemaExcludewhereowner;
+  }
+
+  public void setMultiSchemaDbaViews( Boolean pMultiSchemaDbaViews )
+  {
+    _multiSchemaDbaViews = pMultiSchemaDbaViews;
+  }
+
   @Override
   public boolean isAbortJvmOnExit()
   {

@@ -92,6 +92,11 @@ public class OrcasMain extends Orcas
             lSyexModel = new AddFkIndexExtension().transformModel( lSyexModel );
           }
 
+          if( getParameters().getMultiSchema() )
+          {
+            lSyexModel = new MultiSchemaPrefixIndexExtension().transformModel( lSyexModel );
+          }
+
           if( getParameters().getTargetplsql().equals( "" ) )
           {
             logInfo( "loading database" );

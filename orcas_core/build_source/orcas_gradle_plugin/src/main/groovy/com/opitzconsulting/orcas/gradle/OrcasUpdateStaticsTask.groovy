@@ -40,7 +40,7 @@ public class OrcasUpdateStaticsTask extends BaseOrcasTask
         pParameters.setModelLoader( modelLoader );
       }
 
-      new OrcasMain().mainRun( pParameters );
+      new OrcasMain().mainRun( modifyParameters( pParameters ) );
     }
     else
     {

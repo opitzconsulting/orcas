@@ -45,7 +45,7 @@ public abstract class WrapperPreparedStatement
     {
       if( !handleSQLException( e ) )
       {
-        throw new RuntimeException( e );
+        throw ExceptionManager.createException( e, _sqlString );
       }
     }
     finally

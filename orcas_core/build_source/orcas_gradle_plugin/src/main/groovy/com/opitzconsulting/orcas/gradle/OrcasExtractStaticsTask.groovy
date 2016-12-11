@@ -38,6 +38,6 @@ public class OrcasExtractStaticsTask extends BaseOrcasTask
     }
     pParameters.setSpoolfolder( lExtractstaticsoutfolder );
  
-    new OrcasExtractStatics().mainRun( pParameters );
+    new OrcasExtractStatics().mainRun( modifyParameters( pParameters ) );
   }
 }

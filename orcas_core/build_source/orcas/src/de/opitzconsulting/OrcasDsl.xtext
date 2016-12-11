@@ -9,7 +9,7 @@ ModelElement:
   Table | Sequence | IndexExTable | Comment | Mview;
 
 Table :
-  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
+  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
 
 TablePartitioning :
   "partition" "by" (RangePartitions | HashPartitions | ListPartitions | RefPartitions);
@@ -90,7 +90,7 @@ IndexOrUniqueKey :
   Index | UniqueKey;  
 
 ForeignKey :
-  "constraint" consName=DBNAME "foreign" "key" ("("(srcColumns+=ColumnRef)*")")? "references" destTable=DBNAME ("("(destColumns+=ColumnRef)+")")? ("on" "delete" (delete_rule=FkDeleteRuleType))? ("deferrable" "initially" deferrtype=DeferrType)? (status=EnableType)? (",")?;
+  "constraint" consName=DBNAME "foreign" "key" ("("(srcColumns+=ColumnRef)*")")? "references" destTable=DBNAME_WITH_SCHEMA ("("(destColumns+=ColumnRef)+")")? ("on" "delete" (delete_rule=FkDeleteRuleType))? ("deferrable" "initially" deferrtype=DeferrType)? (status=EnableType)? (",")?;
    
 PrimaryKey :
   ("constraint" consName=DBNAME)? "primary" "key" "(" (pk_columns+=ColumnRef)+ ")" (status=EnableType)? ("using" "index" (reverse="reverse")? ("tablespace" tablespace=DBNAME)?)? (",")?;  
@@ -99,10 +99,10 @@ UniqueKey :
   "constraint" consName=DBNAME "unique" "(" (uk_columns+=ColumnRef)+ ")" ("using" "index" ("tablespace" tablespace=DBNAME)? (indexname=DBNAME)?)? (status=EnableType)? (",")?;  
   
 Index :
-  "index" consName=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? (",")?;  
+  "index" consName=DBNAME_WITH_SCHEMA ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? (",")?;  
   
 IndexExTable:
- "create" (uniqueness="unique"|uniqueness="nonunique")? (bitmap="bitmap")? "index" index_name=DBNAME ("on")? table_name=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? ";";
+ "create" (uniqueness="unique"|uniqueness="nonunique")? (bitmap="bitmap")? "index" index_name=DBNAME_WITH_SCHEMA ("on")? table_name=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? ";";
 
 enum FkDeleteRuleType :
   cascade="cascade"|no_action="no_action"|set_null="set_null";  
@@ -159,13 +159,13 @@ ColumnRef :
   column_name=DBNAME (",")?;  
   
 Sequence:
- "create" "sequence" sequence_name=DBNAME ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
+ "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
 
 ColumnIdentity:
  "generated" ( always="always"|"by" by_default="default" ("on" on_null="null")? ) "as" "identity" ( "(" ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ")" )?;
 
 Mview:
- "create" "materialized" "view" mview_name=DBNAME ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (parallel=ParallelType (parallel_degree=INT)? )? (buildMode=BuildModeType)? (refreshMethod=RefreshMethodType ("on" refreshMode=RefreshModeType)?)? (queryRewrite=EnableType "query" "rewrite")? ("as" viewSelectCLOB=STRING) ";";
+ "create" "materialized" "view" mview_name=DBNAME_WITH_SCHEMA ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (parallel=ParallelType (parallel_degree=INT)? )? (buildMode=BuildModeType)? (refreshMethod=RefreshMethodType ("on" refreshMode=RefreshModeType)?)? (queryRewrite=EnableType "query" "rewrite")? ("as" viewSelectCLOB=STRING) ";";
 
 enum NewValuesType :
   including="including"|excluding="excluding";
@@ -182,7 +182,9 @@ Comment:
 InlineComment:
  "comment" "on" comment_object=CommentObjectType (column_name=DBNAME)? "is" comment=STRING ";";
 
+DBNAME_WITH_SCHEMA:
+  DBNAME ( '.' DBNAME )?;
+
 terminal DBNAME :
   ('A'..'Z'|'a'..'z')('A'..'Z'|'a'..'z'|'_'|'0'..'9'|'#')*;
-
 

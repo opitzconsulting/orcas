@@ -27,6 +27,6 @@ public class ExecuteOrcasScriptTask extends BaseOrcasTask
 
     pParameters.setAdditionalParameters( scriptParameters );
 
-    new OrcasScriptRunner().mainRun( pParameters );
+    new OrcasScriptRunner().mainRun( modifyParameters( pParameters ) );
   }
 }

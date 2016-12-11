@@ -8,5 +8,6 @@ create or replace type col_test_type as object
 create table tab_datatypes
 (
   col_type col_test_type
-);
+)
+/
 

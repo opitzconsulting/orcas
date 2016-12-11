@@ -120,7 +120,7 @@ public class LoadIst
   private Map<String,List<String>> excludeMap = new HashMap<String,List<String>>();
 
   private Map<String,Object> constraintMapForFK = new HashMap<String,Object>();
-  private Map<String,String> constraintTableMapForFK = new HashMap<String,String>();
+  private Map<String,Table> constraintTableMapForFK = new HashMap<String,Table>();
 
   private Parameters _parameters;
 
@@ -134,17 +134,17 @@ public class LoadIst
     _parameters = pParameters;
   }
 
-  private void registerConstarintForeFK( String pConstraintname, String pTablename, Object pConstarint )
+  private void registerConstarintForFK( String pUkConstraintname, Table pTable, String pTableOwner, Object pConstarint )
   {
-    constraintMapForFK.put( pConstraintname, pConstarint );
-    constraintTableMapForFK.put( pConstraintname, pTablename );
+    constraintMapForFK.put( getNameWithOwner( pUkConstraintname, pTableOwner ), pConstarint );
+    constraintTableMapForFK.put( getNameWithOwner( pUkConstraintname, pTableOwner ), pTable );
   }
 
   public Model loadModel( boolean pWithSequeneceMayValueSelect )
   {
-    isIgnoredSequence( "TEST" );
-    isIgnoredMView( "TEST" );
-    isIgnoredTable( "TEST" );
+    isIgnoredSequence( "TEST", "TEST" );
+    isIgnoredMView( "TEST", "TEST" );
+    isIgnoredTable( "TEST", "TEST" );
 
     _oracleMajorVersion = loadOracleMajorVersion();
 
@@ -266,7 +266,7 @@ public class LoadIst
     {
       excludeMap.put( pType, new ArrayList<String>() );
 
-      String lSql = "select object_name, case when ( " + getExcludeWhere( pExcludeWhere ) + " ) then 1 else 0 end is_exclude from user_objects where object_type=?";
+      String lSql = "select object_name, owner, case when ( " + getExcludeWhere( pExcludeWhere ) + " ) then 1 else 0 end is_exclude from " + getDataDictionaryView( "objects" ) + " where object_type=?";
 
       new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( pType ) )
       {
@@ -275,38 +275,38 @@ public class LoadIst
         {
           if( pResultSet.getInt( "is_exclude" ) == 1 )
           {
-            excludeMap.get( pType ).add( pResultSet.getString( "object_name" ) );
+            excludeMap.get( pType ).add( getNameWithOwner( pResultSet.getString( "object_name" ), pResultSet.getString( "owner" ) ) );
           }
         }
       }.execute();
     }
   }
 
-  private boolean isIgnored( String pName, String pExcludeWhere, String pType )
+  private boolean isIgnored( String pName, String pOwner, String pExcludeWhere, String pType )
   {
     loadIgnoreCache( pExcludeWhere, pType );
 
-    return excludeMap.get( pType ).contains( pName );
+    return excludeMap.get( pType ).contains( getNameWithOwner( pName, pOwner ) );
   }
 
-  private boolean isIgnoredSequence( String pString )
+  private boolean isIgnoredSequence( String pString, String pOwner )
   {
-    return isIgnored( pString, _parameters.getExcludewheresequence(), "SEQUENCE" );
+    return isIgnored( pString, pOwner, _parameters.getExcludewheresequence(), "SEQUENCE" );
   }
 
-  private boolean isIgnoredMView( String pString )
+  private boolean isIgnoredMView( String pString, String pOwner )
   { // TODO @
-    return isIgnored( pString, "@", "MATERIALIZED VIEW" );
+    return isIgnored( pString, pOwner, "@", "MATERIALIZED VIEW" );
   }
 
-  private boolean isIgnoredTable( String pString )
+  private boolean isIgnoredTable( String pString, String pOwner )
   {
     if( pString.equalsIgnoreCase( OrcasScriptRunner.ORCAS_UPDATES_TABLE ) )
     {
       return true;
     }
 
-    return isIgnored( pString, _parameters.getExcludewheretable(), "TABLE" ) || isIgnored( pString, "1=1", "VIEW" );
+    return isIgnored( pString, pOwner, _parameters.getExcludewheretable(), "TABLE" ) || isIgnored( pString, pOwner, "1=1", "VIEW" );
   }
 
   private int toInt( BigDecimal pBigDecimal )
@@ -322,6 +322,7 @@ public class LoadIst
   {
     String lSql = "" + //
                   " select sequence_name," + //
+                  "        owner," + //
                   "        increment_by," + //
                   "        last_number," + //
                   "        cache_size," + //
@@ -329,7 +330,8 @@ public class LoadIst
                   "        max_value," + //
                   "        cycle_flag," + //
                   "        order_flag" + //
-                  "   from user_sequences" + //
+                  "   from " +
+                  getDataDictionaryView( "sequences" ) + //
                   "  order by sequence_name" + //
                   "";
 
@@ -338,11 +340,11 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredSequence( pResultSet.getString( "sequence_name" ) ) )
+        if( !isIgnoredSequence( pResultSet.getString( "sequence_name" ), pResultSet.getString( "owner" ) ) )
         {
           Sequence lSequence = new SequenceImpl();
 
-          lSequence.setSequence_name( pResultSet.getString( "sequence_name" ) );
+          lSequence.setSequence_name( getNameWithOwner( pResultSet.getString( "sequence_name" ), pResultSet.getString( "owner" ) ) );
           lSequence.setIncrement_by( toInt( pResultSet.getBigDecimal( "increment_by" ) ) );
           if( pWithSequeneceMayValueSelect )
           {
@@ -381,6 +383,7 @@ public class LoadIst
     String lSql = "" + //
                   " select query," + //
                   "        mview_name," + //
+                  "        mviews.owner," + //
                   "        updatable," + //
                   "        rewrite_enabled," + //
                   "        refresh_mode," + //
@@ -393,9 +396,12 @@ public class LoadIst
                   "        trim(compression) compression," + //
                   "        trim(compress_for) compress_for," + //
                   "        tablespace_name" + //
-                  "   from user_mviews mviews" + //
-                  "   left outer join user_tables tables" + //
+                  "   from " +
+                  getDataDictionaryView( "mviews" ) + //
+                  "   left outer join " +
+                  getDataDictionaryView( "tables" ) + //
                   "        on mviews.mview_name = tables.table_name" + //
+                  "        and mviews.owner = tables.owner" + //                  
                   "  order by mview_name" + //
                   "";
 
@@ -406,13 +412,13 @@ public class LoadIst
       {
         String lString = pResultSet.getString( "query" );
 
-        if( !isIgnoredMView( pResultSet.getString( "mview_name" ) ) )
+        if( !isIgnoredMView( pResultSet.getString( "mview_name" ), pResultSet.getString( "owner" ) ) )
         {
           final Mview lMview = new MviewImpl();
 
           lMview.setViewSelectCLOB( lString );
 
-          lMview.setMview_name( pResultSet.getString( "mview_name" ) );
+          lMview.setMview_name( getNameWithOwner( pResultSet.getString( "mview_name" ), pResultSet.getString( "owner" ) ) );
 
           if( "IMMEDIATE".equals( pResultSet.getString( "build_mode" ) ) )
           {
@@ -574,13 +580,25 @@ public class LoadIst
     }
   }
 
-  private Table findTable( Model pModel, String pTablename )
+  private String getNameWithOwner( String pObjectName, String pOwner )
+  {
+    if( _parameters.getMultiSchema() )
+    {
+      return pOwner + "." + pObjectName;
+    }
+    else
+    {
+      return pObjectName;
+    }
+  }
+
+  private Table findTable( Model pModel, String pTablename, String pOwner )
   {
     for( ModelElement lModelElement : pModel.getModel_elements() )
     {
       if( lModelElement instanceof Table )
       {
-        if( ((Table)lModelElement).getName().equals( pTablename ) )
+        if( ((Table)lModelElement).getName().equals( getNameWithOwner( pTablename, pOwner ) ) )
         {
           return (Table)lModelElement;
         }
@@ -590,13 +608,13 @@ public class LoadIst
     throw new IllegalStateException( "Table not found: " + pTablename );
   }
 
-  private Index findIndex( Model pModel, String pTablename, String pIndexname )
+  private Index findIndex( Model pModel, String pTablename, String pTableOwner, String pIndexname, String pIndexOwner )
   {
-    for( IndexOrUniqueKey lIndexOrUniqueKey : findTable( pModel, pTablename ).getInd_uks() )
+    for( IndexOrUniqueKey lIndexOrUniqueKey : findTable( pModel, pTablename, pTableOwner ).getInd_uks() )
     {
       if( lIndexOrUniqueKey instanceof Index )
       {
-        if( ((Index)lIndexOrUniqueKey).getConsName().equals( pIndexname ) )
+        if( ((Index)lIndexOrUniqueKey).getConsName().equals( getNameWithOwner( pIndexname, pIndexOwner ) ) )
         {
           return (Index)lIndexOrUniqueKey;
         }
@@ -606,9 +624,9 @@ public class LoadIst
     throw new IllegalStateException( "Index not found: " + pTablename + " " + pIndexname );
   }
 
-  private UniqueKey findUniqueKey( Model pModel, String pTablename, String pUniquekeyname )
+  private UniqueKey findUniqueKey( Model pModel, String pTablename, String pOwner, String pUniquekeyname )
   {
-    for( IndexOrUniqueKey lIndexOrUniqueKey : findTable( pModel, pTablename ).getInd_uks() )
+    for( IndexOrUniqueKey lIndexOrUniqueKey : findTable( pModel, pTablename, pOwner ).getInd_uks() )
     {
       if( lIndexOrUniqueKey instanceof UniqueKey )
       {
@@ -622,9 +640,9 @@ public class LoadIst
     throw new IllegalStateException( "UK not found: " + pTablename + " " + pUniquekeyname );
   }
 
-  private ForeignKey findForeignKey( Model pModel, String pTablename, String pForeignkeyname )
+  private ForeignKey findForeignKey( Model pModel, String pTablename, String pOwner, String pForeignkeyname )
   {
-    for( ForeignKey lForeignKey : findTable( pModel, pTablename ).getForeign_keys() )
+    for( ForeignKey lForeignKey : findTable( pModel, pTablename, pOwner ).getForeign_keys() )
     {
       if( lForeignKey.getConsName().equals( pForeignkeyname ) )
       {
@@ -642,8 +660,9 @@ public class LoadIst
     if( _oracleMajorVersion >= 12 )
     {
       lSql = "" + //
-             " select user_tab_cols.table_name," + //
-             "        user_tab_cols.column_name," + //
+             " select tab_cols.table_name," + //
+             "        tab_cols.owner," + //
+             "        tab_cols.column_name," + //
              "        data_type," + //
              "        data_type_owner," + //
              "        data_length," + //
@@ -656,10 +675,13 @@ public class LoadIst
              "        column_id," + //
              "        default_on_null, " + //
              "        generation_type " + //
-             "   from user_tab_cols" + //
-             "   left outer join user_tab_identity_cols" + //
-             "       on (   user_tab_cols.column_name = user_tab_identity_cols.column_name" + //
-             "          and user_tab_cols.table_name  = user_tab_identity_cols.table_name " + //
+             "   from " +
+             getDataDictionaryView( "tab_cols" ) + //
+             "   left outer join " +
+             getDataDictionaryView( "tab_identity_cols" ) + //
+             "       on (   tab_cols.column_name = tab_identity_cols.column_name" + //
+             "          and tab_cols.table_name  = tab_identity_cols.table_name " + //
+             "          and tab_cols.owner       = tab_identity_cols.owner " + //
              "          )" + //
              "  where hidden_column = 'NO'" + //
              "";
@@ -667,8 +689,9 @@ public class LoadIst
     else
     {
       lSql = "" + //
-             " select user_tab_cols.table_name," + //
-             "        user_tab_cols.column_name," + //
+             " select tab_cols.table_name," + //
+             "        tab_cols.owner," + //          
+             "        tab_cols.column_name," + //
              "        data_type," + //
              "        data_type_owner," + //
              "        data_length," + //
@@ -681,7 +704,8 @@ public class LoadIst
              "        column_id," + //
              "        null default_on_null," + //
              "        null generation_type" + //
-             "   from user_tab_cols" + //
+             "   from " +
+             getDataDictionaryView( "tab_cols" ) + //
              "  where hidden_column = 'NO'" + //
              "";
     }
@@ -700,7 +724,7 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
           Column lColumn = new ColumnImpl();
 
@@ -840,17 +864,114 @@ public class LoadIst
             }
           }
 
-          findTable( pModel, pResultSet.getString( "table_name" ) ).getColumns().add( lColumn );
+          findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getColumns().add( lColumn );
         }
       }
     }.execute();
+  }
+
+  private String getDataDictionaryView( String pName )
+  {
+    if( !_parameters.getMultiSchema() )
+    {
+      String lViewName = "user_" + pName;
+
+      boolean lHasOwnerColumn = false;
+
+      if( pName.equalsIgnoreCase( "mviews" ) )
+      {
+        lHasOwnerColumn = true;
+      }
+      if( pName.equalsIgnoreCase( "constraints" ) )
+      {
+        lHasOwnerColumn = true;
+      }
+      if( pName.equalsIgnoreCase( "cons_columns" ) )
+      {
+        lHasOwnerColumn = true;
+      }
+
+      if( lHasOwnerColumn )
+      {
+        return "(select * from " + lViewName + ") " + pName;
+      }
+      else
+      {
+        return "(select " + lViewName + ".*, USER owner from " + lViewName + ") " + pName;
+      }
+    }
+    else
+    {
+      String lOwnerColumnName = null;
+
+      if( pName.equalsIgnoreCase( "sequences" ) )
+      {
+        lOwnerColumnName = "sequence_owner";
+      }
+      if( pName.equalsIgnoreCase( "ind_columns" ) )
+      {
+        lOwnerColumnName = "index_owner";
+      }
+      if( pName.equalsIgnoreCase( "mview_logs" ) )
+      {
+        lOwnerColumnName = "log_owner";
+      }
+      if( pName.equalsIgnoreCase( "ind_expressions" ) )
+      {
+        lOwnerColumnName = "index_owner";
+      }
+      if( pName.equalsIgnoreCase( "tab_partitions" ) )
+      {
+        lOwnerColumnName = "table_owner";
+      }
+      if( pName.equalsIgnoreCase( "tab_subpartitions" ) )
+      {
+        lOwnerColumnName = "table_owner";
+      }
+
+      String lViewName;
+
+      if( _parameters.getMultiSchemaDbaViews() )
+      {
+        lViewName = "dba_" + pName;
+      }
+      else
+      {
+        lViewName = "all_" + pName;
+      }
+
+      String lSelectList = "*";
+
+      if( lOwnerColumnName == null )
+      {
+        lOwnerColumnName = "owner";
+      }
+      else
+      {
+        lSelectList = lViewName + ".*," + lViewName + "." + lOwnerColumnName + " owner";
+      }
+
+      String lWhereClause;
+      if( _parameters.getMultiSchemaExcludewhereowner() == null )
+      {
+        throw new IllegalArgumentException( "cant use dba_views or all_views without exclude-owner" );
+      }
+      else
+      {
+        lWhereClause = " where not(" + _parameters.getMultiSchemaExcludewhereowner().replace( "owner", lOwnerColumnName ) + ")";
+      }
+
+      return "(select " + lSelectList + " from " + lViewName + lWhereClause + ") " + pName;
+    }
   }
 
   private void loadIndexesIntoModel( final Model pModel )
   {
     String lSql = "" + //
                   " select index_name," + //
+                  "        owner," + //
                   "        table_name," + //
+                  "        table_owner," + //
                   "        uniqueness," + //
                   "        tablespace_name," + //
                   "        logging," + //
@@ -858,15 +979,18 @@ public class LoadIst
                   "        partitioned," + //
                   "        index_type," + //
                   "        compression" + //
-                  "   from user_indexes" + //
+                  "   from " +
+                  getDataDictionaryView( "indexes" ) + //
                   "  where generated = 'N'" + //
-                  "    and (index_name,table_name) not in" + //
+                  "    and (index_name,table_name,owner) not in" + //
                   "        (" + //
                   "        select constraint_name," + //
-                  "               table_name" + //
-                  "          from user_constraints" + //
+                  "               table_name," + //
+                  "               owner" + //
+                  "          from " +
+                  getDataDictionaryView( "constraints" ) + //
                   "         where constraint_type in ( 'U', 'P' )" + //
-                  "           and constraint_name = user_constraints.index_name" + //
+                  "           and constraint_name = constraints.index_name" + //
                   "        )" + //
                   "  order by table_name," + //
                   "           index_name" + //
@@ -877,11 +1001,11 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ) ) )
         {
           final Index lIndex = new IndexImpl();
 
-          lIndex.setConsName( pResultSet.getString( "index_name" ) );
+          lIndex.setConsName( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ) );
 
           lIndex.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
@@ -936,7 +1060,7 @@ public class LoadIst
             lIndex.setCompression( CompressType.NOCOMPRESS );
           }
 
-          findTable( pModel, pResultSet.getString( "table_name" ) ).getInd_uks().add( lIndex );
+          findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ) ).getInd_uks().add( lIndex );
         }
       }
     }.execute();
@@ -945,20 +1069,28 @@ public class LoadIst
   private void loadIndexColumnsIntoModel( final Model pModel )
   {
     String lSql = "" + //
-                  " select user_ind_columns.table_name," + //
-                  "        user_ind_columns.index_name," + //
-                  "        column_name" + //
-                  "   from user_ind_columns," + //
-                  "        user_indexes" + //
+                  " select ind_columns.table_name," + //
+                  "        ind_columns.index_name," + //
+                  "        column_name," + //
+                  "        ind_columns.owner," + //                  
+                  "        indexes.table_owner" + //
+                  "   from " +
+                  getDataDictionaryView( "ind_columns" ) +
+                  "," + //
+                  "        " +
+                  getDataDictionaryView( "indexes" ) + //
                   "  where generated = 'N'" + //
-                  "     and user_ind_columns.index_name = user_indexes.index_name" + //
-                  "     and (user_indexes.index_name,user_indexes.table_name) not in" + //
+                  "     and ind_columns.index_name = indexes.index_name" + //
+                  "     and ind_columns.owner = indexes.owner" + //
+                  "     and (indexes.index_name,indexes.table_name,indexes.owner) not in" + //
                   "         (" + //
                   "         select constraint_name," + //
-                  "                table_name" + //
-                  "           from user_constraints" + //
+                  "                table_name," + //
+                  "                owner" + //                  
+                  "           from " +
+                  getDataDictionaryView( "constraints" ) + //
                   "          where constraint_type in ( 'U', 'P' )" + //
-                  "            and constraint_name = user_constraints.index_name" + //
+                  "            and constraint_name = constraints.index_name" + //
                   "          )" + //
                   "   order by table_name," + //
                   "            index_name," + //
@@ -969,21 +1101,21 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
           ColumnRef lColumnRef = new ColumnRefImpl();
 
           lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
 
-          findIndex( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ) ).getIndex_columns().add( lColumnRef );
+          findIndex( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ).getIndex_columns().add( lColumnRef );
         }
       }
     }.execute();
   }
 
-  private void setIndexColumnExpression( Model pModel, String pTablename, String pIndexName, int pColumnPosition, String pExpression, int pMaxColumnPositionForInd )
+  private void setIndexColumnExpression( Model pModel, String pTablename, String pTableOwner, String pIndexName, String pIndexOwner, int pColumnPosition, String pExpression, int pMaxColumnPositionForInd )
   {
-    Index lIndex = findIndex( pModel, pTablename, pIndexName );
+    Index lIndex = findIndex( pModel, pTablename, pTableOwner, pIndexName, pIndexOwner );
 
     // TODO ltrim(p_expression,',')
     lIndex.getIndex_columns().get( pColumnPosition - 1 ).setColumn_name( pExpression.replace( "\"", "" ).replace( " ", "" ) );
@@ -1015,28 +1147,36 @@ public class LoadIst
   private void loadIndexExpressionsIntoModel( final Model pModel )
   {
     String lSql = "" + //
-                  " select user_ind_expressions.table_name," + //
-                  "        user_ind_expressions.index_name," + //
+                  " select ind_expressions.table_name," + //
+                  "        indexes.table_owner," + //
+                  "        ind_expressions.index_name," + //
+                  "        ind_expressions.owner," + //
                   "        column_position," + //
                   "        column_expression," + //
                   "        max (column_position)" + //
                   "        over" + //
                   "        (" + //
                   "          partition by" + //
-                  "            user_ind_expressions.table_name," + //
-                  "            user_ind_expressions.index_name" + //
+                  "            ind_expressions.table_name," + //
+                  "            ind_expressions.index_name" + //
                   "        ) as max_column_position_for_index" + //
-                  "   from user_ind_expressions," + //
-                  "        user_indexes" + //
+                  "   from " +
+                  getDataDictionaryView( "ind_expressions" ) +
+                  "," + //
+                  "        " +
+                  getDataDictionaryView( "indexes" ) + //
                   "  where generated = 'N'" + //
-                  "    and user_ind_expressions.index_name = user_indexes.index_name" + //
-                  "    and (user_indexes.index_name,user_indexes.table_name) not in" + //
+                  "    and ind_expressions.index_name = indexes.index_name" + //
+                  "    and ind_expressions.owner = indexes.owner" + //                  
+                  "    and (indexes.index_name,indexes.table_name,indexes.owner) not in" + //
                   "        (" + //
                   "        select constraint_name," + //
-                  "               table_name" + //
-                  "          from user_constraints" + //
+                  "               table_name," + //
+                  "               owner" + //                  
+                  "          from " +
+                  getDataDictionaryView( "constraints" ) + //
                   "         where constraint_type in ( 'U', 'P' )" + //
-                  "           and constraint_name = user_constraints.index_name" + //
+                  "           and constraint_name = constraints.index_name" + //
                   "        )" + //
                   "  order by table_name," + //
                   "           index_name," + //
@@ -1048,9 +1188,9 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
-          setIndexColumnExpression( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getInt( "column_position" ), pResultSet.getString( "column_expression" ), pResultSet.getInt( "max_column_position_for_index" ) );
+          setIndexColumnExpression( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ), pResultSet.getInt( "column_position" ), pResultSet.getString( "column_expression" ), pResultSet.getInt( "max_column_position_for_index" ) );
         }
       }
     }.execute();
@@ -1059,21 +1199,27 @@ public class LoadIst
   private void loadTableConstraintsIntoModel( final Model pModel )
   {
     String lSql = "" + //
-                  " select user_constraints.table_name," + //
+                  " select constraints.table_name," + //
+                  "        constraints.owner," + //
                   "        constraint_name," + //
                   "        constraint_type," + //
                   "        r_constraint_name," + //
+                  "        r_owner," + //
                   "        delete_rule," + //
                   "        deferrable," + //
                   "        deferred," + //
-                  "        user_constraints.status," + //
-                  "        user_constraints.generated," + //
-                  "        user_constraints.index_name," + //
-                  "        user_indexes.tablespace_name," + //
-                  "        user_indexes.index_type," + //
+                  "        constraints.status," + //
+                  "        constraints.generated," + //
+                  "        constraints.index_name," + //
+                  "        indexes.tablespace_name," + //
+                  "        indexes.index_type," + //
                   "        search_condition" + //                  
-                  "   from user_constraints" + //
-                  "   left outer join user_indexes on (user_constraints.index_name = user_indexes.index_name)" + //
+                  "   from " +
+                  getDataDictionaryView( "constraints" ) + //
+                  "   left outer join " +
+                  getDataDictionaryView( "indexes" ) +
+                  " on (constraints.index_name = indexes.index_name " + //
+                  " and constraints.owner = indexes.owner)" + //
                   "  order by table_name," + //
                   "           constraint_name" + //
                   "";
@@ -1083,9 +1229,9 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
-          Table lTable = findTable( pModel, pResultSet.getString( "table_name" ) );
+          Table lTable = findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) );
 
           EnableType lEnableType;
           if( "ENABLED".equals( pResultSet.getString( "status" ) ) )
@@ -1125,7 +1271,7 @@ public class LoadIst
               lPrimaryKey.setConsName( pResultSet.getString( "constraint_name" ) );
             }
 
-            registerConstarintForeFK( pResultSet.getString( "constraint_name" ), pResultSet.getString( "table_name" ), lPrimaryKey );
+            registerConstarintForFK( pResultSet.getString( "constraint_name" ), lTable, pResultSet.getString( "owner" ), lPrimaryKey );
 
             lPrimaryKey.setStatus( lEnableType );
 
@@ -1145,7 +1291,7 @@ public class LoadIst
 
             lUniqueKey.setConsName( pResultSet.getString( "constraint_name" ) );
 
-            registerConstarintForeFK( pResultSet.getString( "constraint_name" ), pResultSet.getString( "table_name" ), lUniqueKey );
+            registerConstarintForFK( pResultSet.getString( "constraint_name" ), lTable, pResultSet.getString( "owner" ), lUniqueKey );
 
             lUniqueKey.setStatus( lEnableType );
 
@@ -1170,7 +1316,7 @@ public class LoadIst
             lForeignKey.setDeferrtype( lDeferrType );
 
             // in desttable wird der ref-constraintname zwischengespeichert, wird durch update_foreignkey_srcdata dann korrekt aktualisiert
-            lForeignKey.setDestTable( pResultSet.getString( "r_constraint_name" ) );
+            lForeignKey.setDestTable( getNameWithOwner( pResultSet.getString( "r_constraint_name" ), pResultSet.getString( "r_owner" ) ) );
 
             if( "NO ACTION".equals( pResultSet.getString( "delete_rule" ) ) )
             {
@@ -1213,18 +1359,23 @@ public class LoadIst
   private void loadTableConstraintColumnsIntoModel( final Model pModel )
   {
     String lSql = "" + //
-                  " select user_cons_columns.table_name," + //
-                  "       column_name," + //
-                  "       position," + //
-                  "       user_cons_columns.constraint_name," + //
-                  "       constraint_type" + //
-                  "  from user_cons_columns," + //
-                  "       user_constraints" + //
-                  " where user_cons_columns.constraint_name = user_constraints.constraint_name" + //
-                  "   and user_cons_columns.table_name = user_constraints.table_name" + //
+                  " select cons_columns.table_name," + //
+                  "        cons_columns.owner," + //
+                  "        column_name," + //
+                  "        position," + //
+                  "        cons_columns.constraint_name," + //
+                  "        constraint_type" + //
+                  "   from " +
+                  getDataDictionaryView( "cons_columns" ) +
+                  "," + //
+                  "       " +
+                  getDataDictionaryView( "constraints" ) + //
+                  " where cons_columns.constraint_name = constraints.constraint_name" + //
+                  "   and cons_columns.table_name = constraints.table_name" + //
+                  "   and cons_columns.owner = constraints.owner" + //
                   " order by table_name," + //
                   "          constraint_name," + //
-                  "         position" + //
+                  "          position" + //
                   "";
 
     new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
@@ -1232,7 +1383,7 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
           ColumnRef lColumnRef = new ColumnRefImpl();
 
@@ -1240,17 +1391,17 @@ public class LoadIst
 
           if( "P".equals( pResultSet.getString( "constraint_type" ) ) )
           {
-            findTable( pModel, pResultSet.getString( "table_name" ) ).getPrimary_key().getPk_columns().add( lColumnRef );
+            findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getPrimary_key().getPk_columns().add( lColumnRef );
           }
 
           if( "U".equals( pResultSet.getString( "constraint_type" ) ) )
           {
-            findUniqueKey( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ) ).getUk_columns().add( lColumnRef );
+            findUniqueKey( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ), pResultSet.getString( "constraint_name" ) ).getUk_columns().add( lColumnRef );
           }
 
           if( "R".equals( pResultSet.getString( "constraint_type" ) ) )
           {
-            findForeignKey( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ) ).getSrcColumns().add( lColumnRef );
+            findForeignKey( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ), pResultSet.getString( "constraint_name" ) ).getSrcColumns().add( lColumnRef );
           }
         }
       }
@@ -1261,8 +1412,10 @@ public class LoadIst
   {
     String lSql = "" + //
                   " select table_name," + //
+                  "        owner," + //
                   "        comments" + //
-                  "   from user_tab_comments" + //
+                  "   from " +
+                  getDataDictionaryView( "tab_comments" ) + //
                   "  where comments is not null" + //
                   "  order by table_name" + //
                   "";
@@ -1272,7 +1425,7 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
           InlineComment lInlineComment = new InlineCommentImpl();
 
@@ -1280,7 +1433,7 @@ public class LoadIst
 
           lInlineComment.setComment_object( CommentObjectType.TABLE );
 
-          findTable( pModel, pResultSet.getString( "table_name" ) ).getComments().add( lInlineComment );
+          findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getComments().add( lInlineComment );
         }
       }
     }.execute();
@@ -1291,8 +1444,10 @@ public class LoadIst
     String lSql = "" + //
                   " select table_name," + //
                   "        column_name," + //
+                  "        owner," + //
                   "        comments" + //
-                  "   from user_col_comments" + //
+                  "   from " +
+                  getDataDictionaryView( "col_comments" ) + //
                   "  where comments is not null" + //
                   "  order by table_name," + //
                   "           column_name" + //
@@ -1303,7 +1458,7 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
           InlineComment lInlineComment = new InlineCommentImpl();
 
@@ -1313,7 +1468,7 @@ public class LoadIst
 
           lInlineComment.setComment_object( CommentObjectType.COLUMN );
 
-          findTable( pModel, pResultSet.getString( "table_name" ) ).getComments().add( lInlineComment );
+          findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getComments().add( lInlineComment );
         }
       }
     }.execute();
@@ -1323,9 +1478,11 @@ public class LoadIst
   {
     String lSql = "" + //
                   " select table_name," + //
+                  "        owner," + //
                   "        column_name," + //
                   "        tablespace_name" + //
-                  "   from user_lobs" + //
+                  "   from " +
+                  getDataDictionaryView( "lobs" ) + //
                   "  order by table_name," + //
                   "           column_name" + //
                   "";
@@ -1335,7 +1492,7 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
           LobStorage lLobStorage = new LobStorageImpl();
 
@@ -1343,7 +1500,7 @@ public class LoadIst
 
           lLobStorage.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
-          Table lTable = findTable( pModel, pResultSet.getString( "table_name" ) );
+          Table lTable = findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) );
 
           if( findColumn( lTable, lLobStorage.getColumn_name() ) != null )
           {
@@ -1377,7 +1534,7 @@ public class LoadIst
         {
           String lRefConstraintName = lForeignKey.getDestTable();
 
-          lForeignKey.setDestTable( constraintTableMapForFK.get( lRefConstraintName ) );
+          lForeignKey.setDestTable( constraintTableMapForFK.get( lRefConstraintName ).getName() );
 
           Object lConstraint = constraintMapForFK.get( lRefConstraintName );
 
@@ -1410,6 +1567,7 @@ public class LoadIst
   {
     String lSql = "" + //
                   " select tables.table_name," + //
+                  "        tables.owner," + //
                   "        tables.tablespace_name," + //
                   "        tables.temporary," + //
                   "        tables.duration," + //
@@ -1417,10 +1575,13 @@ public class LoadIst
                   "        trim(degree) degree," + //
                   "        trim(compression) compression," + //
                   "        trim(compress_for) compress_for," + //
-                  "        parts.def_tablespace_name as part_tabspace" + //
-                  "   from user_tables tables" + //
-                  "   left outer join user_part_tables parts" + //
-                  "     on tables.table_name = parts.table_name " + //
+                  "        part_tables.def_tablespace_name as part_tabspace" + //
+                  "   from " +
+                  getDataDictionaryView( "tables" ) + //
+                  "   left outer join " +
+                  getDataDictionaryView( "part_tables" ) + //
+                  "     on tables.table_name = part_tables.table_name " + //
+                  "     and tables.owner = part_tables.owner " + //
                   "  order by table_name" + //
                   "";
 
@@ -1429,11 +1590,11 @@ public class LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ) ) )
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
           final Table lTable = new TableImpl();
 
-          lTable.setName( pResultSet.getString( "table_name" ) );
+          lTable.setName( getNameWithOwner( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) );
 
           if( pResultSet.getString( "tablespace_name" ) != null )
           {
@@ -1500,28 +1661,41 @@ public class LoadIst
     String lSql = "" + //
                   " select master," + //
                   "        column_name, " + //
+                  "        owner, " + //                  
                   "        column_id " + //
                   "  from  (" + //  
-                  "        select logs.master," + //
+                  "        select mview_logs.master," + //
                   "               tab_columns.column_name," + //
+                  "               tab_columns.owner, " + //                  
                   "               tab_columns.column_id" + //
-                  "          from user_mview_logs logs " +
-                  "          join user_tab_columns tab_columns " + //         
-                  "            on     logs.log_table = tab_columns.table_name" + // 
+                  "          from " +
+                  getDataDictionaryView( "mview_logs" ) +
+                  "          join " +
+                  getDataDictionaryView( "tab_columns" ) + //         
+                  "            on     mview_logs.log_table = tab_columns.table_name" + // 
+                  "            and     mview_logs.owner = tab_columns.owner" + //                  
                   "               and tab_columns.column_name not like '%$$'" + //           
                   "        minus" + //            
-                  "        select logs.master," + //
+                  "        select mview_logs.master," + //
                   "               tab_columns.column_name," + //
+                  "               tab_columns.owner, " + //                  
                   "               tab_columns.column_id" + //
-                  "          from user_mview_logs logs " + //
-                  "          join user_tab_columns tab_columns" + // 
-                  "            on logs.log_table = tab_columns.table_name" + // 
+                  "          from " +
+                  getDataDictionaryView( "mview_logs" ) + //
+                  "          join " +
+                  getDataDictionaryView( "tab_columns" ) + // 
+                  "            on mview_logs.log_table = tab_columns.table_name" + // 
+                  "           and mview_logs.owner = tab_columns.owner" + //                  
                   "           and tab_columns.column_name not like '%$$'" + // 
-                  "          join user_constraints cons" + // 
-                  "            on logs.master = cons.table_name" + //
-                  "           and cons.constraint_type = 'P'" + //
-                  "          join user_cons_columns cons_columns" + //
-                  "            on cons.constraint_name = cons_columns.constraint_name" + //
+                  "          join " +
+                  getDataDictionaryView( "constraints" ) + // 
+                  "            on mview_logs.master = constraints.table_name" + //
+                  "           and mview_logs.owner = constraints.owner" + //
+                  "           and constraints.constraint_type = 'P'" + //
+                  "          join " +
+                  getDataDictionaryView( "cons_columns" ) + //
+                  "            on constraints.constraint_name = cons_columns.constraint_name" + //
+                  "           and constraints.owner = cons_columns.owner" + //
                   "           and cons_columns.column_name = tab_columns.column_name" + //
                   "        )" + //           
                   "  order by master, column_id" + //            
@@ -1533,12 +1707,13 @@ public class LoadIst
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
         String lTablename = pResultSet.getString( "master" );
-        if( !isIgnoredTable( lTablename ) )
+        String lOwner = pResultSet.getString( "owner" );
+        if( !isIgnoredTable( lTablename, lOwner ) )
         {
           ColumnRef lColumnRef = new ColumnRefImpl();
           lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
 
-          findTable( pModel, lTablename ).getMviewLog().getColumns().add( lColumnRef );
+          findTable( pModel, lTablename, lOwner ).getMviewLog().getColumns().add( lColumnRef );
         }
       }
     }.execute();
@@ -1548,6 +1723,7 @@ public class LoadIst
   {
     String lSql = "" + //
                   " select master," + //
+                  "        mview_logs.owner," + //
                   "        log_table," + //
                   "        rowids," + //
                   "        primary_key," + //
@@ -1563,9 +1739,12 @@ public class LoadIst
                   "        commit_scn_based," + //
                   "        tablespace_name, " + //
                   "        trim(degree) degree" + //
-                  "   from user_mview_logs logs" + //
-                  "   join user_tables tabs" + //
-                  "     on logs.log_table = tabs.table_name" + //
+                  "   from " +
+                  getDataDictionaryView( "mview_logs" ) + //
+                  "   join " +
+                  getDataDictionaryView( "tables" ) + //
+                  "     on mview_logs.log_table = tables.table_name" + //
+                  "    and mview_logs.owner = tables.owner" + //
                   "  order by master" + //
                   "";
 
@@ -1575,8 +1754,9 @@ public class LoadIst
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
         String lTablename = pResultSet.getString( "master" );
+        String lOwner = pResultSet.getString( "owner" );
 
-        if( !isIgnoredTable( lTablename ) )
+        if( !isIgnoredTable( lTablename, lOwner ) )
         {
           final MviewLog lMviewLog = new MviewLogImpl();
 
@@ -1639,7 +1819,7 @@ public class LoadIst
             }
           } );
 
-          findTable( pModel, lTablename ).setMviewLog( lMviewLog );
+          findTable( pModel, lTablename, lOwner ).setMviewLog( lMviewLog );
         }
       }
     }.execute();
@@ -1662,7 +1842,7 @@ public class LoadIst
       return null;
     }
 
-    String lSql = "select column_name from user_subpart_key_columns where name = ? and object_type = 'TABLE' order by column_position";
+    String lSql = "select column_name from " + getDataDictionaryView( "subpart_key_columns" ) + " where name = ? and object_type = 'TABLE' order by column_position";
 
     if( pSubpartitioningType.equals( "HASH" ) )
     {
@@ -1765,7 +1945,8 @@ public class LoadIst
                   " select subpartition_name," + //
                   "        tablespace_name," + //
                   "        high_value" + //                  
-                  "   from user_tab_subpartitions" + //
+                  "   from " +
+                  getDataDictionaryView( "tab_subpartitions" ) + //
                   "  where table_name = ?" + //
                   "    and partition_name = ?" + //
                   "  order by subpartition_position" + //
@@ -1820,6 +2001,7 @@ public class LoadIst
   {
     String lSql = "" + //
                   " select table_name, " + //
+                  "        owner, " + //
                   "        partitioning_type, " + //
                   "        subpartitioning_type, " + //
                   "        interval," + //
@@ -1827,7 +2009,8 @@ public class LoadIst
                   "        def_tablespace_name," + //                  
                   "        def_compression," + //
                   "        def_compress_for" + //
-                  "   from user_part_tables" + //       
+                  "   from " +
+                  getDataDictionaryView( "part_tables" ) + //       
                   "";
 
     new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
@@ -1836,14 +2019,15 @@ public class LoadIst
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
         final String lTablename = pResultSet.getString( "table_name" );
-        if( !isIgnoredTable( lTablename ) )
+        final String lOwner = pResultSet.getString( "owner" );
+        if( !isIgnoredTable( lTablename, lOwner ) )
         {
           // Read compression type, works only for one compression type for all partitions
           handleCompression( pResultSet.getString( "def_compression" ), pResultSet.getString( "def_compress_for" ), new CompressionHandler()
           {
             public void setCompression( CompressType pCompressType, CompressForType pCompressForType )
             {
-              Table lTable = findTable( pModel, lTablename );
+              Table lTable = findTable( pModel, lTablename, lOwner );
               lTable.setCompression( pCompressType );
               lTable.setCompressionFor( pCompressForType );
             }
@@ -1853,14 +2037,15 @@ public class LoadIst
           {
             final HashPartitions lHashPartitions = new HashPartitionsImpl();
 
-            setPartitioningForTable( pModel, lTablename, lHashPartitions );
+            setPartitioningForTable( pModel, lTablename, lOwner, lHashPartitions );
 
             lHashPartitions.setColumn( loadPartitionColumns( lTablename ).get( 0 ) );
 
             String lSql = "" + //
                           " select partition_name," + //
                           "        tablespace_name" + //
-                          "   from user_tab_partitions" + //
+                          "   from " +
+                          getDataDictionaryView( "tab_partitions" ) + //
                           "  where table_name = ?" + //
                           "  order by partition_position" + //
                           "";
@@ -1884,7 +2069,7 @@ public class LoadIst
           {
             final ListPartitions lListPartitions = new ListPartitionsImpl();
 
-            setPartitioningForTable( pModel, lTablename, lListPartitions );
+            setPartitioningForTable( pModel, lTablename, lOwner, lListPartitions );
 
             lListPartitions.setTableSubPart( load_tablesubpart( pResultSet.getString( "table_name" ), pResultSet.getString( "subpartitioning_type" ) ) );
 
@@ -1894,7 +2079,8 @@ public class LoadIst
                           " select partition_name," + //
                           "        tablespace_name," + //
                           "        high_value" + //
-                          "   from user_tab_partitions" + //
+                          "   from " +
+                          getDataDictionaryView( "tab_partitions" ) + //
                           "  where table_name = ?" + //
                           "  order by partition_position" + //
                           "";
@@ -1937,7 +2123,7 @@ public class LoadIst
           {
             final RangePartitions lRangePartitions = new RangePartitionsImpl();
 
-            setPartitioningForTable( pModel, lTablename, lRangePartitions );
+            setPartitioningForTable( pModel, lTablename, lOwner, lRangePartitions );
 
             lRangePartitions.setIntervalExpression( pResultSet.getString( "interval" ) );
 
@@ -1949,7 +2135,8 @@ public class LoadIst
                           " select partition_name," + //
                           "        tablespace_name," + //
                           "        high_value" + //
-                          "   from user_tab_partitions" + //
+                          "   from " +
+                          getDataDictionaryView( "tab_partitions" ) + //
                           "  where table_name = ?" + //
                           "  order by partition_position" + //
                           "";
@@ -1993,14 +2180,15 @@ public class LoadIst
           {
             final RefPartitions lRefPartitions = new RefPartitionsImpl();
 
-            setPartitioningForTable( pModel, lTablename, lRefPartitions );
+            setPartitioningForTable( pModel, lTablename, lOwner, lRefPartitions );
 
             lRefPartitions.setFkName( pResultSet.getString( "ref_ptn_constraint_name" ) );
 
             String lSql = "" + //
                           " select partition_name," + //
                           "        tablespace_name" + //
-                          "   from user_tab_partitions" + //
+                          "   from " +
+                          getDataDictionaryView( "tab_partitions" ) + //
                           "  where table_name = ?" + //
                           "  order by partition_position" + //
                           "";
@@ -2058,7 +2246,8 @@ public class LoadIst
 
     String lSql = "" + //
                   "  select column_name" + //
-                  "    from user_part_key_columns" + //
+                  "    from " +
+                  getDataDictionaryView( "part_key_columns" ) + //
                   "   where name = ?" + //
                   "     and object_type = 'TABLE'" + //
                   "   order by column_position" + //
@@ -2079,9 +2268,9 @@ public class LoadIst
     return lColumnRefList;
   }
 
-  private void setPartitioningForTable( Model pModel, String pTablename, TablePartitioning pTablePartitioning )
+  private void setPartitioningForTable( Model pModel, String pTablename, String pOwner, TablePartitioning pTablePartitioning )
   {
-    Table lTable = findTable( pModel, pTablename );
+    Table lTable = findTable( pModel, pTablename, pOwner );
     lTable.setTablePartitioning( pTablePartitioning );
     lTable.setLogging( LoggingType.LOGGING );
   }

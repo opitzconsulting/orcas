@@ -13,7 +13,7 @@ public class OrcasInitializeOrcasDbTask extends BaseOrcasTask
   {
     pParameters.setAdditionalParameters( null );
 
-    new OrcasInitializeOrcasDb().mainRun( pParameters );
+    new OrcasInitializeOrcasDb().mainRun( modifyParameters( pParameters ) );
   }
 
   @Override

@@ -174,7 +174,7 @@
         </fileset>  
       </path>
 
-      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractStatics" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" dir="${tmpfolder}" maxmemory="512m">
+      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractStatics" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
         <arg value="${orcas.default_java_fork}"/>
         <arg value="oracle.jdbc.OracleDriver"/>
         <arg value="${orcas.default_jdbcurl}"/>
@@ -185,7 +185,7 @@
         <arg value="object_name like ''%$%''"/>
         <arg value="dd.mm.yy"/>
         <arg value="info"/>
-        <arg value="load_spool.xml"/>
+        <arg value="${tmpfolder}/load_spool.xml"/>
         <arg value="null"/>
         <arg value="null"/>
         <arg value="null"/>

@@ -21,7 +21,7 @@ RuleTerminal:
 	"terminal" name=ID2 ":" terminal_rule=TERMINAL_RULE ";";
 
 RuleEntry:
-	RuleValueEntry | RuleConstnatEntry | rule_marker=RULE_MARKER | constant_string=STRING;
+	RuleValueEntry | RuleConstnatEntry | rule_marker=RULE_MARKER | constant_string=STRING | constant_terminal_rule=TERMINAL_RULE;
 
 RuleValueEntry:
 	(value_name=ID2 (assignmnet_type="=" | assignmnet_type="+="))? rule_name=ID2;

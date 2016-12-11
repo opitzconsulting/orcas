@@ -43,6 +43,7 @@ generate orcasDsl "http://www.opitzconsulting.de/OrcasDsl"
   «ENDIF-» 
   «IF rule_marker != null-»«rule_marker-»«ENDIF-» 
   «IF constant_string != null-»"«constant_string»"«ENDIF-»  
+  «IF constant_terminal_rule != null-»«constant_terminal_rule»«ENDIF-»  
 «ENDDEFINE»
 
 «DEFINE write_rule_value_entry FOR RuleValueEntry-»

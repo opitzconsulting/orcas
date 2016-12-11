@@ -1,7 +1,7 @@
 <?xml version = '1.0' encoding = 'windows-1252'?>
 <project name="ant_default_include">
   <property name="orcas_dir" value="${orcas_sqlplus_dir}/../orcas_core"/>
-  <property name="orcas_domain_extension_dir" value="${orcas_sqlplus_dir}/../orcas_domain_extension"/>
+  <property name="orcas_domain_extension_dir" value="${orcas_sqlplus_dir}/../orcas_domain_extension_plsql"/>
   <import file="${orcas_dir}/orcas_default_tasks.xml"/>
 
   <macrodef name="orcas_sqlplus_initialize">
