@@ -10,7 +10,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,9 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ibm.icu.util.StringTokenizer;
+
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
+import de.opitzconsulting.orcas.sql.WrapperCallableStatement;
 import de.opitzconsulting.orcas.sql.WrapperExecuteStatement;
 import de.opitzconsulting.orcas.sql.WrapperExecuteUpdate;
 import de.opitzconsulting.orcas.sql.WrapperIteratorResultSet;
@@ -112,7 +117,7 @@ public class OrcasScriptRunner extends Orcas
                       if( !getParameters().isOneTimeScriptLogonlyMode() )
                       {
                         logInfo( "execute one-time-script " + lFilePart );
-                        runFile( lFile, pCallableStatementProvider, getParameters() );
+                        runFile( lFile, pCallableStatementProvider, getParameters(), null );
                         addSpoolfolderScriptIfNeeded( lFile );
                       }
 
@@ -154,7 +159,7 @@ public class OrcasScriptRunner extends Orcas
                   }
                   else
                   {
-                    runFile( lFile, pCallableStatementProvider, getParameters() );
+                    runFile( lFile, pCallableStatementProvider, getParameters(), null );
                     addSpoolfolderScriptIfNeeded( lFile );
                   }
                 }
@@ -188,7 +193,7 @@ public class OrcasScriptRunner extends Orcas
 
   public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters ) throws Exception
   {
-    runReader( new InputStreamReader( pURL.openStream() ), pCallableStatementProvider, pParameters, null );
+    runReader( new InputStreamReader( pURL.openStream() ), pCallableStatementProvider, pParameters, null, null );
   }
 
   public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters, String... pAdditionalParameters ) throws Exception
@@ -255,7 +260,7 @@ public class OrcasScriptRunner extends Orcas
     return null;
   }
 
-  private void runFile( File pFile, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters ) throws Exception
+  private void runFile( File pFile, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, SpoolHandler pSpoolHandler ) throws Exception
   {
     if( pParameters.getAdditionalParameters().isEmpty() )
     {
@@ -266,7 +271,7 @@ public class OrcasScriptRunner extends Orcas
       _log.debug( "execute script: " + pFile + " " + pParameters.getAdditionalParameters() );
     }
 
-    runReader( new InputStreamReader( new FileInputStream( pFile ) ), pCallableStatementProvider, pParameters, pFile );
+    runReader( new InputStreamReader( new FileInputStream( pFile ) ), pCallableStatementProvider, pParameters, pFile, pSpoolHandler );
   }
 
   static List<String> parseReaderToLines( Reader pReader ) throws IOException
@@ -285,12 +290,19 @@ public class OrcasScriptRunner extends Orcas
     return lLines;
   }
 
-  protected void runReader( Reader pReader, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile ) throws Exception
+  private boolean _serveroutput = false;
+
+  protected void runReader( Reader pReader, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile, SpoolHandler pSpoolHandler ) throws Exception
   {
-    runLines( parseReaderToLines( pReader ), pCallableStatementProvider, pParameters, pFile );
+    runLines( parseReaderToLines( pReader ), pCallableStatementProvider, pParameters, pFile, pSpoolHandler );
   }
 
   void runLines( List<String> pLines, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile ) throws Exception
+  {
+    runLines( pLines, pCallableStatementProvider, pParameters, pFile, null );
+  }
+
+  void runLines( List<String> pLines, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile, SpoolHandler pSpoolHandler ) throws Exception
   {
     boolean lHasPlSqlModeTerminator = false;
 
@@ -305,12 +317,51 @@ public class OrcasScriptRunner extends Orcas
     boolean lPlSqlMode = false;
     boolean lNonPlSqlMultilineMode = false;
 
-    SpoolHandler lSpoolHandler = createSpoolHandler( pParameters );
+    final SpoolHandler lSpoolHandler = pSpoolHandler == null ? createSpoolHandler( pParameters ) : pSpoolHandler;
 
     List<CommandHandler> lCommandHandlerList = new ArrayList<OrcasScriptRunner.CommandHandler>();
 
     lCommandHandlerList.add( lSpoolHandler );
     lCommandHandlerList.add( new PromptHandler( lSpoolHandler ) );
+    lCommandHandlerList.add( new CommandHandler()
+    {
+      public boolean isCommand( String pTrimedLine )
+      {
+        if( pTrimedLine.startsWith( "set" ) )
+        {
+          List<String> lCommands = new ArrayList<String>();
+
+          StringTokenizer lStringTokenizer = new StringTokenizer( pTrimedLine, " \t" );
+          while( lStringTokenizer.hasMoreTokens() )
+          {
+            lCommands.add( lStringTokenizer.nextToken() );
+          }
+
+          if( lCommands.size() >= 3 )
+          {
+            if( lCommands.get( 1 ).equalsIgnoreCase( "serveroutput" ) )
+            {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      }
+
+      public void handleCommand( String pLine, File pCurrentFile ) throws Exception
+      {
+        List<String> lCommands = new ArrayList<String>();
+
+        StringTokenizer lStringTokenizer = new StringTokenizer( pLine.trim(), " \t" );
+        while( lStringTokenizer.hasMoreTokens() )
+        {
+          lCommands.add( lStringTokenizer.nextToken() );
+        }
+
+        _serveroutput = lCommands.get( 2 ).equalsIgnoreCase( "on" );
+      }
+    } );
     lCommandHandlerList.add( new CommandHandler()
     {
       public boolean isCommand( String pTrimedLine )
@@ -323,7 +374,7 @@ public class OrcasScriptRunner extends Orcas
         _log.debug( "ignoring: " + pLine );
       }
     } );
-    lCommandHandlerList.add( createStartHandler( pCallableStatementProvider, pParameters ) );
+    lCommandHandlerList.add( createStartHandler( pCallableStatementProvider, pParameters, lSpoolHandler ) );
 
     StringBuffer lCurrent = new StringBuffer();
     for( String lLine : pLines )
@@ -422,6 +473,40 @@ public class OrcasScriptRunner extends Orcas
           executeSql( lCurrent.toString(), pCallableStatementProvider, pParameters );
         }
 
+        if( _serveroutput )
+        {
+          final boolean[] keepRunning = new boolean[1];
+          do
+          {
+            new WrapperCallableStatement( "begin dbms_output.get_line( ?, ?); end;", pCallableStatementProvider )
+            {
+              @Override
+              protected void useCallableStatement( CallableStatement pCallableStatement ) throws SQLException
+              {
+                pCallableStatement.registerOutParameter( 1, java.sql.Types.VARCHAR );
+                pCallableStatement.registerOutParameter( 2, java.sql.Types.NUMERIC );
+
+                pCallableStatement.executeUpdate();
+
+                BigDecimal lStatus = pCallableStatement.getBigDecimal( 2 );
+
+                _log.debug( "serveroutput status: " + lStatus );
+                keepRunning[0] = lStatus != null && lStatus.intValue() == 0;
+
+                String lLine = pCallableStatement.getString( 1 );
+
+                if( lLine != null )
+                {
+                  lSpoolHandler.spoolIfActive( lLine );
+
+                  logInfo( "serveroutput: " + lLine );
+                }
+              }
+            }.execute();
+          }
+          while( keepRunning[0] );
+        }
+
         lCurrent = null;
       }
     }
@@ -434,9 +519,9 @@ public class OrcasScriptRunner extends Orcas
     lSpoolHandler.spoolHandleFileEnd();
   }
 
-  protected StartHandler createStartHandler( final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters )
+  protected StartHandler createStartHandler( final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, SpoolHandler pSpoolHandler )
   {
-    return new StartHandler( pParameters, pCallableStatementProvider );
+    return new StartHandler( pParameters, pCallableStatementProvider, pSpoolHandler );
   }
 
   protected SpoolHandler createSpoolHandler( Parameters pParameters )
@@ -676,11 +761,13 @@ public class OrcasScriptRunner extends Orcas
   {
     private Parameters parameters;
     private CallableStatementProvider callableStatementProvider;
+    private SpoolHandler spoolHandler;
 
-    public StartHandler( Parameters pParameters, CallableStatementProvider pCallableStatementProvider )
+    public StartHandler( Parameters pParameters, CallableStatementProvider pCallableStatementProvider, SpoolHandler pSpoolHandler )
     {
       parameters = pParameters;
       callableStatementProvider = pCallableStatementProvider;
+      spoolHandler = pSpoolHandler;
     }
 
     public boolean isCommand( String pTrimedLine )
@@ -703,7 +790,7 @@ public class OrcasScriptRunner extends Orcas
         lFile = new File( doReplace( lTrimLine.substring( 1 ).trim(), parameters ) );
       }
 
-      runFile( lFile, callableStatementProvider, parameters );
+      runFile( lFile, callableStatementProvider, parameters, spoolHandler );
     }
   }
 }

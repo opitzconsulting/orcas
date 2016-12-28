@@ -364,7 +364,7 @@ public class OrcasDiff extends AbstractStatementBuilder
       if( lSollStartValue != null && lIstValue != null && lSollStartValue.compareTo( lIstValue ) > 0 )
       {
         addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lSollStartValue.longValue() - lIstValue.longValue()) );
-        addStmt( "declare v_dummy number; begin select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual; end;" );
+        addStmt( "declare\n v_dummy number;\n begin\n select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual;\n end;" );
         addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
       }
       else
@@ -843,10 +843,28 @@ public class OrcasDiff extends AbstractStatementBuilder
       }
     }
 
+    if( _parameters.getMultiSchema() )
+    {
+      if( !getSchemaName( pTableDiff.nameNew ).equals( getSchemaName( pForeignKeyDiff.destTableNew ) ) )
+      {
+        addStmt( "grant references on " + pForeignKeyDiff.destTableNew + " to " + getSchemaName( pTableDiff.nameNew ) );
+      }
+    }
+
     stmtStart( "alter table " + pTableDiff.nameNew );
     stmtAppend( "add" );
     stmtAppend( createForeignKeyClause( pForeignKeyDiff ) );
     stmtDone();
+  }
+
+  private String getSchemaName( String pName )
+  {
+    if( pName.indexOf( '.' ) < 0 )
+    {
+      return "";
+    }
+    
+    return pName.substring( 0, pName.indexOf( '.' ) );
   }
 
   private String createForeignKeyClause( ForeignKeyDiff pForeignKeyDiff )

@@ -80,9 +80,14 @@ public class JdbcConnectionHandler
       Connection lConnection = DriverManager.getConnection( pJdbcConnectParameters.getJdbcUrl(), lProperties );
       //      Connection lConnection = lDriver.connect( pJdbcConnectParameters.getJdbcUrl(), lProperties );
 
-      pRunWithCallableStatementProvider.run( new CallableStatementProviderImpl( lConnection, pParameters ) );
-
-      lConnection.close();
+      try
+      {
+        pRunWithCallableStatementProvider.run( new CallableStatementProviderImpl( lConnection, pParameters ) );
+      }
+      finally
+      {
+        lConnection.close();
+      }
     }
     catch( Exception e )
     {

@@ -1,0 +1,57 @@
+apply plugin: 'java'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies 
+{
+  compile 'junit:junit:4.12'
+  compile group: 'com.opitzconsulting.orcas', name: 'orcas-main',
+                  version: '2.6.2-SNAPSHOT'
+
+  compile "com.oracle:ojdbc6:11.1.0.7"
+
+/*
+  you need to provide the oracle jdbc driver here.
+  please make sure you find a way that works with the oracle license terms
+
+  you can install it to your local maven-repository:
+  mvn install:install-file "-Dfile=C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar" -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.1.0.7 -Dpackaging=jar
+ 
+  you can also provide a direct path to it:
+  classpath files('C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar')
+
+  the driver is also accessible via http://maven.oracle.com, note that this requires a login-configuration
+*/
+}
+
+
+test.outputs.upToDateWhen { false }
+
+test {
+    systemProperty "orcas.integrationtest.workfolder",                   "" + buildDir + "/gradle_tests/"
+
+    systemProperty "orcas.integrationtest.with_second_run_empty_test",   "true"
+    systemProperty "orcas.integrationtest.with_run_with_spool_test",     "true"
+    systemProperty "orcas.integrationtest.with_run_with_extract_test",   "true"
+    systemProperty "orcas.integrationtest.execute_tests",                ".*seq.*"
+
+    systemProperty "orcas.integrationtest.available_feature_list",       ""
+    systemProperty "orcas.integrationtest.jdbc_url",                     "jdbc:oracle:thin:@localhost:1522:XE"
+    systemProperty "orcas.integrationtest.jdbc_user",                    "orcas_integration_test_dba"
+    systemProperty "orcas.integrationtest.jdbc_password",                "orcas_integration_test_dba"
+
+    systemProperty "junit.parallel.threads" ,                            "10"
+
+    testLogging {
+        events "started", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+
+
+
+

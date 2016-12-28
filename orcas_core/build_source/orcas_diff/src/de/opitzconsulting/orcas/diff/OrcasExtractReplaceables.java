@@ -228,16 +228,16 @@ public class OrcasExtractReplaceables extends Orcas
             };
           }
 
-          protected StartHandler createStartHandler( final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters )
+          protected StartHandler createStartHandler( final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, final SpoolHandler pSpoolHandler )
           {
-            return new StartHandler( pParameters, pCallableStatementProvider )
+            return new StartHandler( pParameters, pCallableStatementProvider, pSpoolHandler )
             {
               @Override
               public void handleCommand( String pLine, File pCurrentFile ) throws Exception
               {
                 if( pLine.equals( "@&1" ) )
                 {
-                  runReader( new InputStreamReader( new ByteArrayInputStream( _dummyFileContent ) ), pCallableStatementProvider, pParameters, null );
+                  runReader( new InputStreamReader( new ByteArrayInputStream( _dummyFileContent ) ), pCallableStatementProvider, pParameters, null, pSpoolHandler );
                 }
                 else
                 {
