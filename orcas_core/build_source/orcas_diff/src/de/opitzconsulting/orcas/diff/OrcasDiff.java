@@ -723,6 +723,16 @@ public class OrcasDiff extends AbstractStatementBuilder
         stmtAppend( "tablespace" );
         stmtAppend( pTableDiff.tablespaceNew );
       }
+      
+      if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )
+      {
+		  //add pctfree
+		  if(pTableDiff.pctfreeNew != null) {
+		      stmtAppend( "pctfree" );
+		      stmtAppend( ""+pTableDiff.pctfreeNew );
+		  }    	  
+      }
+
       if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )
       {
         if( pTableDiff.loggingNew == LoggingType.NOLOGGING )

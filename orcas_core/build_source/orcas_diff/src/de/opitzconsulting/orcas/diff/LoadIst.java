@@ -1,5 +1,6 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Date;
@@ -14,7 +15,16 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.emf.common.notify.Adapter;
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
 
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
@@ -1569,6 +1579,7 @@ public class LoadIst
                   " select tables.table_name," + //
                   "        tables.owner," + //
                   "        tables.tablespace_name," + //
+                  "		   tables.pct_free," + //	
                   "        tables.temporary," + //
                   "        tables.duration," + //
                   "        tables.logging," + //
@@ -1604,6 +1615,9 @@ public class LoadIst
           {
             lTable.setTablespace( pResultSet.getString( "part_tabspace" ) );
           }
+
+          //set pctfree
+          lTable.setPctfree(pResultSet.getInt("pct_free"));
 
           if( "YES".equals( pResultSet.getString( "logging" ) ) )
           {

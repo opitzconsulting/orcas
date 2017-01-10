@@ -34,6 +34,7 @@
       <apply-templates select="transactionControl" />
       <apply-templates select="tablePartitioning" />
       <apply-templates select="tablespace" />
+      <apply-templates select="pctfree" />
       <apply-templates select="compression" />
       <apply-templates select="compressionFor" />
       <apply-templates select="logging" />

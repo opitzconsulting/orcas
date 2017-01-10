@@ -9,7 +9,8 @@ ModelElement:
   Table | Sequence | IndexExTable | Comment | Mview;
 
 Table :
-  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
+  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ("pctfree" pctfree=INT)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
+
 
 TablePartitioning :
   "partition" "by" (RangePartitions | HashPartitions | ListPartitions | RefPartitions);

@@ -148,6 +148,7 @@
       <apply-templates select="transactionControl" />
       <apply-templates select="tablePartitioning" />
       <apply-templates select="tablespace" />
+      <apply-templates select="pctfree" />
       <apply-templates select="compression" />
       <apply-templates select="compressionFor" />
       <apply-templates select="logging" />
@@ -447,6 +448,12 @@
     <text>tablespace </text>
     <value-of select="myfunc:format-dbname(.)" />
   </template>
+
+  <template match="pctfree">
+    <text> pctfree </text>
+    <value-of select="." />
+  </template>
+
   
   <template match="indexname[parent::UniqueKey]">
     <text> </text>
