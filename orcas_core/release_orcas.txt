@@ -29,6 +29,7 @@ git commit/push github release
 change version to a new snapshot-version:
 build_source/build.gradle
 orcas_maven_plugin/pom.xml (3 entries)
+orcas_integrationstest/build.gradle
 
 git commit/push
 
