@@ -25,6 +25,7 @@ import com.opitzconsulting.orcas.xslt.XsltExtractDirAccessClass;
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.extensions.AllExtensions;
+import de.opitzconsulting.orcas.extensions.OrcasExtension;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.syex.trans.TransformOrigSyex;
@@ -81,6 +82,15 @@ public class OrcasExtractStatics extends Orcas
         {
           logInfo( "calling java reverse-extensions" );
           lSyexModel = OrcasMain.callJavaExtensions( lSyexModel, lAllExtensions, getParameters() );
+        }
+
+        if( !getParameters().getAdditionalOrcasReverseExtensions().isEmpty() )
+        {
+          logInfo( "calling additional reverse-extensions" );
+          for( OrcasExtension lOrcasExtension : getParameters().getAdditionalOrcasReverseExtensions() )
+          {
+            lSyexModel = lOrcasExtension.transformModel( lSyexModel );
+          }
         }
 
         if( getParameters().getSpoolfile().equals( "" ) )

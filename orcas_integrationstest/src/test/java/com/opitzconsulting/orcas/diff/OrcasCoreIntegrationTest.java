@@ -386,6 +386,8 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setTablemovetablespace( _testSetup._tablemovetablespace );
     lParametersCall.setIndexmovetablespace( _testSetup._indexmovetablespace );
     lParametersCall.setIndexparallelcreate( _testSetup._indexparallelcreate );
+    lParametersCall.getAdditionalOrcasExtensions().add( new TablespaceRemapperExtension( orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() ) );
+    lParametersCall.setDateformat( _testSetup._dateformat );
 
     new OrcasMain().mainRun( lParametersCall );
   }
@@ -407,7 +409,7 @@ public class OrcasCoreIntegrationTest
 
     resetUser( getConnectParametersTargetUser() );
 
-    executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_zielzustand.sql" );
+    executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_zielzustand.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
 
     extractSchema( getConnectParametersTargetUser(), REFERENCE_NAME, true );
 
@@ -422,7 +424,7 @@ public class OrcasCoreIntegrationTest
   public void test_01_update_statics()
   {
     resetUser( getConnectParametersTargetUser() );
-    executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_ausgangszustand.sql" );
+    executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_ausgangszustand.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
 
     executeOrcasStatics( getConnectParametersTargetUser(), _lognameFirstRun );
     asserSchemaEqual( "orcas_run", true );
@@ -444,7 +446,7 @@ public class OrcasCoreIntegrationTest
     assumeTestNotSkipped( orcasCoreIntegrationConfig.isWithRunWithSpoolTest() );
 
     resetUser( getConnectParametersTargetUser() );
-    executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_ausgangszustand.sql" );
+    executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_ausgangszustand.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
     executeScript( orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + _lognameFirstRun + "/", getConnectParametersTargetUser(), "master_install.sql" );
     asserSchemaEqual( "protocol_run", true );
   }

@@ -27,10 +27,6 @@ import de.opitzconsulting.orcasDsl.impl.ModelImpl;
 
 public class XtextFileLoader
 {
-  private static Map<Object,Object> loadOptions;
-  private static XtextResourceSet resourceSet;
-  private static int counter;
-
   public static Model loadModelXml( String pFilename )
   {
     EPackage.Registry.INSTANCE.put( OrcasDslPackage.eNS_URI, OrcasDslPackage.eINSTANCE );
@@ -62,24 +58,33 @@ public class XtextFileLoader
 
   public static Model loadModelDsl( List<File> pModelFiles, Parameters pParameters )
   {
-    XtextFileLoader.initXtext();
+    Injector lInjector = new OrcasDslStandaloneSetup().createInjectorAndDoEMFRegistration();
+    XtextResourceSet lResourceSet = lInjector.getInstance( XtextResourceSet.class );
+
+    lResourceSet.addLoadOption( XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE );
+
+    Map<Object,Object> lLoadOptions = lResourceSet.getLoadOptions();
+    lLoadOptions.put( XtextResource.OPTION_ENCODING, "utf8" );
+
     Model lReturn = new ModelImpl();
+
+    int lCounter = 0;
 
     for( File lFile : pModelFiles )
     {
-      lReturn.getModel_elements().addAll( loadModelDslFile( lFile, pParameters ).getModel_elements() );
+      lReturn.getModel_elements().addAll( loadModelDslFile( lFile, pParameters, lResourceSet, lLoadOptions, lCounter++ ).getModel_elements() );
     }
 
     return lReturn;
   }
 
-  private static Model loadModelDslFile( File pFile, Parameters pParameters )
+  private static Model loadModelDslFile( File pFile, Parameters pParameters, XtextResourceSet pResourceSet, Map<Object,Object> pLoadOptions, int pCounter )
   {
-    Resource lResource = resourceSet.createResource( URI.createURI( "dummy:/dummy" + counter++ + ".orcasdsl" ) );
+    Resource lResource = pResourceSet.createResource( URI.createURI( "dummy:/dummy" + pCounter + ".orcasdsl" ) );
     try
     {
       FileInputStream lInputStream = new FileInputStream( pFile );
-      lResource.load( lInputStream, loadOptions );
+      lResource.load( lInputStream, pLoadOptions );
       lInputStream.close();
       Model lModel = (Model)lResource.getContents().get( 0 );
 
@@ -100,16 +105,5 @@ public class XtextFileLoader
 
       throw new RuntimeException( e );
     }
-  }
-
-  public static void initXtext()
-  {
-    Injector lInjector = new OrcasDslStandaloneSetup().createInjectorAndDoEMFRegistration();
-    resourceSet = lInjector.getInstance( XtextResourceSet.class );
-
-    resourceSet.addLoadOption( XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE );
-
-    loadOptions = resourceSet.getLoadOptions();
-    loadOptions.put( XtextResource.OPTION_ENCODING, "utf8" );
   }
 }

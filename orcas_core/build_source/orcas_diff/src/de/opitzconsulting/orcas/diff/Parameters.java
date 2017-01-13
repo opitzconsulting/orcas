@@ -2,8 +2,10 @@ package de.opitzconsulting.orcas.diff;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
+import de.opitzconsulting.orcas.extensions.OrcasExtension;
 import de.opitzconsulting.orcasDsl.Model;
 
 public abstract class Parameters
@@ -101,10 +103,13 @@ public abstract class Parameters
   protected Boolean _loadExtractWithReverseExtensions = true;
   protected Boolean _multiSchema = false;
   protected Boolean _multiSchemaDbaViews = false;
-  protected String _multiSchemaExcludewhereowner;
+  protected String _multiSchemaExcludewhereowner;  
 
   private InfoLogHandler _infoLogHandler;
   private String _removePromptPrefix;
+  
+  private List<OrcasExtension> _additionalOrcasExtensions = new ArrayList<OrcasExtension>();
+  private List<OrcasExtension> _additionalOrcasReverseExtensions = new ArrayList<OrcasExtension>(); 
 
   protected ModelLoader _modelLoader = new ModelLoader()
   {
@@ -369,5 +374,15 @@ public abstract class Parameters
   public Boolean getMultiSchemaDbaViews()
   {
     return checkNull( _multiSchemaDbaViews );
+  }
+
+  public List<OrcasExtension> getAdditionalOrcasExtensions()
+  {
+    return _additionalOrcasExtensions;
+  }
+
+  public List<OrcasExtension> getAdditionalOrcasReverseExtensions()
+  {
+    return _additionalOrcasReverseExtensions;
   }
 }

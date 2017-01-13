@@ -187,11 +187,11 @@ public class OrcasCoreSpoolTest
     deleteRecursive( new File( orcasCoreIntegrationConfig.getWorkfolder() + lTestFolderName ) );
 
     resetUser( _connectParametersTargetUser );
-    executeScript( _connectParametersTargetUser, "testspool/tests/" + testName + "/" + "a.sql" );
+    executeScript( _connectParametersTargetUser, "testspool/tests/" + testName + "/" + "a.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
     OrcasCoreIntegrationTest.extractSchema( _connectParametersTargetUser, "a", true, lTestFolderName, OrcasCoreIntegrationTest.DEFAULT_EXCLUDE, "dd.mm.yyyy" );
 
     resetUser( _connectParametersTargetUser );
-    executeScript( _connectParametersTargetUser, "testspool/tests/" + testName + "/" + "b.sql" );
+    executeScript( _connectParametersTargetUser, "testspool/tests/" + testName + "/" + "b.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
     OrcasCoreIntegrationTest.asserSchemaEqual( "a", "b", true, lTestFolderName, OrcasCoreIntegrationTest.DEFAULT_EXCLUDE, "dd.mm.yyyy", _connectParametersTargetUser );
   }
 }

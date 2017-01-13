@@ -11,6 +11,7 @@ import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatem
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.extensions.AllExtensions;
+import de.opitzconsulting.orcas.extensions.OrcasExtension;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperCallableStatement;
@@ -75,6 +76,15 @@ public class OrcasMain extends Orcas
             {
               logInfo( "calling java extensions" );
               lSyexModel = callJavaExtensions( lSyexModel, lAllExtensions, getParameters() );
+            }
+
+            if( !getParameters().getAdditionalOrcasExtensions().isEmpty() )
+            {
+              logInfo( "calling additional extensions" );
+              for( OrcasExtension lOrcasExtension : getParameters().getAdditionalOrcasExtensions() )
+              {
+                lSyexModel = lOrcasExtension.transformModel( lSyexModel );
+              }
             }
 
             if( PlSqlHandler.isPlSqlEextensionsExistst() )
@@ -246,6 +256,7 @@ public class OrcasMain extends Orcas
       pAllExtensions.setParameter( pParameters.getExtensionParameter() );
     }
     lSyexModel = pAllExtensions.transformModel( lSyexModel );
+
     return lSyexModel;
   }
 

@@ -1,6 +1,5 @@
 package de.opitzconsulting.orcas.diff;
 
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Date;
@@ -15,16 +14,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.emf.common.notify.Adapter;
-import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EOperation;
-import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.resource.Resource;
 
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
@@ -127,7 +117,7 @@ public class LoadIst
 {
   private Log _log = LogFactory.getLog( OrcasMain.class );
 
-  private Map<String,List<String>> excludeMap = new HashMap<String,List<String>>();
+  private Map<String,List<String>> includeMap = new HashMap<String,List<String>>();
 
   private Map<String,Object> constraintMapForFK = new HashMap<String,Object>();
   private Map<String,Table> constraintTableMapForFK = new HashMap<String,Table>();
@@ -272,9 +262,9 @@ public class LoadIst
 
   private void loadIgnoreCache( String pExcludeWhere, final String pType )
   {
-    if( !excludeMap.containsKey( pType ) )
+    if( !includeMap.containsKey( pType ) )
     {
-      excludeMap.put( pType, new ArrayList<String>() );
+      includeMap.put( pType, new ArrayList<String>() );
 
       String lSql = "select object_name, owner, case when ( " + getExcludeWhere( pExcludeWhere ) + " ) then 1 else 0 end is_exclude from " + getDataDictionaryView( "objects" ) + " where object_type=?";
 
@@ -283,9 +273,9 @@ public class LoadIst
         @Override
         protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
         {
-          if( pResultSet.getInt( "is_exclude" ) == 1 )
+          if( pResultSet.getInt( "is_exclude" ) == 0 )
           {
-            excludeMap.get( pType ).add( getNameWithOwner( pResultSet.getString( "object_name" ), pResultSet.getString( "owner" ) ) );
+            includeMap.get( pType ).add( getNameWithOwner( pResultSet.getString( "object_name" ), pResultSet.getString( "owner" ) ) );
           }
         }
       }.execute();
@@ -296,7 +286,7 @@ public class LoadIst
   {
     loadIgnoreCache( pExcludeWhere, pType );
 
-    return excludeMap.get( pType ).contains( getNameWithOwner( pName, pOwner ) );
+    return !includeMap.get( pType ).contains( getNameWithOwner( pName, pOwner ) );
   }
 
   private boolean isIgnoredSequence( String pString, String pOwner )
@@ -316,7 +306,7 @@ public class LoadIst
       return true;
     }
 
-    return isIgnored( pString, pOwner, _parameters.getExcludewheretable(), "TABLE" ) || isIgnored( pString, pOwner, "1=1", "VIEW" );
+    return isIgnored( pString, pOwner, _parameters.getExcludewheretable(), "TABLE" );
   }
 
   private int toInt( BigDecimal pBigDecimal )
@@ -1617,7 +1607,7 @@ public class LoadIst
           }
 
           //set pctfree
-          lTable.setPctfree(pResultSet.getInt("pct_free"));
+          lTable.setPctfree( pResultSet.getInt( "pct_free" ) );
 
           if( "YES".equals( pResultSet.getString( "logging" ) ) )
           {

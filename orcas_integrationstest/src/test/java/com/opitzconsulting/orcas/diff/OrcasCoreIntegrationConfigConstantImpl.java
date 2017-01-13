@@ -12,7 +12,7 @@ public class OrcasCoreIntegrationConfigConstantImpl extends OrcasCoreIntegration
   private boolean _withSecondRunEmptyTest = true;
   private boolean _withRunWithSpoolTest = true;
   private boolean _withRunWithExtractTest = true;
-  private String _executeTests = ".*";
+  private String _executeTests = ".*remove";
 
   private int _parallelThreads = 1;
 
@@ -64,5 +64,15 @@ public class OrcasCoreIntegrationConfigConstantImpl extends OrcasCoreIntegration
   public int getParallelThreads()
   {
     return _parallelThreads;
+  }
+
+  public String getAlternateTablespace1()
+  {
+    return null;
+  }
+
+  public String getAlternateTablespace2()
+  {
+    return null;
   }
 }

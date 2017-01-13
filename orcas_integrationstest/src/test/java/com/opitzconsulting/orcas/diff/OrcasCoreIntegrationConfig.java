@@ -28,5 +28,9 @@ public interface OrcasCoreIntegrationConfig
 
   String getJdbcPassword();
 
+  String getAlternateTablespace1();
+
+  String getAlternateTablespace2();
+
   int getParallelThreads();
 }

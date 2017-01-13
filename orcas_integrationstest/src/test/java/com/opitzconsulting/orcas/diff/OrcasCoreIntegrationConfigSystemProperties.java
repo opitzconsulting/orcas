@@ -90,4 +90,14 @@ public class OrcasCoreIntegrationConfigSystemProperties extends OrcasCoreIntegra
   {
     return true;
   }
+
+  public String getAlternateTablespace1()
+  {
+    return getStringProperty( "orcas.integrationtest.alternate_tablespace_1" );
+  }
+
+  public String getAlternateTablespace2()
+  {
+    return getStringProperty( "orcas.integrationtest.alternate_tablespace_2" );
+  }
 }

@@ -31,25 +31,61 @@ dependencies
 test.outputs.upToDateWhen { false }
 
 test {
+    loadPropertyFile( "../../distribution/custom.properties", project );
+    loadPropertyFile( "../../custom.properties", project );
+    loadPropertyFile( "distribution/default_location.properties", project );
+
+    println "--- location: ${project.location} ---"
+
+    loadPropertyFile( "../../distribution/integrationstest/${project.location}/location.properties", project );
+    loadPropertyFile( "../../distribution/${project.location}/location.properties", project );
+    loadPropertyFile( "distribution/${project.location}/location.properties", project );
+    loadPropertyFile( "distribution/default.properties", project );
+
     systemProperty "orcas.integrationtest.workfolder",                   "" + buildDir + "/gradle_tests/"
 
-    systemProperty "orcas.integrationtest.with_second_run_empty_test",   "true"
-    systemProperty "orcas.integrationtest.with_run_with_spool_test",     "true"
-    systemProperty "orcas.integrationtest.with_run_with_extract_test",   "true"
-    systemProperty "orcas.integrationtest.execute_tests",                ".*seq.*"
+    systemProperty "orcas.integrationtest.with_second_run_empty_test",   with_second_run_empty_test
+    systemProperty "orcas.integrationtest.with_run_with_spool_test",     with_run_with_spool_test
+    systemProperty "orcas.integrationtest.with_run_with_extract_test",   with_run_with_extract_test
+    systemProperty "orcas.integrationtest.execute_tests",                execute_tests
 
-    systemProperty "orcas.integrationtest.available_feature_list",       ""
-    systemProperty "orcas.integrationtest.jdbc_url",                     "jdbc:oracle:thin:@localhost:1522:XE"
-    systemProperty "orcas.integrationtest.jdbc_user",                    "orcas_integration_test_dba"
-    systemProperty "orcas.integrationtest.jdbc_password",                "orcas_integration_test_dba"
+    systemProperty "orcas.integrationtest.available_feature_list",       available_feature_list
+    systemProperty "orcas.integrationtest.jdbc_url",                     "jdbc:oracle:thin:@${jdbc_host}:${jdbc_port}:${jdbc_sid}"
+    systemProperty "orcas.integrationtest.jdbc_user",                    username_dba
+    systemProperty "orcas.integrationtest.jdbc_password",                password_dba
+    systemProperty "orcas.integrationtest.alternate_tablespace_1",       alternate_tablespace_1
+    systemProperty "orcas.integrationtest.alternate_tablespace_2",       alternate_tablespace_2
 
-    systemProperty "junit.parallel.threads" ,                            "10"
+    systemProperty "junit.parallel.threads" ,                            parallel_threads
 
     testLogging {
         events "started", "skipped", "failed"
         exceptionFormat "full"
     }
 }
+
+def loadPropertyFile(String pFileName, Project pProject) {
+    def lProperties = new Properties()
+    def lFile = new File(pFileName)
+
+    if( !lFile.exists() )
+    {
+      return
+    }
+
+    lProperties.load(new FileInputStream(lFile))
+
+    lProperties.each 
+    { 
+      key, val ->
+
+      if( !project.hasProperty(key) )
+      {
+        project.ext.set( key, val )
+      }
+    }
+}
+
 
 
 

@@ -1,10 +1,10 @@
 create table tab_mod_compress
 (
   id number(15) not null
-) nocompress;
+) pctfree 0 nocompress;
 
 create table tab_mod_compress_dl
 (
   id number(15) not null
-) compress for all operations;
+) pctfree 0 compress for all operations;
 
