@@ -151,6 +151,10 @@ public class JavaDataReaderGenerator extends JavaGenerator
               {
                 lValueString = "lAttributes[" + i + "] == null ? intNullValue : ((BigDecimal)lAttributes[" + i + "] ).intValue()";
               }
+              if( lType.getJavaName().equals( "Integer" ) )
+              {
+                lValueString = "lAttributes[" + i + "] == null ? null : ((BigDecimal)lAttributes[" + i + "] ).intValue()";
+              }              
               if( lType.getJavaName().equals( "boolean" ) )
               {
                 lValueString = "((BigDecimal)lAttributes[" + i + "] ).intValue() == 1";

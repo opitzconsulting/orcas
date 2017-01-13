@@ -1,5 +1,7 @@
 grammar de.opitzconsulting.OrigOrcasDsl with org.eclipse.xtext.common.Terminals
 
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
 generate origOrcasDsl "http://www.opitzconsulting.de/OrigOrcasDsl"
 
 Model :
@@ -9,7 +11,7 @@ ModelElement:
   Table | Sequence | IndexExTable | Comment | Mview;
 
 Table :
-  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ("pctfree" pctfree=INT)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
+  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ("pctfree" pctfree=NULLABLE_INT)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
 
 
 TablePartitioning :
@@ -185,6 +187,9 @@ InlineComment:
 
 DBNAME_WITH_SCHEMA:
   DBNAME ( '.' DBNAME )?;
+
+NULLABLE_INT returns ecore::EIntegerObject:
+  INT;
 
 terminal DBNAME :
   ('A'..'Z'|'a'..'z')('A'..'Z'|'a'..'z'|'_'|'0'..'9'|'#')*;

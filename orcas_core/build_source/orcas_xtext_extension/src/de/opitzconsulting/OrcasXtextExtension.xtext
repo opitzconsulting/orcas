@@ -9,13 +9,13 @@ ModelElement:
 	header=Header (rules+=Rule)+;
 
 Header:
-	"grammar" this_grammar=IDDOT "with" super_grammar=IDDOT "generate" name=ID2 this_generate=STRING;
+	"grammar" this_grammar=IDDOT "with" super_grammar=IDDOT ( "import" importurl=STRING "as" importalias=ID2 ) "generate" name=ID2 this_generate=STRING;
 
 Rule:
 	RuleTerminal | RuleNormal;
 
 RuleNormal:
-	(rule_enum="enum")? name=ID2 ":" (rule_entries+=RuleEntry)+ ";";
+	(rule_enum="enum")? name=ID2 ("returns" typeurlalias=ID2 "::" typename=ID2)? ":" (rule_entries+=RuleEntry)+ ";";
 
 RuleTerminal:
 	"terminal" name=ID2 ":" terminal_rule=TERMINAL_RULE ";";

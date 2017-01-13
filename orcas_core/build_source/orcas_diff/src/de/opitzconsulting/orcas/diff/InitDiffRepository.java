@@ -703,6 +703,18 @@ public class InitDiffRepository
           {
             pValue.setCompressionFor( null );
           }
+
+          if( pValue.getPctfree() != null && pValue.getPctfree().intValue() == 0 )
+          {
+            pValue.setPctfree( null );
+          }
+        }
+        else
+        {
+          if( pValue.getPctfree() != null && pValue.getPctfree().intValue() == 10 )
+          {
+            pValue.setPctfree( null );
+          }
         }
       }
     } );

@@ -106,7 +106,7 @@ public class TypeDataContainer
       {
         lSqlName = "varchar2(2000)";
       }
-      if( lClass == int.class )
+      if( lClass == int.class || lClass == Integer.class )
       {
         lSqlName = "number";
       }
