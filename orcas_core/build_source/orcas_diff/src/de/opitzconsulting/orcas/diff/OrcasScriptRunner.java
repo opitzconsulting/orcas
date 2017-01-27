@@ -21,8 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.ibm.icu.util.StringTokenizer;
+import java.util.StringTokenizer;
 
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;

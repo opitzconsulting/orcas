@@ -35,6 +35,8 @@ class OrcasGradlePlugin implements Plugin<Project> {
         pProject.task('extract')
 
         pProject.extract.dependsOn pProject.extractStatics,  pProject.extractReplaceables
+
+        pProject.task('schemaSyncStatics', type: OrcasSchemaSyncStaticsTask)
     }
 }
 
@@ -82,6 +84,10 @@ class OrcasGradlePluginExtension {
   def boolean extractremovedefaultvaluesfrommodel = true;
   def String extractreplaceablesoutfolder;
   def String viewextractmode = "text";
+
+  def String srcjdbcurl;
+  def String srcusername;
+  def String srcpassword;
 }
 
 
