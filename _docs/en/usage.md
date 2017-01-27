@@ -1,18 +1,31 @@
 ---
 layout: page
-title: How to work with Orcas?
+title: First steps with Orcas
 permalink: /docs/usage/
 categories: 
 - en
 ---
+## Setup
 
-This documentation describes how to work with Orcas. For this, the Orderentry example is used, which has ideally already [installed]({{site.baseurl}}/docs/examples/).
+This documentation describes how to work with Orcas. 
 
-With Orcas all tables (and other database objects) are stored in plain text files. This one will then place typically in a version control along with the other sources of a project. Thus they merge largely without problems or sectors.
+For this documentation, the Orderentry example is used, for information on how to install and run orcas refre to the correspponding instructions of your favorite build-tool:
 
-The task of Orcas is to read the files, compare them with an existing database schema and execute the necessary changes if necessary in the scheme.
+- [Orcas for maven]({{site.baseurl}}/docs/getting-started-maven/)
 
-In the Orderentry example it's for example possible in the file orderentry\db\tabellen\categories.sql
+- [Orcas for gradle]({{site.baseurl}}/docs/getting-started-gradle/)
+
+- [Orcas for ant]({{site.baseurl}}/docs/examples/)
+
+## Orcas
+
+With Orcas all tables (and other database objects) are stored in plain text files. These then place typically be placed in a version control along with the other sources of a project.
+
+The task of Orcas is to read these files, compare them with an existing database schema and execute the necessary schema changes.
+
+For example in the orderentry example there is a table named "categories". 
+
+It is defined in a file called "categories.sql":
 {% highlight sql %}
 create table categories
 (
@@ -26,7 +39,7 @@ create table categories
 );
 {% endhighlight %}
 
-Insert a new column:
+If the new column "image_location" is inserted:
 
 {% highlight sql %}
 create table categories
@@ -42,23 +55,23 @@ create table categories
 );
 {% endhighlight %}
 
-Start Orcas, and the new column is in the database.
+Orcas will add the new column to the database.
 
-In the same way you would perform other changes:
+In the same way you would perform other changes like:
 
 - Change default values
 - Add or delete constraints
-- set "not null" or remove (set "not null" is of course only possible if in the respective table column are consistently data included)
-- Creating tables (for logical reasons in a new file)
-- Create foreign keys. Orcas ensures the correct sequence when creating
-- Change data type/length. Here, enlarging a column is relatively easily, shrinking or type changes are only successful if the data contained in the table are matching.
+- set "not null" or remove it
+- Create tables
+- Create foreign keys
+- Change data type/length.
 
 ## Deleting parts of the data model
 
-There are two changes that are blocked by default and therefore not successfully run through:
+There are two changes that are blocked by default:
 
-- Delete Column
-- Delete Table
+- Delete Column (unless the column is empty)
+- Delete Table (unless the table is empty)
 
 Both changes run through, if the table is empty (or in columns although if only null values are present). In the Orderentry example it will work for now (because all the tables are empty initially). But if you write data into the tables, then this leads to an error message.
 

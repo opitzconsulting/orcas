@@ -11,7 +11,7 @@ By using simple text files, an **integration** into existing projects using **ve
 Orcas is an acronym for **Or**a**c**le **a**daptive **s**chemas”. It is only compatible with Oracle RDBMS.
 
 
-## Problem
+## The problems Orcas can solve
 
 The following problems can frequently occur during development of database applications:
 

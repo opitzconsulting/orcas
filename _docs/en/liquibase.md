@@ -1,26 +1,26 @@
 ---
 layout: page
-title: Delimitation of liquibase/flyway
+title: Alternatives liquibase/flyway
 permalink: /docs/liquibase/
 categories: 
 - en
 ---
 [liquibase](http://www.liquibase.org/) and [flyway](http://flywaydb.org/) are two tools, which adress the same problem as Orcas does.
 
-Both are working in principle with a list of database changes which need to be performed (partially this "list" can be ordered hierachically, too).
+Basically both tools work with al list of database changes which needs to be maintained manually and gets executed automatically.
 
-Both Tools, on principle, are recommended and will also be used in some projects of OPITZ CONSULTING. The big advantage of both tools is, you are not used to work with Oracle databases.
+Both tools can be recommended and are also used in some projects of OPITZ CONSULTING. The big advantage of both tools is, you are not limited to work with Oracle databases. 
 
 ## So, why Orcas?
 
 ### Database model in form of scripts
 
-Important: only the database model itself and not the change log of the database model will be retained.
-A change log in Orcas is only necessary for special cases and is always just basically in existence to the database model.
+Important: the database model itself and not the change log of the database model is maintained.
+A change log in Orcas is only necessary for special cases and only in adition to the model.
 
 In Orcas, version control merging conflicts normally occur, when you "need" them. So exactly when two developers applying changes to the database model at the same section. On the one hand, if you put the change log into the version control, usually you get to much merge conflicts (namely everytime two developers are applying changes to the database model at the same time, regardless of whether it is at the same section or not). On the other hand you can get too little merge conflicts (e.g. you outsource every change into a new file. Normally you don't get merge conflicts, which means problematical parallel changings in the data model will be recognized while installing or in the worst case never).
 
-There are the same problems with Orcas, because Orcas has to use a change log mechanism for single special cases, too. The advantage is, you don't need it that often, so the capability of merge conflicts is significantly reduced. Furthermore a wrong merged change log will be detected with great reliability, because afterward there will be a complete comparison. In addition to this, you also merge the data model itself, so you can precisely say, whether there is a problem with the change log or not.
+In the "special casese" whrer you need an change log in Orcas, there are basically the same problems regarding merges. But the advantage is, you don't need it that often, so the lieklyness of (unwanted) merge conflicts is significantly reduced. Furthermore a wrong merged change log will be detected with great reliability, because afterwards there will be a complete comparison. In addition to this, you also merge the data model itself, so you can precisely say, whether there is a problem with the change log or not.
 
 The data model in form of scripts is also very suitable for ensuring the traceability of changes (e.g. to answer questions like "Who changed a table with his commit and when?").
 
