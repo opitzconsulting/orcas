@@ -24,7 +24,8 @@ examples/gradle*/build.gradle
 examples/maven*/pom.xml
 examples/orderentry/db/build.xml
 
-git commit/push github release
+git commit/push 
+github release
 
 change version to a new snapshot-version:
 build_source/build.gradle
