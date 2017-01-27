@@ -5,7 +5,7 @@ public class OrcasCoreIntegrationConfigConstantImpl extends OrcasCoreIntegration
   private String _workfolder = "./build/ide_tests/";
   private String _availableFeatureList = "";
 
-  private String _jdbcUrl = "jdbc:oracle:thin:@localhost:1522:XE";
+  private String _jdbcUrl = "jdbc:oracle:thin:@localhost:1521:XE";
   private String _jdbcUser = "orcas_integration_test_dba";
   private String _jdbcPassword = _jdbcUser;
 

@@ -49,10 +49,10 @@
 	</dependencies>
 
         <configuration>
-          <jdbcurl>jdbc:oracle:thin:@localhost:1522:XE</jdbcurl>
+          <jdbcurl>jdbc:oracle:thin:@localhost:1521:XE</jdbcurl>
           <username>orcas_orderentry</username>
           <password>orcas_orderentry</password>
-          <orcasjdbcurl>jdbc:oracle:thin:@localhost:1522:XE</orcasjdbcurl>
+          <orcasjdbcurl>jdbc:oracle:thin:@localhost:1521:XE</orcasjdbcurl>
           <orcasusername>orcas_orderentry_orcas</orcasusername>
           <orcaspassword>orcas_orderentry</orcaspassword>
           <loglevel>info</loglevel>

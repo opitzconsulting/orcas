@@ -41,7 +41,7 @@
 	</dependencies>
 
         <configuration>
-          <jdbcurl>jdbc:oracle:thin:@localhost:1522:XE</jdbcurl>
+          <jdbcurl>jdbc:oracle:thin:@localhost:1521:XE</jdbcurl>
           <username>orcas_orderentry</username>
           <password>orcas_orderentry</password>
           <loglevel>info</loglevel>
