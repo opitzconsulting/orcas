@@ -25,7 +25,7 @@ examples/maven*/pom.xml
 examples/orderentry/db/build.xml
 
 git commit/push 
-github release
+github release  release tag: e.g. "2.6.2", release name e.g. "orcas version 2.6.2"
 
 change version to a new snapshot-version:
 build_source/build.gradle
