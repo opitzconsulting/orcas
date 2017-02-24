@@ -15,6 +15,7 @@ Java 8 (1.8) needed at least.
 ### Gradle
 
 Use the gradle wrapper (type gradlew or ./gradlew instead of gradle).
+
 Otherwise download and install gradle from [gradle.org](https://gradle.org/). Until further notice you can use the newest version. Orcas rquires at least gradle 3.3.
 
 ### Orcale jdbc driver
@@ -56,4 +57,5 @@ grant create view to orcas_orderentry;
 
 ## Start orcas
 Exceute `gradle databaseDeployment` at a command line located at `examples\gradle`.
+
 For gradle wrapper use `gradlew databaseDeployment` or `./gradlew databaseDeployment` instead.
