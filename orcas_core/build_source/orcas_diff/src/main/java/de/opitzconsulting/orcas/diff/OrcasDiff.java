@@ -509,7 +509,6 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       if( lTableDiff.isNew == true )
       {
-        //    TODO Sonderbehandlung für Tabellen zu Mviews, die nicht prebuilt sind, sie dürfen nicht behandelt werden        
         handleTable( lTableDiff );
       }
     }
@@ -847,7 +846,7 @@ public class OrcasDiff extends AbstractStatementBuilder
           }
           else
           {
-            throw new RuntimeException( "Fehler beim FK Aufbau " + pForeignKeyDiff.consNameNew + " auf tabelle " + pTableDiff.nameNew + " Datenbereinigung nicht möglich, da keine delete rule. " + lFkFalseDataSelect );
+            throw new RuntimeException( "error FK rebuild " + pForeignKeyDiff.consNameNew + " on table " + pTableDiff.nameNew + " data-cleaning not possible , missing delete rule. " + lFkFalseDataSelect );
           }
         }
       }

@@ -11,6 +11,9 @@ sudo su
 # somehow oraenv does not set LD_LIBRARY_PATH correctly (used for reverse-engineering jdbc-oci connection)
 printf "export LD_LIBRARY_PATH=$ORACLE_HOME/lib" >> .bash_profile
 
+# install java
+yum -y install java-1.8.0-openjdk-devel 
+
 # install ant
 yum -y install ant
 yum -y install ant-contrib
