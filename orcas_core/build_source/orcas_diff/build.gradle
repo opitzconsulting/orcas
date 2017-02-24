@@ -14,7 +14,4 @@ dependencies
   compile "xalan:xalan:2.7.2"
 }
 
-compileJava.source "src"
-processResources.from "resources"
-
 

@@ -19,3 +19,7 @@ sourceSets {
     }
 }
 
+javadocJar.dependsOn groovydoc
+
+javadocJar.from groovydoc.destinationDir
+

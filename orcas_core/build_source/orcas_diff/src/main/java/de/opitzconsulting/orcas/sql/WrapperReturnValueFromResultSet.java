@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * This class handles returnvalues from resultsets. Note, that {@link de.oc.gds.framework.businesstier.util.PlSqlRunner PlSqlRunner} should be use to handle return values from functions.
+ * This class handles returnvalues from resultsets. 
  * 
  * It is also importatnt to know, that using this class or any of its subclasse, executeForValue has to be used instaed of execute.
  * 
