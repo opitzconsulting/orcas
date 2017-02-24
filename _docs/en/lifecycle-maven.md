@@ -1,4 +1,4 @@
----
+-ls--
 layout: page
 title: Orcas for Maven lifecycle
 permalink: /docs/lifecycle-maven/
@@ -44,12 +44,6 @@ Compiles all pl/sql code in the database-schema.
 Executes one-time-scripts in `src/main/scripts/post-compile`. 
 
 ## database-deployment
-This is the main thing to exceute. Does nothing on its, but is set up to exceute all others.
+This is the main goal to exceute. Does nothing on its own, but is set up to exceute all other goals.
 
-<iframe width="480" height="360" src="{{site.baseurl}}/orcas_maven_plugin/site/plugin-info.html" frameborder="0"> </iframe>
-
-
-## Soon to come...
-
-## 
 
