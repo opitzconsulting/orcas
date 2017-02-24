@@ -7,9 +7,15 @@ import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
 
+/**
+ * Compiles pl/sql code in the database.
+ */
 @Mojo( name = "compileAllInvalid" )
 public class OrcasCompileAllInvalid extends BaseOrcasMojo
 {
+  /**
+   * The logname for spooling.
+   */
   @Parameter( defaultValue = "compile-all-invalid" )
   private String logname;
 

@@ -6,9 +6,15 @@ import org.apache.maven.plugins.annotations.Parameter;
 import de.opitzconsulting.orcas.diff.OrcasMain;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 
+/**
+ * This is the main mojo to update the database-schema according to the orcas-script files.
+ */
 @Mojo( name = "updateStatics" )
 public class OrcasUpdateStatics extends BaseOrcasMojo
 {
+  /**
+   * The logname for spooling.
+   */
   @Parameter( defaultValue = "update-statics" )
   private String logname;
 

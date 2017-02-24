@@ -8,6 +8,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import de.opitzconsulting.orcas.diff.OrcasExtractReplaceables;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 
+/**
+ * Cretaes sql-scripts for replace objects existing in the database-schema.
+ */
 @Mojo( name = "extractReplaceables" )
 public class OrcasExtractReplaceablesMojo extends BaseOrcasMojo
 {

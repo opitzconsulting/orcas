@@ -7,6 +7,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 import de.opitzconsulting.orcas.diff.Orcas;
 
+/**
+ * Cleans the spoolfolder.
+ */
 @Mojo( name = "cleanLog" )
 public class OrcasCleanLog extends BaseOrcasMojo
 {

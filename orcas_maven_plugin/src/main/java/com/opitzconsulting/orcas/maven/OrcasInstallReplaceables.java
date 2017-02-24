@@ -6,9 +6,15 @@ import org.apache.maven.plugins.annotations.Parameter;
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 
+/**
+ * Exceutes sql-script that contain database-objects.
+ */
 @Mojo( name = "installReplaceables" )
 public class OrcasInstallReplaceables extends BaseOrcasMojo
 {
+  /**
+   * The logname for spooling.
+   */
   @Parameter( defaultValue = "install-replaceables" )
   private String logname;
 

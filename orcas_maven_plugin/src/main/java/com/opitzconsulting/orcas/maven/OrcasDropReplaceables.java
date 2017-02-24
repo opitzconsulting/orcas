@@ -10,9 +10,15 @@ import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
 
+/**
+ * Drops all replaceanles in th database-schema.
+ */
 @Mojo( name = "dropReplaceables" )
 public class OrcasDropReplaceables extends BaseOrcasMojo
 {
+  /**
+   * The logname for spooling.
+   */
   @Parameter( defaultValue = "drop-replaceables" )
   private String logname;
 
@@ -22,21 +28,39 @@ public class OrcasDropReplaceables extends BaseOrcasMojo
     return logname;
   }
 
+  /**
+   * exclude views.
+   */
   @Parameter( defaultValue = "object_name not like '%'" )
   private String excludewhereview;
 
+  /**
+   * exclude object types.
+   */
   @Parameter( defaultValue = "object_name not like '%'" )
   private String excludewhereobjecttype;
 
+  /**
+   * exclude packages.
+   */
   @Parameter( defaultValue = "object_name not like '%'" )
   private String excludewherepackage;
 
+  /**
+   * exclude trigger.
+   */
   @Parameter( defaultValue = "object_name not like '%'" )
   private String excludewheretrigger;
 
+  /**
+   * exclude functions.
+   */
   @Parameter( defaultValue = "object_name not like '%'" )
   private String excludewherefunction;
 
+  /**
+   * exclude procedures.
+   */
   @Parameter( defaultValue = "object_name not like '%'" )
   private String excludewhereprocedure;
 

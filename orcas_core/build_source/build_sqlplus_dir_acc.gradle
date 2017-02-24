@@ -21,7 +21,7 @@ class GenerateJavaSqlplusDirAccessClassClass extends DefaultTask {
   def List<String> sqlplusDirFilenameList = new ArrayList<String>();
   def className = project.ext.maven_artifactId_postfix.capitalize().replace("-","");
   def packageName = className.toLowerCase();
-  def accessClassFile = new File("${project.buildDir}/javagen/de/opitzconsulting/orcas/${packageName}/SqlplusDirAccess${className}.java");
+  def accessClassFile = new File("${project.buildDir}/javagen/com/opitzconsulting/orcas/${packageName}/SqlplusDirAccess${className}.java");
 
     def getSqlplusDirFilenameList() {
       if( sqlplusDir == null )
@@ -59,7 +59,7 @@ class GenerateJavaSqlplusDirAccessClassClass extends DefaultTask {
 
     @TaskAction
     def generateAccessClass() {
-      new File("${project.buildDir}/javagen/de/opitzconsulting/orcas/${packageName}").mkdirs();
+      new File("${project.buildDir}/javagen/com/opitzconsulting/orcas/${packageName}").mkdirs();
       
       accessClassFile.delete();
       accessClassFile << """
