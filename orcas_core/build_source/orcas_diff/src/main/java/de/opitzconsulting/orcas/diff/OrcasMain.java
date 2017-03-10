@@ -230,7 +230,7 @@ public class OrcasMain extends Orcas
       }
     }
 
-    logInfo( new XMLOutputter( Format.getPrettyFormat() ).outputString( lDiffActionsElement ) );
+    //logInfo( new XMLOutputter( Format.getPrettyFormat() ).outputString( lDiffActionsElement ) );
   }
 
   private void doSchemaSync( final Parameters pParameters ) throws Exception
