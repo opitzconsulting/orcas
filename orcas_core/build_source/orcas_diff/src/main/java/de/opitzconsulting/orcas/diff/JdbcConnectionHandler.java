@@ -60,7 +60,8 @@ public class JdbcConnectionHandler
 
           try
           {
-            // oracle driver logs MBean Registration-Messages that cant be prevented otherwise 
+            // oracle driver logs MBean Registration-Messages that cant be
+            // prevented otherwise
             System.setErr( new PrintStream( new ByteArrayOutputStream() ) );
             System.setOut( new PrintStream( new ByteArrayOutputStream() ) );
             loadDriverClass( pJdbcConnectParameters );
@@ -77,8 +78,18 @@ public class JdbcConnectionHandler
       lProperties.setProperty( "user", pJdbcConnectParameters.getJdbcUser() );
       lProperties.setProperty( "password", pJdbcConnectParameters.getJdbcPassword() );
 
-      Connection lConnection = DriverManager.getConnection( pJdbcConnectParameters.getJdbcUrl(), lProperties );
-      //      Connection lConnection = lDriver.connect( pJdbcConnectParameters.getJdbcUrl(), lProperties );
+      Connection lConnection;
+
+      try
+      {
+        lConnection = DriverManager.getConnection( pJdbcConnectParameters.getJdbcUrl(), lProperties );
+        // Connection lConnection = lDriver.connect(
+        // pJdbcConnectParameters.getJdbcUrl(), lProperties );
+      }
+      catch( Exception e )
+      {
+        throw new RuntimeException( "connection failed: jdbc-url:" + pJdbcConnectParameters.getJdbcUrl() + " user: " + pJdbcConnectParameters.getJdbcUser(), e );
+      }
 
       try
       {
@@ -104,7 +115,7 @@ public class JdbcConnectionHandler
   {
     try
     {
-      CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl)pCallableStatementProvider;
+      CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl) pCallableStatementProvider;
       return lCallableStatementProviderImpl._connection.createStruct( lCallableStatementProviderImpl._parameters.getOrcasDbUser().toUpperCase() + "." + pTypeName.toUpperCase(), pAttributes );
     }
     catch( SQLException e )
@@ -115,7 +126,7 @@ public class JdbcConnectionHandler
 
   public static Array createArrayOf( String pTypeName, Object[] pElements, CallableStatementProvider pCallableStatementProvider )
   {
-    CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl)pCallableStatementProvider;
+    CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl) pCallableStatementProvider;
     return OracleDriverSpecificHandler.call_OracleConnection_createARRAY( lCallableStatementProviderImpl._connection, lCallableStatementProviderImpl._parameters.getOrcasDbUser().toUpperCase() + "." + pTypeName.toUpperCase(), pElements );
   }
 
@@ -123,7 +134,7 @@ public class JdbcConnectionHandler
   {
     try
     {
-      CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl)pCallableStatementProvider;
+      CallableStatementProviderImpl lCallableStatementProviderImpl = (CallableStatementProviderImpl) pCallableStatementProvider;
 
       Clob lClob = OracleDriverSpecificHandler.call_CLOB_createTemporary_MODE_READWRITE( lCallableStatementProviderImpl._connection );
 

@@ -7,6 +7,10 @@ import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
+
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
@@ -141,22 +145,11 @@ public class OrcasMain extends Orcas
       public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
         String lCallExtensions = "" + //
-                                 " declare" +
-                                 " v_model " +
-                                 pParameters.getOrcasDbUser() +
-                                 ".ot_syex_model;" +
-                                 " v_anydata SYS.ANYDATA;" +
-                                 " begin " + //
-                                 "   select model into v_anydata from " +
-                                 pParameters.getOrcasDbUser() +
-                                 ".orcas_sqlplus_model;" +
-                                 " if( v_anydata.getObject( v_model ) = DBMS_TYPES.SUCCESS )" +
-                                 " then " +
-                                 "    null; " +
-                                 " end if;" + //
-                                 " ? := v_model;" + //
-                                 " end; " + //
-                                 "";
+        " declare" + " v_model " + pParameters.getOrcasDbUser() + ".ot_syex_model;" + " v_anydata SYS.ANYDATA;" + " begin " + //
+        "   select model into v_anydata from " + pParameters.getOrcasDbUser() + ".orcas_sqlplus_model;" + " if( v_anydata.getObject( v_model ) = DBMS_TYPES.SUCCESS )" + " then " + "    null; " + " end if;" + //
+        " ? := v_model;" + //
+        " end; " + //
+        "";
 
         new WrapperCallableStatement( lCallExtensions, pCallableStatementProvider )
         {
@@ -168,7 +161,7 @@ public class OrcasMain extends Orcas
             pCallableStatement.execute();
 
             DataReader.setIntNullValue( DiffRepository.getNullIntValue() );
-            DataReader.loadIntoModel( lOutputModel, (Struct)pCallableStatement.getObject( 1 ) );
+            DataReader.loadIntoModel( lOutputModel, (Struct) pCallableStatement.getObject( 1 ) );
           }
         }.execute();
       }
@@ -181,28 +174,34 @@ public class OrcasMain extends Orcas
   {
     List<String> lScriptLines = new ArrayList<String>();
 
-    for( String lLine : pDiffResult.getSqlStatements() )
+    for( DiffAction lDiffAction : pDiffResult.getDiffActions() )
     {
-      int lMaxLineLength = 2000;
+      // lScriptLines.add( "-- " + lDiffAction.getTextKey() );
+      // logInfo( lDiffAction.getTextKey() );
 
-      lLine = addLineBreaksIfNeeded( lLine, lMaxLineLength );
+      for( String lStatement : lDiffAction.getStatements() )
+      {
+        int lMaxLineLength = 2000;
 
-      if( lLine.endsWith( ";" ) )
-      {
-        lScriptLines.add( lLine );
-        lScriptLines.add( "/" );
-        logInfo( lLine );
-        logInfo( "/" );
-      }
-      else
-      {
-        lScriptLines.add( lLine + ";" );
-        logInfo( lLine + ";" );
-      }
+        lStatement = addLineBreaksIfNeeded( lStatement, lMaxLineLength );
 
-      if( !pParameters.isLogonly() )
-      {
-        new WrapperExecuteStatement( lLine, pCallableStatementProvider ).execute();
+        if( lStatement.endsWith( ";" ) )
+        {
+          lScriptLines.add( lStatement );
+          lScriptLines.add( "/" );
+          logInfo( lStatement );
+          logInfo( "/" );
+        }
+        else
+        {
+          lScriptLines.add( lStatement + ";" );
+          logInfo( lStatement + ";" );
+        }
+
+        if( !pParameters.isLogonly() )
+        {
+          new WrapperExecuteStatement( lStatement, pCallableStatementProvider ).execute();
+        }
       }
     }
 
@@ -210,6 +209,28 @@ public class OrcasMain extends Orcas
     {
       addSpoolfolderScriptIfNeeded( lScriptLines, pParameters.getLogname() + ".sql" );
     }
+
+    Element lDiffActionsElement = new Element( "diff-actions" );
+    for( DiffAction lDiffAction : pDiffResult.getDiffActions() )
+    {
+      Element lDiffActionElement = new Element( "diff-action" );
+      lDiffActionsElement.addContent( lDiffActionElement );
+      lDiffActionElement.setAttribute( "key", lDiffAction.getTextKey() );
+
+      for( DiffActionReason lDiffActionReason : lDiffAction.getDiffActionReasons() )
+      {
+        lDiffActionElement.addContent( lDiffActionReason.getJdomElement( false ) );
+      }
+
+      for( String lStatement : lDiffAction.getStatements() )
+      {
+        Element lStatementElement = new Element( "statement" );
+        lDiffActionElement.addContent( lStatementElement );
+        lStatementElement.addContent( lStatement );
+      }
+    }
+
+    logInfo( new XMLOutputter( Format.getPrettyFormat() ).outputString( lDiffActionsElement ) );
   }
 
   private void doSchemaSync( final Parameters pParameters ) throws Exception

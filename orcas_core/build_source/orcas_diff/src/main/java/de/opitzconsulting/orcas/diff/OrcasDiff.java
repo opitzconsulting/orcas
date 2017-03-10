@@ -1,11 +1,21 @@
 package de.opitzconsulting.orcas.diff;
 
+import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.emf.ecore.EAttribute;
+
+import de.opitzconsulting.orcas.diff.DiffAction.DiffReasonType;
+import de.opitzconsulting.orcas.diff.DiffReasonKey.DiffReasonKeyRegistry;
+import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
 import de.opitzconsulting.orcas.orig.diff.ConstraintDiff;
@@ -54,7 +64,7 @@ import de.opitzconsulting.origOrcasDsl.PermanentnessType;
 import de.opitzconsulting.origOrcasDsl.RefreshModeType;
 import de.opitzconsulting.origOrcasDsl.SynchronousType;
 
-public class OrcasDiff extends AbstractStatementBuilder
+public class OrcasDiff // extends AbstractStatementBuilder
 {
   private CallableStatementProvider _callableStatementProvider;
 
@@ -65,14 +75,64 @@ public class OrcasDiff extends AbstractStatementBuilder
   }
 
   private Parameters _parameters;
+  private List<DiffAction> diffActions = new ArrayList<DiffAction>();
+  private DiffAction activeDiffAction;
 
-  private boolean isIndexRecreate( TableDiff pTableDiff, String pIndexname )
+  private Map<AbstractDiff, List<DiffActionReason>> recreateDiffDiffActionReasonMap = new HashMap<>();
+  private DiffReasonKeyRegistry diffReasonKeyRegistry;
+
+  private boolean isRecreateNeeded( AbstractDiff pDiff )
+  {
+    return recreateDiffDiffActionReasonMap.containsKey( pDiff );
+  }
+
+  private void addRecreateNeeded( AbstractDiff pDiff, DiffActionReason pDiffActionReason )
+  {
+    List<DiffActionReason> lDiffActionReasonList = recreateDiffDiffActionReasonMap.get( pDiff );
+
+    if( lDiffActionReasonList == null )
+    {
+      lDiffActionReasonList = new ArrayList<>();
+      recreateDiffDiffActionReasonMap.put( pDiff, lDiffActionReasonList );
+    }
+
+    lDiffActionReasonList.add( pDiffActionReason );
+  }
+
+  private void setRecreateNeededDifferent( AbstractDiff pDiff, EAttribute... pDiffReasonDetails )
+  {
+    DiffActionReasonDifferent lDiffActionReasonDifferent = new DiffActionReasonDifferent( diffReasonKeyRegistry.getDiffReasonKey( pDiff ) );
+
+    for( EAttribute lEAttribute : pDiffReasonDetails )
+    {
+      if( lEAttribute != null )
+      {
+        lDiffActionReasonDifferent.addDiffReasonDetail( lEAttribute );
+      }
+    }
+
+    addRecreateNeeded( pDiff, lDiffActionReasonDifferent );
+  }
+
+  private void setRecreateNeededDependsOn( AbstractDiff pDiff, List<DiffActionReason> pDiffActionReasonDependsOnList )
+  {
+    addRecreateNeeded( pDiff, new DiffActionReasonDependsOn( diffReasonKeyRegistry.getDiffReasonKey( pDiff ), pDiffActionReasonDependsOnList ) );
+  }
+
+  private List<DiffActionReason> getIndexRecreate( TableDiff pTableDiff, String pIndexname )
   {
     for( IndexOrUniqueKeyDiff lIndexOrUniqueKeyDiff : pTableDiff.ind_uksIndexDiff )
     {
       if( lIndexOrUniqueKeyDiff.consNameNew.equals( pIndexname ) )
       {
-        return lIndexOrUniqueKeyDiff.isRecreateNeeded;
+        if( isRecreateNeeded( lIndexOrUniqueKeyDiff ) )
+        {
+          return recreateDiffDiffActionReasonMap.get( lIndexOrUniqueKeyDiff );
+        }
+        else
+        {
+          return Collections.emptyList();
+        }
       }
     }
 
@@ -122,16 +182,39 @@ public class OrcasDiff extends AbstractStatementBuilder
     return pValue1 < pValue2;
   }
 
+  private List<EAttribute> getDifferentEAttributes( AbstractDiff pDiff, EAttribute... pEAttributes )
+  {
+    List<EAttribute> lReturn = new ArrayList<>();
+
+    for( EAttribute lEAttribute : pEAttributes )
+    {
+      if( !pDiff.isFieldEqual( lEAttribute ) )
+      {
+        lReturn.add( lEAttribute );
+      }
+    }
+
+    return lReturn;
+  }
+
+  private void setRecreateNeededIfDifferent( AbstractDiff pDiff, EAttribute... pEAttributes )
+  {
+    List<EAttribute> lDifferentEAttributes = getDifferentEAttributes( pDiff, pEAttributes );
+    if( !lDifferentEAttributes.isEmpty() )
+    {
+      setRecreateNeededDifferent( pDiff, new ArrayList<>( lDifferentEAttributes ).toArray( new EAttribute[lDifferentEAttributes.size()] ) );
+    }
+  }
+
   private void updateIsRecreateNeeded( ModelDiff pModelDiff )
   {
     for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
     {
       if( lTableDiff.isMatched )
       {
-        if( !lTableDiff.permanentnessIsEqual || !lTableDiff.transactionControlIsEqual )
-        {
-          lTableDiff.isRecreateNeeded = true;
-        }
+        setRecreateNeededIfDifferent( lTableDiff, TABLE__PERMANENTNESS, TABLE__TRANSACTION_CONTROL );
+
+        Map<String, List<DiffActionReason>> lRecreateColumnNames = new HashMap<>();
 
         for( ColumnDiff lColumnDiff : lTableDiff.columnsDiff )
         {
@@ -139,7 +222,8 @@ public class OrcasDiff extends AbstractStatementBuilder
           {
             if( isRecreateColumn( lColumnDiff ) )
             {
-              lColumnDiff.isRecreateNeeded = true;
+              setRecreateNeededDifferent( lColumnDiff );
+              lRecreateColumnNames.put( lColumnDiff.nameOld, recreateDiffDiffActionReasonMap.get( lColumnDiff ) );
             }
           }
         }
@@ -149,8 +233,10 @@ public class OrcasDiff extends AbstractStatementBuilder
           if( !lTableDiff.primary_keyDiff.consNameIsEqual //
               || !lTableDiff.primary_keyDiff.pk_columnsIsEqual || !lTableDiff.primary_keyDiff.reverseIsEqual || (!lTableDiff.primary_keyDiff.tablespaceIsEqual && isIndexmovetablespace()) )
           {
-            lTableDiff.primary_keyDiff.isRecreateNeeded = true;
+            setRecreateNeededDifferent( lTableDiff.primary_keyDiff );
           }
+
+          handleColumnDependentRecreate( lRecreateColumnNames, lTableDiff.primary_keyDiff, lTableDiff.primary_keyDiff.pk_columnsDiff );
         }
 
         for( IndexDiff lIndexDiff : lTableDiff.ind_uksIndexDiff )
@@ -159,15 +245,14 @@ public class OrcasDiff extends AbstractStatementBuilder
           {
             if( ((!lIndexDiff.index_columnsIsEqual //
                   || !lIndexDiff.function_based_expressionIsEqual || !lIndexDiff.domain_index_expressionIsEqual)
-            // domain index kann nicht abgeglichen werden                           
-                 && lIndexDiff.domain_index_expressionNew == null) ||
-                !lIndexDiff.uniqueIsEqual ||
-                !lIndexDiff.bitmapIsEqual ||
-                !lIndexDiff.globalIsEqual ||
-                !lIndexDiff.compressionIsEqual )
+                 // domain index cant be compared
+                 && lIndexDiff.domain_index_expressionNew == null)
+                || !lIndexDiff.uniqueIsEqual || !lIndexDiff.bitmapIsEqual || !lIndexDiff.globalIsEqual || !lIndexDiff.compressionIsEqual )
             {
-              lIndexDiff.isRecreateNeeded = true;
+              setRecreateNeededDifferent( lIndexDiff );
             }
+
+            handleColumnDependentRecreate( lRecreateColumnNames, lIndexDiff, lIndexDiff.index_columnsDiff );
           }
         }
 
@@ -176,21 +261,24 @@ public class OrcasDiff extends AbstractStatementBuilder
           if( lUniqueKeyDiff.isMatched )
           {
             if( !lUniqueKeyDiff.uk_columnsIsEqual || //
-                !lUniqueKeyDiff.indexnameIsEqual ||
-                (!lUniqueKeyDiff.tablespaceIsEqual && isIndexmovetablespace()) )
+                !lUniqueKeyDiff.indexnameIsEqual || (!lUniqueKeyDiff.tablespaceIsEqual && isIndexmovetablespace()) )
             {
-              lUniqueKeyDiff.isRecreateNeeded = true;
+              setRecreateNeededDifferent( lUniqueKeyDiff );
             }
             else
             {
               if( lUniqueKeyDiff.indexnameNew != null )
               {
-                if( isIndexRecreate( lTableDiff, lUniqueKeyDiff.indexnameNew ) )
+                List<DiffActionReason> lIndexRecreate = getIndexRecreate( lTableDiff, lUniqueKeyDiff.indexnameNew );
+
+                if( !lIndexRecreate.isEmpty() )
                 {
-                  lUniqueKeyDiff.isRecreateNeeded = true;
+                  setRecreateNeededDependsOn( lUniqueKeyDiff, lIndexRecreate );
                 }
               }
             }
+
+            handleColumnDependentRecreate( lRecreateColumnNames, lUniqueKeyDiff, lUniqueKeyDiff.uk_columnsDiff );
           }
         }
 
@@ -201,7 +289,7 @@ public class OrcasDiff extends AbstractStatementBuilder
             if( !lConstraintDiff.ruleIsEqual //
                 || !lConstraintDiff.deferrtypeIsEqual )
             {
-              lConstraintDiff.isRecreateNeeded = true;
+              setRecreateNeededDifferent( lConstraintDiff );
             }
           }
         }
@@ -212,33 +300,47 @@ public class OrcasDiff extends AbstractStatementBuilder
           {
             if( !lForeignKeyDiff.isEqual )
             {
-              lForeignKeyDiff.isRecreateNeeded = true;
+              setRecreateNeededDifferent( lForeignKeyDiff );
             }
+
+            handleColumnDependentRecreate( lRecreateColumnNames, lForeignKeyDiff, lForeignKeyDiff.srcColumnsDiff );
           }
         }
 
         if( !lTableDiff.mviewLogDiff.columnsIsEqual //
             || //
-            ("rowid".equalsIgnoreCase( lTableDiff.mviewLogDiff.rowidNew ) //                               
+            ("rowid".equalsIgnoreCase( lTableDiff.mviewLogDiff.rowidNew ) //
              && //
              !lTableDiff.mviewLogDiff.primaryKeyIsEqual //
             ) //
             || //
             (lTableDiff.mviewLogDiff.rowidNew == null && //
-             !"primary".equalsIgnoreCase( lTableDiff.mviewLogDiff.primaryKeyOld ) // 
+             !"primary".equalsIgnoreCase( lTableDiff.mviewLogDiff.primaryKeyOld ) //
             ) //
             || !lTableDiff.mviewLogDiff.rowidIsEqual //
             || !lTableDiff.mviewLogDiff.withSequenceIsEqual //
             || !lTableDiff.mviewLogDiff.commitScnIsEqual //
             || !lTableDiff.mviewLogDiff.tablespaceIsEqual )
         {
-          lTableDiff.mviewLogDiff.isRecreateNeeded = true;
+          setRecreateNeededDifferent( lTableDiff.mviewLogDiff );
         }
 
-        // these changes should by applied with alter statements, but it results in ORA-27476
+        // these changes should by applied with alter statements, but it results
+        // in ORA-27476
         if( lTableDiff.mviewLogDiff.startWithIsEqual == false || lTableDiff.mviewLogDiff.nextIsEqual == false || lTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
         {
-          lTableDiff.mviewLogDiff.isRecreateNeeded = true;
+          setRecreateNeededDifferent( lTableDiff.mviewLogDiff );
+        }
+
+        for( InlineCommentDiff lCommentDiff : lTableDiff.commentsDiff )
+        {
+          if( lCommentDiff.isMatched )
+          {
+            if( lCommentDiff.column_nameOld != null )
+            {
+              handleColumnDependentRecreate( lRecreateColumnNames, lCommentDiff, lCommentDiff.column_nameOld );
+            }
+          }
         }
       }
     }
@@ -251,15 +353,124 @@ public class OrcasDiff extends AbstractStatementBuilder
             || !replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBNew ).equals( replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBOld ) ) //
             || !lMviewDiff.buildModeIsEqual )
         {
-          lMviewDiff.isRecreateNeeded = true;
+          setRecreateNeededDifferent( lMviewDiff );
+        }
+      }
+    }
+
+    for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
+    {
+      for( ForeignKeyDiff lForeignKeyDiff : lTableDiff.foreign_keysDiff )
+      {
+        if( lForeignKeyDiff.isMatched )
+        {
+          List<DiffActionReason> lRefConstraintRecreate = getRefConstraintRecreate( pModelDiff, lForeignKeyDiff.destTableOld, lForeignKeyDiff.destColumnsDiff );
+
+          if( !lRefConstraintRecreate.isEmpty() )
+          {
+            setRecreateNeededDependsOn( lForeignKeyDiff, lRefConstraintRecreate );
+          }
         }
       }
     }
   }
 
+  private void handleColumnDependentRecreate( Map<String, List<DiffActionReason>> pRecreateColumnNames, AbstractDiff pDiff, List<ColumnRefDiff> pColumnDiffList )
+  {
+    List<DiffActionReason> lDependsOnList = new ArrayList<>();
+
+    for( ColumnRefDiff lColumnRefDiff : pColumnDiffList )
+    {
+      if( lColumnRefDiff.isOld )
+      {
+        if( pRecreateColumnNames.keySet().contains( lColumnRefDiff.column_nameOld ) )
+        {
+          lDependsOnList.addAll( pRecreateColumnNames.get( lColumnRefDiff.column_nameOld ) );
+        }
+      }
+    }
+
+    if( !lDependsOnList.isEmpty() )
+    {
+      setRecreateNeededDependsOn( pDiff, lDependsOnList );
+    }
+  }
+
+  private void handleColumnDependentRecreate( Map<String, List<DiffActionReason>> pRecreateColumnNames, AbstractDiff pDiff, String pColumnName )
+  {
+    List<DiffActionReason> lDependsOnList = new ArrayList<>();
+
+    if( pRecreateColumnNames.keySet().contains( pColumnName ) )
+    {
+      lDependsOnList.addAll( pRecreateColumnNames.get( pColumnName ) );
+    }
+
+    if( !lDependsOnList.isEmpty() )
+    {
+      setRecreateNeededDependsOn( pDiff, lDependsOnList );
+    }
+  }
+
+  private List<DiffActionReason> getRefConstraintRecreate( ModelDiff pModelDiff, String pDestTableName, List<ColumnRefDiff> pDestColumnsDiff )
+  {
+    List<DiffActionReason> lReturn = new ArrayList<>();
+
+    for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
+    {
+      if( lTableDiff.isMatched && lTableDiff.nameOld.equals( pDestTableName ) )
+      {
+        if( isRecreateNeeded( lTableDiff ) )
+        {
+          lReturn.addAll( recreateDiffDiffActionReasonMap.get( lTableDiff ) );
+        }
+
+        if( isRecreateNeeded( lTableDiff.primary_keyDiff ) )
+        {
+          if( isOldColumnNamesEqual( pDestColumnsDiff, lTableDiff.primary_keyDiff.pk_columnsDiff ) )
+          {
+            lReturn.addAll( recreateDiffDiffActionReasonMap.get( lTableDiff.primary_keyDiff ) );
+          }
+        }
+
+        for( UniqueKeyDiff lUniqueKeyDiff : lTableDiff.ind_uksUniqueKeyDiff )
+        {
+          if( isRecreateNeeded( lUniqueKeyDiff ) )
+          {
+            if( isOldColumnNamesEqual( pDestColumnsDiff, lUniqueKeyDiff.uk_columnsDiff ) )
+            {
+              lReturn.addAll( recreateDiffDiffActionReasonMap.get( lUniqueKeyDiff ) );
+            }
+          }
+        }
+      }
+    }
+
+    return lReturn;
+  }
+
+  private boolean isOldColumnNamesEqual( List<ColumnRefDiff> pColumnRefDiffList1, List<ColumnRefDiff> pColumnRefDiffList2 )
+  {
+    return getOldColumnNames( pColumnRefDiffList1 ).equals( getOldColumnNames( pColumnRefDiffList2 ) );
+  }
+
+  private String getOldColumnNames( List<ColumnRefDiff> pColumnRefDiffList )
+  {
+    String lReturn = "";
+
+    for( ColumnRefDiff lColumnRefDiff : pColumnRefDiffList )
+    {
+      if( lColumnRefDiff.isOld )
+      {
+        lReturn += lColumnRefDiff.column_nameOld + ",";
+      }
+    }
+
+    return lReturn;
+  }
+
   private String replaceLinefeedBySpace( String pValue )
   {
-    return pValue.replace( Character.toString( (char)13 ) + Character.toString( (char)10 ), " " ).replace( Character.toString( (char)10 ), " " ).replace( Character.toString( (char)13 ), " " );
+    return pValue.replace( Character.toString( (char) 13 ) + Character.toString( (char) 10 ), " " ).replace( Character.toString( (char) 10 ), " " ).replace( Character.toString( (char) 13 ), " " );
   }
 
   private boolean isIndexmovetablespace()
@@ -274,6 +485,8 @@ public class OrcasDiff extends AbstractStatementBuilder
 
     sortTablesForRefPart( lModelDiff );
 
+    diffReasonKeyRegistry = new DiffReasonKey.DiffReasonKeyRegistry( lModelDiff );
+
     updateIsRecreateNeeded( lModelDiff );
 
     handleAllTables( lModelDiff );
@@ -282,21 +495,21 @@ public class OrcasDiff extends AbstractStatementBuilder
 
     handleAllMviews( lModelDiff );
 
-    return new DiffResult( getStmtList() );
+    return new DiffResult( diffActions );
   }
 
   public class DiffResult
   {
-    private List<String> sqlStatements = new ArrayList<String>();
+    private List<DiffAction> diffActions = new ArrayList<DiffAction>();
 
-    public List<String> getSqlStatements()
+    public List<DiffAction> getDiffActions()
     {
-      return sqlStatements;
+      return diffActions;
     }
 
-    private DiffResult( List<String> pSqlStatements )
+    private DiffResult( List<DiffAction> pDiffActions )
     {
-      sqlStatements.addAll( pSqlStatements );
+      diffActions.addAll( pDiffActions );
     }
   }
 
@@ -308,97 +521,108 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       if( pSequenceDiff.max_value_selectNew != null )
       {
-        lSollStartValue = (BigDecimal)new WrapperReturnFirstValue( pSequenceDiff.max_value_selectNew, getCallableStatementProvider() ).executeForValue();
+        lSollStartValue = (BigDecimal) new WrapperReturnFirstValue( pSequenceDiff.max_value_selectNew, getCallableStatementProvider() ).executeForValue();
 
         lSollStartValue = lSollStartValue.add( BigDecimal.valueOf( 1 ) );
       }
     }
     catch( Exception e )
     {
-      //    kann vorkommen, wenn fuer das select benoetigte Tabellen nicht exisitieren. kann erst richtig korrigiert werden, wenn auch der Tabellenabgleich auf dieses Package umgestellt wurde      
+      // kann vorkommen, wenn fuer das select benoetigte Tabellen nicht
+      // exisitieren. kann erst richtig korrigiert werden, wenn auch der
+      // Tabellenabgleich auf dieses Package umgestellt wurde
     }
+
+    BigDecimal lFinalSollStartValue = lSollStartValue;
 
     if( pSequenceDiff.isMatched == false )
     {
-      stmtStart( "create sequence " + pSequenceDiff.sequence_nameNew );
-      if( pSequenceDiff.increment_byNew != null )
+      doInDiffActionCreate( pSequenceDiff, p ->
       {
-        stmtAppend( "increment by " + pSequenceDiff.increment_byNew );
-      }
+        p.stmtStart( "create sequence " + pSequenceDiff.sequence_nameNew );
+        if( pSequenceDiff.increment_byNew != null )
+        {
+          p.stmtAppend( "increment by " + pSequenceDiff.increment_byNew );
+        }
 
-      if( lSollStartValue != null )
-      {
-        stmtAppend( "start with " + lSollStartValue );
-      }
+        if( lFinalSollStartValue != null )
+        {
+          p.stmtAppend( "start with " + lFinalSollStartValue );
+        }
 
-      if( pSequenceDiff.maxvalueNew != null )
-      {
-        stmtAppend( "maxvalue " + pSequenceDiff.maxvalueNew );
-      }
+        if( pSequenceDiff.maxvalueNew != null )
+        {
+          p.stmtAppend( "maxvalue " + pSequenceDiff.maxvalueNew );
+        }
 
-      if( pSequenceDiff.minvalueNew != null )
-      {
-        stmtAppend( "minvalue " + pSequenceDiff.minvalueNew );
-      }
+        if( pSequenceDiff.minvalueNew != null )
+        {
+          p.stmtAppend( "minvalue " + pSequenceDiff.minvalueNew );
+        }
 
-      if( pSequenceDiff.cycleNew != null )
-      {
-        stmtAppend( pSequenceDiff.cycleNew.getLiteral() );
-      }
+        if( pSequenceDiff.cycleNew != null )
+        {
+          p.stmtAppend( pSequenceDiff.cycleNew.getLiteral() );
+        }
 
-      if( pSequenceDiff.cacheNew != null )
-      {
-        stmtAppend( "cache " + pSequenceDiff.cacheNew );
-      }
+        if( pSequenceDiff.cacheNew != null )
+        {
+          p.stmtAppend( "cache " + pSequenceDiff.cacheNew );
+        }
 
-      if( pSequenceDiff.orderNew != null )
-      {
-        stmtAppend( pSequenceDiff.orderNew.getLiteral() );
-      }
+        if( pSequenceDiff.orderNew != null )
+        {
+          p.stmtAppend( pSequenceDiff.orderNew.getLiteral() );
+        }
 
-      stmtDone();
+        p.stmtDone();
+      } );
     }
     else
     {
-      BigDecimal lIstValue = BigDecimal.valueOf( Long.valueOf( pSequenceDiff.max_value_selectOld ) );
-      if( lSollStartValue != null && lIstValue != null && lSollStartValue.compareTo( lIstValue ) > 0 )
+      doInDiffActionAlter( pSequenceDiff, p ->
       {
-        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lSollStartValue.longValue() - lIstValue.longValue()) );
-        addStmt( "declare\n v_dummy number;\n begin\n select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual;\n end;" );
-        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
-      }
-      else
-      {
-        if( pSequenceDiff.increment_byIsEqual == false )
+
+        BigDecimal lIstValue = BigDecimal.valueOf( Long.valueOf( pSequenceDiff.max_value_selectOld ) );
+        if( lFinalSollStartValue != null && lIstValue != null && lFinalSollStartValue.compareTo( lIstValue ) > 0 )
         {
-          addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
+          p.addStmt( SEQUENCE__MAX_VALUE_SELECT, "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lFinalSollStartValue.longValue() - lIstValue.longValue()) );
+          p.addStmt( SEQUENCE__MAX_VALUE_SELECT, "declare\n v_dummy number;\n begin\n select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual;\n end;" );
+          p.addStmt( SEQUENCE__MAX_VALUE_SELECT, "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
         }
-      }
+        else
+        {
+          if( pSequenceDiff.increment_byIsEqual == false )
+          {
+            p.addStmt( SEQUENCE__INCREMENT_BY, "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
+          }
+        }
 
-      if( pSequenceDiff.maxvalueIsEqual == false )
-      {
-        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + pSequenceDiff.maxvalueNew );
-      }
+        if( pSequenceDiff.maxvalueIsEqual == false )
+        {
+          p.addStmt( SEQUENCE__MAXVALUE, "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + pSequenceDiff.maxvalueNew );
+        }
 
-      if( pSequenceDiff.minvalueIsEqual == false )
-      {
-        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " minvalue " + nvl( pSequenceDiff.minvalueNew, 1 ) );
-      }
+        if( pSequenceDiff.minvalueIsEqual == false )
+        {
+          p.addStmt( SEQUENCE__MINVALUE, "alter sequence " + pSequenceDiff.sequence_nameNew + " minvalue " + nvl( pSequenceDiff.minvalueNew, 1 ) );
+        }
 
-      if( pSequenceDiff.cycleIsEqual == false )
-      {
-        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() );
-      }
+        if( pSequenceDiff.cycleIsEqual == false )
+        {
+          p.addStmt( SEQUENCE__CYCLE, "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() );
+        }
 
-      if( pSequenceDiff.cacheIsEqual == false )
-      {
-        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " cache " + nvl( pSequenceDiff.cacheNew, 20 ) );
-      }
+        if( pSequenceDiff.cacheIsEqual == false )
+        {
+          p.addStmt( SEQUENCE__CACHE, "alter sequence " + pSequenceDiff.sequence_nameNew + " cache " + nvl( pSequenceDiff.cacheNew, 20 ) );
+        }
 
-      if( pSequenceDiff.orderIsEqual == false )
-      {
-        addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.orderNew.getLiteral() );
-      }
+        if( pSequenceDiff.orderIsEqual == false )
+        {
+          p.addStmt( SEQUENCE__ORDER, "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.orderNew.getLiteral() );
+        }
+      } );
     }
   }
 
@@ -414,15 +638,77 @@ public class OrcasDiff extends AbstractStatementBuilder
         }
         else
         {
-          addStmt( "drop sequence " + lSequenceDiff.sequence_nameOld );
+          doInDiffActionDrop( lSequenceDiff, p ->
+          {
+            p.addStmt( "drop sequence " + lSequenceDiff.sequence_nameOld );
+          } );
         }
       }
     }
   }
 
-  private void dropTableConstraintByName( String pTablename, String pCconstraintName )
+  private <T extends AbstractStatementBuilder> void doInDiffAction( DiffAction pDiffAction, AbstractDiffActionRunnable<T> pRunnable, T pAbstractStatementBuilder )
   {
-    addStmt( "alter table " + pTablename + " drop constraint " + pCconstraintName );
+    addDiffAction( pDiffAction );
+    pRunnable.run( pAbstractStatementBuilder );
+    diffActionDone();
+  }
+
+  private <T extends AbstractStatementBuilder> void doInDiffAction( DiffAction pDiffAction, List<DiffActionReason> pDiffActionReasonList, AbstractDiffActionRunnable<T> pRunnable, T pAbstractStatementBuilder )
+  {
+    for( DiffActionReason lDiffActionReason : pDiffActionReasonList )
+    {
+      pDiffAction.addDiffActionReason( lDiffActionReason );
+    }
+    doInDiffAction( pDiffAction, pRunnable, pAbstractStatementBuilder );
+  }
+
+  private <T extends AbstractStatementBuilder> void doInDiffAction( AbstractDiff pDiff, List<DiffActionReason> pDiffActionReasonList, DiffReasonType pDiffReasonType, AbstractDiffActionRunnable<T> pRunnable, T pAbstractStatementBuilder )
+  {
+    doInDiffAction( new DiffAction( diffReasonKeyRegistry.getDiffReasonKey( pDiff ), pDiffReasonType ), pDiffActionReasonList, pRunnable, pAbstractStatementBuilder );
+  }
+
+  private void doInDiffActionAlter( AbstractDiff pDiff, DiffActionRunnableAlter pRunnable )
+  {
+    DiffAction lDiffAction = new DiffAction( diffReasonKeyRegistry.getDiffReasonKey( pDiff ), DiffReasonType.ALTER );
+    DiffActionReasonDifferent lDiffActionReasonDifferent = new DiffActionReasonDifferent( diffReasonKeyRegistry.getDiffReasonKey( pDiff ) );
+    doInDiffAction( lDiffAction, Collections.singletonList( lDiffActionReasonDifferent ), pRunnable, new StatementBuilderAlter( lDiffActionReasonDifferent ) );
+  }
+
+  private void doInDiffActionDrop( AbstractDiff pDiff, DiffActionRunnable pRunnable )
+  {
+    boolean lRecreateNeeded = isRecreateNeeded( pDiff );
+    DiffAction lDiffAction = new DiffAction( diffReasonKeyRegistry.getDiffReasonKey( pDiff ), lRecreateNeeded ? DiffReasonType.RECREATE_DROP : DiffReasonType.DROP );
+
+    doInDiffAction( lDiffAction, lRecreateNeeded ? recreateDiffDiffActionReasonMap.get( pDiff ) : Collections.singletonList( new DiffActionReasonSurplus( diffReasonKeyRegistry.getDiffReasonKey( pDiff ) ) ), pRunnable, new StatementBuilder() );
+  }
+
+  private void doInDiffActionCreate( AbstractDiff pDiff, DiffActionRunnable pRunnable )
+  {
+    boolean lRecreateNeeded = isRecreateNeeded( pDiff );
+    DiffAction lDiffAction = new DiffAction( diffReasonKeyRegistry.getDiffReasonKey( pDiff ), lRecreateNeeded ? DiffReasonType.RECREATE_CREATE : DiffReasonType.CREATE );
+
+    doInDiffAction( lDiffAction, lRecreateNeeded ? recreateDiffDiffActionReasonMap.get( pDiff ) : Collections.singletonList( new DiffActionReasonMissing( diffReasonKeyRegistry.getDiffReasonKey( pDiff ) ) ), pRunnable, new StatementBuilder() );
+  }
+
+  private void diffActionDone()
+  {
+    if( activeDiffAction.getStatements().isEmpty() )
+    {
+      diffActions.remove( activeDiffAction );
+    }
+    activeDiffAction = null;
+  }
+
+  private void addDiffAction( DiffAction pDiffAction )
+  {
+    activeDiffAction = pDiffAction;
+    diffActions.add( pDiffAction );
+  }
+
+  private void dropTableConstraintByName( StatementBuilder p, String pTablename, String pCconstraintName )
+  {
+    p.addStmt( "alter table " + pTablename + " drop constraint " + pCconstraintName );
   }
 
   private void handleAllTables( ModelDiff pModelDiff )
@@ -431,47 +717,67 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       for( ForeignKeyDiff lForeignKeyDiff : lTableDiff.foreign_keysDiff )
       {
-        if( lForeignKeyDiff.isOld == true && (lForeignKeyDiff.isMatched == false || lForeignKeyDiff.isRecreateNeeded == true) )
+        if( lForeignKeyDiff.isOld == true && (lForeignKeyDiff.isMatched == false || isRecreateNeeded( lForeignKeyDiff ) == true) )
         {
-          dropTableConstraintByName( lTableDiff.nameOld, lForeignKeyDiff.consNameOld );
+          doInDiffActionDrop( lForeignKeyDiff, p ->
+          {
+            dropTableConstraintByName( p, lTableDiff.nameOld, lForeignKeyDiff.consNameOld );
+          } );
         }
       }
     }
 
-    for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
+    for(
+
+    TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
     {
-      if( lTableDiff.isOld == true && (lTableDiff.isMatched == false || lTableDiff.isRecreateNeeded == true) )
+      if( lTableDiff.isOld == true && (lTableDiff.isMatched == false || isRecreateNeeded( lTableDiff ) == true) )
       {
-        dropWithDropmodeCheck( "select 1 from " + lTableDiff.nameOld, "drop table " + lTableDiff.nameOld );
+        doInDiffActionDrop( lTableDiff, p ->
+        {
+          dropWithDropmodeCheck( p, "select 1 from " + lTableDiff.nameOld, "drop table " + lTableDiff.nameOld );
+        } );
       }
       else
       {
         for( ConstraintDiff lConstraintDiff : lTableDiff.constraintsDiff )
         {
-          if( lConstraintDiff.isOld == true && (lConstraintDiff.isMatched == false || lConstraintDiff.isRecreateNeeded == true) )
+          if( lConstraintDiff.isOld == true && (lConstraintDiff.isMatched == false || isRecreateNeeded( lConstraintDiff )) )
           {
-            dropTableConstraintByName( lTableDiff.nameOld, lConstraintDiff.consNameOld );
+            doInDiffActionDrop( lConstraintDiff, p ->
+            {
+              dropTableConstraintByName( p, lTableDiff.nameOld, lConstraintDiff.consNameOld );
+            } );
           }
         }
 
-        if( lTableDiff.mviewLogDiff.isOld == true && (lTableDiff.mviewLogDiff.isMatched == false || lTableDiff.mviewLogDiff.isRecreateNeeded == true) )
+        if( lTableDiff.mviewLogDiff.isOld == true && (lTableDiff.mviewLogDiff.isMatched == false || isRecreateNeeded( lTableDiff.mviewLogDiff )) )
         {
-          addStmt( "drop materialized view log on " + lTableDiff.nameOld );
+          doInDiffActionDrop( lTableDiff.mviewLogDiff, p ->
+          {
+            p.addStmt( "drop materialized view log on " + lTableDiff.nameOld );
+          } );
         }
 
         for( UniqueKeyDiff lUniqueKeyDiff : lTableDiff.ind_uksUniqueKeyDiff )
         {
-          if( lUniqueKeyDiff.isOld == true && (lUniqueKeyDiff.isMatched == false || lUniqueKeyDiff.isRecreateNeeded == true) )
+          if( lUniqueKeyDiff.isOld == true && (lUniqueKeyDiff.isMatched == false || isRecreateNeeded( lUniqueKeyDiff ) == true) )
           {
-            dropTableConstraintByName( lTableDiff.nameOld, lUniqueKeyDiff.consNameOld );
+            doInDiffActionDrop( lUniqueKeyDiff, p ->
+            {
+              dropTableConstraintByName( p, lTableDiff.nameOld, lUniqueKeyDiff.consNameOld );
+            } );
           }
         }
 
         for( IndexDiff lIndexDiff : lTableDiff.ind_uksIndexDiff )
         {
-          if( lIndexDiff.isOld == true && (lIndexDiff.isMatched == false || lIndexDiff.isRecreateNeeded == true) )
+          if( lIndexDiff.isOld == true && (lIndexDiff.isMatched == false || isRecreateNeeded( lIndexDiff ) == true) )
           {
-            addStmt( "drop index " + lIndexDiff.consNameOld );
+            doInDiffActionDrop( lIndexDiff, p ->
+            {
+              p.addStmt( "drop index " + lIndexDiff.consNameOld );
+            } );
           }
         }
 
@@ -482,25 +788,31 @@ public class OrcasDiff extends AbstractStatementBuilder
             boolean lIsColumnComment = lCommentDiff.column_nameOld != null;
             if( !lIsColumnComment || columnIsNew( lTableDiff, lCommentDiff.column_nameOld ) )
             {
-              stmtStart( "comment on" );
-              stmtAppend( lCommentDiff.comment_objectOld.getName() );
-              stmtAppend( " " );
-              stmtAppend( lTableDiff.nameOld );
-              if( lIsColumnComment )
+              doInDiffActionDrop( lCommentDiff, p ->
               {
-                stmtAppend( "." );
-                stmtAppend( lCommentDiff.column_nameOld );
-              }
-              stmtAppend( "is" );
-              stmtAppend( "''" );
-              stmtDone();
+                p.stmtStart( "comment on" );
+                p.stmtAppend( lCommentDiff.comment_objectOld.getName() );
+                p.stmtAppend( " " );
+                p.stmtAppend( lTableDiff.nameOld );
+                if( lIsColumnComment )
+                {
+                  p.stmtAppend( "." );
+                  p.stmtAppend( lCommentDiff.column_nameOld );
+                }
+                p.stmtAppend( "is" );
+                p.stmtAppend( "''" );
+                p.stmtDone();
+              } );
             }
           }
         }
 
-        if( lTableDiff.primary_keyDiff.isOld == true && (lTableDiff.primary_keyDiff.isMatched == false || lTableDiff.primary_keyDiff.isRecreateNeeded == true) )
+        if( lTableDiff.primary_keyDiff.isOld == true && (lTableDiff.primary_keyDiff.isMatched == false || isRecreateNeeded( lTableDiff.primary_keyDiff )) )
         {
-          dropTableConstraintByName( lTableDiff.nameOld, lTableDiff.primary_keyDiff.consNameOld );
+          doInDiffActionDrop( lTableDiff.primary_keyDiff, p ->
+          {
+            dropTableConstraintByName( p, lTableDiff.nameOld, lTableDiff.primary_keyDiff.consNameOld );
+          } );
         }
       }
     }
@@ -517,7 +829,7 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       for( ForeignKeyDiff lForeignKeyDiff : lTableDiff.foreign_keysDiff )
       {
-        if( lForeignKeyDiff.isNew == true && (lForeignKeyDiff.isMatched == false || lForeignKeyDiff.isRecreateNeeded == true) )
+        if( lForeignKeyDiff.isNew == true && (lForeignKeyDiff.isMatched == false || isRecreateNeeded( lForeignKeyDiff )) )
         {
           if( lTableDiff.isOld == false && lTableDiff.tablePartitioningRefPartitionsDiff.isNew == true && lTableDiff.tablePartitioningRefPartitionsDiff.fkNameNew.equalsIgnoreCase( lForeignKeyDiff.consNameNew ) )
           {
@@ -525,7 +837,10 @@ public class OrcasDiff extends AbstractStatementBuilder
           }
           else
           {
-            createForeignKey( lTableDiff, lForeignKeyDiff );
+            doInDiffActionCreate( lForeignKeyDiff, p ->
+            {
+              createForeignKey( p, lTableDiff, lForeignKeyDiff );
+            } );
           }
         }
       }
@@ -547,21 +862,12 @@ public class OrcasDiff extends AbstractStatementBuilder
 
   private void handleTable( TableDiff pTableDiff )
   {
-    if( pTableDiff.isMatched == true )
+    if( pTableDiff.isMatched == false || isRecreateNeeded( pTableDiff ) == true )
     {
-      if( pTableDiff.tablespaceIsEqual == false && isTablemovetablespace() == true )
+      doInDiffActionCreate( pTableDiff, p ->
       {
-        stmtStart( "alter table" );
-        stmtAppend( pTableDiff.nameNew );
-        stmtAppend( "move tablespace" );
-        stmtAppend( nvl( pTableDiff.tablespaceNew, getDefaultTablespace() ) );
-        stmtDone();
-      }
-    }
-
-    if( pTableDiff.isMatched == false || pTableDiff.isRecreateNeeded == true )
-    {
-      createTable( pTableDiff );
+        createTable( p, pTableDiff );
+      } );
     }
     else
     {
@@ -573,47 +879,62 @@ public class OrcasDiff extends AbstractStatementBuilder
         }
         else
         {
-          dropWithDropmodeCheck( "select 1 from " + pTableDiff.nameOld + " where " + lColumnDiff.nameOld + " != null", "alter table " + pTableDiff.nameOld + " drop column " + lColumnDiff.nameOld );
+          doInDiffActionDrop( lColumnDiff, p ->
+          {
+            dropWithDropmodeCheck( p, "select 1 from " + pTableDiff.nameOld + " where " + lColumnDiff.nameOld + " != null", "alter table " + pTableDiff.nameOld + " drop column " + lColumnDiff.nameOld );
+          } );
         }
       }
 
-      if( pTableDiff.loggingIsEqual == false )
+      doInDiffActionAlter( pTableDiff, p ->
       {
-        if( pTableDiff.transactionControlNew == null )
+        if( pTableDiff.tablespaceIsEqual == false && isTablemovetablespace() == true )
         {
-          stmtStart( "alter table" );
-          stmtAppend( pTableDiff.nameNew );
-          if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
-          {
-            stmtAppend( "nologging" );
-          }
-          else
-          {
-            stmtAppend( "logging" );
-          }
-          stmtDone();
+          p.stmtStart( "alter table" );
+          p.stmtAppend( pTableDiff.nameNew );
+          p.stmtAppend( "move tablespace" );
+          p.stmtAppend( nvl( pTableDiff.tablespaceNew, getDefaultTablespace() ) );
+          p.stmtDone( TABLE__TABLESPACE );
         }
-      }
 
-      if( pTableDiff.parallelIsEqual == false || pTableDiff.parallel_degreeIsEqual == false )
-      {
-        stmtStart( "alter table" );
-        stmtAppend( pTableDiff.nameNew );
+        if( pTableDiff.loggingIsEqual == false )
+        {
+          if( pTableDiff.transactionControlNew == null )
+          {
+            p.stmtStart( "alter table" );
+            p.stmtAppend( pTableDiff.nameNew );
+            if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
+            {
+              p.stmtAppend( "nologging" );
+            }
+            else
+            {
+              p.stmtAppend( "logging" );
+            }
+            p.stmtDone( TABLE__LOGGING );
+          }
+        }
 
-        handleParallel( pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, true );
+        if( pTableDiff.parallelIsEqual == false || pTableDiff.parallel_degreeIsEqual == false )
+        {
+          p.stmtStart( "alter table" );
+          p.stmtAppend( pTableDiff.nameNew );
 
-        stmtDone();
-      }
+          handleParallel( p, pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, true );
 
-      if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY && (pTableDiff.compressionIsEqual == false || pTableDiff.compressionForIsEqual == false) )
-      {
-        stmtStart( "alter table" );
-        stmtAppend( pTableDiff.nameNew );
+          p.stmtDone( TABLE__PARALLEL );
+        }
 
-        handleCompression( pTableDiff.compressionNew, pTableDiff.compressionForNew, true );
+        if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY && (pTableDiff.compressionIsEqual == false || pTableDiff.compressionForIsEqual == false) )
+        {
+          p.stmtStart( "alter table" );
+          p.stmtAppend( pTableDiff.nameNew );
 
-        stmtDone();
-      }
+          handleCompression( p, pTableDiff.compressionNew, pTableDiff.compressionForNew, true );
+
+          p.stmtDone( TABLE__COMPRESSION );
+        }
+      } );
     }
 
     if( pTableDiff.primary_keyDiff.isNew == true )
@@ -625,7 +946,7 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       if( lConstraintDiff.isNew == true )
       {
-        handleConstraint( pTableDiff.nameNew, lConstraintDiff );
+        handleConstraint( pTableDiff, lConstraintDiff );
       }
     }
 
@@ -633,7 +954,7 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       if( lIndexDiff.isNew == true )
       {
-        handleIndex( pTableDiff.nameNew, lIndexDiff );
+        handleIndex( pTableDiff, lIndexDiff );
       }
     }
 
@@ -641,7 +962,7 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       if( lUniqueKeyDiff.isNew == true )
       {
-        handleUniquekey( pTableDiff.nameNew, lUniqueKeyDiff );
+        handleUniquekey( pTableDiff, lUniqueKeyDiff );
       }
     }
 
@@ -695,118 +1016,119 @@ public class OrcasDiff extends AbstractStatementBuilder
     return lReturn;
   }
 
-  private void createTable( TableDiff pTableDiff )
+  private void createTable( StatementBuilder p, TableDiff pTableDiff )
   {
-    stmtStart( "create" );
+    p.stmtStart( "create" );
     if( pTableDiff.permanentnessNew == PermanentnessType.GLOBAL_TEMPORARY )
     {
-      stmtAppend( "global " + pTableDiff.permanentnessNew.getLiteral() );
+      p.stmtAppend( "global " + pTableDiff.permanentnessNew.getLiteral() );
     }
-    stmtAppend( "table" );
-    stmtAppend( pTableDiff.nameNew );
-    stmtAppend( "(" );
-    stmtAppend( createColumnClause( pTableDiff.columnsDiff ) );
-    stmtAppend( createRefFkClause( pTableDiff ) );
-    stmtAppend( ")" );
+    p.stmtAppend( "table" );
+    p.stmtAppend( pTableDiff.nameNew );
+    p.stmtAppend( "(" );
+    p.stmtAppend( createColumnClause( pTableDiff.columnsDiff ) );
+    p.stmtAppend( createRefFkClause( pTableDiff ) );
+    p.stmtAppend( ")" );
     if( pTableDiff.transactionControlNew != null )
     {
-      stmtAppend( "on commit " );
-      stmtAppend( pTableDiff.transactionControlNew.getLiteral() );
-      stmtAppend( "rows nocache" );
+      p.stmtAppend( "on commit " );
+      p.stmtAppend( pTableDiff.transactionControlNew.getLiteral() );
+      p.stmtAppend( "rows nocache" );
     }
     else
     {
-      stmtAppend( createColumnStorageClause( pTableDiff.lobStoragesDiff ) );
+      p.stmtAppend( createColumnStorageClause( pTableDiff.lobStoragesDiff ) );
       if( pTableDiff.tablespaceNew != null )
       {
-        stmtAppend( "tablespace" );
-        stmtAppend( pTableDiff.tablespaceNew );
+        p.stmtAppend( "tablespace" );
+        p.stmtAppend( pTableDiff.tablespaceNew );
       }
-      
+
       if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )
       {
-		  //add pctfree
-		  if(pTableDiff.pctfreeNew != null) {
-		      stmtAppend( "pctfree" );
-		      stmtAppend( ""+pTableDiff.pctfreeNew );
-		  }    	  
+        // add pctfree
+        if( pTableDiff.pctfreeNew != null )
+        {
+          p.stmtAppend( "pctfree" );
+          p.stmtAppend( "" + pTableDiff.pctfreeNew );
+        }
       }
 
       if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )
       {
         if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
         {
-          stmtAppend( "nologging" );
+          p.stmtAppend( "nologging" );
         }
       }
-      handleCompression( pTableDiff.compressionNew, pTableDiff.compressionForNew, false );
+      handleCompression( p, pTableDiff.compressionNew, pTableDiff.compressionForNew, false );
     }
-    handleParallel( pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, false );
-    stmtAppend( createPartitioningClause( pTableDiff ) );
+    handleParallel( p, pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, false );
+    p.stmtAppend( createPartitioningClause( pTableDiff ) );
 
-    stmtDone();
+    p.stmtDone();
   }
 
-  private void handleParallel( ParallelType pParallelType, Integer pParallelDegree, boolean pWithDefault )
+  private void handleParallel( AbstractStatementBuilder p, ParallelType pParallelType, Integer pParallelDegree, boolean pWithDefault )
   {
     if( pParallelType == ParallelType.PARALLEL )
     {
-      stmtAppend( "parallel" );
+      p.stmtAppend( "parallel" );
       if( pParallelDegree != null && pParallelDegree > 1 )
       {
-        stmtAppend( "" + pParallelDegree );
+        p.stmtAppend( "" + pParallelDegree );
       }
     }
     else
     {
       if( pWithDefault || pParallelType == ParallelType.NOPARALLEL )
       {
-        stmtAppend( "noparallel" );
+        p.stmtAppend( "noparallel" );
       }
     }
   }
 
-  private void handleCompression( CompressType pCompressionType, CompressForType pCompressForType, boolean pWithDefault )
+  private void handleCompression( AbstractStatementBuilder p, CompressType pCompressionType, CompressForType pCompressForType, boolean pWithDefault )
   {
     if( pCompressionType == CompressType.COMPRESS )
     {
-      stmtAppend( "compress" );
+      p.stmtAppend( "compress" );
 
       if( pCompressForType == CompressForType.ALL )
       {
-        stmtAppend( "for all operations" );
+        p.stmtAppend( "for all operations" );
       }
       if( pCompressForType == CompressForType.DIRECT_LOAD )
       {
-        stmtAppend( "for direct_load operations" );
+        p.stmtAppend( "for direct_load operations" );
       }
       if( pCompressForType == CompressForType.QUERY_LOW )
       {
-        stmtAppend( "for query low" );
+        p.stmtAppend( "for query low" );
       }
       if( pCompressForType == CompressForType.QUERY_HIGH )
       {
-        stmtAppend( "for query high" );
+        p.stmtAppend( "for query high" );
       }
       if( pCompressForType == CompressForType.ARCHIVE_LOW )
       {
-        stmtAppend( "for archive low" );
+        p.stmtAppend( "for archive low" );
       }
       if( pCompressForType == CompressForType.ARCHIVE_HIGH )
       {
-        stmtAppend( "for archive high" );
+        p.stmtAppend( "for archive high" );
       }
     }
     else
     {
       if( pWithDefault || pCompressionType == CompressType.NOCOMPRESS )
       {
-        stmtAppend( "nocompress" );
+        p.stmtAppend( "nocompress" );
       }
     }
   }
 
-  private void createForeignKey( TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff )
+  private void createForeignKey( StatementBuilder p, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff )
   {
     String lFkFalseDataSelect;
     String lFkFalseDataWherePart;
@@ -834,15 +1156,15 @@ public class OrcasDiff extends AbstractStatementBuilder
       {
         if( pForeignKeyDiff.delete_ruleNew == FkDeleteRuleType.CASCADE )
         {
-          addStmt( "delete " + pTableDiff.nameNew + " " + lFkFalseDataWherePart );
-          addStmt( "commit" );
+          p.addStmt( "delete " + pTableDiff.nameNew + " " + lFkFalseDataWherePart );
+          p.addStmt( "commit" );
         }
         else
         {
           if( pForeignKeyDiff.delete_ruleNew == FkDeleteRuleType.SET_NULL )
           {
-            addStmt( "update " + pTableDiff.nameNew + " set " + getColumnList( pForeignKeyDiff.srcColumnsDiff ) + " = null " + lFkFalseDataWherePart );
-            addStmt( "commit" );
+            p.addStmt( "update " + pTableDiff.nameNew + " set " + getColumnList( pForeignKeyDiff.srcColumnsDiff ) + " = null " + lFkFalseDataWherePart );
+            p.addStmt( "commit" );
           }
           else
           {
@@ -856,14 +1178,14 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       if( !getSchemaName( pTableDiff.nameNew ).equals( getSchemaName( pForeignKeyDiff.destTableNew ) ) )
       {
-        addStmt( "grant references on " + pForeignKeyDiff.destTableNew + " to " + getSchemaName( pTableDiff.nameNew ) );
+        p.addStmt( "grant references on " + pForeignKeyDiff.destTableNew + " to " + getSchemaName( pTableDiff.nameNew ) );
       }
     }
 
-    stmtStart( "alter table " + pTableDiff.nameNew );
-    stmtAppend( "add" );
-    stmtAppend( createForeignKeyClause( pForeignKeyDiff ) );
-    stmtDone();
+    p.stmtStart( "alter table " + pTableDiff.nameNew );
+    p.stmtAppend( "add" );
+    p.stmtAppend( createForeignKeyClause( pForeignKeyDiff ) );
+    p.stmtDone();
   }
 
   private String getSchemaName( String pName )
@@ -872,7 +1194,7 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       return "";
     }
-    
+
     return pName.substring( 0, pName.indexOf( '.' ) );
   }
 
@@ -904,22 +1226,47 @@ public class OrcasDiff extends AbstractStatementBuilder
 
   private void handleComment( TableDiff pTableDiff, InlineCommentDiff pInlineCommentDiff )
   {
-    if( pInlineCommentDiff.isEqual == false )
+    if( pInlineCommentDiff.isEqual == false || isRecreateNeeded( pInlineCommentDiff ) )
     {
       if( pInlineCommentDiff.isNew == true )
       {
-        stmtStart( "comment on" );
-        stmtAppend( pInlineCommentDiff.comment_objectNew.getName() );
-        stmtAppend( " " );
-        stmtAppend( pTableDiff.nameNew );
-        if( pInlineCommentDiff.column_nameNew != null )
+        DiffReasonType lDiffReasonType;
+        List<DiffActionReason> lDiffActionReasonList;
+        if( isRecreateNeeded( pInlineCommentDiff ) )
         {
-          stmtAppend( "." );
-          stmtAppend( pInlineCommentDiff.column_nameNew );
+          lDiffReasonType = DiffReasonType.RECREATE_CREATE;
+          lDiffActionReasonList = recreateDiffDiffActionReasonMap.get( pInlineCommentDiff );
         }
-        stmtAppend( "is" );
-        stmtAppend( "'" + pInlineCommentDiff.commentNew.replace( "'", "''" ) + "'" );
-        stmtDone();
+        else
+        {
+          if( pInlineCommentDiff.isMatched )
+          {
+            lDiffReasonType = DiffReasonType.ALTER;
+            DiffActionReasonDifferent lDiffActionReasonDifferent = new DiffActionReasonDifferent( diffReasonKeyRegistry.getDiffReasonKey( pInlineCommentDiff ) );
+            lDiffActionReasonDifferent.addDiffReasonDetail( INLINE_COMMENT__COMMENT );
+            lDiffActionReasonList = Collections.singletonList( lDiffActionReasonDifferent );
+          }
+          else
+          {
+            lDiffReasonType = DiffReasonType.CREATE;
+            lDiffActionReasonList = Collections.singletonList( new DiffActionReasonMissing( diffReasonKeyRegistry.getDiffReasonKey( pInlineCommentDiff ) ) );
+          }
+        }
+        doInDiffAction( pInlineCommentDiff, lDiffActionReasonList, lDiffReasonType, p ->
+        {
+          p.stmtStart( "comment on" );
+          p.stmtAppend( pInlineCommentDiff.comment_objectNew.getName() );
+          p.stmtAppend( " " );
+          p.stmtAppend( pTableDiff.nameNew );
+          if( pInlineCommentDiff.column_nameNew != null )
+          {
+            p.stmtAppend( "." );
+            p.stmtAppend( pInlineCommentDiff.column_nameNew );
+          }
+          p.stmtAppend( "is" );
+          p.stmtAppend( "'" + pInlineCommentDiff.commentNew.replace( "'", "''" ) + "'" );
+          p.stmtDone();
+        }, new StatementBuilder() );
       }
     }
   }
@@ -940,149 +1287,158 @@ public class OrcasDiff extends AbstractStatementBuilder
     return false;
   }
 
-  private void handleUniquekey( String pTablename, UniqueKeyDiff pUniqueKeyDiff )
+  private void handleUniquekey( TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
   {
-    if( pUniqueKeyDiff.isMatched == false || pUniqueKeyDiff.isRecreateNeeded == true )
+    if( pUniqueKeyDiff.isMatched == false || isRecreateNeeded( pUniqueKeyDiff ) == true )
     {
-      stmtStart( "alter table " + pTablename + " add constraint " + pUniqueKeyDiff.consNameNew + " unique (" + getColumnList( pUniqueKeyDiff.uk_columnsDiff ) + ")" );
-      if( pUniqueKeyDiff.tablespaceNew != null )
+      doInDiffActionCreate( pUniqueKeyDiff, p ->
       {
-        stmtAppend( "using index tablespace " + pUniqueKeyDiff.tablespaceNew );
-      }
-      else
-      {
-        if( pUniqueKeyDiff.indexnameNew != null && !pUniqueKeyDiff.indexnameNew.equals( pUniqueKeyDiff.consNameNew ) )
+        p.stmtStart( "alter table " + pTableDiff.nameNew + " add constraint " + pUniqueKeyDiff.consNameNew + " unique (" + getColumnList( pUniqueKeyDiff.uk_columnsDiff ) + ")" );
+        if( pUniqueKeyDiff.tablespaceNew != null )
         {
-          stmtAppend( "using index " + pUniqueKeyDiff.indexnameNew );
+          p.stmtAppend( "using index tablespace " + pUniqueKeyDiff.tablespaceNew );
         }
-      }
-      if( pUniqueKeyDiff.statusNew != null )
-      {
-        stmtAppend( pUniqueKeyDiff.statusNew.getName() );
-      }
+        else
+        {
+          if( pUniqueKeyDiff.indexnameNew != null && !pUniqueKeyDiff.indexnameNew.equals( pUniqueKeyDiff.consNameNew ) )
+          {
+            p.stmtAppend( "using index " + pUniqueKeyDiff.indexnameNew );
+          }
+        }
+        if( pUniqueKeyDiff.statusNew != null )
+        {
+          p.stmtAppend( pUniqueKeyDiff.statusNew.getName() );
+        }
 
-      stmtDone();
+        p.stmtDone();
+      } );
     }
   }
 
-  private void handleIndex( String pTablename, IndexDiff pIndexDiff )
+  private void handleIndex( TableDiff pTableDiff, IndexDiff pIndexDiff )
   {
-    if( pIndexDiff.isMatched == false || pIndexDiff.isRecreateNeeded == true )
+    if( pIndexDiff.isMatched == false || isRecreateNeeded( pIndexDiff ) == true )
     {
-      stmtStart( "create" );
-      if( pIndexDiff.uniqueNew != null )
+      doInDiffActionCreate( pIndexDiff, p ->
       {
-        stmtAppend( pIndexDiff.uniqueNew );
-      }
-      if( pIndexDiff.bitmapNew != null )
-      {
-        stmtAppend( "bitmap" );
-      }
-      stmtAppend( "index" );
-      stmtAppend( pIndexDiff.consNameNew );
-      stmtAppend( "on" );
-      stmtAppend( pTablename );
-      stmtAppend( "(" );
-      if( pIndexDiff.function_based_expressionNew != null )
-      {
-        stmtAppend( pIndexDiff.function_based_expressionNew );
-      }
-      else
-      {
-        stmtAppend( getColumnList( pIndexDiff.index_columnsDiff ) );
-      }
-      stmtAppend( ")" );
-      if( pIndexDiff.domain_index_expressionNew != null )
-      {
-        stmtAppend( pIndexDiff.domain_index_expressionNew );
-      }
-      else
-      {
-        if( pIndexDiff.loggingNew != null )
+        p.stmtStart( "create" );
+        if( pIndexDiff.uniqueNew != null )
         {
-          stmtAppend( pIndexDiff.loggingNew.getLiteral() );
+          p.stmtAppend( pIndexDiff.uniqueNew );
         }
-      }
-      if( pIndexDiff.tablespaceNew != null )
-      {
-        stmtAppend( "tablespace" );
-        stmtAppend( pIndexDiff.tablespaceNew );
-      }
-      if( pIndexDiff.globalNew != null )
-      {
-        stmtAppend( pIndexDiff.globalNew.getLiteral() );
-      }
-      if( pIndexDiff.bitmapNew == null && pIndexDiff.compressionNew == CompressType.COMPRESS )
-      {
-        stmtAppend( "compress" );
-      }
-      if( pIndexDiff.compressionNew == CompressType.NOCOMPRESS )
-      {
-        stmtAppend( "nocompress" );
-      }
-
-      if( pIndexDiff.parallelNew == ParallelType.PARALLEL || isIndexparallelcreate() )
-      {
-        stmtAppend( "parallel" );
-        if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
+        if( pIndexDiff.bitmapNew != null )
         {
-          stmtAppend( " " + pIndexDiff.parallel_degreeNew );
+          p.stmtAppend( "bitmap" );
         }
-      }
+        p.stmtAppend( "index" );
+        p.stmtAppend( pIndexDiff.consNameNew );
+        p.stmtAppend( "on" );
+        p.stmtAppend( pTableDiff.nameNew );
+        p.stmtAppend( "(" );
+        if( pIndexDiff.function_based_expressionNew != null )
+        {
+          p.stmtAppend( pIndexDiff.function_based_expressionNew );
+        }
+        else
+        {
+          p.stmtAppend( getColumnList( pIndexDiff.index_columnsDiff ) );
+        }
+        p.stmtAppend( ")" );
+        if( pIndexDiff.domain_index_expressionNew != null )
+        {
+          p.stmtAppend( pIndexDiff.domain_index_expressionNew );
+        }
+        else
+        {
+          if( pIndexDiff.loggingNew != null )
+          {
+            p.stmtAppend( pIndexDiff.loggingNew.getLiteral() );
+          }
+        }
+        if( pIndexDiff.tablespaceNew != null )
+        {
+          p.stmtAppend( "tablespace" );
+          p.stmtAppend( pIndexDiff.tablespaceNew );
+        }
+        if( pIndexDiff.globalNew != null )
+        {
+          p.stmtAppend( pIndexDiff.globalNew.getLiteral() );
+        }
+        if( pIndexDiff.bitmapNew == null && pIndexDiff.compressionNew == CompressType.COMPRESS )
+        {
+          p.stmtAppend( "compress" );
+        }
+        if( pIndexDiff.compressionNew == CompressType.NOCOMPRESS )
+        {
+          p.stmtAppend( "nocompress" );
+        }
 
-      stmtDone();
+        if( pIndexDiff.parallelNew == ParallelType.PARALLEL || isIndexparallelcreate() )
+        {
+          p.stmtAppend( "parallel" );
+          if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
+          {
+            p.stmtAppend( " " + pIndexDiff.parallel_degreeNew );
+          }
+        }
 
-      if( pIndexDiff.parallelNew != ParallelType.PARALLEL && isIndexparallelcreate() )
-      {
-        addStmt( "alter index " + pIndexDiff.consNameNew + " noparallel" );
-      }
+        p.stmtDone();
+
+        if( pIndexDiff.parallelNew != ParallelType.PARALLEL && isIndexparallelcreate() )
+        {
+          p.addStmt( "alter index " + pIndexDiff.consNameNew + " noparallel" );
+        }
+      } );
     }
     else
     {
-      if( pIndexDiff.parallelIsEqual == false || pIndexDiff.parallel_degreeIsEqual == false )
+      doInDiffActionAlter( pIndexDiff, p ->
       {
-        stmtStart( "alter index" );
-        stmtAppend( pIndexDiff.consNameNew );
-        if( pIndexDiff.parallelNew == ParallelType.PARALLEL )
+        if( pIndexDiff.parallelIsEqual == false || pIndexDiff.parallel_degreeIsEqual == false )
         {
-          stmtAppend( "parallel" );
-          if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
+          p.stmtStart( "alter index" );
+          p.stmtAppend( pIndexDiff.consNameNew );
+          if( pIndexDiff.parallelNew == ParallelType.PARALLEL )
           {
-            stmtAppend( " " + pIndexDiff.parallel_degreeNew );
+            p.stmtAppend( "parallel" );
+            if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
+            {
+              p.stmtAppend( " " + pIndexDiff.parallel_degreeNew );
+            }
           }
+          else
+          {
+            p.stmtAppend( "noparallel" );
+          }
+
+          p.stmtDone( INDEX__PARALLEL );
         }
-        else
+
+        if( pIndexDiff.loggingIsEqual == false )
         {
-          stmtAppend( "noparallel" );
+          p.stmtStart( "alter index" );
+          p.stmtAppend( pIndexDiff.consNameNew );
+          if( pIndexDiff.loggingNew == LoggingType.NOLOGGING )
+          {
+            p.stmtAppend( "nologging" );
+          }
+          else
+          {
+            p.stmtAppend( "logging" );
+          }
+
+          p.stmtDone( INDEX__LOGGING );
         }
 
-        stmtDone();
-      }
-
-      if( pIndexDiff.loggingIsEqual == false )
-      {
-        stmtStart( "alter index" );
-        stmtAppend( pIndexDiff.consNameNew );
-        if( pIndexDiff.loggingNew == LoggingType.NOLOGGING )
+        if( pIndexDiff.tablespaceIsEqual == false && !(pIndexDiff.tablespaceOld == null && pIndexDiff.tablespaceNew == null) && isIndexmovetablespace() == true )
         {
-          stmtAppend( "nologging" );
+          p.stmtStart( "alter index" );
+          p.stmtAppend( pIndexDiff.consNameNew );
+          p.stmtAppend( "rebuild tablespace" );
+          p.stmtAppend( nvl( pIndexDiff.tablespaceNew, getDefaultTablespace() ) );
+          p.stmtDone( INDEX_OR_UNIQUE_KEY__TABLESPACE );
         }
-        else
-        {
-          stmtAppend( "logging" );
-        }
-
-        stmtDone();
-      }
-
-      if( pIndexDiff.tablespaceIsEqual == false && !(pIndexDiff.tablespaceOld == null && pIndexDiff.tablespaceNew == null) && isIndexmovetablespace() == true )
-      {
-        stmtStart( "alter index" );
-        stmtAppend( pIndexDiff.consNameNew );
-        stmtAppend( "rebuild tablespace" );
-        stmtAppend( nvl( pIndexDiff.tablespaceNew, getDefaultTablespace() ) );
-        stmtDone();
-      }
+      } );
     }
   }
 
@@ -1096,51 +1452,57 @@ public class OrcasDiff extends AbstractStatementBuilder
     return _parameters.isIndexparallelcreate();
   }
 
-  private void handleConstraint( String pTablename, ConstraintDiff pConstraintDiff )
+  private void handleConstraint( TableDiff pTableDiff, ConstraintDiff pConstraintDiff )
   {
-    if( pConstraintDiff.isMatched == false || pConstraintDiff.isRecreateNeeded == true )
+    if( pConstraintDiff.isMatched == false || isRecreateNeeded( pConstraintDiff ) == true )
     {
-      stmtStart( "alter table " + pTablename + " add constraint " + pConstraintDiff.consNameNew + " check (" + pConstraintDiff.ruleNew + ")" );
-      if( pConstraintDiff.deferrtypeNew != null )
+      doInDiffActionCreate( pConstraintDiff, p ->
       {
-        stmtAppend( "deferrable initially " + pConstraintDiff.deferrtypeNew.getName() );
-      }
-      if( pConstraintDiff.statusNew != null )
-      {
-        stmtAppend( pConstraintDiff.statusNew.getName() );
-      }
+        p.stmtStart( "alter table " + pTableDiff.nameNew + " add constraint " + pConstraintDiff.consNameNew + " check (" + pConstraintDiff.ruleNew + ")" );
+        if( pConstraintDiff.deferrtypeNew != null )
+        {
+          p.stmtAppend( "deferrable initially " + pConstraintDiff.deferrtypeNew.getName() );
+        }
+        if( pConstraintDiff.statusNew != null )
+        {
+          p.stmtAppend( pConstraintDiff.statusNew.getName() );
+        }
 
-      stmtDone();
+        p.stmtDone();
+      } );
     }
   }
 
   private void handlePrimarykey( TableDiff pTableDiff )
   {
-    if( pTableDiff.primary_keyDiff.isMatched == false || pTableDiff.primary_keyDiff.isRecreateNeeded == true )
+    if( pTableDiff.primary_keyDiff.isMatched == false || isRecreateNeeded( pTableDiff.primary_keyDiff ) )
     {
-      stmtStart( "alter table " + pTableDiff.nameNew + " add" );
-      if( pTableDiff.primary_keyDiff.consNameNew != null )
+      doInDiffActionCreate( pTableDiff.primary_keyDiff, p ->
       {
-        stmtAppend( "constraint " + pTableDiff.primary_keyDiff.consNameNew );
-      }
-      stmtAppend( "primary key (" + getColumnList( pTableDiff.primary_keyDiff.pk_columnsDiff ) + ")" );
-
-      if( pTableDiff.primary_keyDiff.tablespaceNew != null || pTableDiff.primary_keyDiff.reverseNew != null )
-      {
-        stmtAppend( "using index" );
-
-        if( pTableDiff.primary_keyDiff.reverseNew != null )
+        p.stmtStart( "alter table " + pTableDiff.nameNew + " add" );
+        if( pTableDiff.primary_keyDiff.consNameNew != null )
         {
-          stmtAppend( "reverse" );
+          p.stmtAppend( "constraint " + pTableDiff.primary_keyDiff.consNameNew );
+        }
+        p.stmtAppend( "primary key (" + getColumnList( pTableDiff.primary_keyDiff.pk_columnsDiff ) + ")" );
+
+        if( pTableDiff.primary_keyDiff.tablespaceNew != null || pTableDiff.primary_keyDiff.reverseNew != null )
+        {
+          p.stmtAppend( "using index" );
+
+          if( pTableDiff.primary_keyDiff.reverseNew != null )
+          {
+            p.stmtAppend( "reverse" );
+          }
+
+          if( pTableDiff.primary_keyDiff.tablespaceNew != null )
+          {
+            p.stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
+          }
         }
 
-        if( pTableDiff.primary_keyDiff.tablespaceNew != null )
-        {
-          stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
-        }
-      }
-
-      stmtDone();
+        p.stmtDone();
+      } );
     }
   }
 
@@ -1286,116 +1648,124 @@ public class OrcasDiff extends AbstractStatementBuilder
 
   private void handleColumn( TableDiff pTableDiff, ColumnDiff pColumnDiff )
   {
-
     if( pColumnDiff.isMatched == false )
     {
-      stmtStart( "alter table " + pTableDiff.nameNew + " add " + createColumnCreatePart( pColumnDiff ) );
-
-      if( findLobstorage( pTableDiff, pColumnDiff.nameNew ) != null )
+      doInDiffActionCreate( pColumnDiff, p ->
       {
-        stmtAppend( "lob (" + pColumnDiff.nameNew + ") store as ( tablespace " + findLobstorage( pTableDiff, pColumnDiff.nameNew ).tablespaceNew + " )" );
-      }
+        p.stmtStart( "alter table " + pTableDiff.nameNew + " add " + createColumnCreatePart( pColumnDiff ) );
 
-      stmtDone();
+        if( findLobstorage( pTableDiff, pColumnDiff.nameNew ) != null )
+        {
+          p.stmtAppend( "lob (" + pColumnDiff.nameNew + ") store as ( tablespace " + findLobstorage( pTableDiff, pColumnDiff.nameNew ).tablespaceNew + " )" );
+        }
+
+        p.stmtDone();
+      } );
     }
     else
     {
-      if( pColumnDiff.isRecreateNeeded == true )
+      if( isRecreateNeeded( pColumnDiff ) )
       {
-        recreateColumn( pTableDiff, pColumnDiff );
+        doInDiffAction( pColumnDiff, Collections.singletonList( new DiffActionReasonDifferent( diffReasonKeyRegistry.getDiffReasonKey( pColumnDiff ) ) ), DiffReasonType.RECREATE, p ->
+        {
+          recreateColumn( p, pTableDiff, pColumnDiff );
+        }, new StatementBuilder() );
       }
       else
       {
-        if( pColumnDiff.byteorcharIsEqual == false || pColumnDiff.precisionIsEqual == false || pColumnDiff.scaleIsEqual == false )
+        doInDiffActionAlter( pColumnDiff, p ->
         {
-          addStmt( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff ) + ")" );
-        }
+          if( pColumnDiff.byteorcharIsEqual == false || pColumnDiff.precisionIsEqual == false || pColumnDiff.scaleIsEqual == false )
+          {
+            p.addStmt( COLUMN__BYTEORCHAR, "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff ) + ")" );
+          }
 
-        if( pColumnDiff.default_valueIsEqual == false )
-        {
-          stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default" );
-          if( pColumnDiff.default_valueNew == null )
+          if( pColumnDiff.default_valueIsEqual == false )
           {
-            stmtAppend( "null" );
+            p.stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default" );
+            if( pColumnDiff.default_valueNew == null )
+            {
+              p.stmtAppend( "null" );
+            }
+            else
+            {
+              p.stmtAppend( pColumnDiff.default_valueNew );
+            }
+            p.stmtAppend( ")" );
+            p.stmtDone( COLUMN__DEFAULT_VALUE );
           }
-          else
-          {
-            stmtAppend( pColumnDiff.default_valueNew );
-          }
-          stmtAppend( ")" );
-          stmtDone();
-        }
 
-        if( pColumnDiff.notnullIsEqual == false )
-        {
-          stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew );
-          if( pColumnDiff.notnullNew == false )
+          if( pColumnDiff.notnullIsEqual == false )
           {
-            stmtAppend( "null" );
+            p.stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew );
+            if( pColumnDiff.notnullNew == false )
+            {
+              p.stmtAppend( "null" );
+            }
+            else
+            {
+              p.stmtAppend( "not null" );
+            }
+            p.stmtAppend( ")" );
+            p.stmtDone( COLUMN__NOTNULL );
           }
-          else
-          {
-            stmtAppend( "not null" );
-          }
-          stmtAppend( ")" );
-          stmtDone();
-        }
+        } );
       }
     }
   }
 
-  private void recreateColumn( TableDiff pTableDiff, ColumnDiff pColumnDiff )
+  private void recreateColumn( StatementBuilder p, TableDiff pTableDiff, ColumnDiff pColumnDiff )
   {
     String lTmpOldColumnameNew = "DTO_" + pColumnDiff.nameNew;
     String lTmpNewColumnameNew = "DTN_" + pColumnDiff.nameNew;
 
-    addStmt( "alter table " + pTableDiff.nameNew + " add " + lTmpNewColumnameNew + " " + getColumnDatatype( pColumnDiff ) );
+    p.addStmt( "alter table " + pTableDiff.nameNew + " add " + lTmpNewColumnameNew + " " + getColumnDatatype( pColumnDiff ) );
 
-    //      TODO    for cur_trigger in
-    //            (
-    //            select trigger_name
-    //              from user_triggers
-    //             where table_name = pTableDiff.nameNew
-    //            )
-    //          {
-    //            add_stmt( "alter trigger " + cur_trigger.trigger_name + " disable" );
-    //          }
+    // TODO for cur_trigger in
+    // (
+    // select trigger_name
+    // from user_triggers
+    // where table_name = pTableDiff.nameNew
+    // )
+    // {
+    // add_stmt( "alter trigger " + cur_trigger.trigger_name + " disable" );
+    // }
 
-    addStmt( "update " + pTableDiff.nameNew + " set " + lTmpNewColumnameNew + " = " + pColumnDiff.nameOld );
-    addStmt( "commit" );
+    p.addStmt( "update " + pTableDiff.nameNew + " set " + lTmpNewColumnameNew + " = " + pColumnDiff.nameOld );
+    p.addStmt( "commit" );
 
-    //          for cur_trigger in
-    //            (
-    //            select trigger_name
-    //              from user_triggers
-    //             where table_name = pTableDiff.nameNew
-    //            )
-    //          {
-    //            add_stmt( "alter trigger " + cur_trigger.trigger_name + " enable" );
-    //          }
+    // for cur_trigger in
+    // (
+    // select trigger_name
+    // from user_triggers
+    // where table_name = pTableDiff.nameNew
+    // )
+    // {
+    // add_stmt( "alter trigger " + cur_trigger.trigger_name + " enable" );
+    // }
 
-    addStmt( "alter table " + pTableDiff.nameNew + " rename column " + pColumnDiff.nameOld + " to " + lTmpOldColumnameNew );
-    addStmt( "alter table " + pTableDiff.nameNew + " rename column " + lTmpNewColumnameNew + " to " + pColumnDiff.nameNew );
-    addStmt( "alter table " + pTableDiff.nameNew + " drop column " + lTmpOldColumnameNew );
+    p.addStmt( "alter table " + pTableDiff.nameNew + " rename column " + pColumnDiff.nameOld + " to " + lTmpOldColumnameNew );
+    p.addStmt( "alter table " + pTableDiff.nameNew + " rename column " + lTmpNewColumnameNew + " to " + pColumnDiff.nameNew );
+    p.addStmt( "alter table " + pTableDiff.nameNew + " drop column " + lTmpOldColumnameNew );
 
     if( pColumnDiff.default_valueNew != null )
     {
-      stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default" );
-      stmtAppend( pColumnDiff.default_valueNew );
-      stmtAppend( ")" );
-      stmtDone();
+      p.stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default" );
+      p.stmtAppend( pColumnDiff.default_valueNew );
+      p.stmtAppend( ")" );
+      p.stmtDone();
     }
 
     if( pColumnDiff.notnullNew == true )
     {
-      stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew );
-      stmtAppend( "not null" );
-      stmtAppend( ")" );
-      stmtDone();
+      p.stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew );
+      p.stmtAppend( "not null" );
+      p.stmtAppend( ")" );
+      p.stmtDone();
     }
   }
 
-  private void dropWithDropmodeCheck( String pTestStatement, String pDropStatement )
+  private void dropWithDropmodeCheck( StatementBuilder p, String pTestStatement, String pDropStatement )
   {
     if( isDropmode() != true )
     {
@@ -1407,13 +1777,13 @@ public class OrcasDiff extends AbstractStatementBuilder
         }
         else
         {
-          addStmt( "-- dropmode-ignore: " + pDropStatement );
+          p.addStmt( "-- dropmode-ignore: " + pDropStatement );
           return;
         }
       }
     }
 
-    addStmt( pDropStatement );
+    p.addStmt( pDropStatement );
   }
 
   private boolean isDropmodeIgnore()
@@ -1435,7 +1805,7 @@ public class OrcasDiff extends AbstractStatementBuilder
 
   private boolean hasRows( String pTestStatement )
   {
-    return (Boolean)new WrapperReturnValueFromResultSet( pTestStatement, getCallableStatementProvider() )
+    return (Boolean) new WrapperReturnValueFromResultSet( pTestStatement, getCallableStatementProvider() )
     {
       @Override
       protected Object getValueFromResultSet( ResultSet pResultSet ) throws SQLException
@@ -1529,114 +1899,120 @@ public class OrcasDiff extends AbstractStatementBuilder
     pModelDiff.model_elementsTableDiff = lOrderedList;
   }
 
-  private void createMview( MviewDiff pMviewDiff )
+  private void createMview( StatementBuilder p, MviewDiff pMviewDiff )
   {
-    stmtStart( "create materialized view" );
-    stmtAppend( pMviewDiff.mview_nameNew );
+    p.stmtStart( "create materialized view" );
+    p.stmtAppend( pMviewDiff.mview_nameNew );
 
     if( pMviewDiff.buildModeNew == BuildModeType.PREBUILT )
     {
-      stmtAppend( "on prebuilt table" );
+      p.stmtAppend( "on prebuilt table" );
     }
     else
     {
       // Physical properties nur, wenn nicht prebuilt
       if( pMviewDiff.tablespaceNew != null )
       {
-        stmtAppend( "tablespace" );
-        stmtAppend( pMviewDiff.tablespaceNew );
+        p.stmtAppend( "tablespace" );
+        p.stmtAppend( pMviewDiff.tablespaceNew );
       }
 
-      handleCompression( pMviewDiff.compressionNew, pMviewDiff.compressionForNew, false );
+      handleCompression( p, pMviewDiff.compressionNew, pMviewDiff.compressionForNew, false );
 
-      handleParallel( pMviewDiff.parallelNew, pMviewDiff.parallel_degreeNew, false );
+      handleParallel( p, pMviewDiff.parallelNew, pMviewDiff.parallel_degreeNew, false );
 
       if( pMviewDiff.buildModeNew != null )
       {
-        stmtAppend( "build" );
-        stmtAppend( pMviewDiff.buildModeNew.getLiteral() );
+        p.stmtAppend( "build" );
+        p.stmtAppend( pMviewDiff.buildModeNew.getLiteral() );
       }
     }
 
     if( pMviewDiff.refreshMethodNew != null )
     {
-      stmtAppend( adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) );
+      p.stmtAppend( adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) );
 
       if( pMviewDiff.refreshModeNew != null )
       {
-        stmtAppend( "on" );
-        stmtAppend( pMviewDiff.refreshModeNew.getLiteral() );
+        p.stmtAppend( "on" );
+        p.stmtAppend( pMviewDiff.refreshModeNew.getLiteral() );
       }
     }
 
     if( pMviewDiff.queryRewriteNew == EnableType.ENABLE )
     {
-      stmtAppend( "enable query rewrite" );
+      p.stmtAppend( "enable query rewrite" );
     }
 
-    stmtAppend( "as" );
-    stmtAppend( pMviewDiff.viewSelectCLOBNew );
-    stmtDone();
+    p.stmtAppend( "as" );
+    p.stmtAppend( pMviewDiff.viewSelectCLOBNew );
+    p.stmtDone();
   }
 
   private void handleMview( MviewDiff pMviewDiff )
   {
-    if( pMviewDiff.isMatched == false || pMviewDiff.isRecreateNeeded )
+    if( pMviewDiff.isMatched == false || isRecreateNeeded( pMviewDiff ) )
     {
-      createMview( pMviewDiff );
+      doInDiffActionCreate( pMviewDiff, p ->
+      {
+        createMview( p, pMviewDiff );
+      } );
     }
     else
     {
-      if( !pMviewDiff.queryRewriteIsEqual )
+      doInDiffActionAlter( pMviewDiff, p ->
       {
-        EnableType lQueryRewriteNew = pMviewDiff.queryRewriteNew;
-
-        if( lQueryRewriteNew == null )
+        if( !pMviewDiff.queryRewriteIsEqual )
         {
-          lQueryRewriteNew = EnableType.DISABLE;
+          EnableType lQueryRewriteNew = pMviewDiff.queryRewriteNew;
+
+          if( lQueryRewriteNew == null )
+          {
+            lQueryRewriteNew = EnableType.DISABLE;
+          }
+
+          p.addStmt( MVIEW__QUERY_REWRITE, "alter materialized view " + pMviewDiff.mview_nameNew + " " + lQueryRewriteNew.getLiteral() + " query rewrite" );
         }
 
-        addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + lQueryRewriteNew.getLiteral() + " query rewrite" );
-      }
-
-      if( !pMviewDiff.refreshModeIsEqual || !pMviewDiff.refreshMethodIsEqual )
-      {
-        RefreshModeType lRefreshModeType = pMviewDiff.refreshModeNew;
-        String lRefreshmode;
-        if( lRefreshModeType == null )
+        if( !pMviewDiff.refreshModeIsEqual || !pMviewDiff.refreshMethodIsEqual )
         {
-          lRefreshmode = "";
-        }
-        else
-        {
-          lRefreshmode = " on " + lRefreshModeType.getLiteral();
-        }
-        addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) + lRefreshmode );
-      }
-
-      //     Physical parameters nur, wenn nicht prebuilt
-      if( pMviewDiff.buildModeNew != BuildModeType.PREBUILT )
-      {
-        if( pMviewDiff.parallelIsEqual == false || pMviewDiff.parallel_degreeIsEqual == false )
-        {
-          stmtStart( "alter materialized view" );
-          stmtAppend( pMviewDiff.mview_nameNew );
-
-          handleParallel( pMviewDiff.parallelNew, pMviewDiff.parallel_degreeNew, true );
-
-          stmtDone();
+          RefreshModeType lRefreshModeType = pMviewDiff.refreshModeNew;
+          String lRefreshmode;
+          if( lRefreshModeType == null )
+          {
+            lRefreshmode = "";
+          }
+          else
+          {
+            lRefreshmode = " on " + lRefreshModeType.getLiteral();
+          }
+          p.addStmt( MVIEW__REFRESH_MODE, "alter materialized view " + pMviewDiff.mview_nameNew + " " + adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) + lRefreshmode );
         }
 
-        if( pMviewDiff.compressionIsEqual == false || pMviewDiff.compressionForIsEqual == false )
+        // Physical parameters nur, wenn nicht prebuilt
+        if( pMviewDiff.buildModeNew != BuildModeType.PREBUILT )
         {
-          stmtStart( "alter materialized view" );
-          stmtAppend( pMviewDiff.mview_nameNew );
+          if( pMviewDiff.parallelIsEqual == false || pMviewDiff.parallel_degreeIsEqual == false )
+          {
+            p.stmtStart( "alter materialized view" );
+            p.stmtAppend( pMviewDiff.mview_nameNew );
 
-          handleCompression( pMviewDiff.compressionNew, pMviewDiff.compressionForNew, true );
+            handleParallel( p, pMviewDiff.parallelNew, pMviewDiff.parallel_degreeNew, true );
 
-          stmtDone();
+            p.stmtDone( MVIEW__PARALLEL );
+          }
+
+          if( pMviewDiff.compressionIsEqual == false || pMviewDiff.compressionForIsEqual == false )
+          {
+            p.stmtStart( "alter materialized view" );
+            p.stmtAppend( pMviewDiff.mview_nameNew );
+
+            handleCompression( p, pMviewDiff.compressionNew, pMviewDiff.compressionForNew, true );
+
+            p.stmtDone( MVIEW__COMPRESSION );
+          }
         }
-      }
+      } );
     }
   }
 
@@ -1646,9 +2022,12 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       if( !lMviewDiff.isEqual )
       {
-        if( lMviewDiff.isRecreateNeeded || !lMviewDiff.isNew )
+        if( isRecreateNeeded( lMviewDiff ) || !lMviewDiff.isNew )
         {
-          addStmt( "drop materialized view " + lMviewDiff.mview_nameOld );
+          doInDiffActionDrop( lMviewDiff, p ->
+          {
+            p.addStmt( "drop materialized view " + lMviewDiff.mview_nameOld );
+          } );
         }
 
         if( lMviewDiff.isNew )
@@ -2072,80 +2451,80 @@ public class OrcasDiff extends AbstractStatementBuilder
     return lReturn;
   }
 
-  private void createMviewlog( TableDiff pTableDiff )
+  private void createMviewlog( StatementBuilder p, TableDiff pTableDiff )
   {
     String c_date_format = _parameters.getDateformat();
-    stmtStart( "create materialized view log on" );
-    stmtAppend( pTableDiff.nameNew );
+    p.stmtStart( "create materialized view log on" );
+    p.stmtAppend( pTableDiff.nameNew );
 
     if( pTableDiff.mviewLogDiff.tablespaceNew != null )
     {
-      stmtAppend( "tablespace" );
-      stmtAppend( pTableDiff.mviewLogDiff.tablespaceNew );
+      p.stmtAppend( "tablespace" );
+      p.stmtAppend( pTableDiff.mviewLogDiff.tablespaceNew );
     }
 
-    handleParallel( pTableDiff.mviewLogDiff.parallelNew, pTableDiff.mviewLogDiff.parallel_degreeNew, false );
+    handleParallel( p, pTableDiff.mviewLogDiff.parallelNew, pTableDiff.mviewLogDiff.parallel_degreeNew, false );
 
-    stmtAppend( "with" );
+    p.stmtAppend( "with" );
 
     if( nvl( pTableDiff.mviewLogDiff.primaryKeyNew, "null" ).equals( "primary" ) || !nvl( pTableDiff.mviewLogDiff.rowidNew, "null" ).equals( "rowid" ) )
     {
-      stmtAppend( "primary key" );
+      p.stmtAppend( "primary key" );
       if( nvl( pTableDiff.mviewLogDiff.rowidNew, "null" ).equals( "rowid" ) )
       {
-        stmtAppend( "," );
+        p.stmtAppend( "," );
       }
     }
 
     if( nvl( pTableDiff.mviewLogDiff.rowidNew, "null" ).equals( "rowid" ) )
     {
-      stmtAppend( "rowid" );
+      p.stmtAppend( "rowid" );
     }
 
     if( nvl( pTableDiff.mviewLogDiff.withSequenceNew, "null" ).equals( "sequence" ) )
     {
-      stmtAppend( "," );
-      stmtAppend( "sequence" );
+      p.stmtAppend( "," );
+      p.stmtAppend( "sequence" );
     }
 
     if( pTableDiff.mviewLogDiff.columnsDiff.size() > 0 )
     {
-      stmtAppend( "(" );
-      stmtAppend( getColumnList( pTableDiff.mviewLogDiff.columnsDiff ) );
-      stmtAppend( ")" );
+      p.stmtAppend( "(" );
+      p.stmtAppend( getColumnList( pTableDiff.mviewLogDiff.columnsDiff ) );
+      p.stmtAppend( ")" );
     }
 
     if( nvl( pTableDiff.mviewLogDiff.commitScnNew, "null" ).equals( "commit_scn" ) )
     {
-      stmtAppend( "," );
-      stmtAppend( "commit scn" );
+      p.stmtAppend( "," );
+      p.stmtAppend( "commit scn" );
     }
 
     if( pTableDiff.mviewLogDiff.newValuesNew != null )
     {
-      stmtAppend( pTableDiff.mviewLogDiff.newValuesNew.getLiteral() );
-      stmtAppend( "new values" );
+      p.stmtAppend( pTableDiff.mviewLogDiff.newValuesNew.getLiteral() );
+      p.stmtAppend( "new values" );
     }
 
     if( pTableDiff.mviewLogDiff.startWithNew != null || pTableDiff.mviewLogDiff.nextNew != null || (pTableDiff.mviewLogDiff.repeatIntervalNew != null && pTableDiff.mviewLogDiff.repeatIntervalNew != 0) )
     {
-      stmtAppend( "purge" );
+      p.stmtAppend( "purge" );
       if( pTableDiff.mviewLogDiff.startWithNew != null )
       {
-        stmtAppend( "start with" );
-        stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.startWithNew + "','" + c_date_format + "')" );
+        p.stmtAppend( "start with" );
+        p.stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.startWithNew + "','" + c_date_format + "')" );
       }
       if( pTableDiff.mviewLogDiff.nextNew != null )
       {
-        stmtAppend( "next" );
-        stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.nextNew + "','" + c_date_format + "')" );
+        p.stmtAppend( "next" );
+        p.stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.nextNew + "','" + c_date_format + "')" );
       }
       else
       {
         if( pTableDiff.mviewLogDiff.repeatIntervalNew != null && pTableDiff.mviewLogDiff.repeatIntervalNew != 0 )
         {
-          stmtAppend( "repeat interval" );
-          stmtAppend( "" + pTableDiff.mviewLogDiff.repeatIntervalNew );
+          p.stmtAppend( "repeat interval" );
+          p.stmtAppend( "" + pTableDiff.mviewLogDiff.repeatIntervalNew );
         }
       }
     }
@@ -2153,92 +2532,177 @@ public class OrcasDiff extends AbstractStatementBuilder
     {
       if( pTableDiff.mviewLogDiff.synchronousNew == SynchronousType.ASYNCHRONOUS )
       {
-        stmtAppend( "purge immediate asynchronous" );
+        p.stmtAppend( "purge immediate asynchronous" );
       }
     }
 
-    stmtDone();
+    p.stmtDone();
   }
 
   private void handleMviewlog( TableDiff pTableDiff )
   {
-    if( !pTableDiff.mviewLogDiff.isOld || pTableDiff.mviewLogDiff.isRecreateNeeded )
+    if( !pTableDiff.mviewLogDiff.isOld || isRecreateNeeded( pTableDiff.mviewLogDiff ) )
     {
-      createMviewlog( pTableDiff );
+      doInDiffActionCreate( pTableDiff.mviewLogDiff, p ->
+      {
+        createMviewlog( p, pTableDiff );
+      } );
     }
     else
     {
-      if( pTableDiff.mviewLogDiff.parallelIsEqual == false || pTableDiff.mviewLogDiff.parallel_degreeIsEqual == false )
+      doInDiffActionAlter( pTableDiff.mviewLogDiff, p ->
       {
-        stmtStart( "alter materialized view log on" );
-        stmtAppend( pTableDiff.nameNew );
-        handleParallel( pTableDiff.mviewLogDiff.parallelNew, pTableDiff.mviewLogDiff.parallel_degreeNew, true );
-
-        stmtDone();
-      }
-
-      if( pTableDiff.mviewLogDiff.newValuesIsEqual == false )
-      {
-        stmtStart( "alter materialized view log on" );
-        stmtAppend( pTableDiff.nameNew );
-
-        if( pTableDiff.mviewLogDiff.newValuesNew == NewValuesType.INCLUDING )
+        if( pTableDiff.mviewLogDiff.parallelIsEqual == false || pTableDiff.mviewLogDiff.parallel_degreeIsEqual == false )
         {
-          stmtAppend( "including" );
+          p.stmtStart( "alter materialized view log on" );
+          p.stmtAppend( pTableDiff.nameNew );
+          handleParallel( p, pTableDiff.mviewLogDiff.parallelNew, pTableDiff.mviewLogDiff.parallel_degreeNew, true );
+
+          p.stmtDone( MVIEW_LOG__PARALLEL );
         }
-        else
-        {
-          stmtAppend( "excluding" );
-        }
-        stmtAppend( "new values" );
 
-        stmtDone();
-      }
+        if( pTableDiff.mviewLogDiff.newValuesIsEqual == false )
+        {
+          p.stmtStart( "alter materialized view log on" );
+          p.stmtAppend( pTableDiff.nameNew );
 
-      if( pTableDiff.mviewLogDiff.startWithIsEqual == false || pTableDiff.mviewLogDiff.nextIsEqual == false || pTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
-      {
-        stmtStart( "alter materialized view log on" );
-        stmtAppend( pTableDiff.nameNew );
-        stmtAppend( "purge" );
-        if( pTableDiff.mviewLogDiff.startWithIsEqual == false )
-        {
-          stmtAppend( "start with" );
-          stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.startWithNew + "','" + _parameters.getDateformat() + "')" );
-        }
-        if( pTableDiff.mviewLogDiff.nextIsEqual == false )
-        {
-          stmtAppend( "next" );
-          stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.nextNew + "','" + _parameters.getDateformat() + "')" );
-        }
-        else
-        {
-          if( pTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
+          if( pTableDiff.mviewLogDiff.newValuesNew == NewValuesType.INCLUDING )
           {
-            stmtAppend( "repeat interval" );
-            stmtAppend( pTableDiff.mviewLogDiff.repeatIntervalNew + "" );
-          }
-        }
-
-        stmtDone();
-      }
-      else
-      {
-        if( pTableDiff.mviewLogDiff.synchronousIsEqual == false )
-        {
-          stmtAppend( "alter materialized view log on" );
-          stmtAppend( pTableDiff.nameNew );
-          if( pTableDiff.mviewLogDiff.synchronousNew == SynchronousType.ASYNCHRONOUS )
-          {
-            stmtAppend( "purge immediate asynchronous" );
+            p.stmtAppend( "including" );
           }
           else
           {
-            stmtAppend( "purge immediate synchronous" );
+            p.stmtAppend( "excluding" );
+          }
+          p.stmtAppend( "new values" );
+
+          p.stmtDone( MVIEW_LOG__NEW_VALUES );
+        }
+
+        if( pTableDiff.mviewLogDiff.startWithIsEqual == false || pTableDiff.mviewLogDiff.nextIsEqual == false || pTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
+        {
+          p.stmtStart( "alter materialized view log on" );
+          p.stmtAppend( pTableDiff.nameNew );
+          p.stmtAppend( "purge" );
+          if( pTableDiff.mviewLogDiff.startWithIsEqual == false )
+          {
+            p.stmtAppend( "start with" );
+            p.stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.startWithNew + "','" + _parameters.getDateformat() + "')" );
+          }
+          if( pTableDiff.mviewLogDiff.nextIsEqual == false )
+          {
+            p.stmtAppend( "next" );
+            p.stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.nextNew + "','" + _parameters.getDateformat() + "')" );
+          }
+          else
+          {
+            if( pTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
+            {
+              p.stmtAppend( "repeat interval" );
+              p.stmtAppend( pTableDiff.mviewLogDiff.repeatIntervalNew + "" );
+            }
           }
 
-          stmtDone();
+          p.stmtDone( MVIEW_LOG__START_WITH );
         }
+        else
+        {
+          if( pTableDiff.mviewLogDiff.synchronousIsEqual == false )
+          {
+            p.stmtAppend( "alter materialized view log on" );
+            p.stmtAppend( pTableDiff.nameNew );
+            if( pTableDiff.mviewLogDiff.synchronousNew == SynchronousType.ASYNCHRONOUS )
+            {
+              p.stmtAppend( "purge immediate asynchronous" );
+            }
+            else
+            {
+              p.stmtAppend( "purge immediate synchronous" );
+            }
+
+            p.stmtDone( MVIEW_LOG__SYNCHRONOUS );
+          }
+        }
+      } );
+    }
+  }
+
+  private abstract class AbstractStatementBuilder
+  {
+    String _stmt;
+
+    protected void stmtAppend( String pString )
+    {
+      _stmt = _stmt + " " + pString;
+    }
+
+    protected void stmtStart( String pString )
+    {
+      _stmt = pString;
+    }
+  }
+
+  private interface AbstractDiffActionRunnable<T extends AbstractStatementBuilder>
+  {
+    void run( T p );
+  }
+
+  private interface DiffActionRunnable extends AbstractDiffActionRunnable<StatementBuilder>
+  {
+  }
+
+  private interface DiffActionRunnableAlter extends AbstractDiffActionRunnable<StatementBuilderAlter>
+  {
+  }
+
+  private class StatementBuilderAlter extends AbstractStatementBuilder
+  {
+    private DiffActionReasonDifferent diffActionReasonDifferent;
+
+    public StatementBuilderAlter( DiffActionReasonDifferent pDiffActionReasonDifferent )
+    {
+      diffActionReasonDifferent = pDiffActionReasonDifferent;
+    }
+
+    public void addStmt( EAttribute pAlterReason, String pString )
+    {
+      if( activeDiffAction != null )
+      {
+        activeDiffAction.addStatement( pString );
       }
+      else
+      {
+        throw new IllegalStateException( "no active diff action: " + pString );
+      }
+
+      diffActionReasonDifferent.addDiffReasonDetail( pAlterReason );
+    }
+
+    public void stmtDone( EAttribute pAlterReason )
+    {
+      addStmt( pAlterReason, _stmt );
+      _stmt = null;
+    }
+  }
+
+  class StatementBuilder extends AbstractStatementBuilder
+  {
+    void addStmt( String pString )
+    {
+      if( activeDiffAction != null )
+      {
+        activeDiffAction.addStatement( pString );
+      }
+      else
+      {
+        throw new IllegalStateException( "no active diff action: " + pString );
+      }
+    }
+
+    void stmtDone()
+    {
+      addStmt( _stmt );
+      _stmt = null;
     }
   }
 }
