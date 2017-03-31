@@ -1,7 +1,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "boxcutter/centos72-docker" 
+  config.vm.box = "williamyeh/centos7-docker" 
 
   config.vm.synced_folder "images", "/vm_inside/images", create: true
   # mount orcas directory to vm
@@ -12,14 +12,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision :shell, inline: "docker build -t orcas_jenkins /vm_inside/images/orcas_jenkins"
   config.vm.provision :shell, inline: "docker build -t orcas_jenkins_slave /vm_inside/images/orcas_jenkins_slave"
   config.vm.provision :shell, inline: "docker create --name orcasdb -p 49161:1521 wnameless/oracle-xe-11g"
-  config.vm.provision :shell, inline: "docker create --name orcas_jenkins -p 8080:8080 -p 50000:50000 --env JAVA_OPTS=-Dhudson.slaves.WorkspaceList=- orcas_jenkins"
+  config.vm.provision :shell, inline: "docker create --name orcas_jenkins -p 8281:8080 -p 50000:50000 --env JAVA_OPTS=-Dhudson.slaves.WorkspaceList=- orcas_jenkins"
   config.vm.provision :shell, inline: "docker create --name orcas_jenkins_slave --link=orcasdb:orcasdb orcas_jenkins_slave"
   config.vm.provision :shell, inline: "docker start orcasdb", run: "always" 
   config.vm.provision :shell, inline: "docker start orcas_jenkins", run: "always" 
   config.vm.provision :shell, inline: "docker start orcas_jenkins_slave", run: "always" 
 
   config.vm.network :forwarded_port, guest: 49161, host: 1541 # Oracle XE
-  config.vm.network :forwarded_port, guest: 8080, host: 8281 # jenkins
+  config.vm.network :forwarded_port, guest: 8281, host: 8281 # jenkins
   config.vm.network :forwarded_port, guest: 50000, host: 50000 # jenkins-admin
 
   config.vm.provider "virtualbox" do |v|

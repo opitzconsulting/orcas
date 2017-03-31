@@ -5,12 +5,8 @@
   <import file="${orcas_dir}/orcas_default_tasks.xml"/>
 
   <target name="load_mvn_deps">
-    <orcas_internal_gradle_build tmpfolder="/tmp/orcas_tmp" extensionfolder="" extensionparameter="" />
+    <orcas_internal_gradle_build tmpfolder="/tmp/orcas_tmp" extensionfolder="" extensionparameter="" extensionextractfile=""/>
     <zip destfile="${env.ORCAS_PREBUILDFILE_NOEXTENSIONS}" >
-      <fileset dir="/tmp/orcas_tmp/gradle_build" includes="*_distribution/**"/>
-    </zip>
-    <orcas_internal_gradle_build tmpfolder="/tmp/orcas_tmp" extensionfolder="${orcas_dir}/../orcas_domain_extension/extensions" extensionparameter="" />
-    <zip destfile="${env.ORCAS_PREBUILDFILE_DOMAINEXTENSION}" >
       <fileset dir="/tmp/orcas_tmp/gradle_build" includes="*_distribution/**"/>
     </zip>
   </target>

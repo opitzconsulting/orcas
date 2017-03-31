@@ -17,10 +17,14 @@
       <scriptText>job(&apos;orcas_integration_test&apos;) {   
     description &apos;orcas core tests&apos;
     steps {
-         ant {
-            prop(&apos;ladetest&apos;,&apos;test*&apos;)
-            prop(&apos;available_feature_list&apos;,&apos;&apos;)
-            buildFile(&apos;/opt/orcas/orcas-master/orcas_integrationstest/build_jenkins.xml&apos;)
+      gradle {
+            tasks(&apos;test&apos;)
+            useWrapper = true
+            configure { node -&gt;
+              (node / &apos;rootBuildScriptDir&apos;).setValue(&apos;/opt/orcas/orcas-master/orcas_integrationstest&apos;)
+              (node / &apos;buildFile&apos;).setValue(&apos;/opt/orcas/orcas-master/orcas_integrationstest/build.gradle&apos;)
+              (node / &apos;makeExecutable&apos;).setValue(&apos;true&apos;)
+             }
         }
     }
     publishers {

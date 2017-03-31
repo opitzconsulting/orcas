@@ -10,10 +10,6 @@ WORKDIR /tmp/orcas
 COPY build.xml .
 
 ENV ORCAS_CORE=/opt/orcas/orcas-master/orcas_core
-ENV ORCAS_PREBUILDFILE_NOEXTENSIONS=/opt/orcas/orcas-master/prebuildfile_noextensions.zip
-ENV ORCAS_PREBUILDFILE_DOMAINEXTENSION=/opt/orcas/orcas-master/prebuildfile_domainextension.zip
-
-RUN ant
 
 
 
