@@ -182,11 +182,11 @@ public class JavaOdGenerator extends JavaGenerator
     pOut.println( "public " + "boolean isAllFieldsEqual;" );
     pOut.println( "public " + "boolean isEqual;" );
 
-    pOut.println( " public boolean isFieldEqual( EAttribute pEAttribute ) " );
+    pOut.println( " public boolean isFieldEqual( EStructuralFeature pEStructuralFeature ) " );
     pOut.println( " { " );
     pOut.println( "   try " );
     pOut.println( "   { " );
-    pOut.println( "     Field lField = getClass().getField( pEAttribute.getName() + \"IsEqual\" ); " );
+    pOut.println( "     Field lField = getClass().getField( pEStructuralFeature.getName() + \"IsEqual\" ); " );
     pOut.println( "     return (Boolean) lField.get( this ); " );
     pOut.println( "   } " );
     pOut.println( "   catch( Exception e ) " );

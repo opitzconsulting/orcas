@@ -8,12 +8,12 @@ lob ( clob_column )
 store as 
 (
   tablespace replaceme1
-),
+)
 lob ( blob_column )
 store as 
 (
   tablespace replaceme1
-) tablespace replaceme1;
+) tablespace replaceme2;
 
 create table tab_mod_tablespace
 (
@@ -43,4 +43,11 @@ create table tab_mod_tablespace_reverse_def
   id number(15) not null
 );
 
+create table varray_table
+(
+  id number, 
+  col1 object type "t_varchararray"
+) 
+varray col1 store as securefile lob (tablespace replaceme2)
+tablespace replaceme1;
 

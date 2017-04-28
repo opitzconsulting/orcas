@@ -80,7 +80,7 @@ public class OrcasCoreIntegrationTest
 
   private String _lognameFirstRun = "first_run";
 
-  private static Map<String,JdbcConnectParameters> _connectParametersTargetUserMap = new HashMap<String,JdbcConnectParameters>();
+  private static Map<String, JdbcConnectParameters> _connectParametersTargetUserMap = new HashMap<String, JdbcConnectParameters>();
 
   private static List<String> parseReaderToLines( File pFile )
   {
@@ -460,6 +460,11 @@ public class OrcasCoreIntegrationTest
       Assume.assumeTrue( "extract test not possible for testcase", _testSetup._test_extract );
 
       resetUser( getConnectParametersTargetUser() );
+      String lErzeugeAusgangszustandExtractFile = "tests/" + testName + "/" + "erzeuge_ausgangszustand_extract.sql";
+      if( new File( orcasCoreIntegrationConfig.getBaseDir() + lErzeugeAusgangszustandExtractFile ).exists() )
+      {
+        executeScript( getConnectParametersTargetUser(), lErzeugeAusgangszustandExtractFile, orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
+      }
       executeOrcasStatics( getConnectParametersTargetUser(), "spool_extract", orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + EXTRACT_FOLDER_NAME );
       asserSchemaEqual( "extract_run", false );
     }

@@ -146,9 +146,11 @@
       <text>
 )</text>
       <apply-templates select="transactionControl" />
+      <apply-templates select="lobStorages" />
+      <apply-templates select="varrayStorages" />
       <apply-templates select="tablePartitioning" />
       <apply-templates select="tablespace" />
-      <apply-templates select="pctfree" />      
+      <apply-templates select="pctfree" />
       <apply-templates select="compression" />
       <apply-templates select="compressionFor" />
       <apply-templates select="logging" />
@@ -424,6 +426,11 @@
     </if>
   </template>  
 
+  <template match="lobCompressForType | lobDeduplicateType | compressType">
+    <text> </text>
+    <value-of select="." />
+  </template>  
+
   <template match="index_columns | destColumns | srcColumns | uk_columns | pk_columns | columns[parent::RangePartitions]">
     <text> (</text>
     <apply-templates />
@@ -500,6 +507,35 @@
     <text> is</text>
     <apply-templates select="comment" />
     <text>;</text>
+  </template>
+
+ <template match="VarrayStorage">
+    <text>
+</text>
+    <text>varray </text>
+    <apply-templates select="column_name" />
+    <text> store as </text>
+    <apply-templates select="lobStorageType" />
+    <text> lob</text>
+    <apply-templates select="lobStorageParameters" />
+  </template>
+
+ <template match="LobStorage">
+    <text>
+</text>
+    <text>lob (</text>
+    <apply-templates select="column_name" />
+    <text>) store as </text>
+    <apply-templates select="lobStorageParameters" />
+  </template>
+
+ <template match="LobStorageParameters">
+    <text>(</text>
+    <apply-templates select="tablespace" />
+    <apply-templates select="lobDeduplicateType" />
+    <apply-templates select="compressType" />
+    <apply-templates select="lobCompressForType" />
+    <text>)</text>
   </template>
 
   <template match="value[parent::ListPartitionValue] | value[parent::RangePartitionValue] ">

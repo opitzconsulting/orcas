@@ -1,3 +1,5 @@
+create or replace type t_varchararray as varray(10) of varchar2(128);
+
 create table tab_mod_tablespace
  (
    id number(15) not null

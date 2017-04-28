@@ -31,13 +31,13 @@ public class XtextFileLoader
   {
     EPackage.Registry.INSTANCE.put( OrcasDslPackage.eNS_URI, OrcasDslPackage.eINSTANCE );
     Resource.Factory.Registry lRegistry = Resource.Factory.Registry.INSTANCE;
-    Map<String,Object> lMap = lRegistry.getExtensionToFactoryMap();
+    Map<String, Object> lMap = lRegistry.getExtensionToFactoryMap();
     lMap.put( "xml", new XMLResourceFactoryImpl() );
 
     ResourceSet lResourceSet = new ResourceSetImpl();
     Resource lResource = lResourceSet.createResource( URI.createFileURI( pFilename ) );
 
-    ((XMLResource)lResource).getDefaultSaveOptions();
+    ((XMLResource) lResource).getDefaultSaveOptions();
 
     try
     {
@@ -48,7 +48,7 @@ public class XtextFileLoader
       throw new RuntimeException( e );
     }
 
-    return (Model)lResource.getContents().get( 0 );
+    return (Model) lResource.getContents().get( 0 );
   }
 
   public static Model loadModelDslFolder( Parameters pParameters )
@@ -63,7 +63,7 @@ public class XtextFileLoader
 
     lResourceSet.addLoadOption( XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE );
 
-    Map<Object,Object> lLoadOptions = lResourceSet.getLoadOptions();
+    Map<Object, Object> lLoadOptions = lResourceSet.getLoadOptions();
     lLoadOptions.put( XtextResource.OPTION_ENCODING, "utf8" );
 
     Model lReturn = new ModelImpl();
@@ -78,7 +78,7 @@ public class XtextFileLoader
     return lReturn;
   }
 
-  private static Model loadModelDslFile( File pFile, Parameters pParameters, XtextResourceSet pResourceSet, Map<Object,Object> pLoadOptions, int pCounter )
+  private static Model loadModelDslFile( File pFile, Parameters pParameters, XtextResourceSet pResourceSet, Map<Object, Object> pLoadOptions, int pCounter )
   {
     Resource lResource = pResourceSet.createResource( URI.createURI( "dummy:/dummy" + pCounter + ".orcasdsl" ) );
     try
@@ -86,11 +86,11 @@ public class XtextFileLoader
       FileInputStream lInputStream = new FileInputStream( pFile );
       lResource.load( lInputStream, pLoadOptions );
       lInputStream.close();
-      Model lModel = (Model)lResource.getContents().get( 0 );
+      Model lModel = (Model) lResource.getContents().get( 0 );
 
       if( !lResource.getErrors().isEmpty() )
       {
-        throw new RuntimeException( "parse errors" );
+        throw new RuntimeException( "parse errors" + pFile + " :" + lResource.getErrors().get( 0 ) );
       }
 
       return lModel;

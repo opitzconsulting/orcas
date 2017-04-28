@@ -93,6 +93,16 @@ public abstract class Orcas
     return _parameters;
   }
 
+  protected DatabaseHandler getDatabaseHandler()
+  {
+    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:mysql" ) )
+    {
+      return new DatabaseHandlerMySql();
+    }
+    
+    return new DatabaseHandlerOracle();
+  }
+
   protected String getLogName()
   {
     return getParameters().isLognameSet() ? getParameters().getLogname() : getClass().getSimpleName();

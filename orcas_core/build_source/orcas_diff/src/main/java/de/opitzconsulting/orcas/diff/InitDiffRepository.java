@@ -17,6 +17,7 @@ import de.opitzconsulting.orcas.orig.diff.InlineCommentDiff;
 import de.opitzconsulting.orcas.orig.diff.InlineCommentMerge;
 import de.opitzconsulting.orcas.orig.diff.LobStorageDiff;
 import de.opitzconsulting.orcas.orig.diff.LobStorageMerge;
+import de.opitzconsulting.orcas.orig.diff.LobStorageParametersMerge;
 import de.opitzconsulting.orcas.orig.diff.MviewDiff;
 import de.opitzconsulting.orcas.orig.diff.MviewLogMerge;
 import de.opitzconsulting.orcas.orig.diff.MviewMerge;
@@ -27,8 +28,9 @@ import de.opitzconsulting.orcas.orig.diff.TableDiff;
 import de.opitzconsulting.orcas.orig.diff.TableMerge;
 import de.opitzconsulting.orcas.orig.diff.UniqueKeyDiff;
 import de.opitzconsulting.orcas.orig.diff.UniqueKeyMerge;
+import de.opitzconsulting.orcas.orig.diff.VarrayStorageDiff;
+import de.opitzconsulting.orcas.orig.diff.VarrayStorageMerge;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
-import de.opitzconsulting.orcas.sql.WrapperReturnFirstValue;
 import de.opitzconsulting.origOrcasDsl.BuildModeType;
 import de.opitzconsulting.origOrcasDsl.CharType;
 import de.opitzconsulting.origOrcasDsl.Column;
@@ -58,6 +60,7 @@ import de.opitzconsulting.origOrcasDsl.Sequence;
 import de.opitzconsulting.origOrcasDsl.SynchronousType;
 import de.opitzconsulting.origOrcasDsl.Table;
 import de.opitzconsulting.origOrcasDsl.UniqueKey;
+import de.opitzconsulting.origOrcasDsl.VarrayStorage;
 
 public class InitDiffRepository
 {
@@ -68,21 +71,11 @@ public class InitDiffRepository
     return pValue == null || pValue.equals( pDefaultTablespace ) ? null : pValue;
   }
 
-  public static void init( CallableStatementProvider pCallableStatementProvider )
+  public static void init( CallableStatementProvider pCallableStatementProvider, DatabaseHandler pDatabaseHandler )
   {
-    CharType lDefaultCharType;
+    CharType lDefaultCharType = pDatabaseHandler.getDefaultCharType( pCallableStatementProvider );
 
-    if( new WrapperReturnFirstValue( "select value from nls_instance_parameters where parameter = 'NLS_LENGTH_SEMANTICS'", pCallableStatementProvider ).executeForValue().equals( "BYTE" ) )
-    {
-      lDefaultCharType = CharType.BYTE;
-    }
-    else
-    {
-      lDefaultCharType = CharType.CHAR;
-    }
-
-    defaultTablespace = (String)new WrapperReturnFirstValue( "select default_tablespace from user_users", pCallableStatementProvider ).executeForValue();
-    String lDefaultTempTablespace = (String)new WrapperReturnFirstValue( "select temporary_tablespace from user_users", pCallableStatementProvider ).executeForValue();
+    defaultTablespace = pDatabaseHandler.getDefaultTablespace( pCallableStatementProvider );
 
     DiffRepository.setIndexOrUniqueKeyMerge( new IndexOrUniqueKeyMerge()
     {
@@ -96,26 +89,46 @@ public class InitDiffRepository
     DiffRepository.getIndexOrUniqueKeyMerge().tablespaceIsConvertToUpperCase = true;
 
     // not neede for partitioning since there ist no diff there
-    //    pa_orcas_om_repository_orig.set_om_orig_subsubpart( new om_orig_subsubpart( 1, 1 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_tablepartitioning( new om_orig_tablepartitioning() );
-    //    pa_orcas_om_repository_orig.set_om_orig_rangepartitionval( new om_orig_rangepartitionval( 0, 0 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_refpartition( new om_orig_refpartition( 1, 1 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_hashpartition( new om_orig_hashpartition( 1, 1 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_listpartitionvalu( new om_orig_listpartitionvalu( 0, 0 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_listpartition( new om_orig_listpartition( 1, 1 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_rangepartition( new om_orig_rangepartition( 1, 1 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_listsubpart( new om_orig_listsubpart( 1 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_rangesubpart( new om_orig_rangesubpart( 1 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_refpartitions( new om_orig_refpartitions( 1 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_hashsubsubpart( new om_orig_hashsubsubpart() );
-    //    pa_orcas_om_repository_orig.set_om_orig_hashsubparts( new om_orig_hashsubparts() );
-    //    pa_orcas_om_repository_orig.set_om_orig_listsubsubpart( new om_orig_listsubsubpart() );
-    //    pa_orcas_om_repository_orig.set_om_orig_listpartitions( new om_orig_listpartitions() );
-    //    pa_orcas_om_repository_orig.set_om_orig_hashpartitions( new om_orig_hashpartitions() );
-    //    pa_orcas_om_repository_orig.set_om_orig_rangepartitions( new om_orig_rangepartitions( 0 ) );
-    //    pa_orcas_om_repository_orig.set_om_orig_rangesubsubpart( new om_orig_rangesubsubpart() );
-    //    pa_orcas_om_repository_orig.set_om_orig_listsubparts( new om_orig_listsubparts() );
-    //    pa_orcas_om_repository_orig.set_om_orig_rangesubparts( new om_orig_rangesubparts() );
+    // pa_orcas_om_repository_orig.set_om_orig_subsubpart( new
+    // om_orig_subsubpart( 1, 1 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_tablepartitioning( new
+    // om_orig_tablepartitioning() );
+    // pa_orcas_om_repository_orig.set_om_orig_rangepartitionval( new
+    // om_orig_rangepartitionval( 0, 0 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_refpartition( new
+    // om_orig_refpartition( 1, 1 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_hashpartition( new
+    // om_orig_hashpartition( 1, 1 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_listpartitionvalu( new
+    // om_orig_listpartitionvalu( 0, 0 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_listpartition( new
+    // om_orig_listpartition( 1, 1 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_rangepartition( new
+    // om_orig_rangepartition( 1, 1 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_listsubpart( new
+    // om_orig_listsubpart( 1 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_rangesubpart( new
+    // om_orig_rangesubpart( 1 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_refpartitions( new
+    // om_orig_refpartitions( 1 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_hashsubsubpart( new
+    // om_orig_hashsubsubpart() );
+    // pa_orcas_om_repository_orig.set_om_orig_hashsubparts( new
+    // om_orig_hashsubparts() );
+    // pa_orcas_om_repository_orig.set_om_orig_listsubsubpart( new
+    // om_orig_listsubsubpart() );
+    // pa_orcas_om_repository_orig.set_om_orig_listpartitions( new
+    // om_orig_listpartitions() );
+    // pa_orcas_om_repository_orig.set_om_orig_hashpartitions( new
+    // om_orig_hashpartitions() );
+    // pa_orcas_om_repository_orig.set_om_orig_rangepartitions( new
+    // om_orig_rangepartitions( 0 ) );
+    // pa_orcas_om_repository_orig.set_om_orig_rangesubsubpart( new
+    // om_orig_rangesubsubpart() );
+    // pa_orcas_om_repository_orig.set_om_orig_listsubparts( new
+    // om_orig_listsubparts() );
+    // pa_orcas_om_repository_orig.set_om_orig_rangesubparts( new
+    // om_orig_rangesubparts() );
 
     DiffRepository.setLobStorageMerge( new LobStorageMerge()
     {
@@ -157,7 +170,57 @@ public class InitDiffRepository
       }
     } );
     DiffRepository.getLobStorageMerge().column_nameIsConvertToUpperCase = true;
-    DiffRepository.getLobStorageMerge().tablespaceIsConvertToUpperCase = true;
+
+    DiffRepository.setLobStorageParametersMerge( new LobStorageParametersMerge()
+    {
+      @Override
+      public String tablespaceCleanValueIfNeeded( String pValue )
+      {
+        return handleDefaultTablespace( defaultTablespace, super.tablespaceCleanValueIfNeeded( pValue ) );
+      }
+    } );
+    DiffRepository.getLobStorageParametersMerge().tablespaceIsConvertToUpperCase = true;
+
+    DiffRepository.setVarrayStorageMerge( new VarrayStorageMerge()
+    {
+      @Override
+      public boolean isChildOrderRelevant()
+      {
+        return false;
+      }
+
+      @Override
+      public List<Integer> getMergeResult( List<VarrayStorageDiff> pNewDiffValues, List<VarrayStorage> pOldValues )
+      {
+        List<Integer> lReturn = new ArrayList<Integer>();
+
+        for( VarrayStorage lOldValue : pOldValues )
+        {
+          boolean lFound = false;
+
+          int i = 0;
+          for( VarrayStorageDiff pNewDiffValue : pNewDiffValues )
+          {
+            if( pNewDiffValue.column_nameNew.equals( lOldValue.getColumn_name() ) )
+            {
+              lReturn.add( i );
+              lFound = true;
+              break;
+            }
+
+            i++;
+          }
+
+          if( !lFound )
+          {
+            lReturn.add( null );
+          }
+        }
+
+        return lReturn;
+      }
+    } );
+    DiffRepository.getVarrayStorageMerge().column_nameIsConvertToUpperCase = true;
 
     DiffRepository.setInlineCommentMerge( new InlineCommentMerge()
     {
@@ -409,7 +472,9 @@ public class InitDiffRepository
     DiffRepository.getConstraintMerge().deferrtypeDefaultValue = DeferrType.IMMEDIATE;
     DiffRepository.getConstraintMerge().statusDefaultValue = EnableType.ENABLE;
 
-    //    pa_orcas_om_repository_orig.set_om_orig_columnidentity( new om_orig_columnidentity( 0, 0, ot_orig_cycletype.c_nocycle, 0, ot_orig_ordertype.c_noorder ) );
+    // pa_orcas_om_repository_orig.set_om_orig_columnidentity( new
+    // om_orig_columnidentity( 0, 0, ot_orig_cycletype.c_nocycle, 0,
+    // ot_orig_ordertype.c_noorder ) );
 
     DiffRepository.setUniqueKeyMerge( new UniqueKeyMerge()
     {

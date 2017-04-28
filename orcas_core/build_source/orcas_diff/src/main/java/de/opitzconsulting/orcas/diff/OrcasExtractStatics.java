@@ -53,11 +53,11 @@ public class OrcasExtractStatics extends Orcas
       public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
         logInfo( "loading database" );
-        de.opitzconsulting.origOrcasDsl.Model lOrigModel = new LoadIst( pCallableStatementProvider, getParameters() ).loadModel( true );
+        de.opitzconsulting.origOrcasDsl.Model lOrigModel = getDatabaseHandler().createLoadIst( pCallableStatementProvider, getParameters() ).loadModel( true );
 
         if( getParameters().isRemoveDefaultValuesFromModel() )
         {
-          InitDiffRepository.init( pCallableStatementProvider );
+          InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler() );
           logInfo( "removing default values" );
           DiffRepository.getModelMerge().cleanupValues( lOrigModel );
         }
@@ -131,7 +131,9 @@ public class OrcasExtractStatics extends Orcas
           File lDummyOutFile = new File( getParameters().getSpoolfolder(), "dummyout.xml" );
           lTransformer.transform( new DOMSource( lModelXmlFile ), new StreamResult( lDummyOutFile ) );
 
-          // the xslt-file is set up to create the table-files in the same directory as the lDummyOutFile. The lDummyOutFile itself is created, but empty.
+          // the xslt-file is set up to create the table-files in the same
+          // directory as the lDummyOutFile. The lDummyOutFile itself is
+          // created, but empty.
           lDummyOutFile.delete();
         }
         else

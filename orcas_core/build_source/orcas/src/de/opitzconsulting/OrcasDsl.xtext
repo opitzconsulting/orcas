@@ -11,7 +11,7 @@ ModelElement:
   Table | Sequence | IndexExTable | Comment | Mview;
 
 Table :
-  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ("pctfree" pctfree=NULLABLE_INT)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
+  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (varrayStorages+=VarrayStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ("pctfree" pctfree=NULLABLE_INT)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
 
 
 TablePartitioning :
@@ -78,7 +78,19 @@ ListPartitionValue :
   (default="default" | value=STRING) (",")?;
 
 LobStorage :
-  "lob" "(" column_name=DBNAME ")" "store" "as" "(" ("tablespace" tablespace=DBNAME)? ")" (",")?; 
+  "lob" "(" column_name=DBNAME ")" "store" "as" (lobStorageType=LobStorageType)? ("(" lobStorageParameters=LobStorageParameters ")")?; 
+  
+VarrayStorage :
+  "varray" column_name=DBNAME "store" "as" lobStorageType=LobStorageType "lob" ("(" lobStorageParameters=LobStorageParameters ")")?; 
+
+LobStorageParameters :
+  ("tablespace" tablespace=DBNAME)? (lobDeduplicateType=LobDeduplicateType)? (compressType=CompressType (lobCompressForType=LobCompressForType)?)?; 
+
+enum LobStorageType :
+  basicfile="basicfile"|securefile="securefile";  
+
+enum LobDeduplicateType :
+  deduplicate="deduplicate"|keep_duplicates="keep_duplicates";  
   
 Column :
   name=DBNAME data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (with_time_zone="with_time_zone")? ("type" object_type=STRING)? ("default" default_value=STRING)? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
@@ -145,6 +157,9 @@ enum OrderType :
   
 enum CompressForType :
   all="all_operations"|direct_load="direct_load_operations"|query_low="query_low"|query_high="query_high" | archive_low = "archive_low" | archive_high = "archive_high";    
+  
+enum LobCompressForType :
+  high="high"|medium="medium"|low="low";
   
 enum CompressType :
   nocompress="nocompress"|compress="compress";     

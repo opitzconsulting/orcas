@@ -51,7 +51,7 @@ public class OrcasMain extends Orcas
       {
         public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
         {
-          InitDiffRepository.init( pCallableStatementProvider );
+          InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler() );
 
           logInfo( "starting orcas statics" );
 
@@ -114,13 +114,13 @@ public class OrcasMain extends Orcas
           if( getParameters().getTargetplsql().equals( "" ) )
           {
             logInfo( "loading database" );
-            de.opitzconsulting.origOrcasDsl.Model lDatabaseModel = new LoadIst( pCallableStatementProvider, getParameters() ).loadModel( true );
+            de.opitzconsulting.origOrcasDsl.Model lDatabaseModel = getDatabaseHandler().createLoadIst( pCallableStatementProvider, getParameters() ).loadModel( true );
 
             logInfo( "building diff" );
             DiffRepository.getModelMerge().cleanupValues( lDatabaseModel );
             de.opitzconsulting.origOrcasDsl.Model lSollModel = TransformSyexOrig.convertModel( lSyexModel );
             DiffRepository.getModelMerge().cleanupValues( lSollModel );
-            DiffResult lDiffResult = new OrcasDiff( pCallableStatementProvider, getParameters() ).compare( lSollModel, lDatabaseModel );
+            DiffResult lDiffResult = new OrcasDiff( pCallableStatementProvider, getParameters(), getDatabaseHandler() ).compare( lSollModel, lDatabaseModel );
 
             handleDiffResult( getParameters(), pCallableStatementProvider, lDiffResult );
           }
@@ -174,6 +174,8 @@ public class OrcasMain extends Orcas
   {
     List<String> lScriptLines = new ArrayList<String>();
 
+    logXml( pDiffResult );
+
     for( DiffAction lDiffAction : pDiffResult.getDiffActions() )
     {
       // lScriptLines.add( "-- " + lDiffAction.getTextKey() );
@@ -209,7 +211,10 @@ public class OrcasMain extends Orcas
     {
       addSpoolfolderScriptIfNeeded( lScriptLines, pParameters.getLogname() + ".sql" );
     }
+  }
 
+  private void logXml( DiffResult pDiffResult )
+  {
     Element lDiffActionsElement = new Element( "diff-actions" );
     for( DiffAction lDiffAction : pDiffResult.getDiffActions() )
     {
@@ -230,7 +235,7 @@ public class OrcasMain extends Orcas
       }
     }
 
-    //logInfo( new XMLOutputter( Format.getPrettyFormat() ).outputString( lDiffActionsElement ) );
+    logInfo( new XMLOutputter( Format.getPrettyFormat() ).outputString( lDiffActionsElement ) );
   }
 
   private void doSchemaSync( final Parameters pParameters ) throws Exception
@@ -244,8 +249,8 @@ public class OrcasMain extends Orcas
       public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
         CallableStatementProvider lSrcCallableStatementProvider = pCallableStatementProvider;
-        InitDiffRepository.init( lSrcCallableStatementProvider );
-        lSrcModel[0] = new LoadIst( lSrcCallableStatementProvider, pParameters ).loadModel( false );
+        InitDiffRepository.init( lSrcCallableStatementProvider, getDatabaseHandler() );
+        lSrcModel[0] = getDatabaseHandler().createLoadIst( lSrcCallableStatementProvider, getParameters() ).loadModel( false );
         DiffRepository.getModelMerge().cleanupValues( lSrcModel[0] );
       }
     } );
@@ -256,12 +261,12 @@ public class OrcasMain extends Orcas
       public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
         CallableStatementProvider lDestCallableStatementProvider = pCallableStatementProvider;
-        InitDiffRepository.init( lDestCallableStatementProvider );
-        de.opitzconsulting.origOrcasDsl.Model lDstModel = new LoadIst( lDestCallableStatementProvider, pParameters ).loadModel( true );
+        InitDiffRepository.init( lDestCallableStatementProvider, getDatabaseHandler() );
+        de.opitzconsulting.origOrcasDsl.Model lDstModel = getDatabaseHandler().createLoadIst( lDestCallableStatementProvider, getParameters() ).loadModel( true );
         DiffRepository.getModelMerge().cleanupValues( lDstModel );
 
         logInfo( "building diff" );
-        DiffResult lDiffResult = new OrcasDiff( lDestCallableStatementProvider, pParameters ).compare( lSrcModel[0], lDstModel );
+        DiffResult lDiffResult = new OrcasDiff( lDestCallableStatementProvider, pParameters, getDatabaseHandler() ).compare( lSrcModel[0], lDstModel );
 
         handleDiffResult( pParameters, lDestCallableStatementProvider, lDiffResult );
 

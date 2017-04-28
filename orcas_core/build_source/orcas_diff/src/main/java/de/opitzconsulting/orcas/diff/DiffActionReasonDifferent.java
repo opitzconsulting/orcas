@@ -3,7 +3,7 @@ package de.opitzconsulting.orcas.diff;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.jdom2.Element;
 
 public class DiffActionReasonDifferent extends DiffActionReason
@@ -15,7 +15,7 @@ public class DiffActionReasonDifferent extends DiffActionReason
     super( pDiffReasonKey );
   }
 
-  public void addDiffReasonDetail( EAttribute pDiffReasonDetail )
+  public void addDiffReasonDetail( EStructuralFeature pDiffReasonDetail )
   {
     diffReasonDetails.add( pDiffReasonDetail.getName() );
   }
