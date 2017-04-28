@@ -17,7 +17,7 @@
       <scriptText>job(&apos;orcas_integration_test&apos;) {   
     description &apos;orcas core tests&apos;
     steps {
-      shell (&quot;&quot;&quot;rm -R ./*
+      shell (&quot;&quot;&quot;rm -Rf ./*
 
 wget -Nnv https://github.com/opitzconsulting/orcas/archive/master.zip \
  &amp;&amp; unzip master.zip -d orcas

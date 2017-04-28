@@ -4,8 +4,6 @@ sudo yum update -y
 
 sudo yum install -y docker
 
-sudo yum install java-1.8.0-openjdk
-
 sudo service docker start
 
 wget -Nnv https://github.com/opitzconsulting/orcas/archive/master.zip \

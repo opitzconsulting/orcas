@@ -1,0 +1,2 @@
+#!/bin/bash
+wget https://raw.githubusercontent.com/opitzconsulting/orcas/master/orcas_aws/init_jenkins_slave.sh -O - | /bin/bash
