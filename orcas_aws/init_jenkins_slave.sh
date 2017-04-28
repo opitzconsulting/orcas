@@ -17,7 +17,7 @@ sudo docker build -t orcas_jenkins_slave ~/orcas/orcas-master/orcas_docker/image
 
 sudo docker run -d --name orcasdb wnameless/oracle-xe-11g
 
-sudo docker run -d --name orcas_jenkins_slave --link=orcasdb:orcasdb orcas_jenkins_slave
+sudo docker run -d --link=orcasdb:orcasdb orcas_jenkins_slave
 
 
 

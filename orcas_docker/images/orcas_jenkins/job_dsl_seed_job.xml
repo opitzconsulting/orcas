@@ -17,14 +17,12 @@
       <scriptText>job(&apos;orcas_integration_test&apos;) {   
     description &apos;orcas core tests&apos;
     steps {
-      shell {
-      (node / &apos;command&apos;).setValue(&apos;rm -R ./*
+      shell (&amp;&amp;&amp;rm -R ./*
 
 wget -Nnv https://github.com/opitzconsulting/orcas/archive/master.zip \
  &amp;&amp; unzip master.zip -d orcas
 
-cp -R orcas/orcas-master/orcas_docker/images/orcas_jenkins_slave/distribution orcas&apos;)
-      }
+cp -R orcas/orcas-master/orcas_docker/images/orcas_jenkins_slave/distribution orcas&amp;&amp;&amp;)      
       gradle {
             tasks(&apos;publishToMavenLocal&apos;)
             useWrapper = true
