@@ -17,18 +17,35 @@
       <scriptText>job(&apos;orcas_integration_test&apos;) {   
     description &apos;orcas core tests&apos;
     steps {
+      shell {
+      (node / &apos;command&apos;).setValue(&apos;rm -R ./*
+
+wget -Nnv https://github.com/opitzconsulting/orcas/archive/master.zip \
+ &amp;&amp; unzip master.zip -d orcas
+
+cp -R orcas/orcas-master/orcas_docker/images/orcas_jenkins_slave/distribution orcas&apos;)
+      }
+      gradle {
+            tasks(&apos;publishToMavenLocal&apos;)
+            useWrapper = true
+            configure { node -&gt;
+              (node / &apos;rootBuildScriptDir&apos;).setValue(&apos;orcas/orcas-master/orcas_core/build_source&apos;)
+              (node / &apos;buildFile&apos;).setValue(&apos;build.gradle&apos;)
+              (node / &apos;makeExecutable&apos;).setValue(&apos;true&apos;)
+             }
+        }    
       gradle {
             tasks(&apos;test&apos;)
             useWrapper = true
             configure { node -&gt;
-              (node / &apos;rootBuildScriptDir&apos;).setValue(&apos;/opt/orcas/orcas-master/orcas_integrationstest&apos;)
-              (node / &apos;buildFile&apos;).setValue(&apos;/opt/orcas/orcas-master/orcas_integrationstest/build.gradle&apos;)
+              (node / &apos;rootBuildScriptDir&apos;).setValue(&apos;orcas/orcas-master/orcas_integrationstest&apos;)
+              (node / &apos;buildFile&apos;).setValue(&apos;build.gradle&apos;)
               (node / &apos;makeExecutable&apos;).setValue(&apos;true&apos;)
              }
         }
     }
     publishers {
-        archiveJunit(&apos;**/testresult.xml&apos;)
+        archiveJunit(&apos;**/test-results/test/TEST*.xml&apos;)
     }  
 }
 job(&apos;orcas_spool_test&apos;) {     
