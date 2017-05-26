@@ -20,7 +20,7 @@ The Vagrant-VM is only intended for tests. To use Orcas in your own project you 
 
 ### Java
 
-Java 8 (1.8) needed at least. **Important**: It has to be a **JDK** and not a JRE. The "Standard Edition" (SE), e.g. " Java SE Development Kit 8u131", is ok. After the installation you should get the right version with javac:
+Java 8 (1.8) needed at least. **Important**: It has to be a **JDK** and not a JRE. The "Standard Edition" (SE), e.g. "Java SE Development Kit 8u131", is ok. After the installation you should get the right version with javac:
 {% highlight bash %}
 javac -version
 javac 1.8.0_121
