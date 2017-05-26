@@ -17,7 +17,7 @@ run this in upload_maven_central:
 gradle clean publish
 
 close repository on https://oss.sonatype.org/#stagingRepositories
-rlease repository on https://oss.sonatype.org/#stagingRepositories
+release repository on https://oss.sonatype.org/#stagingRepositories
 
 change version of examples to released version:
 examples/gradle*/build.gradle
