@@ -20,10 +20,10 @@ The Vagrant-VM is only intended for tests. To use Orcas in your own project you 
 
 ### Java
 
-Java 6 (1.6) needed at least. **Important**: It has to be a **JDK** and not a JRE. The "Standard Edition" (SE), e.g. "Java SE 6u45", is enough for this. After the installation you should get the right version with javac:
+Java 8 (1.8) needed at least. **Important**: It has to be a **JDK** and not a JRE. The "Standard Edition" (SE), e.g. " Java SE Development Kit 8u131", is ok. After the installation you should get the right version with javac:
 {% highlight bash %}
 javac -version
-javac 1.6.0_12
+javac 1.8.0_121
 {% endhighlight %}
 If not, you maybe have to adapt the PATH variable. In Orcas, Java is used by ant and gradle, so maybe you have to consider the configuration possibilities (e.g. ant interprets JAVA_HOME **before** PATH).
 Download link for Java 8: [Download](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
