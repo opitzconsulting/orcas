@@ -42,7 +42,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.opitzconsulting.orcas</groupId>
-			<artifactId>orcas-main</artifactId>
+			<artifactId>orcas-main-extensionhandler</artifactId>
 			<version>3.0.1-SNAPSHOT</version>
    		</dependency>
 		<dependency>
