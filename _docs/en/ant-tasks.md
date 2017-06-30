@@ -343,6 +343,18 @@ Is used for generating table scripts from an existing schema (reverse engineerin
 |excludewheretable|Defines an [exclude_where-reason]({{site.baseurl}}/docs/ant-tasks/#paricularity) to exclude tables from being adjusted.|No|"object_name like '%$%'"|
 |excludewheresequence|Defines an [exclude_where-reason]({{site.baseurl}}/docs/ant-tasks/#paricularity) to exclude sequences from being adjusted.|No|"object_name like '%$%'"|
 
+<a name="orcas_update_replaceables"/>
+
+### orcas_update_replaceables
+
+This Ant task updates replaceables. It extrcats the replaceables from the database and does a by-file-compare. So make sure the given files look exactly as if they where extracted. Especially file-names are important.
+
+|Attribute|Description|Required|Default|
+|---------|-----------|--------|-------|
+|scriptfolder|Defines the directory where to find the scripts describing the replaceable objects.|Yes||
+|viewmode|For now only text is supported|No|text|
+
+
 <a name="exclude_where"/>
 
 ## Special features with exclude_where_XXX attributes
