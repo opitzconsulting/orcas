@@ -139,7 +139,7 @@ public class ParametersCall extends Parameters
 
   public void setAdditionalParameters( List<String> pAdditionalParameters )
   {
-    _additionalParameters = pAdditionalParameters == null ? Collections.<String> emptyList() : pAdditionalParameters;
+    _additionalParameters = pAdditionalParameters == null ? Collections.<String>emptyList() : pAdditionalParameters;
   }
 
   public void setLogname( String pLogname )
@@ -181,11 +181,6 @@ public class ParametersCall extends Parameters
   public void setModelFiles( List<File> pModelFiles )
   {
     _modelFiles = pModelFiles;
-  }
-
-  public void setModelLoader( ModelLoader pModelLoader )
-  {
-    _modelLoader = pModelLoader;
   }
 
   public void setMultiSchema( Boolean pMultiSchema )

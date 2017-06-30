@@ -46,7 +46,10 @@ import de.opitzconsulting.origOrcasDsl.ForeignKey;
 import de.opitzconsulting.origOrcasDsl.Index;
 import de.opitzconsulting.origOrcasDsl.IndexGlobalType;
 import de.opitzconsulting.origOrcasDsl.InlineComment;
+import de.opitzconsulting.origOrcasDsl.LobCompressForType;
+import de.opitzconsulting.origOrcasDsl.LobDeduplicateType;
 import de.opitzconsulting.origOrcasDsl.LobStorage;
+import de.opitzconsulting.origOrcasDsl.LobStorageType;
 import de.opitzconsulting.origOrcasDsl.LoggingType;
 import de.opitzconsulting.origOrcasDsl.Mview;
 import de.opitzconsulting.origOrcasDsl.NewValuesType;
@@ -170,6 +173,7 @@ public class InitDiffRepository
       }
     } );
     DiffRepository.getLobStorageMerge().column_nameIsConvertToUpperCase = true;
+    DiffRepository.getLobStorageMerge().lobStorageTypeDefaultValue = LobStorageType.BASICFILE;
 
     DiffRepository.setLobStorageParametersMerge( new LobStorageParametersMerge()
     {
@@ -180,6 +184,9 @@ public class InitDiffRepository
       }
     } );
     DiffRepository.getLobStorageParametersMerge().tablespaceIsConvertToUpperCase = true;
+    DiffRepository.getLobStorageParametersMerge().compressTypeDefaultValue = CompressType.NOCOMPRESS;
+    DiffRepository.getLobStorageParametersMerge().lobCompressForTypeDefaultValue = LobCompressForType.MEDIUM;
+    DiffRepository.getLobStorageParametersMerge().lobDeduplicateTypeDefaultValue = LobDeduplicateType.KEEP_DUPLICATES;
 
     DiffRepository.setVarrayStorageMerge( new VarrayStorageMerge()
     {
@@ -221,6 +228,8 @@ public class InitDiffRepository
       }
     } );
     DiffRepository.getVarrayStorageMerge().column_nameIsConvertToUpperCase = true;
+    
+
 
     DiffRepository.setInlineCommentMerge( new InlineCommentMerge()
     {

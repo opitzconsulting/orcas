@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 apply from: '../maven_publish.gradle'
 project.ext.maven_artifactId_postfix = 'generated'
-project.ext.extensiondependent = true
+project.ext.extensiondependent = false
 project.ext.maven_description = 'orcas generated code (besides from xtext)'
 
 configurations 
@@ -15,9 +15,7 @@ configurations
 dependencies 
 {
   generatorRunPath project(':orcas')
-  generatorRunPath project(':orcas_syex')
   compile project(':orcas')
-  compile project(':orcas_syex')
   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.1'
 }
 
@@ -26,9 +24,6 @@ task(createGenDirs)
   doFirst
   {
     new File("${buildDir}/srcgen/src/de/opitzconsulting/orcas/orig/diff").mkdirs();
-    new File("${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/trans").mkdirs();
-    new File("${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/load").mkdirs();
-    new File("${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/xml").mkdirs();
   }
   outputs.file "${buildDir}/srcgen"
 }
@@ -44,51 +39,7 @@ task(generateDiffJava, dependsOn: createGenDirs, type: JavaExec)
   outputs.file args[0]
 }
 
-task(generateTransformerJava, dependsOn: createGenDirs, type: JavaExec) 
-{
-  classpath configurations.generatorRunPath 
-
-  main = "de.opitzconsulting.orcas.ot.JavaTransformerGenerator"
-  args "${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/trans"
-  args "orig"
-
-  outputs.file args[0]
-}
-
-task(generateDataReader, dependsOn: createGenDirs, type: JavaExec) 
-{
-  classpath configurations.generatorRunPath 
-
-  main = "de.opitzconsulting.orcas.ot.JavaDataReaderGenerator"
-  args "${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/load"
-  args "syex"
-
-  outputs.file args[0]
-}
-
-task(generateDataWriter, dependsOn: createGenDirs, type: JavaExec) 
-{
-  classpath configurations.generatorRunPath 
-
-  main = "de.opitzconsulting.orcas.ot.JavaDataWriterGenerator"
-  args "${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/load"
-  args "syex"
-
-  outputs.file args[0]
-}
-
-task(generateXmlExport, dependsOn: createGenDirs, type: JavaExec) 
-{
-  classpath configurations.generatorRunPath 
-
-  main = "de.opitzconsulting.orcas.ot.JavaXmlGenerator"
-  args "${buildDir}/srcgen/src/de/opitzconsulting/orcas/syex/xml"
-  args "syex"
-
-  outputs.file args[0]
-}
-
 compileJava.source "${buildDir}/srcgen"
-compileJava.dependsOn generateDiffJava, generateTransformerJava, generateDataReader, generateDataWriter, generateXmlExport
+compileJava.dependsOn generateDiffJava
 
 

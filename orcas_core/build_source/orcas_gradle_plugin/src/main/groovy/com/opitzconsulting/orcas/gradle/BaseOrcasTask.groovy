@@ -48,6 +48,11 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setDateformat( project.orcasconfiguration.dateformat );
     lParametersCall.setExtensionParameter( project.orcasconfiguration.extensionparameter );
 
+    if( project.orcasconfiguration.extensionHandler != null )
+    {
+      lParametersCall.setExtensionHandler( project.orcasconfiguration.extensionHandler ); 
+    }
+
     if( !project.orcasconfiguration.usernameorcas.equals( "" ) )
     {
       lParametersCall.setOrcasDbUser( project.orcasconfiguration.usernameorcas );

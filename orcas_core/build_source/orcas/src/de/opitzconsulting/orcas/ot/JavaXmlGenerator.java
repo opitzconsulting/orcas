@@ -31,7 +31,6 @@ public class JavaXmlGenerator extends JavaGenerator
 
   private void writeXmlExport( JavaPrettyWriter pOut, String pTypePrefix )
   {
-    ClassDataType.setTypePrefix( pTypePrefix );
     TypeDataContainer lTypeDataContainer = new ClassDataParser().parse();
 
     writePackage( pOut );

@@ -2,11 +2,11 @@ package de.opitzconsulting.orcas.diff;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
-import de.opitzconsulting.orcas.extensions.OrcasExtension;
-import de.opitzconsulting.orcasDsl.Model;
+import org.eclipse.emf.ecore.EObject;
 
 public abstract class Parameters
 {
@@ -103,21 +103,22 @@ public abstract class Parameters
   protected Boolean _loadExtractWithReverseExtensions = true;
   protected Boolean _multiSchema = false;
   protected Boolean _multiSchemaDbaViews = false;
-  protected String _multiSchemaExcludewhereowner;  
+  protected String _multiSchemaExcludewhereowner;
 
   private InfoLogHandler _infoLogHandler;
   private String _removePromptPrefix;
-  
-  private List<OrcasExtension> _additionalOrcasExtensions = new ArrayList<OrcasExtension>();
-  private List<OrcasExtension> _additionalOrcasReverseExtensions = new ArrayList<OrcasExtension>(); 
 
-  protected ModelLoader _modelLoader = new ModelLoader()
+  private AdditionalExtensionFactory _additionalExtensionFactory = new AdditionalExtensionFactory()
   {
-    public Model loadModel( Parameters pParameters )
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public <T extends EObject> List<UnaryOperator<T>> getAdditionalExtensions( Class<T> pModelClass, boolean pReverseMode )
     {
-      return XtextFileLoader.loadModelDsl( FolderHandler.getModelFiles( pParameters ), pParameters );
+      return Collections.EMPTY_LIST;
     }
   };
+
+  private ExtensionHandler extensionHandler;
 
   public boolean isOrderColumnsByName()
   {
@@ -354,9 +355,28 @@ public abstract class Parameters
     return _modelFiles;
   }
 
-  public ModelLoader getModelLoader()
+  public ExtensionHandler getExtensionHandler()
   {
-    return _modelLoader;
+    if( extensionHandler == null )
+    {
+      try
+      {
+        Class<?> lExtensionHandlerImplClass = Thread.currentThread().getContextClassLoader().loadClass( "de.opitzconsulting.orcas.diff.ExtensionHandlerImpl" );
+        setExtensionHandler( (ExtensionHandler) lExtensionHandlerImplClass.newInstance() );
+      }
+      catch( Exception e )
+      {
+        throw new RuntimeException( e );
+      }
+    }
+
+    return extensionHandler;
+  }
+
+  public void setExtensionHandler( ExtensionHandler pExtensionHandler )
+  {
+    extensionHandler = pExtensionHandler;
+    extensionHandler.setParameters( this );
   }
 
   public abstract boolean isAbortJvmOnExit();
@@ -376,13 +396,18 @@ public abstract class Parameters
     return checkNull( _multiSchemaDbaViews );
   }
 
-  public List<OrcasExtension> getAdditionalOrcasExtensions()
+  public AdditionalExtensionFactory getAdditionalOrcasExtensionFactory()
   {
-    return _additionalOrcasExtensions;
+    return _additionalExtensionFactory;
   }
 
-  public List<OrcasExtension> getAdditionalOrcasReverseExtensions()
+  public void setAdditionalOrcasExtensionFactory( AdditionalExtensionFactory pAdditionalExtensionFactory )
   {
-    return _additionalOrcasReverseExtensions;
+    _additionalExtensionFactory = pAdditionalExtensionFactory;
+  }
+
+  public interface AdditionalExtensionFactory
+  {
+    <T extends EObject> List<UnaryOperator<T>> getAdditionalExtensions( Class<T> pModelClass, boolean pReverseMode );
   }
 }

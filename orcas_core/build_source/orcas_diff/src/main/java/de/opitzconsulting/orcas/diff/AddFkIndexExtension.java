@@ -7,16 +7,16 @@ import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
 
-import de.opitzconsulting.orcasDsl.ColumnRef;
-import de.opitzconsulting.orcasDsl.ForeignKey;
-import de.opitzconsulting.orcasDsl.Index;
-import de.opitzconsulting.orcasDsl.IndexExTable;
-import de.opitzconsulting.orcasDsl.IndexOrUniqueKey;
-import de.opitzconsulting.orcasDsl.Model;
-import de.opitzconsulting.orcasDsl.ModelElement;
-import de.opitzconsulting.orcasDsl.Table;
-import de.opitzconsulting.orcasDsl.UniqueKey;
-import de.opitzconsulting.orcasDsl.impl.IndexImpl;
+import de.opitzconsulting.origOrcasDsl.ColumnRef;
+import de.opitzconsulting.origOrcasDsl.ForeignKey;
+import de.opitzconsulting.origOrcasDsl.Index;
+import de.opitzconsulting.origOrcasDsl.IndexExTable;
+import de.opitzconsulting.origOrcasDsl.IndexOrUniqueKey;
+import de.opitzconsulting.origOrcasDsl.Model;
+import de.opitzconsulting.origOrcasDsl.ModelElement;
+import de.opitzconsulting.origOrcasDsl.Table;
+import de.opitzconsulting.origOrcasDsl.UniqueKey;
+import de.opitzconsulting.origOrcasDsl.impl.IndexImpl;
 
 public class AddFkIndexExtension
 {

@@ -56,7 +56,7 @@ public class PlSqlHandler
     return lOutputModel;
   }
 
-  public static de.opitzconsulting.orcas.syex.load.DataWriter createDataWriter( final CallableStatementProvider pCallableStatementProvider )
+  private static de.opitzconsulting.orcas.syex.load.DataWriter createDataWriter( final CallableStatementProvider pCallableStatementProvider )
   {
     de.opitzconsulting.orcas.syex.load.DataWriter lReturn = new de.opitzconsulting.orcas.syex.load.DataWriter()
     {

@@ -35,7 +35,6 @@ public class JavaDataWriterGenerator extends JavaGenerator
 
   private void writeDataReader( JavaPrettyWriter pOut, String pClassName )
   {
-    ClassDataType.setTypePrefix( "syex" );
     TypeDataContainer lTypeDataContainer = new ClassDataParser().parse();
 
     writePackage( pOut );

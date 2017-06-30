@@ -3,8 +3,8 @@ package de.opitzconsulting.orcas.diff;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.opitzconsulting.orcasDsl.ColumnRef;
-import de.opitzconsulting.orcasDsl.impl.ColumnRefImpl;
+import de.opitzconsulting.origOrcasDsl.ColumnRef;
+import de.opitzconsulting.origOrcasDsl.impl.ColumnRefImpl;
 
 public class ModelUtil
 {

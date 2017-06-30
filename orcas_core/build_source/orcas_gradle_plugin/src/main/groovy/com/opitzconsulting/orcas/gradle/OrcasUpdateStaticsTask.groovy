@@ -1,6 +1,5 @@
 package com.opitzconsulting.orcas.gradle
 
-import de.opitzconsulting.orcas.diff.ModelLoader;
 import de.opitzconsulting.orcas.diff.OrcasMain;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 import org.gradle.api.file.FileCollection;
@@ -10,8 +9,6 @@ public class OrcasUpdateStaticsTask extends BaseOrcasTask
   private String logname = "update-statics";
 
   FileCollection scriptFiles;
-
-  ModelLoader modelLoader;
 
   @Override
   protected String getLogname()
@@ -35,10 +32,6 @@ public class OrcasUpdateStaticsTask extends BaseOrcasTask
     {
       pParameters.setSqlplustable( false );
       pParameters.setOrderColumnsByName( false );
-      if( modelLoader != null )
-      {
-        pParameters.setModelLoader( modelLoader );
-      }
 
       new OrcasMain().mainRun( modifyParameters( pParameters ) );
     }

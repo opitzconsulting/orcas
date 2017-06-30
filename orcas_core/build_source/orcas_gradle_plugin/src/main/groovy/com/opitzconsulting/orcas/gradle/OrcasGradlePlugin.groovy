@@ -88,6 +88,8 @@ class OrcasGradlePluginExtension {
   def String srcjdbcurl;
   def String srcusername;
   def String srcpassword;
+
+  def de.opitzconsulting.orcas.diff.ExtensionHandler extensionHandler;
 }
 
 

@@ -2,11 +2,11 @@ package de.opitzconsulting.orcas.diff;
 
 import java.util.ArrayList;
 
-import de.opitzconsulting.orcasDsl.Index;
-import de.opitzconsulting.orcasDsl.IndexOrUniqueKey;
-import de.opitzconsulting.orcasDsl.Model;
-import de.opitzconsulting.orcasDsl.ModelElement;
-import de.opitzconsulting.orcasDsl.Table;
+import de.opitzconsulting.origOrcasDsl.Index;
+import de.opitzconsulting.origOrcasDsl.IndexOrUniqueKey;
+import de.opitzconsulting.origOrcasDsl.Model;
+import de.opitzconsulting.origOrcasDsl.ModelElement;
+import de.opitzconsulting.origOrcasDsl.Table;
 
 public class MultiSchemaPrefixIndexExtension
 {

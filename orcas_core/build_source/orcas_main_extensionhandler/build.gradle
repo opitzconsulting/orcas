@@ -1,0 +1,16 @@
+apply plugin: 'java'
+
+apply from: '../maven_publish.gradle'
+project.ext.maven_artifactId_postfix = 'main-extensionhandler'
+project.ext.extensiondependent = true
+project.ext.maven_description = 'orcas extensionhandler'
+
+dependencies 
+{
+  compile project(':orcas_diff')
+  compile project(':orcas_generated_diff_syex')
+  compile project(':orcas_extensions')
+  compile project(':orcas_xslt_extract')
+}
+
+

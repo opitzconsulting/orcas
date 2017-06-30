@@ -16,6 +16,7 @@ dependencies
   else
   {
     xtextDistribution project(':orcas_diff')
+    xtextDistribution project(':orcas_main_extensionhandler')
   }
 }
 

@@ -2,12 +2,12 @@ package de.opitzconsulting.orcas.diff;
 
 import java.util.ArrayList;
 
-import de.opitzconsulting.orcasDsl.Comment;
-import de.opitzconsulting.orcasDsl.InlineComment;
-import de.opitzconsulting.orcasDsl.Model;
-import de.opitzconsulting.orcasDsl.ModelElement;
-import de.opitzconsulting.orcasDsl.Table;
-import de.opitzconsulting.orcasDsl.impl.InlineCommentImpl;
+import de.opitzconsulting.origOrcasDsl.Comment;
+import de.opitzconsulting.origOrcasDsl.InlineComment;
+import de.opitzconsulting.origOrcasDsl.Model;
+import de.opitzconsulting.origOrcasDsl.ModelElement;
+import de.opitzconsulting.origOrcasDsl.Table;
+import de.opitzconsulting.origOrcasDsl.impl.InlineCommentImpl;
 
 public class InlineCommentsExtension
 {

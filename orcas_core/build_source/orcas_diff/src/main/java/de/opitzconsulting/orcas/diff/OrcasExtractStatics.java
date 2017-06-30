@@ -20,17 +20,10 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.w3c.dom.Document;
 
-import com.opitzconsulting.orcas.xslt.XsltExtractDirAccessClass;
-
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
-import de.opitzconsulting.orcas.extensions.AllExtensions;
-import de.opitzconsulting.orcas.extensions.OrcasExtension;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
-import de.opitzconsulting.orcas.syex.trans.TransformOrigSyex;
-import de.opitzconsulting.orcas.syex.xml.XmlExport;
-import de.opitzconsulting.orcasDsl.Model;
 
 public class OrcasExtractStatics extends Orcas
 {
@@ -62,36 +55,7 @@ public class OrcasExtractStatics extends Orcas
           DiffRepository.getModelMerge().cleanupValues( lOrigModel );
         }
 
-        Model lSyexModel = TransformOrigSyex.convertModel( lOrigModel );
-
-        if( getParameters().getModelFiles() != null || !getParameters().getModelFile().equals( "" ) )
-        {
-          logInfo( "loading additional model files" );
-          lSyexModel.getModel_elements().addAll( getParameters().getModelLoader().loadModel( getParameters() ).getModel_elements() );
-        }
-
-        if( PlSqlHandler.isPlSqlEextensionsExistst() && getParameters().isLoadExtractWithReverseExtensions() )
-        {
-          logInfo( "calling pl/sql reverse-extensions" );
-          lSyexModel = PlSqlHandler.callPlSqlExtensions( lSyexModel, getParameters(), true );
-        }
-
-        AllExtensions lAllExtensions = new AllExtensions();
-        lAllExtensions.setUseReverseExtension( true );
-        if( lAllExtensions.hasExtension() )
-        {
-          logInfo( "calling java reverse-extensions" );
-          lSyexModel = OrcasMain.callJavaExtensions( lSyexModel, lAllExtensions, getParameters() );
-        }
-
-        if( !getParameters().getAdditionalOrcasReverseExtensions().isEmpty() )
-        {
-          logInfo( "calling additional reverse-extensions" );
-          for( OrcasExtension lOrcasExtension : getParameters().getAdditionalOrcasReverseExtensions() )
-          {
-            lSyexModel = lOrcasExtension.transformModel( lSyexModel );
-          }
-        }
+        String lModelString = getParameters().getExtensionHandler().convertModelToXMLString( lOrigModel );
 
         if( getParameters().getSpoolfile().equals( "" ) )
         {
@@ -101,7 +65,7 @@ public class OrcasExtractStatics extends Orcas
 
           OutputStreamWriter lOutputStreamWriter = new OutputStreamWriter( lByteArrayOutputStream, "utf8" );
 
-          lOutputStreamWriter.append( new XmlExport().getModel( lSyexModel, true ) );
+          lOutputStreamWriter.append( lModelString );
           lOutputStreamWriter.flush();
           lByteArrayOutputStream.close();
 
@@ -115,7 +79,7 @@ public class OrcasExtractStatics extends Orcas
             {
               try
               {
-                return new StreamSource( XsltExtractDirAccessClass.getUriResolverURLForImport( pHref ).openStream() );
+                return new StreamSource( getParameters().getExtensionHandler().getUriResolverURLForImport( pHref ).openStream() );
               }
               catch( IOException e )
               {
@@ -124,7 +88,7 @@ public class OrcasExtractStatics extends Orcas
             }
           } );
 
-          StreamSource lXsltStreamSource = new StreamSource( XsltExtractDirAccessClass.getXsltExtractFileURL().openStream() );
+          StreamSource lXsltStreamSource = new StreamSource( getParameters().getExtensionHandler().getXsltExtractFileURL().openStream() );
           Transformer lTransformer = lTransformerFactory.newTransformer( lXsltStreamSource );
 
           new File( getParameters().getSpoolfolder() ).mkdirs();
@@ -143,7 +107,7 @@ public class OrcasExtractStatics extends Orcas
 
           OutputStreamWriter lOutputStreamWriter = new OutputStreamWriter( lFileOutputStream, "utf8" );
 
-          lOutputStreamWriter.append( new XmlExport().getModel( lSyexModel, true ) );
+          lOutputStreamWriter.append( lModelString );
           lOutputStreamWriter.flush();
           lFileOutputStream.close();
         }

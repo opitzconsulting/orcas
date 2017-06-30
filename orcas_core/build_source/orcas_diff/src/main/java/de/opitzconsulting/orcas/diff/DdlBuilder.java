@@ -1677,18 +1677,21 @@ public abstract class DdlBuilder
 
   private void addVarrayStorage( StatementBuilder p, VarrayStorageDiff pVarraystorage )
   {
-    p.stmtAppend( "varray " + pVarraystorage.column_nameNew + " store as" );
-    if( pVarraystorage.lobStorageTypeNew != null )
+    if( pVarraystorage.lobStorageTypeNew != null || isLobStorageParametersDiffNotEmpty( pVarraystorage.lobStorageParametersDiff ) )
     {
-      p.stmtAppend( pVarraystorage.lobStorageTypeNew.getLiteral() );
+      p.stmtAppend( "varray " + pVarraystorage.column_nameNew + " store as" );
+      if( pVarraystorage.lobStorageTypeNew != null )
+      {
+        p.stmtAppend( pVarraystorage.lobStorageTypeNew.getLiteral() );
+      }
+      p.stmtAppend( "lob" );
+      addLobStorageParameters( p, pVarraystorage.lobStorageParametersDiff );
     }
-    p.stmtAppend( "lob" );
-    addLobStorageParameters( p, pVarraystorage.lobStorageParametersDiff );
   }
 
   private void addLobStorageParameters( StatementBuilder p, LobStorageParametersDiff pLobStorageParametersDiff )
   {
-    if( pLobStorageParametersDiff.tablespaceNew != null || pLobStorageParametersDiff.lobDeduplicateTypeNew != null || pLobStorageParametersDiff.compressTypeNew != null )
+    if( isLobStorageParametersDiffNotEmpty( pLobStorageParametersDiff ) )
     {
       p.stmtAppend( "(" );
       if( pLobStorageParametersDiff.tablespaceNew != null )
@@ -1712,14 +1715,22 @@ public abstract class DdlBuilder
     }
   }
 
+  private boolean isLobStorageParametersDiffNotEmpty( LobStorageParametersDiff pLobStorageParametersDiff )
+  {
+    return pLobStorageParametersDiff.tablespaceNew != null || pLobStorageParametersDiff.lobDeduplicateTypeNew != null || pLobStorageParametersDiff.compressTypeNew != null;
+  }
+
   private void addLobStorage( StatementBuilder p, LobStorageDiff pLobstorage )
   {
-    p.stmtAppend( "lob (" + pLobstorage.column_nameNew + ") store as" );
-    if( pLobstorage.lobStorageTypeNew != null )
+    if( pLobstorage.lobStorageTypeNew != null || isLobStorageParametersDiffNotEmpty( pLobstorage.lobStorageParametersDiff ) )
     {
-      p.stmtAppend( pLobstorage.lobStorageTypeNew.getLiteral() );
+      p.stmtAppend( "lob (" + pLobstorage.column_nameNew + ") store as" );
+      if( pLobstorage.lobStorageTypeNew != null )
+      {
+        p.stmtAppend( pLobstorage.lobStorageTypeNew.getLiteral() );
+      }
+      addLobStorageParameters( p, pLobstorage.lobStorageParametersDiff );
     }
-    addLobStorageParameters( p, pLobstorage.lobStorageParametersDiff );
   }
 
   protected String createColumnCreatePart( ColumnDiff pColumnDiff )
