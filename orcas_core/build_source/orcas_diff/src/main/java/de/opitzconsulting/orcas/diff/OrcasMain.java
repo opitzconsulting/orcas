@@ -56,7 +56,9 @@ public class OrcasMain extends Orcas
             logInfo( "building diff" );
             lSollModel = modifyModel( lSollModel );
 
+            _log.debug( "cleanupValues" );
             DiffRepository.getModelMerge().cleanupValues( lSollModel );
+            
             DiffResult lDiffResult = new OrcasDiff( pCallableStatementProvider, getParameters(), getDatabaseHandler() ).compare( lSollModel, lDatabaseModel );
 
             handleDiffResult( getParameters(), pCallableStatementProvider, lDiffResult );
@@ -74,6 +76,7 @@ public class OrcasMain extends Orcas
 
   private de.opitzconsulting.origOrcasDsl.Model modifyModel( de.opitzconsulting.origOrcasDsl.Model pSyexModel )
   {
+    _log.debug( "modifyModel" );
     pSyexModel = new InlineCommentsExtension().transformModel( pSyexModel );
     pSyexModel = new InlineIndexExtension().transformModel( pSyexModel );
 

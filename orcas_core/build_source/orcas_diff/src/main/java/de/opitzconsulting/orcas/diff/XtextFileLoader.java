@@ -2,6 +2,7 @@ package de.opitzconsulting.orcas.diff;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -75,15 +76,14 @@ public abstract class XtextFileLoader<T extends EObject>
   protected abstract T createModelInstance();
 
   protected abstract String getXtextExpectedFileEnding();
+  
 
   private T loadModelDslFile( File pFile, Parameters pParameters, XtextResourceSet pResourceSet, Map<Object, Object> pLoadOptions, int pCounter )
   {
     Resource lResource = pResourceSet.createResource( URI.createURI( "dummy:/dummy" + pCounter + "." + getXtextExpectedFileEnding() ) );
     try
     {
-      FileInputStream lInputStream = new FileInputStream( pFile );
-      lResource.load( lInputStream, pLoadOptions );
-      lInputStream.close();
+      loadFileIntoResource( pFile, pLoadOptions, lResource );
       @SuppressWarnings( "unchecked" )
       T lModel = (T) lResource.getContents().get( 0 );
 
@@ -107,5 +107,12 @@ public abstract class XtextFileLoader<T extends EObject>
 
       throw new RuntimeException( e );
     }
+  }
+
+  protected void loadFileIntoResource( File pFile, Map<Object, Object> pLoadOptions, Resource pResource ) throws Exception
+  {
+    FileInputStream lInputStream = new FileInputStream( pFile );
+    pResource.load( lInputStream, pLoadOptions );
+    lInputStream.close();
   }
 }

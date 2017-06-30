@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
 import de.opitzconsulting.orcas.diff.DdlBuilder.AbstractStatementBuilder;
@@ -39,6 +41,8 @@ import de.opitzconsulting.origOrcasDsl.Model;
 
 public class OrcasDiff
 {
+  private static Log _log = LogFactory.getLog( OrcasDiff.class );
+  
   private Parameters _parameters;
   private RecreateNeededRegistry recreateNeededRegistry;
   private DiffReasonKeyRegistry diffReasonKeyRegistry;
@@ -360,20 +364,26 @@ public class OrcasDiff
 
   public DiffResult compare( Model pModelSoll, Model pModelIst )
   {
+    _log.debug( "build generic diff" );
     ModelDiff lModelDiff = new ModelDiff( pModelSoll );
     lModelDiff.mergeWithOldValue( pModelIst );
 
+    _log.debug( "sort for ref part" );
     sortTablesForRefPart( lModelDiff );
 
     diffReasonKeyRegistry = new DiffReasonKey.DiffReasonKeyRegistry( lModelDiff );
     recreateNeededRegistry = new RecreateNeededRegistry( diffReasonKeyRegistry );
 
+    _log.debug( "update recreate" );
     updateIsRecreateNeeded( lModelDiff );
 
+    _log.debug( "hanlde all tables" );
     handleAllTables( lModelDiff );
 
+    _log.debug( "hanlde all sequences" );
     handleAllSequences( lModelDiff );
 
+    _log.debug( "hanlde all mviews" );
     handleAllMviews( lModelDiff );
 
     return new DiffResult( diffActions );
