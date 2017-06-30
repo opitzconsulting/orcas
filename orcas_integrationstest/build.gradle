@@ -8,8 +8,8 @@ repositories {
 dependencies 
 {
   compile 'junit:junit:4.12'
-  compile group: 'com.opitzconsulting.orcas', name: 'orcas-main',
-                  version: '3.0.0-SNAPSHOT'
+  compile group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler',
+                  version: '3.0.1-SNAPSHOT'
 
   compile "com.oracle:ojdbc6:11.1.0.7"
 

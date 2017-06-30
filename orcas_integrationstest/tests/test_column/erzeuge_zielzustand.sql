@@ -80,4 +80,38 @@ create table tab_long_raw
   col_long_raw long raw
 );
 
+create table tab_dataype_conversion
+(
+  col_number_to_varchar2    varchar2(15)   not null,
+  col_varchar2_to_number    number(15)     not null,
+  col_char_to_varchar2      varchar2(1)    not null,
+  col_varchar2_to_char      char(1)        not null,
+  col_clob_to_varchar2      varchar2(15)   not null,
+  col_varchar2_to_clob      clob           not null,
+  col_clob_to_xml           xmltype        not null,
+  col_xml_to_clob           clob           not null
+);
+insert into tab_dataype_conversion
+(
+  col_number_to_varchar2,
+  col_varchar2_to_number,    
+  col_char_to_varchar2,      
+  col_varchar2_to_char,      
+  col_clob_to_varchar2,      
+  col_varchar2_to_clob,
+  col_clob_to_xml,
+  col_xml_to_clob      
+) 
+values 
+(
+  '1',
+  2,
+  '3',
+  '4',
+  '5',
+  '6',
+  '<seven/>',
+  '<eight/>'
+);
+commit;
 

@@ -69,4 +69,15 @@ create table tab_long_raw
   col_long_raw long_raw
 );
 
+create table tab_dataype_conversion
+(
+  col_number_to_varchar2    varchar2(15)   not null,
+  col_varchar2_to_number    number(15)     not null,
+  col_char_to_varchar2      varchar2 (1)   not null,
+  col_varchar2_to_char      char(1)        not null,
+  col_clob_to_varchar2      varchar2(15)   not null,
+  col_varchar2_to_clob      clob           not null,
+  col_clob_to_xml           xmltype        not null,
+  col_xml_to_clob           clob           not null
+);
 

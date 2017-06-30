@@ -36,3 +36,40 @@ create table tab_mod_cols
   col_set_byte          varchar2(15 char)  not null,
   col_set_char          varchar2(15 byte)  not null
 );
+
+
+create table tab_dataype_conversion
+(
+  col_number_to_varchar2    number(15)     not null,
+  col_varchar2_to_number    varchar2(15)   not null,
+  col_char_to_varchar2      char(1)        not null,
+  col_varchar2_to_char      varchar2(1)    not null,
+  col_clob_to_varchar2      clob           not null,
+  col_varchar2_to_clob      varchar2(15)   not null,
+  col_clob_to_xml           xmltype        not null,
+  col_xml_to_clob           clob           not null
+);
+insert into tab_dataype_conversion
+(
+  col_number_to_varchar2,
+  col_varchar2_to_number,    
+  col_char_to_varchar2,      
+  col_varchar2_to_char,      
+  col_clob_to_varchar2,      
+  col_varchar2_to_clob,
+  col_clob_to_xml,
+  col_xml_to_clob
+) 
+values 
+(
+  1,
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '<seven/>',
+  '<eight/>'
+);
+commit;
+

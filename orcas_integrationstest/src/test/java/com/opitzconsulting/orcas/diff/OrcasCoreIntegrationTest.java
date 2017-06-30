@@ -32,6 +32,13 @@ import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 
+import java.util.Collections;
+import de.opitzconsulting.orcas.diff.Parameters.AdditionalExtensionFactory;
+import java.util.function.UnaryOperator;
+
+import org.eclipse.emf.ecore.EObject;
+import de.opitzconsulting.orcasDsl.Model;
+
 @RunWith( OrcasCoreIntegrationTest.MyOrcasParameterizedParallel.class )
 @FixMethodOrder( MethodSorters.NAME_ASCENDING )
 @UseParametersRunnerFactory( OrcasParameterizedParallel.OrcasParametersRunnerFactory.class )
@@ -386,8 +393,16 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setTablemovetablespace( _testSetup._tablemovetablespace );
     lParametersCall.setIndexmovetablespace( _testSetup._indexmovetablespace );
     lParametersCall.setIndexparallelcreate( _testSetup._indexparallelcreate );
-    lParametersCall.getAdditionalOrcasExtensions().add( new TablespaceRemapperExtension( orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() ) );
     lParametersCall.setDateformat( _testSetup._dateformat );
+
+    lParametersCall.setAdditionalOrcasExtensionFactory( new AdditionalExtensionFactory()
+          {
+            @Override
+            public <T extends EObject> List<UnaryOperator<T>> getAdditionalExtensions( Class<T> pModelClass, boolean pReverseMode )
+            {
+              return Collections.singletonList( p-> (T)new TablespaceRemapperExtension( orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() ).transformModel( (Model)p) );
+            }
+          });
 
     new OrcasMain().mainRun( lParametersCall );
   }
