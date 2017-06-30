@@ -184,6 +184,12 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   @Parameter
   protected String orcaspassword;
 
+  /**
+   * The Extensionhandler-Class to use.
+   */
+  @Parameter
+  private String extensionhandlerClass;
+
   public void execute() throws MojoExecutionException
   {
     ParametersCall lParametersCall = new ParametersCall();
@@ -216,6 +222,11 @@ public abstract class BaseOrcasMojo extends AbstractMojo
     lParametersCall.setExcludewheresequence( excludewheresequence );
     lParametersCall.setDateformat( dateformat );
     lParametersCall.setExtensionParameter( extensionparameter );
+
+    if( extensionhandlerClass != null && !extensionhandlerClass.equals( "" ) )
+    {
+      lParametersCall.setExtensionhandlerClass( extensionhandlerClass );
+    }
 
     if( usernameorcas != null && !usernameorcas.equals( "" ) )
     {

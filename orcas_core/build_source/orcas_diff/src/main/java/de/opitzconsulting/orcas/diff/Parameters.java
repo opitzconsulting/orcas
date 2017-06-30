@@ -119,6 +119,12 @@ public abstract class Parameters
   };
 
   private ExtensionHandler extensionHandler;
+  private String extensionhandlerClass = "de.opitzconsulting.orcas.diff.ExtensionHandlerImpl";
+
+  public void setExtensionhandlerClass( String pExtensionhandlerClass )
+  {
+    extensionhandlerClass = pExtensionhandlerClass;
+  }
 
   public boolean isOrderColumnsByName()
   {
@@ -361,7 +367,7 @@ public abstract class Parameters
     {
       try
       {
-        Class<?> lExtensionHandlerImplClass = Thread.currentThread().getContextClassLoader().loadClass( "de.opitzconsulting.orcas.diff.ExtensionHandlerImpl" );
+        Class<?> lExtensionHandlerImplClass = Thread.currentThread().getContextClassLoader().loadClass( extensionhandlerClass );
         setExtensionHandler( (ExtensionHandler) lExtensionHandlerImplClass.newInstance() );
       }
       catch( Exception e )
