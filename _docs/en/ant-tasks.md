@@ -33,6 +33,7 @@ By using such a tool, the sequence control is very flexible and offers the follo
       <li><a href="#orcas_install">orcas_install</a></li>
       <li><a href="#orcas_check_connection">orcas_check_connection</a></li>
       <li><a href="#orcas_extract">orcas_extract</a></li>
+      <li><a href="#orcas_update_replaceables">orcas_update_replaceables</a></li>
     </ul>
   </li>
   <li><a href="#exclude_where">Special requirement for exclude_where_XXX attributes</a></li>
