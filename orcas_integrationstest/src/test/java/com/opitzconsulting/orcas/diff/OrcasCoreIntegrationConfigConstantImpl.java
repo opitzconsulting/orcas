@@ -6,13 +6,13 @@ public class OrcasCoreIntegrationConfigConstantImpl extends OrcasCoreIntegration
   private String _availableFeatureList = "";
 
   private String _jdbcUrl = "jdbc:oracle:thin:@localhost:1521:XE";
-  private String _jdbcUser = "orcas_integration_test_dba";
+  private String _jdbcUser = "ORCAS_INTEGRATION_TEST_DBA";
   private String _jdbcPassword = _jdbcUser;
 
   private boolean _withSecondRunEmptyTest = true;
   private boolean _withRunWithSpoolTest = true;
   private boolean _withRunWithExtractTest = true;
-  private String _executeTests = ".*remove";
+  private String _executeTests = ".*column";
 
   private int _parallelThreads = 1;
 

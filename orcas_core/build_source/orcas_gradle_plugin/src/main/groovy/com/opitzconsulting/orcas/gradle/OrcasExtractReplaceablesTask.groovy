@@ -29,7 +29,7 @@ public class OrcasExtractReplaceablesTask extends BaseOrcasTask
       }
       else
       {
-        lExtractreplaceablesoutfolder = ".gradle/extract/sql/replaceables";
+        lExtractreplaceablesoutfolder = convertOutFile( "extract/sql/replaceables" );
       }
     }
     else

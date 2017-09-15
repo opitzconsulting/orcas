@@ -29,7 +29,7 @@ public class OrcasExtractStaticsTask extends BaseOrcasTask
       }
       else
       {
-        lExtractstaticsoutfolder = ".gradle/extract/sql/statics";
+        lExtractstaticsoutfolder = convertOutFile( "extract/sql/statics" );
       }
     }
     else

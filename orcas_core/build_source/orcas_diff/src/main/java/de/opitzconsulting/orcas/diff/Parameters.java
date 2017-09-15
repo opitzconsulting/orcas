@@ -104,6 +104,13 @@ public abstract class Parameters
   protected Boolean _multiSchema = false;
   protected Boolean _multiSchemaDbaViews = false;
   protected String _multiSchemaExcludewhereowner;
+  protected boolean _additionsOnly = false;
+  protected boolean _logIgnoredStatements = true;
+  protected String _xmlLogFile;
+  protected String _xmlInputFile;
+  protected boolean _setUnusedInsteadOfDropColumn = false;
+  protected boolean _createIndexOnline = false;
+  protected boolean _minimizeStatementCount = false;
 
   private InfoLogHandler _infoLogHandler;
   private String _removePromptPrefix;
@@ -124,6 +131,16 @@ public abstract class Parameters
   public void setExtensionhandlerClass( String pExtensionhandlerClass )
   {
     extensionhandlerClass = pExtensionhandlerClass;
+  }
+
+  public boolean isMinimizeStatementCount()
+  {
+    return _minimizeStatementCount;
+  }
+
+  public boolean isAdditionsOnly()
+  {
+    return _additionsOnly;
   }
 
   public boolean isOrderColumnsByName()
@@ -415,5 +432,30 @@ public abstract class Parameters
   public interface AdditionalExtensionFactory
   {
     <T extends EObject> List<UnaryOperator<T>> getAdditionalExtensions( Class<T> pModelClass, boolean pReverseMode );
+  }
+
+  public boolean isLogIgnoredStatements()
+  {
+    return _logIgnoredStatements;
+  }
+
+  public String getXmlLogFile()
+  {
+    return _xmlLogFile;
+  }
+
+  public String getXmlInputFile()
+  {
+    return _xmlInputFile;
+  }
+
+  public boolean isSetUnusedInsteadOfDropColumn()
+  {
+    return _setUnusedInsteadOfDropColumn;
+  }
+
+  public boolean isCreateIndexOnline()
+  {
+    return _createIndexOnline;
   }
 }

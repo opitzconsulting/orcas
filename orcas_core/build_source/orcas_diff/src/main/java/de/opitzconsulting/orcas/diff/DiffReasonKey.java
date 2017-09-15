@@ -3,6 +3,7 @@ package de.opitzconsulting.orcas.diff;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ConstraintDiff;
 import de.opitzconsulting.orcas.orig.diff.ForeignKeyDiff;
@@ -22,6 +23,22 @@ public class DiffReasonKey
   private String name;
   private DiffReasonSubEntity diffReasonSubEntity;
   private String subName;
+
+  static DiffReasonKey createByTextKey( String pTextKey )
+  {
+    return new DiffReasonKey()
+    {
+      @Override
+      public String getTextKey()
+      {
+        return pTextKey;
+      }
+    };
+  }
+
+  private DiffReasonKey()
+  {
+  }
 
   private DiffReasonKey( DiffReasonEntity pDiffReasonEntity, String pName )
   {
@@ -111,9 +128,9 @@ public class DiffReasonKey
 
   public static class DiffReasonKeyRegistry
   {
-    private Map<Object, DiffReasonKey> diffReasonKeyMap = new HashMap<>();
+    private Map<AbstractDiff, DiffReasonKey> diffReasonKeyMap = new HashMap<>();
 
-    public DiffReasonKey getDiffReasonKey( Object pDiff )
+    public DiffReasonKey getDiffReasonKey( AbstractDiff pDiff )
     {
       DiffReasonKey lReturn = diffReasonKeyMap.get( pDiff );
 

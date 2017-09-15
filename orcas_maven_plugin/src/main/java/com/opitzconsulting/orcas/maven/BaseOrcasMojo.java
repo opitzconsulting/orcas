@@ -190,6 +190,48 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   @Parameter
   private String extensionhandlerClass;
 
+  /**
+   * If true orcas will generate only schema additions. Contraints will be widened to allow both model-versions.
+   */
+  @Parameter( defaultValue = "false" )
+  private boolean additionsonly;
+
+  /**
+   * If true orcas will add ignored statemts to the log files.
+   */
+  @Parameter( defaultValue = "true" )
+  private boolean logignoredstatements;
+
+  /**
+   * The filename for the xml-log (set null to prevent xml-logging).
+   */
+  @Parameter( defaultValue = "target/log.xml" )
+  private String xmllogfile;
+
+  /**
+   * The filename for the xml-input-file. This file has the same format as the xml-log an can be specified to override oracs ddl-statements.
+   */
+  private String xmlinputfile;
+
+  /**
+   * If true orcas will generate set unused statements instead of drop column.
+   */
+  @Parameter( defaultValue = "false" )
+  private boolean setunusedinsteadofdropcolumn;
+
+  /**
+   * If true orcas will add the online keyword for create index statements. Note that this requires the corresponding oracle-enterprise-option.
+   */
+  @Parameter( defaultValue = "false" )
+  private boolean indexonlinecreate;
+
+  /**
+   * If true orcas will minimize the amount of generated ddl-statements.
+   */
+  @Parameter( defaultValue = "false" )
+  private boolean minimizestatementcount;
+
+
   public void execute() throws MojoExecutionException
   {
     ParametersCall lParametersCall = new ParametersCall();
@@ -222,6 +264,13 @@ public abstract class BaseOrcasMojo extends AbstractMojo
     lParametersCall.setExcludewheresequence( excludewheresequence );
     lParametersCall.setDateformat( dateformat );
     lParametersCall.setExtensionParameter( extensionparameter );
+    lParametersCall.setAdditionsOnly( additionsonly );
+    lParametersCall.setLogIgnoredStatements( logignoredstatements );
+    lParametersCall.setXmlLogFile( xmllogfile );
+    lParametersCall.setXmlInputFile( xmlinputfile );
+    lParametersCall.setSetUnusedInsteadOfDropColumn( setunusedinsteadofdropcolumn );
+    lParametersCall.setCreateIndexOnline( indexonlinecreate );
+    lParametersCall.setMinimizeStatementCount( minimizestatementcount );
 
     if( extensionhandlerClass != null && !extensionhandlerClass.equals( "" ) )
     {

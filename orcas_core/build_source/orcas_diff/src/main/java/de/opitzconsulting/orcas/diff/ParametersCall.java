@@ -7,6 +7,16 @@ import java.util.List;
 
 public class ParametersCall extends Parameters
 {
+  public void setMinimizeStatementCount( boolean pMinimizeStatementCount )
+  {
+    _minimizeStatementCount = pMinimizeStatementCount;
+  }
+
+  public void setAdditionsOnly( boolean pAdditionsOnly )
+  {
+    _additionsOnly = pAdditionsOnly;
+  }
+
   public void setSrcJdbcConnectParameters( JdbcConnectParameters pSrcJdbcConnectParameters )
   {
     _srcJdbcConnectParameters = pSrcJdbcConnectParameters;
@@ -202,5 +212,30 @@ public class ParametersCall extends Parameters
   public boolean isAbortJvmOnExit()
   {
     return false;
+  }
+
+  public void setLogIgnoredStatements( boolean pLogIgnoredStatements )
+  {
+    _logIgnoredStatements = pLogIgnoredStatements;
+  }
+
+  public void setXmlLogFile( String pXmlLogFile )
+  {
+    _xmlLogFile = pXmlLogFile;
+  }
+
+  public void setXmlInputFile( String pXmlInputFile )
+  {
+    _xmlInputFile = pXmlInputFile;
+  }
+
+  public void setSetUnusedInsteadOfDropColumn( boolean pSetUnusedInsteadOfDropColumn )
+  {
+    _setUnusedInsteadOfDropColumn = pSetUnusedInsteadOfDropColumn;
+  }
+
+  public void setCreateIndexOnline( boolean pCreateIndexOnline )
+  {
+    _createIndexOnline = pCreateIndexOnline;
   }
 }

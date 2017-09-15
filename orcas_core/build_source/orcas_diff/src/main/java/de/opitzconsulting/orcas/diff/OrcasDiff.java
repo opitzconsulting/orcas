@@ -10,15 +10,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-import de.opitzconsulting.orcas.diff.DdlBuilder.AbstractStatementBuilder;
-import de.opitzconsulting.orcas.diff.DdlBuilder.StatementBuilder;
 import de.opitzconsulting.orcas.diff.DiffAction.DiffReasonType;
 import de.opitzconsulting.orcas.diff.DiffReasonKey.DiffReasonKeyRegistry;
 import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
@@ -42,14 +41,16 @@ import de.opitzconsulting.origOrcasDsl.Model;
 public class OrcasDiff
 {
   private static Log _log = LogFactory.getLog( OrcasDiff.class );
-  
+
   private Parameters _parameters;
   private RecreateNeededRegistry recreateNeededRegistry;
+  private List<AbstractDiff> implicitDropList;
   private DiffReasonKeyRegistry diffReasonKeyRegistry;
   private DdlBuilder ddlBuilder;
   private List<DiffAction> diffActions = new ArrayList<DiffAction>();
   private DiffAction activeDiffAction;
   private DataHandler dataHandler;
+  private AlterTableCombiner currentAlterTableCombiner;
 
   public OrcasDiff( CallableStatementProvider pCallableStatementProvider, Parameters pParameters, DatabaseHandler pDatabaseHandler )
   {
@@ -57,7 +58,7 @@ public class OrcasDiff
 
     dataHandler = new DataHandler( pCallableStatementProvider, pParameters );
 
-    ddlBuilder = pDatabaseHandler.createDdlBuilder();
+    ddlBuilder = pDatabaseHandler.createDdlBuilder( pParameters );
   }
 
   private List<DiffActionReason> getIndexRecreate( TableDiff pTableDiff, String pIndexname )
@@ -295,6 +296,11 @@ public class OrcasDiff
     return recreateNeededRegistry.createRecreateNeededBuilder( pDiff );
   }
 
+  private Optional<TableDiff> findTableDiff( ModelDiff pModelDiff, String pTableName )
+  {
+    return pModelDiff.model_elementsTableDiff.stream().filter( p -> p.nameOld.equals( pTableName ) ).findAny();
+  }
+
   private List<DiffActionReason> getRefConstraintRecreate( ModelDiff pModelDiff, String pDestTableName, List<ColumnRefDiff> pDestColumnsDiff )
   {
     List<DiffActionReason> lReturn = new ArrayList<>();
@@ -377,6 +383,12 @@ public class OrcasDiff
     _log.debug( "update recreate" );
     updateIsRecreateNeeded( lModelDiff );
 
+    implicitDropList = new ArrayList<>();
+    if( _parameters.isMinimizeStatementCount() )
+    {
+      updateImplicitDropList( lModelDiff );
+    }
+
     _log.debug( "hanlde all tables" );
     handleAllTables( lModelDiff );
 
@@ -386,10 +398,69 @@ public class OrcasDiff
     _log.debug( "hanlde all mviews" );
     handleAllMviews( lModelDiff );
 
+    if( _parameters.isAdditionsOnly() )
+    {
+      // diffActions = diffActions.stream().filter( p -> p.getDiffReasonType()
+      // == DiffReasonType.CREATE ).collect( Collectors.toList() );
+    }
+
     return new DiffResult( diffActions );
   }
 
-  public class DiffResult
+  private void updateImplicitDropList( ModelDiff pModelDiff )
+  {
+    if( _parameters.isAdditionsOnly() )
+    {
+      return;
+    }
+
+    pModelDiff.model_elementsTableDiff.stream()//
+    .filter( p -> p.isOld )//
+    .forEach( pTableDiff ->
+    {
+      pTableDiff.constraintsDiff.stream()//
+      .filter( p -> p.isOld )//
+      .filter( pDiff -> ddlBuilder.isContainsOnlyDropColumns( pTableDiff, pDiff.ruleOld ) )//
+      .forEach( implicitDropList::add );
+
+      Optional.ofNullable( pTableDiff.primary_keyDiff )//
+      .filter( p -> p.isOld )//
+      .filter( pDiff -> ddlBuilder.isAllColumnsOnlyOld( pTableDiff, pDiff.pk_columnsDiff ) )//
+      .ifPresent( implicitDropList::add );
+
+      pTableDiff.ind_uksUniqueKeyDiff.stream()//
+      .filter( p -> p.isOld )//
+      .filter( pDiff -> ddlBuilder.isAllColumnsOnlyOld( pTableDiff, pDiff.uk_columnsDiff ) )//
+      .forEach( implicitDropList::add );
+
+      pTableDiff.ind_uksIndexDiff.stream()//
+      .filter( p -> p.isOld )//
+      .filter( p -> p.function_based_expressionOld == null )//
+      .filter( pDiff -> ddlBuilder.isAllColumnsOnlyOld( pTableDiff, pDiff.index_columnsDiff ) )//
+      .forEach( implicitDropList::add );
+
+      pTableDiff.foreign_keysDiff.stream()//
+      .filter( p -> p.isOld )//
+      .filter( pDiff ->
+      {
+        if( !ddlBuilder.isAllColumnsOnlyOld( pTableDiff, pDiff.srcColumnsDiff ) )
+        {
+          return false;
+        }
+
+        Optional<TableDiff> lDestTableDiff = findTableDiff( pModelDiff, pDiff.destTableOld );
+        if( lDestTableDiff.isPresent() )
+        {
+          return ddlBuilder.isAllColumnsNew( pDiff.destColumnsDiff, lDestTableDiff.get() );
+        }
+
+        return true;
+      } )//
+      .forEach( implicitDropList::add );
+    } );
+  }
+
+  public static class DiffResult
   {
     private List<DiffAction> diffActions = new ArrayList<DiffAction>();
 
@@ -398,7 +469,7 @@ public class OrcasDiff
       return diffActions;
     }
 
-    private DiffResult( List<DiffAction> pDiffActions )
+    public DiffResult( List<DiffAction> pDiffActions )
     {
       diffActions.addAll( pDiffActions );
     }
@@ -419,13 +490,17 @@ public class OrcasDiff
   private <T> void doInDiffAction( DiffAction pDiffAction, AbstractDiffActionRunnable<T> pRunnable, T pAbstractStatementBuilder )
   {
     activeDiffAction = pDiffAction;
-    diffActions.add( pDiffAction );
     pRunnable.accept( pAbstractStatementBuilder );
-    if( activeDiffAction.getStatements().isEmpty() )
-    {
-      diffActions.remove( activeDiffAction );
-    }
+    addDiffAction( activeDiffAction );
     activeDiffAction = null;
+  }
+
+  private void addDiffAction( DiffAction pDiffAction )
+  {
+    if( !diffActions.contains( pDiffAction ) && !pDiffAction.hasNoStatements() )
+    {
+      diffActions.add( pDiffAction );
+    }
   }
 
   private <T> void doInDiffAction( DiffAction pDiffAction, List<DiffActionReason> pDiffActionReasonList, AbstractDiffActionRunnable<T> pRunnable, T pAbstractStatementBuilder )
@@ -446,7 +521,7 @@ public class OrcasDiff
   {
     DiffAction lDiffAction = new DiffAction( diffReasonKeyRegistry.getDiffReasonKey( pDiff ), DiffReasonType.ALTER );
     DiffActionReasonDifferent lDiffActionReasonDifferent = new DiffActionReasonDifferent( diffReasonKeyRegistry.getDiffReasonKey( pDiff ) );
-    doInDiffAction( lDiffAction, Collections.singletonList( lDiffActionReasonDifferent ), pRunnable, new StatementBuilderAlter( lDiffActionReasonDifferent, pDiff ) );
+    doInDiffAction( lDiffAction, Collections.singletonList( lDiffActionReasonDifferent ), pRunnable, new StatementBuilderAlter( lDiffActionReasonDifferent, pDiff, _parameters.isAdditionsOnly(), () -> activeDiffAction, currentAlterTableCombiner ) );
   }
 
   private void doInDiffActionDrop( AbstractDiff pDiff, DiffActionRunnable pRunnable )
@@ -474,7 +549,10 @@ public class OrcasDiff
   {
     if( pDiff.isOld && (pDiff.isMatched == false || isRecreateNeeded( pDiff )) )
     {
-      doInDiffActionDrop( pDiff, pRunnable );
+      if( !implicitDropList.contains( pDiff ) )
+      {
+        doInDiffActionDrop( pDiff, pRunnable );
+      }
     }
     else
     {
@@ -491,8 +569,24 @@ public class OrcasDiff
     {
       dropIfNeeded( lDiff, p ->
       {
-        pRunnable.accept( new StatementBuilderWithDiff<>( () -> activeDiffAction, lDiff ) );
+        pRunnable.accept( new StatementBuilderWithDiff<>( () -> activeDiffAction, _parameters.isAdditionsOnly(), lDiff, currentAlterTableCombiner ) );
       } );
+    }
+  }
+
+  private void runInAlterTableCombiner( Runnable pRunnable )
+  {
+    if( _parameters.isMinimizeStatementCount() )
+    {
+      currentAlterTableCombiner = new AlterTableCombiner( diffReasonKeyRegistry, this::addDiffAction );
+    }
+
+    pRunnable.run();
+
+    if( currentAlterTableCombiner != null )
+    {
+      currentAlterTableCombiner.finishIfNeeded();
+      currentAlterTableCombiner = null;
     }
   }
 
@@ -500,86 +594,164 @@ public class OrcasDiff
   {
     for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
     {
-      dropIfNeeded( lTableDiff.foreign_keysDiff, p -> ddlBuilder.dropForeignKey( p, lTableDiff, p.diff ) );
+      runInAlterTableCombiner( () -> dropIfNeeded( lTableDiff.foreign_keysDiff, p -> ddlBuilder.dropForeignKey( p, lTableDiff, p.diff ) ) );
     }
 
     for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
     {
-      dropIfNeeded( lTableDiff, p -> ddlBuilder.dropTable( p, lTableDiff, dataHandler ), //
-      () ->
+      dropIfNeeded( lTableDiff, p -> ddlBuilder.dropTable( p, lTableDiff, dataHandler ), null );
+    }
+
+    pModelDiff.model_elementsTableDiff.stream().filter( p -> p.isNew ).forEach( pTableDiff ->
+    {
+      Runnable lHandleTableDetailsNoColumns = () ->
       {
-        dropIfNeeded( lTableDiff.constraintsDiff, p -> ddlBuilder.dropConstraint( p, lTableDiff, p.diff ) );
+        handlePrimarykey( pTableDiff );
 
-        dropIfNeeded( lTableDiff.mviewLogDiff, p -> ddlBuilder.dropMaterializedViewLog( p, lTableDiff ) );
+        pTableDiff.constraintsDiff.forEach( p -> handleConstraint( pTableDiff, p ) );
 
-        dropIfNeeded( lTableDiff.ind_uksUniqueKeyDiff, p -> ddlBuilder.dropUniqueKey( p, lTableDiff, p.diff ) );
+        pTableDiff.ind_uksIndexDiff.forEach( p -> handleIndex( pTableDiff, p ) );
 
-        dropIfNeeded( lTableDiff.ind_uksIndexDiff, p -> ddlBuilder.dropIndex( p, p.diff ) );
+        pTableDiff.ind_uksUniqueKeyDiff.forEach( p -> handleUniquekey( pTableDiff, p ) );
 
-        for( InlineCommentDiff lCommentDiff : lTableDiff.commentsDiff )
+        pTableDiff.commentsDiff.forEach( p -> handleComment( pTableDiff, p ) );
+
+        handleMviewlog( pTableDiff );
+      };
+
+      Runnable lCleanupTableDetails = () ->
+      {
+        dropIfNeeded( pTableDiff.constraintsDiff, p -> ddlBuilder.dropConstraint( p, pTableDiff, p.diff ) );
+
+        dropIfNeeded( pTableDiff.mviewLogDiff, p -> ddlBuilder.dropMaterializedViewLog( p, pTableDiff ) );
+
+        dropIfNeeded( pTableDiff.ind_uksUniqueKeyDiff, p -> ddlBuilder.dropUniqueKey( p, pTableDiff, p.diff ) );
+
+        dropIfNeeded( pTableDiff.ind_uksIndexDiff, p -> ddlBuilder.dropIndex( p, pTableDiff, p.diff ) );
+
+        for( InlineCommentDiff lCommentDiff : pTableDiff.commentsDiff )
         {
           if( lCommentDiff.isOld && lCommentDiff.isMatched == false )
           {
             boolean lIsColumnComment = lCommentDiff.column_nameOld != null;
-            if( !lIsColumnComment || columnIsNew( lTableDiff, lCommentDiff.column_nameOld ) )
+            if( !lIsColumnComment || columnIsNew( pTableDiff, lCommentDiff.column_nameOld ) )
             {
-              doInDiffActionDrop( lCommentDiff, p -> ddlBuilder.dropComment( p, lTableDiff, lCommentDiff ) );
+              doInDiffActionDrop( lCommentDiff, p -> ddlBuilder.dropComment( p, pTableDiff, lCommentDiff ) );
             }
           }
         }
 
-        dropIfNeeded( lTableDiff.primary_keyDiff, p -> ddlBuilder.dropPrimaryKey( p, lTableDiff, lTableDiff.primary_keyDiff ) );
-      } );
-    }
+        dropIfNeeded( pTableDiff.primary_keyDiff, p -> ddlBuilder.dropPrimaryKey( p, pTableDiff, pTableDiff.primary_keyDiff ) );
 
-    pModelDiff.model_elementsTableDiff.forEach( p ->
-    {
-      createIfNeededOrAlter( p, //
-      p4 -> ddlBuilder.createTable( p4, p ), //
-      () ->
-      {
-        for( ColumnDiff lColumnDiff : p.columnsDiff )
+        List<ColumnDiff> lDropColumnDiffList = pTableDiff.columnsDiff.stream()//
+        .filter( p -> !p.isNew )//
+        .collect( Collectors.toList() );
+
+        if( lDropColumnDiffList.size() > 1 && _parameters.isMinimizeStatementCount() && ddlBuilder.isMultiDropPossible( pTableDiff, lDropColumnDiffList, dataHandler ) )
         {
-          if( lColumnDiff.isNew )
+          DiffActionRunnable lRunnable = p -> ddlBuilder.getColumnDropHandler( p, pTableDiff, lDropColumnDiffList ).run();
+
+          DiffAction lDiffAction = new DiffAction( diffReasonKeyRegistry.getDiffReasonKey( pTableDiff ), DiffReasonType.ALTER );
+          List<DiffActionReason> lDiffActionReasonList = lDropColumnDiffList//
+          .stream()//
+          .map( pColumnDiff -> new DiffActionReasonSurplus( diffReasonKeyRegistry.getDiffReasonKey( pColumnDiff ) ) )//
+          .collect( Collectors.toList() );
+
+          doInDiffAction( lDiffAction, lDiffActionReasonList, lRunnable, createStatementBuilder() );
+        }
+        else
+        {
+          lDropColumnDiffList.forEach( pColumnDiff -> doInDiffActionDrop( pColumnDiff, p -> ddlBuilder.dropColumn( p, pTableDiff, pColumnDiff, dataHandler ) ) );
+        }
+      };
+
+      Runnable lRecreateColumns = () ->
+      {
+        for( ColumnDiff lColumnDiff : pTableDiff.columnsDiff )
+        {
+          if( lColumnDiff.isNew && lColumnDiff.isOld )
           {
-            handleColumn( p, lColumnDiff );
-          }
-          else
-          {
-            doInDiffActionDrop( lColumnDiff, p6 -> ddlBuilder.dropColumn( p6, p, lColumnDiff, dataHandler ) );
+            if( isRecreateNeeded( lColumnDiff ) )
+            {
+              doInDiffAction( lColumnDiff, recreateNeededRegistry.getRecreateNeededReasons( lColumnDiff ), DiffReasonType.RECREATE, //
+              p -> ddlBuilder.recreateColumn( p, pTableDiff, lColumnDiff ) //
+              , createStatementBuilder() );
+            }
+            else
+            {
+              doInDiffActionAlter( lColumnDiff, p -> ddlBuilder.alterColumnIfNeeded( p, pTableDiff, lColumnDiff ) );
+            }
           }
         }
-      }, //
-      p1 -> ddlBuilder.alterTableIfNeeded( p1, p, _parameters.isTablemovetablespace(), getDefaultTablespace() ), //
-      () ->
+      };
+
+      Runnable lCreateColumns = () ->
       {
-        handlePrimarykey( p );
+        List<ColumnDiff> lCreateColumnDiffList = pTableDiff.columnsDiff.stream()//
+        .filter( p -> p.isNew && !p.isOld )//
+        .collect( Collectors.toList() );
 
-        p.constraintsDiff.forEach( p2 -> handleConstraint( p, p2 ) );
+        if( lCreateColumnDiffList.size() > 1 && _parameters.isMinimizeStatementCount() && ddlBuilder.isMultiCreatePossible( pTableDiff, lCreateColumnDiffList ) )
+        {
+          DiffAction lDiffAction = new DiffAction( diffReasonKeyRegistry.getDiffReasonKey( pTableDiff ), DiffReasonType.ALTER );
+          List<DiffActionReason> lDiffActionReasonList = lCreateColumnDiffList//
+          .stream()//
+          .map( pColumnDiff -> new DiffActionReasonMissing( diffReasonKeyRegistry.getDiffReasonKey( pColumnDiff ) ) )//
+          .collect( Collectors.toList() );
 
-        p.ind_uksIndexDiff.forEach( p3 -> handleIndex( p, p3 ) );
+          doInDiffAction( lDiffAction, lDiffActionReasonList, p -> ddlBuilder.createColumns( p, pTableDiff, lCreateColumnDiffList ), createStatementBuilder() );
+        }
+        else
+        {
+          lCreateColumnDiffList.forEach( pColumnDiff -> doInDiffActionCreate( pColumnDiff, p -> ddlBuilder.createColumn( p, pTableDiff, pColumnDiff ) ) );
+        }
+      };
 
-        p.ind_uksUniqueKeyDiff.forEach( p5 -> handleUniquekey( p, p5 ) );
+      if( !pTableDiff.isOld || isRecreateNeeded( pTableDiff ) )
+      {
+        runInAlterTableCombiner( () ->
+        {
+          doInDiffActionCreate( pTableDiff, p -> ddlBuilder.createTable( p, pTableDiff ) );
 
-        p.commentsDiff.forEach( p7 -> handleComment( p, p7 ) );
+          lHandleTableDetailsNoColumns.run();
+        } );
+      }
+      else
+      {
+        runInAlterTableCombiner( () ->
+        {
+          doInDiffActionAlter( pTableDiff, p -> ddlBuilder.alterTableIfNeeded( p, pTableDiff, _parameters.isTablemovetablespace(), getDefaultTablespace() ) );
 
-        handleMviewlog( p );
-      } );
+          lCleanupTableDetails.run();
+        } );
+
+        runInAlterTableCombiner( lRecreateColumns );
+
+        runInAlterTableCombiner( () ->
+        {
+          lCreateColumns.run();
+
+          lHandleTableDetailsNoColumns.run();
+        } );
+      }
     } );
 
     for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
     {
-      for( ForeignKeyDiff lForeignKeyDiff : lTableDiff.foreign_keysDiff )
+      runInAlterTableCombiner( () ->
       {
-        if( lTableDiff.isOld == false && lTableDiff.tablePartitioningRefPartitionsDiff.isNew && lTableDiff.tablePartitioningRefPartitionsDiff.fkNameNew.equalsIgnoreCase( lForeignKeyDiff.consNameNew ) )
+        for( ForeignKeyDiff lForeignKeyDiff : lTableDiff.foreign_keysDiff )
         {
-          // fk for ref-partition created in create-table
+          if( lTableDiff.isOld == false && lTableDiff.tablePartitioningRefPartitionsDiff.isNew && lTableDiff.tablePartitioningRefPartitionsDiff.fkNameNew.equalsIgnoreCase( lForeignKeyDiff.consNameNew ) )
+          {
+            // fk for ref-partition created in create-table
+          }
+          else
+          {
+            createIfNeeded( lForeignKeyDiff, p -> ddlBuilder.createForeignKey( p, lTableDiff, lForeignKeyDiff, _parameters.getMultiSchema(), dataHandler ) );
+          }
         }
-        else
-        {
-          createIfNeeded( lForeignKeyDiff, p -> ddlBuilder.createForeignKey( p, lTableDiff, lForeignKeyDiff, _parameters.getMultiSchema(), dataHandler ) );
-        }
-      }
+      } );
     }
   }
 
@@ -660,23 +832,6 @@ public class OrcasDiff
     createIfNeeded( pTableDiff.primary_keyDiff, p -> ddlBuilder.createPrimarykey( p, pTableDiff ) );
   }
 
-  private void handleColumn( TableDiff pTableDiff, ColumnDiff pColumnDiff )
-  {
-    if( isRecreateNeeded( pColumnDiff ) )
-    {
-      doInDiffAction( pColumnDiff, Collections.singletonList( new DiffActionReasonDifferent( diffReasonKeyRegistry.getDiffReasonKey( pColumnDiff ) ) ), DiffReasonType.RECREATE, p ->
-      {
-        ddlBuilder.recreateColumn( p, pTableDiff, pColumnDiff );
-      }, createStatementBuilder() );
-    }
-    else
-    {
-      createIfNeededOrAlter( pColumnDiff, //
-      p -> ddlBuilder.createColumn( p, pTableDiff, pColumnDiff ), //
-      p -> ddlBuilder.alterColumnIfNeeded( p, pTableDiff, pColumnDiff ) );
-    }
-  }
-
   static ForeignKeyDiff getFkForRefPartitioning( TableDiff pTableDiff )
   {
     for( ForeignKeyDiff lForeignKeyDiff : pTableDiff.foreign_keysDiff )
@@ -743,37 +898,17 @@ public class OrcasDiff
 
   private void createIfNeededOrAlter( AbstractDiff pDiff, DiffActionRunnable pRunnableCreate, DiffActionRunnableAlter pRunnableAlter )
   {
-    createIfNeededOrAlter( pDiff, pRunnableCreate, null, pRunnableAlter, null );
-  }
-
-  private void createIfNeededOrAlter( AbstractDiff pDiff, DiffActionRunnable pRunnableCreate, Runnable pHandleDetailsAlterOnly, DiffActionRunnableAlter pRunnableAlter, Runnable pHandleDetailsCreateOrAlter )
-  {
     if( pDiff.isNew )
     {
       if( pDiff.isOld == false || isRecreateNeeded( pDiff ) )
       {
         doInDiffActionCreate( pDiff, pRunnableCreate );
-
-        if( pHandleDetailsCreateOrAlter != null )
-        {
-          pHandleDetailsCreateOrAlter.run();
-        }
       }
       else
       {
         if( pRunnableAlter != null )
         {
           doInDiffActionAlter( pDiff, pRunnableAlter );
-        }
-
-        if( pHandleDetailsAlterOnly != null )
-        {
-          pHandleDetailsAlterOnly.run();
-        }
-
-        if( pHandleDetailsCreateOrAlter != null )
-        {
-          pHandleDetailsCreateOrAlter.run();
         }
       }
     }
@@ -814,81 +949,9 @@ public class OrcasDiff
   {
   }
 
-  public class StatementBuilderAlter
-  {
-    private DiffActionReasonDifferent diffActionReasonDifferent;
-    private AbstractDiff diff;
-
-    public StatementBuilderAlter( DiffActionReasonDifferent pDiffActionReasonDifferent, AbstractDiff pDiff )
-    {
-      diffActionReasonDifferent = pDiffActionReasonDifferent;
-      diff = pDiff;
-    }
-
-    public AlterBuilder handleAlterBuilder()
-    {
-      return new AlterBuilder();
-    }
-
-    public class AlterBuilder
-    {
-      private List<EStructuralFeature> checkDifferentEStructuralFeatureList = new ArrayList<>();
-      private List<EStructuralFeature> forceDifferentEStructuralFeatureList = new ArrayList<>();
-
-      public AlterBuilder ifDifferent( EStructuralFeature pEStructuralFeature )
-      {
-        checkDifferentEStructuralFeatureList.add( pEStructuralFeature );
-        return this;
-      }
-
-      public AlterBuilder forceDifferent( EStructuralFeature pEStructuralFeature )
-      {
-        forceDifferentEStructuralFeatureList.add( pEStructuralFeature );
-        return this;
-      }
-
-      public AlterBuilder ifDifferent( EStructuralFeature pEStructuralFeature, boolean pUseIt )
-      {
-        if( pUseIt )
-        {
-          checkDifferentEStructuralFeatureList.add( pEStructuralFeature );
-        }
-
-        return this;
-      }
-
-      public void handle( Consumer<StatementBuilder> pHanlder )
-      {
-        List<EStructuralFeature> lDifferentEAttributes = RecreateNeededBuilder.getDifferentEAttributes( diff, checkDifferentEStructuralFeatureList );
-        lDifferentEAttributes.addAll( forceDifferentEStructuralFeatureList );
-
-        if( !lDifferentEAttributes.isEmpty() )
-        {
-          for( EStructuralFeature lEStructuralFeature : lDifferentEAttributes )
-          {
-            diffActionReasonDifferent.addDiffReasonDetail( lEStructuralFeature );
-          }
-
-          pHanlder.accept( createStatementBuilder() );
-        }
-      }
-    }
-  }
-
   private StatementBuilder createStatementBuilder()
   {
-    return new StatementBuilder( () -> activeDiffAction );
-  }
-
-  class StatementBuilderWithDiff<T extends AbstractDiff> extends StatementBuilder
-  {
-    T diff;
-
-    public StatementBuilderWithDiff( Supplier<DiffAction> pDiffActionSupplier, T pDiff )
-    {
-      super( pDiffActionSupplier );
-      diff = pDiff;
-    }
+    return new StatementBuilder( () -> activeDiffAction, _parameters.isAdditionsOnly(), currentAlterTableCombiner );
   }
 
   public static class DataHandler
@@ -914,17 +977,32 @@ public class OrcasDiff
       }
     }
 
-    public void dropWithDropmodeCheck( String pTestStatement, Runnable pDropHandler )
+    public void dropWithDropmodeCheck( StatementBuilder pStatementBuilder, String pTestStatement, Runnable pDropHandler )
     {
-      if( !isDropmode() )
+      if( !isDropOk( pTestStatement ) )
       {
-        if( hasRows( pTestStatement ) )
-        {
-          throw new RuntimeException( "drop mode not active, the following statement contains data executed would result in data-loss: " + pTestStatement );
-        }
+        pStatementBuilder.fail( "dropmode not active, the following statement contains data. Execution would result in data-loss: " + pTestStatement );
       }
 
       pDropHandler.run();
+    }
+
+    public boolean isDropOk( String pTestStatement )
+    {
+      if( isCheckDropMode() )
+      {
+        if( hasRows( pTestStatement ) )
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    public boolean isCheckDropMode()
+    {
+      return !_parameters.isAdditionsOnly() && !isDropmode();
     }
 
     private boolean hasRows( String pTestStatement )

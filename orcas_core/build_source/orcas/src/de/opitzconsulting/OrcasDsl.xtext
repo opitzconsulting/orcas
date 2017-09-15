@@ -177,7 +177,7 @@ ColumnRef :
   column_name=DBNAME (",")?;  
   
 Sequence:
- "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
+ "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("start" "with" startwith=INT)? ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
 
 ColumnIdentity:
  "generated" ( always="always"|"by" by_default="default" ("on" on_null="null")? ) "as" "identity" ( "(" ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ")" )?;

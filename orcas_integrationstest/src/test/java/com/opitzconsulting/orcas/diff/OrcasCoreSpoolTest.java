@@ -52,7 +52,11 @@ public class OrcasCoreSpoolTest
     {
       if( lFile.getName().startsWith( "test_" ) )
       {
-        lReturn.add( new Object[] { lFile.getName() } );
+        String lTestName = lFile.getName();
+        if( lTestName.matches( orcasCoreIntegrationConfig.getExecuteTests() ) )
+        {
+          lReturn.add( new Object[] { lTestName } );
+        }
       }
     }
 

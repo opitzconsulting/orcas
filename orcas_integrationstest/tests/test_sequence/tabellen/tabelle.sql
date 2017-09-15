@@ -5,7 +5,7 @@ create table tab_dummy
 );
 
 
-create sequence seq_test_create increment by 20;
+create sequence seq_test_create start with 12 increment by 20;
 
 create sequence seq_test_default;
 

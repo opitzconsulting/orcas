@@ -48,8 +48,8 @@ class OrcasGradlePluginExtension {
   def String scriptfolderPostfix = ".sql";
   def String scriptfolderPrefix = "";
   def boolean scriptfolderrecursive = true;
-  def String spoolfile = ".gradle/orcas_spoolfile.sql";
-  def String spoolfolder = ".gradle/log/";
+  def String spoolfile = "orcas_spoolfile.sql";
+  def String spoolfolder = "log/";
   def String loglevel = "info";
   def FailOnErrorMode failOnErrorMode = FailOnErrorMode.ALWAYS;
   def String usernameorcas = "";
@@ -66,6 +66,13 @@ class OrcasGradlePluginExtension {
   def String targetplsql = "";
   def String replaceablesfolder = "src/main/sql/replaceables";
   def String staticsfolder = "src/main/sql/statics" ;
+  def boolean additionsonly = false;
+  def boolean logignoredstatements = true;
+  def String xmllogfile = "log.xml";
+  def String xmlinputfile;
+  def boolean setunusedinsteadofdropcolumn = false;
+  def boolean indexonlinecreate = false;
+  def boolean minimizestatementcount = false;
 
   def String orcasjdbcdriver = "oracle.jdbc.OracleDriver";
   def String orcasjdbcurl;

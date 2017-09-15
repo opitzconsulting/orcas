@@ -1,7 +1,6 @@
 package com.opitzconsulting.orcas.diff;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,11 +9,14 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.UnaryOperator;
 
+import org.eclipse.emf.ecore.EObject;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -25,18 +27,15 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 
+import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.OrcasExtractStatics;
 import de.opitzconsulting.orcas.diff.OrcasMain;
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
+import de.opitzconsulting.orcas.diff.Parameters.AdditionalExtensionFactory;
 import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 import de.opitzconsulting.orcas.diff.ParametersCall;
-
-import java.util.Collections;
-import de.opitzconsulting.orcas.diff.Parameters.AdditionalExtensionFactory;
-import java.util.function.UnaryOperator;
-
-import org.eclipse.emf.ecore.EObject;
+import de.opitzconsulting.orcas.diff.XmlLogFileHandler;
 import de.opitzconsulting.orcasDsl.Model;
 
 @RunWith( OrcasCoreIntegrationTest.MyOrcasParameterizedParallel.class )
@@ -71,9 +70,13 @@ public class OrcasCoreIntegrationTest
 
     for( File lFile : new File( orcasCoreIntegrationConfig.getBaseDir() + "tests" ).listFiles() )
     {
-      if( lFile.getName().startsWith( "test_" ) )
+      String lTestName = lFile.getName();
+      if( lTestName.startsWith( "test_" ) )
       {
-        lReturn.add( new Object[] { lFile.getName() } );
+        if( lTestName.matches( orcasCoreIntegrationConfig.getExecuteTests() ) )
+        {
+          lReturn.add( new Object[] { lTestName } );
+        }
       }
     }
 
@@ -141,6 +144,11 @@ public class OrcasCoreIntegrationTest
     private String _excludewheresequence;
     private boolean _customExtensionFolder;
     private boolean _availableFeatureRequirementMatched = true;
+    private boolean _additionsOnly;
+    private boolean _columnsSetUnused;
+    private boolean _indexonlinecreation;
+    private String _expectfailure;
+    public boolean _minimizeStatementCount;
 
     public TestSetup( String pTestName )
     {
@@ -169,6 +177,15 @@ public class OrcasCoreIntegrationTest
         _dateformat = getProperty( "dateformat", lDefaultProperties, lTestProperties );
         _excludewheresequence = getProperty( "excludewheresequence", lDefaultProperties, lTestProperties );
         _excludewheresequence = _excludewheresequence.replaceAll( "''", "'" );
+        _additionsOnly = getBooleanProperty( "additionsonly", lDefaultProperties, lTestProperties );
+        _columnsSetUnused = getBooleanProperty( "setunused", lDefaultProperties, lTestProperties );
+        _indexonlinecreation = getBooleanProperty( "indexonlinecreation", lDefaultProperties, lTestProperties );
+        _expectfailure = getProperty( "expectfailure", lDefaultProperties, lTestProperties );
+        _minimizeStatementCount = getBooleanProperty( "minimizestatementcount", lDefaultProperties, lTestProperties );
+        if( _expectfailure != null && _expectfailure.trim().length() == 0 )
+        {
+          _expectfailure = null;
+        }
 
         _availableFeatureRequirementMatched = true;
         for( String lRequiredFeature : Arrays.asList( _required_feature_list.split( "," ) ) )
@@ -292,12 +309,17 @@ public class OrcasCoreIntegrationTest
     assertFilesEqual( pNameActual, getSchemaExtarctFileName( pNameExpected, pIncludeData, false, pTestName ), getSchemaExtarctFileName( pNameActual, pIncludeData, false, pTestName ), pIncludeData );
   }
 
+  private static void assertFilesEqual( String pName, String pExpectedFile, String pActualFile )
+  {
+    assertFilesEqual( pName, pExpectedFile, pActualFile, true );
+  }
+
   private static void assertFilesEqual( String pName, String pExpectedFile, String pActualFile, boolean pIncludeData )
   {
     List<String> lExpectedLines = parseReaderToLines( new File( pExpectedFile ) );
     List<String> lActualLines = parseReaderToLines( new File( pActualFile ) );
 
-    String lMessage = "schema-files not equal: " + pName + " " + pExpectedFile + " " + pActualFile;
+    String lMessage = "files not equal: " + pName + " " + pExpectedFile + " " + pActualFile;
 
     int lMinLines = Math.min( lExpectedLines.size(), lActualLines.size() );
     for( int i = 0; i < lMinLines; i++ )
@@ -340,7 +362,12 @@ public class OrcasCoreIntegrationTest
 
   private static String getSchemaExtarctFileName( String pString, boolean pIncludeData, boolean pOrcas, String pTestName )
   {
-    return orcasCoreIntegrationConfig.getWorkfolder() + pTestName + "/" + pString + (pIncludeData ? "_data" : "_nodata") + (pOrcas ? "_orcas" : "_spool") + ".txt";
+    return getWorkfolderFilename( pTestName, pString + (pIncludeData ? "_data" : "_nodata") + (pOrcas ? "_orcas" : "_spool") + ".txt" );
+  }
+
+  private static String getWorkfolderFilename( String pTestName, String pFilename )
+  {
+    return orcasCoreIntegrationConfig.getWorkfolder() + pTestName + "/" + pFilename;
   }
 
   private void orcasExtract( JdbcConnectParameters p_connectParametersTargetUser, String pString )
@@ -366,12 +393,33 @@ public class OrcasCoreIntegrationTest
     new OrcasExtractStatics().mainRun( lParametersCall );
   }
 
-  private void executeOrcasStatics( JdbcConnectParameters pJdbcConnectParameters, String pSpoolName )
+  private void executeOrcasStatics( JdbcConnectParameters pJdbcConnectParameters, String pSpoolName, boolean pLogIgnoredStatements )
   {
-    executeOrcasStatics( pJdbcConnectParameters, pSpoolName, orcasCoreIntegrationConfig.getBaseDir() + "tests/" + testName + "/tabellen" );
+    String lXmlInputFile = null;
+    if( isXmlInputFileExists() )
+    {
+      lXmlInputFile = getXmlInputFile();
+    }
+
+    executeOrcasStatics( pJdbcConnectParameters, pSpoolName, orcasCoreIntegrationConfig.getBaseDir() + "tests/" + testName + "/tabellen", pLogIgnoredStatements, lXmlInputFile );
   }
 
-  private void executeOrcasStatics( JdbcConnectParameters pJdbcConnectParameters, String pSpoolName, String pModelFolder )
+  private boolean isXmlInputFileExists()
+  {
+    return new File( getXmlInputFile() ).exists();
+  }
+
+  private String getXmlInputFile()
+  {
+    return getBasedirFilename( "input_xml.xml" );
+  }
+
+  private String getBasedirFilename( String pFilename )
+  {
+    return orcasCoreIntegrationConfig.getBaseDir() + "tests/" + testName + "/" + pFilename;
+  }
+
+  private void executeOrcasStatics( JdbcConnectParameters pJdbcConnectParameters, String pSpoolName, String pModelFolder, boolean pLogIgnoredStatements, String pXmlInputFile )
   {
     ParametersCall lParametersCall = new ParametersCall();
 
@@ -394,17 +442,64 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setIndexmovetablespace( _testSetup._indexmovetablespace );
     lParametersCall.setIndexparallelcreate( _testSetup._indexparallelcreate );
     lParametersCall.setDateformat( _testSetup._dateformat );
+    lParametersCall.setAdditionsOnly( _testSetup._additionsOnly );
+    lParametersCall.setLogIgnoredStatements( pLogIgnoredStatements );
+    lParametersCall.setSetUnusedInsteadOfDropColumn( _testSetup._columnsSetUnused );
+    lParametersCall.setCreateIndexOnline( _testSetup._indexonlinecreation );
+    String lXmlLogFile = getLogfileName( pSpoolName );
+    lParametersCall.setXmlLogFile( lXmlLogFile );
+    lParametersCall.setXmlInputFile( pXmlInputFile );
+    lParametersCall.setMinimizeStatementCount( _testSetup._minimizeStatementCount );
 
     lParametersCall.setAdditionalOrcasExtensionFactory( new AdditionalExtensionFactory()
-          {
-            @Override
-            public <T extends EObject> List<UnaryOperator<T>> getAdditionalExtensions( Class<T> pModelClass, boolean pReverseMode )
-            {
-              return Collections.singletonList( p-> (T)new TablespaceRemapperExtension( orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() ).transformModel( (Model)p) );
-            }
-          });
+    {
+      @SuppressWarnings( "unchecked" )
+      @Override
+      public <T extends EObject> List<UnaryOperator<T>> getAdditionalExtensions( Class<T> pModelClass, boolean pReverseMode )
+      {
+        return Collections.singletonList( p -> (T) new TablespaceRemapperExtension( orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() ).transformModel( (Model) p ) );
+      }
+    } );
 
-    new OrcasMain().mainRun( lParametersCall );
+    if( isExpectfailure() )
+    {
+      try
+      {
+        new OrcasMain().mainRun( lParametersCall );
+
+        fail( "expected faliure: " + _testSetup._expectfailure );
+      }
+      catch( Exception e )
+      {
+        String lMessage = e.getMessage();
+        boolean lMatches = lMessage.matches( _testSetup._expectfailure );
+
+        if( !lMatches )
+        {
+          throw new RuntimeException( "no matching error: " + _testSetup._expectfailure + " " + lMessage, e );
+        }
+      }
+    }
+    else
+    {
+      new OrcasMain().mainRun( lParametersCall );
+    }
+
+    assertXmlLogFileParse( pSpoolName, lXmlLogFile );
+  }
+
+  private String getLogfileName( String pSpoolName )
+  {
+    return getSpoolFolder( pSpoolName + "_log.xml" );
+  }
+
+  private void assertXmlLogFileParse( String pSpoolName, String pXmlLogFile )
+  {
+    XmlLogFileHandler lXmlLogFileHandler = new XmlLogFileHandler();
+    DiffResult lParseXmlDiffResult = lXmlLogFileHandler.parseXml( pXmlLogFile );
+    String lXmlLogFileFromXmlLogFileHandlerParse = getSpoolFolder( pSpoolName + "_log_reparse.xml" );
+    lXmlLogFileHandler.logXml( lParseXmlDiffResult, lXmlLogFileFromXmlLogFileHandlerParse );
+    assertFilesEqual( "xml-log-parse", pXmlLogFile, lXmlLogFileFromXmlLogFileHandlerParse );
   }
 
   private String getSpoolFolder( String pSpoolName )
@@ -424,15 +519,23 @@ public class OrcasCoreIntegrationTest
 
     resetUser( getConnectParametersTargetUser() );
 
-    executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_zielzustand.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
-
-    extractSchema( getConnectParametersTargetUser(), REFERENCE_NAME, true );
-
-    if( orcasCoreIntegrationConfig.isWithRunWithExtractTest() )
+    if( !isExpectfailure() )
     {
-      extractSchema( getConnectParametersTargetUser(), REFERENCE_NAME, false );
-      orcasExtract( getConnectParametersTargetUser(), EXTRACT_FOLDER_NAME );
+      executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_zielzustand.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
+
+      extractSchema( getConnectParametersTargetUser(), REFERENCE_NAME, true );
+
+      if( orcasCoreIntegrationConfig.isWithRunWithExtractTest() )
+      {
+        extractSchema( getConnectParametersTargetUser(), REFERENCE_NAME, false );
+        orcasExtract( getConnectParametersTargetUser(), EXTRACT_FOLDER_NAME );
+      }
     }
+  }
+
+  private boolean isExpectfailure()
+  {
+    return _testSetup._expectfailure != null;
   }
 
   @Test
@@ -441,24 +544,35 @@ public class OrcasCoreIntegrationTest
     resetUser( getConnectParametersTargetUser() );
     executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_ausgangszustand.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
 
-    executeOrcasStatics( getConnectParametersTargetUser(), _lognameFirstRun );
-    asserSchemaEqual( "orcas_run", true );
+    executeOrcasStatics( getConnectParametersTargetUser(), _lognameFirstRun, true );
+
+    if( !isExpectfailure() )
+    {
+      asserSchemaEqual( "orcas_run", true );
+    }
+
+    String lReferenceXmlFile = getBasedirFilename( "reference_log.xml" );
+
+    if( new File( lReferenceXmlFile ).exists() )
+    {
+      assertFilesEqual( "reference_log", lReferenceXmlFile, getLogfileName( _lognameFirstRun ) );
+    }
   }
 
   @Test
   public void test_02_second_run_empty()
   {
-    assumeTestNotSkipped( orcasCoreIntegrationConfig.isWithSecondRunEmptyTest() );
+    assumeTestNotSkipped( orcasCoreIntegrationConfig.isWithSecondRunEmptyTest() && !isXmlInputFileExists() && !isExpectfailure() );
 
     String lLognameSecondRun = "spool_second_run";
-    executeOrcasStatics( getConnectParametersTargetUser(), lLognameSecondRun );
+    executeOrcasStatics( getConnectParametersTargetUser(), lLognameSecondRun, false );
     assertFalse( "second run not empty", new File( getSpoolFolder( lLognameSecondRun ) ).exists() );
   }
 
   @Test
   public void test_03_run_with_spool()
   {
-    assumeTestNotSkipped( orcasCoreIntegrationConfig.isWithRunWithSpoolTest() );
+    assumeTestNotSkipped( orcasCoreIntegrationConfig.isWithRunWithSpoolTest() && !isExpectfailure() );
 
     resetUser( getConnectParametersTargetUser() );
     executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_ausgangszustand.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
@@ -471,16 +585,16 @@ public class OrcasCoreIntegrationTest
   {
     try
     {
-      assumeTestNotSkipped( orcasCoreIntegrationConfig.isWithRunWithExtractTest() );
+      assumeTestNotSkipped( orcasCoreIntegrationConfig.isWithRunWithExtractTest() && !isExpectfailure() );
       Assume.assumeTrue( "extract test not possible for testcase", _testSetup._test_extract );
 
       resetUser( getConnectParametersTargetUser() );
-      String lErzeugeAusgangszustandExtractFile = "tests/" + testName + "/" + "erzeuge_ausgangszustand_extract.sql";
-      if( new File( orcasCoreIntegrationConfig.getBaseDir() + lErzeugeAusgangszustandExtractFile ).exists() )
+      String lErzeugeAusgangszustandExtractFile = getBasedirFilename( "erzeuge_ausgangszustand_extract.sql" );
+      if( new File( lErzeugeAusgangszustandExtractFile ).exists() )
       {
         executeScript( getConnectParametersTargetUser(), lErzeugeAusgangszustandExtractFile, orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
       }
-      executeOrcasStatics( getConnectParametersTargetUser(), "spool_extract", orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + EXTRACT_FOLDER_NAME );
+      executeOrcasStatics( getConnectParametersTargetUser(), "spool_extract", orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + EXTRACT_FOLDER_NAME, true, null );
       asserSchemaEqual( "extract_run", false );
     }
     finally

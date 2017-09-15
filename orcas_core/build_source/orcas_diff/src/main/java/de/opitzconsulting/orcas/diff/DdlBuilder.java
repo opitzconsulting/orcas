@@ -3,11 +3,12 @@ package de.opitzconsulting.orcas.diff;
 import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import de.opitzconsulting.orcas.diff.OrcasDiff.DataHandler;
-import de.opitzconsulting.orcas.diff.OrcasDiff.StatementBuilderAlter;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
 import de.opitzconsulting.orcas.orig.diff.ConstraintDiff;
@@ -55,6 +56,22 @@ import de.opitzconsulting.origOrcasDsl.SynchronousType;
 
 public abstract class DdlBuilder
 {
+  private Parameters parameters;
+
+  public DdlBuilder( Parameters pParameters )
+  {
+    parameters = pParameters;
+  }
+
+  public boolean isAllColumnsNew( List<ColumnRefDiff> pColumns, TableDiff pTableDiff )
+  {
+    return !pColumns.stream()//
+    .filter( p -> !p.isNew )//
+    .filter( p -> !isColumnNew( pTableDiff, p.column_nameOld ) )//
+    .findAny()//
+    .isPresent();
+  }
+
   private String createRangeValuelist( List<RangePartitionValueDiff> pRangePartitionValueDiffList )
   {
     String lReturn = "";
@@ -121,59 +138,89 @@ public abstract class DdlBuilder
     return lReturn;
   }
 
-  public static abstract class AbstractStatementBuilder
+  private void dropTableConstraintByName( StatementBuilder p, TableDiff pTableDiff, String pCconstraintName, boolean pIsgnoreIfAdditionsOnly )
   {
-    String _stmt;
-
-    protected void stmtAppend( String pString )
-    {
-      _stmt = _stmt + " " + pString;
-    }
-
-    protected void stmtStart( String pString )
-    {
-      _stmt = pString;
-    }
-  }
-
-  private void dropTableConstraintByName( StatementBuilder p, String pTablename, String pCconstraintName )
-  {
-    p.addStmt( "alter table " + pTablename + " drop constraint " + pCconstraintName );
+    p.stmtStartAlterTable( pTableDiff );
+    p.stmtAppend( "drop constraint " + pCconstraintName );
+    p.stmtDone( pIsgnoreIfAdditionsOnly );
   }
 
   public void dropTable( StatementBuilder p, TableDiff pTableDiff, DataHandler pDataHandler )
   {
-    pDataHandler.dropWithDropmodeCheck( "select 1 from " + pTableDiff.nameOld, () -> p.addStmt( "drop table " + pTableDiff.nameOld ) );
+    p.failIfAdditionsOnly( pTableDiff.isNew, "cant't recreate table" );
+
+    pDataHandler.dropWithDropmodeCheck( p, "select 1 from " + pTableDiff.nameOld, () -> p.addStmt( "drop table " + pTableDiff.nameOld, true ) );
   }
 
   public void dropColumn( StatementBuilder p, TableDiff pTableDiff, ColumnDiff pColumnDiff, DataHandler pDataHandler )
   {
-    pDataHandler.dropWithDropmodeCheck( "select 1 from " + pTableDiff.nameOld + " where " + pColumnDiff.nameOld + " != null", () -> p.addStmt( "alter table " + pTableDiff.nameOld + " drop column " + pColumnDiff.nameOld ) );
+    Runnable lDropHandler = getColumnDropHandler( p, pTableDiff, Collections.singletonList( pColumnDiff ) );
+
+    pDataHandler.dropWithDropmodeCheck( p, getColumnDropCheckSelect( pTableDiff, pColumnDiff ), lDropHandler );
+  }
+
+  private String getColumnDropCheckSelect( TableDiff pTableDiff, ColumnDiff pColumnDiff )
+  {
+    return "select 1 from " + pTableDiff.nameOld + " where " + pColumnDiff.nameOld + " is not null";
+  }
+
+  public Runnable getColumnDropHandler( StatementBuilder p, TableDiff pTableDiff, List<ColumnDiff> pColumnDiffList )
+  {
+    Runnable lAdditionsOnlyAlternativeHandler = () ->
+    {
+      pColumnDiffList.stream()//
+      .filter( pColumnDiff -> pColumnDiff.notnullOld && pColumnDiff.default_valueOld == null )//
+      .forEach( pColumnDiff ->
+      {
+        p.stmtStartAlterTable( pTableDiff );
+        p.stmtAppend( "modify ( " + pColumnDiff.nameOld );
+        p.stmtAppend( "null" );
+        p.stmtAppend( ")" );
+        p.stmtDone( StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT );
+      } );
+    };
+
+    return () ->
+    {
+      p.stmtStartAlterTableNoCombine( pTableDiff );
+
+      if( parameters.isSetUnusedInsteadOfDropColumn() )
+      {
+        p.stmtAppend( "set unused" );
+      }
+      else
+      {
+        p.stmtAppend( "drop" );
+      }
+
+      p.stmtAppend( "(" + pColumnDiffList.stream().map( pColumnDiff -> pColumnDiff.nameOld ).collect( Collectors.joining( "," ) ) + ")" );
+      p.stmtDone( lAdditionsOnlyAlternativeHandler );
+    };
   }
 
   public void dropUniqueKey( StatementBuilder p, TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
   {
-    dropTableConstraintByName( p, pTableDiff.nameOld, pUniqueKeyDiff.consNameOld );
+    dropTableConstraintByName( p, pTableDiff, pUniqueKeyDiff.consNameOld, !pTableDiff.isNew || isAllColumnsOnlyOld( pTableDiff, pUniqueKeyDiff.uk_columnsDiff ) );
   }
 
-  public void dropIndex( StatementBuilder p, IndexDiff pIndexDiff )
+  public void dropIndex( StatementBuilder p, TableDiff pTableDiff, IndexDiff pIndexDiff )
   {
-    p.addStmt( "drop index " + pIndexDiff.consNameOld );
+    p.addStmt( "drop index " + pIndexDiff.consNameOld, !pTableDiff.isNew || pIndexDiff.uniqueOld == null || isAllColumnsOnlyOld( pTableDiff, pIndexDiff.index_columnsDiff ) );
   }
 
   public void dropForeignKey( StatementBuilder p, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff )
   {
-    dropTableConstraintByName( p, pTableDiff.nameOld, pForeignKeyDiff.consNameOld );
+    dropTableConstraintByName( p, pTableDiff, pForeignKeyDiff.consNameOld, !pTableDiff.isNew || isAllColumnsOnlyOld( pTableDiff, pForeignKeyDiff.srcColumnsDiff ) );
   }
 
   public void dropPrimaryKey( StatementBuilder p, TableDiff pTableDiff, PrimaryKeyDiff pPrimaryKeyDiff )
   {
-    dropTableConstraintByName( p, pTableDiff.nameOld, pPrimaryKeyDiff.consNameOld );
+    dropTableConstraintByName( p, pTableDiff, pPrimaryKeyDiff.consNameOld, false );
   }
 
   public void dropConstraint( StatementBuilder p, TableDiff pTableDiff, ConstraintDiff pConstraintDiff )
   {
-    dropTableConstraintByName( p, pTableDiff.nameOld, pConstraintDiff.consNameOld );
+    dropTableConstraintByName( p, pTableDiff, pConstraintDiff.consNameOld, false );
   }
 
   public void dropMaterializedViewLog( StatementBuilder p, TableDiff pTableDiff )
@@ -183,40 +230,12 @@ public abstract class DdlBuilder
 
   public void dropSequence( StatementBuilder p, SequenceDiff lSequenceDiff )
   {
-    p.addStmt( "drop sequence " + lSequenceDiff.sequence_nameOld );
+    p.addStmt( "drop sequence " + lSequenceDiff.sequence_nameOld, true );
   }
 
   public void dropMview( StatementBuilder p, MviewDiff pMviewDiff )
   {
     p.addStmt( "drop materialized view " + pMviewDiff.mview_nameOld );
-  }
-
-  public static class StatementBuilder extends AbstractStatementBuilder
-  {
-    private Supplier<DiffAction> diffActionSupplier;
-
-    public StatementBuilder( Supplier<DiffAction> pDiffActionSupplier )
-    {
-      diffActionSupplier = pDiffActionSupplier;
-    }
-
-    void addStmt( String pString )
-    {
-      if( diffActionSupplier.get() != null )
-      {
-        diffActionSupplier.get().addStatement( pString );
-      }
-      else
-      {
-        throw new IllegalStateException( "no active diff action: " + pString );
-      }
-    }
-
-    void stmtDone()
-    {
-      addStmt( _stmt );
-      _stmt = null;
-    }
   }
 
   public void dropComment( StatementBuilder p, TableDiff pTableDiff, InlineCommentDiff pCommentDiff )
@@ -234,7 +253,7 @@ public abstract class DdlBuilder
     }
     p.stmtAppend( "is" );
     p.stmtAppend( "''" );
-    p.stmtDone();
+    p.stmtDone( true );
   }
 
   public void alterSequenceIfNeeded( StatementBuilderAlter p1, SequenceDiff pSequenceDiff, DataHandler pDataHandler )
@@ -244,6 +263,8 @@ public abstract class DdlBuilder
     BigDecimal lIstValue = BigDecimal.valueOf( Long.valueOf( pSequenceDiff.max_value_selectOld ) );
     if( lMaxValueSelectValue != null && lIstValue != null && lMaxValueSelectValue.compareTo( lIstValue ) > 0 )
     {
+      p1.failIfAdditionsOnly( !pSequenceDiff.increment_byIsEqual, "cant't change increment by" );
+
       p1.handleAlterBuilder()//
       .forceDifferent( SEQUENCE__MAX_VALUE_SELECT )//
       .handle( p ->
@@ -257,27 +278,33 @@ public abstract class DdlBuilder
     {
       p1.handleAlterBuilder()//
       .ifDifferent( SEQUENCE__INCREMENT_BY )//
+      .failIfAdditionsOnly()//
       .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) ) );
     }
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__MAXVALUE )//
+    .failIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + pSequenceDiff.maxvalueNew ) );
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__MINVALUE )//
+    .failIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " minvalue " + nvl( pSequenceDiff.minvalueNew, 1 ) ) );
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__CYCLE )//
+    .failIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() ) );
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__CACHE )//
+    .ignoreIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " cache " + nvl( pSequenceDiff.cacheNew, 20 ) ) );
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__ORDER )//
+    .failIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.orderNew.getLiteral() ) );
   }
 
@@ -286,6 +313,7 @@ public abstract class DdlBuilder
     BigDecimal lMaxValueSelectValue = pDataHandler.getSequenceMaxValueSelectValue( pSequenceDiff );
 
     p.stmtStart( "create sequence " + pSequenceDiff.sequence_nameNew );
+
     if( pSequenceDiff.increment_byNew != null )
     {
       p.stmtAppend( "increment by " + pSequenceDiff.increment_byNew );
@@ -294,6 +322,13 @@ public abstract class DdlBuilder
     if( lMaxValueSelectValue != null )
     {
       p.stmtAppend( "start with " + lMaxValueSelectValue );
+    }
+    else
+    {
+      if( pSequenceDiff.startwithNew != null )
+      {
+        p.stmtAppend( "start with " + pSequenceDiff.startwithNew );
+      }
     }
 
     if( pSequenceDiff.maxvalueNew != null )
@@ -326,33 +361,17 @@ public abstract class DdlBuilder
 
   public void recreateColumn( StatementBuilder p, TableDiff pTableDiff, ColumnDiff pColumnDiff )
   {
+    p.failIfAdditionsOnly( "can't recreate columns" );
+
     String lTmpOldColumnameNew = "DTO_" + pColumnDiff.nameNew;
     String lTmpNewColumnameNew = "DTN_" + pColumnDiff.nameNew;
 
-    p.addStmt( "alter table " + pTableDiff.nameNew + " add " + lTmpNewColumnameNew + " " + getColumnDatatype( pColumnDiff ) );
-
-    // TODO for cur_trigger in
-    // (
-    // select trigger_name
-    // from user_triggers
-    // where table_name = pTableDiff.nameNew
-    // )
-    // {
-    // add_stmt( "alter trigger " + cur_trigger.trigger_name + " disable" );
-    // }
+    p.stmtStartAlterTableNoCombine( pTableDiff );
+    p.stmtAppend( "add " + lTmpNewColumnameNew + " " + getColumnDatatype( pColumnDiff ) );
+    p.stmtDone();
 
     p.addStmt( "update " + pTableDiff.nameNew + " set " + lTmpNewColumnameNew + " = " + pColumnDiff.nameOld );
     p.addStmt( "commit" );
-
-    // for cur_trigger in
-    // (
-    // select trigger_name
-    // from user_triggers
-    // where table_name = pTableDiff.nameNew
-    // )
-    // {
-    // add_stmt( "alter trigger " + cur_trigger.trigger_name + " enable" );
-    // }
 
     p.addStmt( "alter table " + pTableDiff.nameNew + " rename column " + pColumnDiff.nameOld + " to " + lTmpOldColumnameNew );
     p.addStmt( "alter table " + pTableDiff.nameNew + " rename column " + lTmpNewColumnameNew + " to " + pColumnDiff.nameNew );
@@ -381,13 +400,22 @@ public abstract class DdlBuilder
     .ifDifferent( COLUMN__BYTEORCHAR )//
     .ifDifferent( COLUMN__PRECISION )//
     .ifDifferent( COLUMN__SCALE )//
-    .handle( p -> p.addStmt( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff ) + ")" ) );
+    .handle( p ->
+    {
+      p.stmtStartAlterTable( pTableDiff.nameNew );
+      p.stmtAppend( "modify ( " + pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff ) + ")" );
+      p.stmtDone();
+    } );
 
     p1.handleAlterBuilder()//
     .ifDifferent( COLUMN__DEFAULT_VALUE )//
+    .ignoreIfAdditionsOnly( pColumnDiff.default_valueNew == null )//
+    .failIfAdditionsOnly( pColumnDiff.default_valueOld != null, "can't change default" )//
     .handle( p ->
     {
-      p.stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default" );
+      p.stmtStartAlterTable( pTableDiff );
+      p.stmtAppend( "modify ( " + pColumnDiff.nameNew + " default" );
+
       if( pColumnDiff.default_valueNew == null )
       {
         p.stmtAppend( "null" );
@@ -402,9 +430,11 @@ public abstract class DdlBuilder
 
     p1.handleAlterBuilder()//
     .ifDifferent( COLUMN__NOTNULL )//
+    .ignoreIfAdditionsOnly( pColumnDiff.notnullNew )//
     .handle( p ->
     {
-      p.stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew );
+      p.stmtStartAlterTable( pTableDiff );
+      p.stmtAppend( "modify ( " + pColumnDiff.nameNew );
       if( pColumnDiff.notnullNew == false )
       {
         p.stmtAppend( "null" );
@@ -420,14 +450,24 @@ public abstract class DdlBuilder
 
   public void createPrimarykey( StatementBuilder p, TableDiff pTableDiff )
   {
-    p.stmtStart( "alter table " + pTableDiff.nameNew + " add" );
+    boolean lHasIndexParameters = pTableDiff.primary_keyDiff.tablespaceNew != null || pTableDiff.primary_keyDiff.reverseNew != null;
+
+    if( lHasIndexParameters )
+    {
+      p.stmtStartAlterTableNoCombine( pTableDiff );
+    }
+    else
+    {
+      p.stmtStartAlterTable( pTableDiff );
+    }
+    p.stmtAppend( "add" );
     if( pTableDiff.primary_keyDiff.consNameNew != null )
     {
       p.stmtAppend( "constraint " + pTableDiff.primary_keyDiff.consNameNew );
     }
     p.stmtAppend( "primary key (" + getColumnList( pTableDiff.primary_keyDiff.pk_columnsDiff ) + ")" );
 
-    if( pTableDiff.primary_keyDiff.tablespaceNew != null || pTableDiff.primary_keyDiff.reverseNew != null )
+    if( lHasIndexParameters )
     {
       p.stmtAppend( "using index" );
 
@@ -442,12 +482,13 @@ public abstract class DdlBuilder
       }
     }
 
-    p.stmtDone();
+    p.stmtDone( pTableDiff.isOld );
   }
 
   public void createConstraint( StatementBuilder p, TableDiff pTableDiff, ConstraintDiff pConstraintDiff )
   {
-    p.stmtStart( "alter table " + pTableDiff.nameNew + " add constraint " + pConstraintDiff.consNameNew + " check (" + pConstraintDiff.ruleNew + ")" );
+    p.stmtStartAlterTable( pTableDiff );
+    p.stmtAppend( "add constraint " + pConstraintDiff.consNameNew + " check (" + pConstraintDiff.ruleNew + ")" );
     if( pConstraintDiff.deferrtypeNew != null )
     {
       p.stmtAppend( "deferrable initially " + pConstraintDiff.deferrtypeNew.getName() );
@@ -457,7 +498,66 @@ public abstract class DdlBuilder
       p.stmtAppend( pConstraintDiff.statusNew.getName() );
     }
 
-    p.stmtDone();
+    p.stmtDone( getConstraintIgnoreIfAdditionsOnly( pTableDiff, pConstraintDiff.ruleNew ) );
+  }
+
+  public boolean isContainsOnlyDropColumns( TableDiff pTableDiff, String pRule )
+  {
+    List<String> lRuleParts = splitRuleParts( pRule );
+
+    return !pTableDiff.columnsDiff.stream()//
+    .filter( p -> p.isNew )//
+    .filter( p -> lRuleParts.contains( p.nameNew ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  private List<String> splitRuleParts( String pRule )
+  {
+    return Arrays.asList( pRule.toUpperCase().split( "[^\\w]+" ) );
+  }
+
+  private boolean getConstraintIgnoreIfAdditionsOnly( TableDiff pTableDiff, String pRuleNew )
+  {
+    if( !pTableDiff.isOld )
+    {
+      return false;
+    }
+
+    List<String> lRuleParts = splitRuleParts( pRuleNew );
+
+    return containsNotNull( lRuleParts ) || constraintContainsOldColumns( lRuleParts, pTableDiff.columnsDiff );
+  }
+
+  private boolean constraintContainsOldColumns( List<String> pRuleParts, List<ColumnDiff> pColumnsDiff )
+  {
+    return pColumnsDiff//
+    .stream()//
+    .filter( p -> p.isOld )//
+    .filter( p -> pRuleParts.contains( p.nameOld ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  private boolean containsNotNull( List<String> pRuleParts )
+  {
+    for( int i = 0; i < pRuleParts.size(); i++ )
+    {
+      String lRulePart = pRuleParts.get( i );
+
+      if( lRulePart.equals( "NOT" ) )
+      {
+        if( i != pRuleParts.size() - 1 )
+        {
+          if( pRuleParts.get( i + 1 ).equals( "NULL" ) )
+          {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   private String createSubListClause( ListSubSubPartDiff pListSubSubPartDiff )
@@ -857,11 +957,17 @@ public abstract class DdlBuilder
       }
     }
 
-    p.stmtDone();
+    if( parameters.isCreateIndexOnline() )
+    {
+      p.stmtAppend( "online" );
+    }
+
+    boolean lIgnoreIfAdditionsOnly = pTableDiff.isOld && pIndexDiff.uniqueNew != null && !isAllColumnsOnlyNew( pTableDiff, pIndexDiff.index_columnsDiff );
+    p.stmtDone( lIgnoreIfAdditionsOnly );
 
     if( pIndexDiff.parallelNew != ParallelType.PARALLEL && pIsIndexParallelCreate )
     {
-      p.addStmt( "alter index " + pIndexDiff.consNameNew + " noparallel" );
+      p.addStmt( "alter index " + pIndexDiff.consNameNew + " noparallel", lIgnoreIfAdditionsOnly );
     }
   }
 
@@ -921,7 +1027,7 @@ public abstract class DdlBuilder
 
       if( lColumnDiff.isNew )
       {
-        lReturn = lReturn + " " + createColumnCreatePart( lColumnDiff );
+        lReturn = lReturn + " " + createColumnCreatePart( lColumnDiff, false );
       }
     }
 
@@ -933,6 +1039,7 @@ public abstract class DdlBuilder
     p1.handleAlterBuilder()//
     .ifDifferent( INDEX__PARALLEL )//
     .ifDifferent( INDEX__PARALLEL_DEGREE )//
+    .ignoreIfAdditionsOnly()//
     .handle( p ->
     {
       p.stmtStart( "alter index" );
@@ -955,6 +1062,7 @@ public abstract class DdlBuilder
 
     p1.handleAlterBuilder()//
     .ifDifferent( INDEX__LOGGING )//
+    .ignoreIfAdditionsOnly()//
     .handle( p ->
     {
       p.stmtStart( "alter index" );
@@ -973,6 +1081,7 @@ public abstract class DdlBuilder
 
     p1.handleAlterBuilder()//
     .ifDifferent( INDEX_OR_UNIQUE_KEY__TABLESPACE, pIsIndexmovetablespace )//
+    .ignoreIfAdditionsOnly()//
     .handle( p ->
     {
       p.stmtStart( "alter index" );
@@ -983,16 +1092,78 @@ public abstract class DdlBuilder
     } );
   }
 
+  public boolean isColumnNew( TableDiff pTableDiff, String pColumnName )
+  {
+    return pTableDiff.columnsDiff//
+    .stream()//
+    .filter( p -> p.isNew )//
+    .filter( p -> p.nameNew.equals( pColumnName ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  private boolean isColumnOnlyNew( TableDiff pTableDiff, String pColumnName )
+  {
+    return pTableDiff.columnsDiff//
+    .stream()//
+    .filter( p -> !p.isOld && p.isNew )//
+    .filter( p -> p.nameNew.equals( pColumnName ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  private boolean isAllColumnsOnlyNew( TableDiff pTableDiff, List<ColumnRefDiff> pColumnsDiff )
+  {
+    return !pColumnsDiff//
+    .stream()//
+    .filter( p -> p.isNew )//
+    .filter( p -> !isColumnOnlyNew( pTableDiff, p.column_nameNew ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  public boolean isColumnOnlyOld( TableDiff pTableDiff, String pColumnName )
+  {
+    return pTableDiff.columnsDiff//
+    .stream()//
+    .filter( p -> p.isOld && !p.isNew )//
+    .filter( p -> p.nameOld.equals( pColumnName ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  public boolean isAllColumnsOnlyOld( TableDiff pTableDiff, List<ColumnRefDiff> pColumnsDiff )
+  {
+    return !pColumnsDiff//
+    .stream()//
+    .filter( p -> p.isOld )//
+    .filter( p -> !isColumnOnlyOld( pTableDiff, p.column_nameOld ) )//
+    .findAny()//
+    .isPresent();
+  }
+
   public void createUniqueKey( StatementBuilder p, TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
   {
-    p.stmtStart( "alter table " + pTableDiff.nameNew + " add constraint " + pUniqueKeyDiff.consNameNew + " unique (" + getColumnList( pUniqueKeyDiff.uk_columnsDiff ) + ")" );
-    if( pUniqueKeyDiff.tablespaceNew != null )
+    boolean lHasTablespace = pUniqueKeyDiff.tablespaceNew != null;
+    boolean lHasIndex = pUniqueKeyDiff.indexnameNew != null && !pUniqueKeyDiff.indexnameNew.equals( pUniqueKeyDiff.consNameNew );
+
+    if( lHasTablespace || lHasIndex )
+    {
+      p.stmtStartAlterTableNoCombine( pTableDiff );
+    }
+    else
+    {
+      p.stmtStartAlterTable( pTableDiff );
+    }
+
+    p.stmtAppend( "add constraint " + pUniqueKeyDiff.consNameNew + " unique (" + getColumnList( pUniqueKeyDiff.uk_columnsDiff ) + ")" );
+    if( lHasTablespace )
     {
       p.stmtAppend( "using index tablespace " + pUniqueKeyDiff.tablespaceNew );
     }
     else
     {
-      if( pUniqueKeyDiff.indexnameNew != null && !pUniqueKeyDiff.indexnameNew.equals( pUniqueKeyDiff.consNameNew ) )
+      if( lHasIndex )
       {
         p.stmtAppend( "using index " + pUniqueKeyDiff.indexnameNew );
       }
@@ -1002,7 +1173,7 @@ public abstract class DdlBuilder
       p.stmtAppend( pUniqueKeyDiff.statusNew.getName() );
     }
 
-    p.stmtDone();
+    p.stmtDone( pTableDiff.isOld && !isAllColumnsOnlyNew( pTableDiff, pUniqueKeyDiff.uk_columnsDiff ) );
   }
 
   public void setComment( StatementBuilder p, TableDiff pTableDiff, InlineCommentDiff pInlineCommentDiff )
@@ -1371,10 +1542,10 @@ public abstract class DdlBuilder
   {
     p1.handleAlterBuilder()//
     .ifDifferent( TABLE__TABLESPACE, pTablemovetablespace )//
+    .ignoreIfAdditionsOnly()//
     .handle( p ->
     {
-      p.stmtStart( "alter table" );
-      p.stmtAppend( pTableDiff.nameNew );
+      p.stmtStartAlterTable( pTableDiff );
       p.stmtAppend( "move tablespace" );
       p.stmtAppend( nvl( pTableDiff.tablespaceNew, pDefaultTablespace ) );
       p.stmtDone();
@@ -1382,10 +1553,10 @@ public abstract class DdlBuilder
 
     p1.handleAlterBuilder()//
     .ifDifferent( TABLE__LOGGING, pTableDiff.transactionControlNew == null )//
+    .ignoreIfAdditionsOnly()//
     .handle( p ->
     {
-      p.stmtStart( "alter table" );
-      p.stmtAppend( pTableDiff.nameNew );
+      p.stmtStartAlterTable( pTableDiff );
       if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
       {
         p.stmtAppend( "nologging" );
@@ -1400,10 +1571,10 @@ public abstract class DdlBuilder
     p1.handleAlterBuilder()//
     .ifDifferent( TABLE__PARALLEL )//
     .ifDifferent( TABLE__PARALLEL_DEGREE )//
+    .ignoreIfAdditionsOnly()//
     .handle( p ->
     {
-      p.stmtStart( "alter table" );
-      p.stmtAppend( pTableDiff.nameNew );
+      p.stmtStartAlterTable( pTableDiff );
 
       handleParallel( p, pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, true );
 
@@ -1413,10 +1584,10 @@ public abstract class DdlBuilder
     p1.handleAlterBuilder()//
     .ifDifferent( TABLE__COMPRESSION, pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )//
     .ifDifferent( TABLE__COMPRESSION_FOR, pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )//
+    .ignoreIfAdditionsOnly()//
     .handle( p ->
     {
-      p.stmtStart( "alter table" );
-      p.stmtAppend( pTableDiff.nameNew );
+      p.stmtStartAlterTable( pTableDiff );
 
       handleCompression( p, pTableDiff.compressionNew, pTableDiff.compressionForNew, true );
 
@@ -1568,10 +1739,10 @@ public abstract class DdlBuilder
       }
     }
 
-    p.stmtStart( "alter table " + pTableDiff.nameNew );
+    p.stmtStartAlterTable( pTableDiff );
     p.stmtAppend( "add" );
     p.stmtAppend( createForeignKeyClause( pForeignKeyDiff ) );
-    p.stmtDone();
+    p.stmtDone( pTableDiff.isOld && !isAllColumnsOnlyNew( pTableDiff, pForeignKeyDiff.srcColumnsDiff ) );
   }
 
   private String getSchemaName( String pName )
@@ -1658,21 +1829,78 @@ public abstract class DdlBuilder
 
   public void createColumn( StatementBuilder p, TableDiff pTableDiff, ColumnDiff pColumnDiff )
   {
-    p.stmtStart( "alter table " + pTableDiff.nameNew + " add " + createColumnCreatePart( pColumnDiff ) );
+    createColumns( p, pTableDiff, Collections.singletonList( pColumnDiff ) );
+  }
 
-    LobStorageDiff lLobstorage = findLobstorage( pTableDiff, pColumnDiff.nameNew );
-    if( lLobstorage != null )
+  private boolean isOnOldTableWothNotNullAndNoDefault( TableDiff pTableDiff, ColumnDiff pColumnDiff )
+  {
+    return pColumnDiff.notnullNew && pTableDiff.isOld && pColumnDiff.default_valueNew == null;
+  }
+
+  public void createColumns( StatementBuilder p, TableDiff pTableDiff, List<ColumnDiff> pColumnDiffList )
+  {
+    prepareCreateColumn( p, pTableDiff, pColumnDiffList, false );
+
+    boolean lIsAnyOnOldTableWothNotNullAndNoDefault = pColumnDiffList.stream()//
+    .filter( pColumnDiff -> isOnOldTableWothNotNullAndNoDefault( pTableDiff, pColumnDiff ) )//
+    .findAny()//
+    .isPresent();
+
+    if( lIsAnyOnOldTableWothNotNullAndNoDefault )
     {
-      addLobStorage( p, lLobstorage );
+      p.stmtDone( () ->
+      {
+        prepareCreateColumn( p, pTableDiff, pColumnDiffList, true );
+        p.stmtDone( StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT );
+      } );
+    }
+    else
+    {
+      p.stmtDone();
+    }
+  }
+
+  private void prepareCreateColumn( StatementBuilder p, TableDiff pTableDiff, List<ColumnDiff> pColumnDiffList, boolean pForAdditionsOnlyMode )
+  {
+    p.stmtStartAlterTable( pTableDiff );
+    p.stmtAppend( "add" );
+    if( pColumnDiffList.size() > 1 )
+    {
+      p.stmtAppend( "(" );
     }
 
-    VarrayStorageDiff lVarraystorage = findVarraystorage( pTableDiff, pColumnDiff.nameNew );
-    if( lVarraystorage != null )
-    {
-      addVarrayStorage( p, lVarraystorage );
-    }
+    boolean[] lIsFirst = new boolean[] { true };
 
-    p.stmtDone();
+    pColumnDiffList.forEach( pColumnDiff ->
+    {
+      if( lIsFirst[0] )
+      {
+        lIsFirst[0] = false;
+      }
+      else
+      {
+        p.stmtAppend( "," );
+      }
+
+      p.stmtAppend( createColumnCreatePart( pColumnDiff, pForAdditionsOnlyMode ? isOnOldTableWothNotNullAndNoDefault( pTableDiff, pColumnDiff ) : false ) );
+
+      LobStorageDiff lLobstorage = findLobstorage( pTableDiff, pColumnDiff.nameNew );
+      if( lLobstorage != null )
+      {
+        addLobStorage( p, lLobstorage );
+      }
+
+      VarrayStorageDiff lVarraystorage = findVarraystorage( pTableDiff, pColumnDiff.nameNew );
+      if( lVarraystorage != null )
+      {
+        addVarrayStorage( p, lVarraystorage );
+      }
+    } );
+
+    if( pColumnDiffList.size() > 1 )
+    {
+      p.stmtAppend( ")" );
+    }
   }
 
   private void addVarrayStorage( StatementBuilder p, VarrayStorageDiff pVarraystorage )
@@ -1733,7 +1961,7 @@ public abstract class DdlBuilder
     }
   }
 
-  protected String createColumnCreatePart( ColumnDiff pColumnDiff )
+  protected String createColumnCreatePart( ColumnDiff pColumnDiff, boolean pWithoutNotNull )
   {
     String lReturn = pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff );
 
@@ -1800,9 +2028,33 @@ public abstract class DdlBuilder
 
     if( pColumnDiff.notnullNew )
     {
-      lReturn = lReturn + " not null";
+      if( !pWithoutNotNull )
+      {
+        lReturn = lReturn + " not null";
+      }
     }
 
     return lReturn;
+  }
+
+  public boolean isMultiCreatePossible( TableDiff pTableDiff, List<ColumnDiff> pCreateColumnDiffList )
+  {
+    return !pCreateColumnDiffList.stream().filter( p -> findVarraystorage( pTableDiff, p.nameNew ) != null ).findAny().isPresent();
+  }
+
+  public boolean isMultiDropPossible( TableDiff pTableDiff, List<ColumnDiff> pDropColumnDiffList, DataHandler pDataHandler )
+  {
+    return !pDropColumnDiffList.stream().filter( p -> !pDataHandler.isDropOk( getColumnDropCheckSelect( pTableDiff, p ) ) ).findAny().isPresent();
+  }
+
+  public boolean isContainsOnlyNewColumns( TableDiff pTableDiff, String pRuleOld )
+  {
+    List<String> lRuleParts = splitRuleParts( pRuleOld );
+
+    return !pTableDiff.columnsDiff.stream()//
+    .filter( p -> !p.isNew )//
+    .filter( p -> lRuleParts.contains( p.nameOld ) )//
+    .findAny()//
+    .isPresent();
   }
 }

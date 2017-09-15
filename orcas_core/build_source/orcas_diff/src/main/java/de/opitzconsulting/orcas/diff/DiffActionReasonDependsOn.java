@@ -3,11 +3,14 @@ package de.opitzconsulting.orcas.diff;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jdom2.Element;
-
 public class DiffActionReasonDependsOn extends DiffActionReason
 {
   private List<DiffActionReason> diffActionReasonDependsOnList = new ArrayList<>();
+
+  public List<DiffActionReason> getDiffActionReasonDependsOnList()
+  {
+    return diffActionReasonDependsOnList;
+  }
 
   public DiffActionReasonDependsOn( DiffReasonKey pDiffReasonKey, List<DiffActionReason> pDiffActionReasonDependsOnList )
   {
@@ -16,21 +19,30 @@ public class DiffActionReasonDependsOn extends DiffActionReason
   }
 
   @Override
-  public Element getJdomElement( boolean pIncludeKey )
-  {
-    Element lReturn = super.getJdomElement( pIncludeKey );
-
-    for( DiffActionReason lDiffActionReason : diffActionReasonDependsOnList )
-    {
-      lReturn.addContent( lDiffActionReason.getJdomElement( true ) );
-    }
-
-    return lReturn;
-  }
-
-  @Override
   protected String getTypeString()
   {
     return "dependent";
+  }
+
+  @Override
+  public boolean equals( Object pOther )
+  {
+    if( !super.equals( pOther ) )
+    {
+      return false;
+    }
+
+    DiffActionReasonDependsOn lOther = (DiffActionReasonDependsOn) pOther;
+
+    if( diffActionReasonDependsOnList.size() != lOther.diffActionReasonDependsOnList.size() )
+    {
+      return false;
+    }
+
+    return !diffActionReasonDependsOnList//
+    .stream()//
+    .filter( p -> !lOther.diffActionReasonDependsOnList.contains( p ) )//
+    .findAny()//
+    .isPresent();
   }
 }

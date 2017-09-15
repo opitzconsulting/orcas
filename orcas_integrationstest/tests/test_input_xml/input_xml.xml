@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff-actions>
+  <diff-action key="drop:table_column:TAB_DEL_COL.COL_DEFAULT">
+    <diff-action-reason type="surplus" key="table_column:TAB_DEL_COL.COL_DEFAULT"/>
+    <statement>alter table TAB_DEL_COL add col_add varchar2(1)</statement>
+  </diff-action>
+</diff-actions>

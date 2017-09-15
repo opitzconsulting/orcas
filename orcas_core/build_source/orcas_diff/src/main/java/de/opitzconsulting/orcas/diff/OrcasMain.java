@@ -3,11 +3,9 @@ package de.opitzconsulting.orcas.diff;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.jdom2.Element;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
-
+import de.opitzconsulting.orcas.diff.DiffAction.Statement;
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
@@ -58,7 +56,7 @@ public class OrcasMain extends Orcas
 
             _log.debug( "cleanupValues" );
             DiffRepository.getModelMerge().cleanupValues( lSollModel );
-            
+
             DiffResult lDiffResult = new OrcasDiff( pCallableStatementProvider, getParameters(), getDatabaseHandler() ).compare( lSollModel, lDatabaseModel );
 
             handleDiffResult( getParameters(), pCallableStatementProvider, lDiffResult );
@@ -92,39 +90,76 @@ public class OrcasMain extends Orcas
     return pSyexModel;
   }
 
-  private void handleDiffResult( Parameters pParameters, CallableStatementProvider pCallableStatementProvider, DiffResult pDiffResult ) throws FileNotFoundException
+  private void handleDiffResult( Parameters pParameters, CallableStatementProvider pCallableStatementProvider, DiffResult pOriginalDiffResult ) throws FileNotFoundException
   {
+    DiffResult lDiffResult = pOriginalDiffResult;
+
+    if( pParameters.getXmlInputFile() != null )
+    {
+      logInfo( "applying xml input file: " + pParameters.getXmlInputFile() );
+      lDiffResult = handleXmlInputFile( lDiffResult, getXmlLogFileHandler().parseXml( pParameters.getXmlInputFile() ) );
+    }
+
     List<String> lScriptLines = new ArrayList<String>();
 
-    logXml( pDiffResult );
-
-    for( DiffAction lDiffAction : pDiffResult.getDiffActions() )
+    if( getParameters().getXmlLogFile() != null )
     {
-      // lScriptLines.add( "-- " + lDiffAction.getTextKey() );
-      // logInfo( lDiffAction.getTextKey() );
+      getXmlLogFileHandler().logXml( lDiffResult, getParameters().getXmlLogFile() );
+    }
 
-      for( String lStatement : lDiffAction.getStatements() )
+    for( DiffAction lDiffAction : lDiffResult.getDiffActions() )
+    {
+      for( Statement lStatementClass : lDiffAction.getStatements() )
       {
+        if( lStatementClass.isFailure() )
+        {
+          throw new RuntimeException( lStatementClass.getComment() + ":" + lStatementClass.getStatement() );
+        }
+      }
+    }
+
+    for( DiffAction lDiffAction : lDiffResult.getDiffActions() )
+    {
+      for( Statement lStatementClass : lDiffAction.getStatements() )
+      {
+        String lStatement = lStatementClass.getStatement();
+
         int lMaxLineLength = 2000;
 
         lStatement = addLineBreaksIfNeeded( lStatement, lMaxLineLength );
+        String lStatementToExecute = lStatement;
 
-        if( lStatement.endsWith( ";" ) )
+        if( !lStatementClass.isIgnore() || getParameters().isLogIgnoredStatements() )
         {
-          lScriptLines.add( lStatement );
-          lScriptLines.add( "/" );
-          logInfo( lStatement );
-          logInfo( "/" );
-        }
-        else
-        {
-          lScriptLines.add( lStatement + ";" );
-          logInfo( lStatement + ";" );
+          if( lStatementClass.isIgnore() )
+          {
+            lStatement = "-- ignore-" + lStatementClass.getComment() + ": " + lStatement;
+          }
+          else
+          {
+            if( lStatementClass.getComment() != null )
+            {
+              lStatement = lStatement + " -- " + lStatementClass.getComment();
+            }
+          }
+
+          if( lStatement.endsWith( ";" ) )
+          {
+            lScriptLines.add( lStatement );
+            lScriptLines.add( "/" );
+            logInfo( lStatement );
+            logInfo( "/" );
+          }
+          else
+          {
+            lScriptLines.add( lStatement + ";" );
+            logInfo( lStatement + ";" );
+          }
         }
 
-        if( !pParameters.isLogonly() )
+        if( !pParameters.isLogonly() && !lStatementClass.isIgnore() )
         {
-          new WrapperExecuteStatement( lStatement, pCallableStatementProvider ).execute();
+          new WrapperExecuteStatement( lStatementToExecute, pCallableStatementProvider ).execute();
         }
       }
     }
@@ -135,29 +170,82 @@ public class OrcasMain extends Orcas
     }
   }
 
-  private void logXml( DiffResult pDiffResult )
+  private XmlLogFileHandler getXmlLogFileHandler()
   {
-    Element lDiffActionsElement = new Element( "diff-actions" );
-    for( DiffAction lDiffAction : pDiffResult.getDiffActions() )
+    return new XmlLogFileHandler();
+  }
+
+  private boolean isInList( DiffActionReason pDiffActionReason, List<DiffActionReason> pDiffActionReasonList )
+  {
+    return pDiffActionReasonList//
+    .stream()//
+    .filter( p -> p.equals( pDiffActionReason ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  private boolean isAnyNotInDiffActionReasonList( DiffAction pDiffAction1, DiffAction pDiffAction2 )
+  {
+    return pDiffAction1.getDiffActionReasons()//
+    .stream()//
+    .filter( p -> !isInList( p, pDiffAction2.getDiffActionReasons() ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  private void checkSameDiffReasons( DiffAction pOriginalDiffAction, DiffAction pInputDiffAction )
+  {
+    if( isAnyNotInDiffActionReasonList( pOriginalDiffAction, pInputDiffAction ) || isAnyNotInDiffActionReasonList( pInputDiffAction, pOriginalDiffAction ) )
     {
-      Element lDiffActionElement = new Element( "diff-action" );
-      lDiffActionsElement.addContent( lDiffActionElement );
-      lDiffActionElement.setAttribute( "key", lDiffAction.getTextKey() );
+      throw getXmlLogFileHandler().createDiffReasonsDifferentExcepotion( pOriginalDiffAction.getDiffActionReasons(), pInputDiffAction.getDiffActionReasons() );
+    }
+  }
 
-      for( DiffActionReason lDiffActionReason : lDiffAction.getDiffActionReasons() )
-      {
-        lDiffActionElement.addContent( lDiffActionReason.getJdomElement( false ) );
-      }
+  private DiffAction handleXmlInputFile( DiffAction pOriginalDiffAction, List<DiffAction> pInputDiffActions )
+  {
+    List<DiffAction> lMatchingInputDiffActions = pInputDiffActions//
+    .stream()//
+    .filter( p -> p.getTextKey().equals( pOriginalDiffAction.getTextKey() ) )//
+    .collect( Collectors.toList() );
 
-      for( String lStatement : lDiffAction.getStatements() )
-      {
-        Element lStatementElement = new Element( "statement" );
-        lDiffActionElement.addContent( lStatementElement );
-        lStatementElement.addContent( lStatement );
-      }
+    if( lMatchingInputDiffActions.size() > 1 )
+    {
+      throw getXmlLogFileHandler().createDuplicateDiffActionException( lMatchingInputDiffActions );
     }
 
-    logInfo( new XMLOutputter( Format.getPrettyFormat() ).outputString( lDiffActionsElement ) );
+    if( lMatchingInputDiffActions.size() == 1 )
+    {
+      DiffAction lMatchingInputDiffAction = lMatchingInputDiffActions.get( 0 );
+
+      checkSameDiffReasons( pOriginalDiffAction, lMatchingInputDiffAction );
+
+      pInputDiffActions.remove( lMatchingInputDiffAction );
+
+      return lMatchingInputDiffAction;
+    }
+    else
+    {
+      return pOriginalDiffAction;
+    }
+  }
+
+  private DiffResult handleXmlInputFile( DiffResult pOriginalDiffResult, DiffResult pInputDiffResult )
+  {
+    List<DiffAction> lInputDiffActionList = new ArrayList<>( pInputDiffResult.getDiffActions() );
+
+    List<DiffAction> lDiffActions = new ArrayList<>();
+
+    pOriginalDiffResult.getDiffActions().forEach( p ->
+    {
+      lDiffActions.add( handleXmlInputFile( p, lInputDiffActionList ) );
+    } );
+
+    if( !lInputDiffActionList.isEmpty() )
+    {
+      throw getXmlLogFileHandler().createSurplusDiffActionException( lInputDiffActionList );
+    }
+
+    return new DiffResult( lDiffActions );
   }
 
   private void doSchemaSync( final Parameters pParameters ) throws Exception

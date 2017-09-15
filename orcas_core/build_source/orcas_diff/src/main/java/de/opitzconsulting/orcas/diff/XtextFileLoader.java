@@ -2,12 +2,12 @@ package de.opitzconsulting.orcas.diff;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -65,7 +65,10 @@ public abstract class XtextFileLoader<T extends EObject>
     for( File lFile : pModelFiles )
     {
       T lLoadModelDslFile = loadModelDslFile( lFile, pParameters, lResourceSet, lLoadOptions, lCounter++ );
-      combinModelResults( lReturn, lLoadModelDslFile );
+      if( lLoadModelDslFile != null )
+      {
+        combinModelResults( lReturn, lLoadModelDslFile );
+      }
     }
 
     return lReturn;
@@ -76,7 +79,6 @@ public abstract class XtextFileLoader<T extends EObject>
   protected abstract T createModelInstance();
 
   protected abstract String getXtextExpectedFileEnding();
-  
 
   private T loadModelDslFile( File pFile, Parameters pParameters, XtextResourceSet pResourceSet, Map<Object, Object> pLoadOptions, int pCounter )
   {
@@ -84,8 +86,15 @@ public abstract class XtextFileLoader<T extends EObject>
     try
     {
       loadFileIntoResource( pFile, pLoadOptions, lResource );
+      EList<EObject> lContents = lResource.getContents();
+
+      if( lContents.isEmpty() )
+      {
+        return null;
+      }
+
       @SuppressWarnings( "unchecked" )
-      T lModel = (T) lResource.getContents().get( 0 );
+      T lModel = (T) lContents.get( 0 );
 
       if( !lResource.getErrors().isEmpty() )
       {

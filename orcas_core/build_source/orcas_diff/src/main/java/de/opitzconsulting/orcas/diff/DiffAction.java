@@ -7,7 +7,7 @@ public class DiffAction
 {
   private DiffReasonKey diffReasonKey;
   private DiffReasonType diffReasonType;
-  private List<String> statements = new ArrayList<>();
+  private List<Statement> statements = new ArrayList<>();
   private List<DiffActionReason> diffActionReasons = new ArrayList<>();
 
   public DiffAction( DiffReasonKey pDiffReasonKey, DiffReasonType pDiffReasonType )
@@ -16,9 +16,34 @@ public class DiffAction
     diffReasonType = pDiffReasonType;
   }
 
+  public DiffReasonKey getDiffReasonKey()
+  {
+    return diffReasonKey;
+  }
+
   public void addStatement( String pStatement )
   {
-    statements.add( pStatement );
+    statements.add( new Statement( pStatement ) );
+  }
+
+  public void addStatement( String pStatement, String pComment )
+  {
+    statements.add( new Statement( pStatement, pComment ) );
+  }
+
+  public void addIgnoredStatement( String pStatement, String pIgnoreReason )
+  {
+    statements.add( new Statement( pStatement, true, false, pIgnoreReason ) );
+  }
+
+  public void addFailureStatement( String pStatement, String pFailureReason )
+  {
+    statements.add( new Statement( pStatement, false, true, pFailureReason ) );
+  }
+
+  public DiffReasonType getDiffReasonType()
+  {
+    return diffReasonType;
   }
 
   public void addDiffActionReason( DiffActionReason pDiffActionReason )
@@ -31,12 +56,26 @@ public class DiffAction
     CREATE, RECREATE, RECREATE_CREATE, ALTER, DROP, RECREATE_DROP
   }
 
+  public static DiffAction parseFromTextKey( String pTextKey )
+  {
+    String[] lSplit = pTextKey.split( ":" );
+    String lDiffReasonType = lSplit[0];
+    String lDiffReasonKey = lSplit[1] + ":" + lSplit[2];
+
+    return new DiffAction( DiffReasonKey.createByTextKey( lDiffReasonKey ), DiffReasonType.valueOf( lDiffReasonType.toUpperCase() ) );
+  }
+
   public String getTextKey()
   {
     return diffReasonType.name().toLowerCase() + ":" + diffReasonKey.getTextKey();
   }
 
-  public List<String> getStatements()
+  public boolean hasNoStatements()
+  {
+    return getStatements().isEmpty();
+  }
+
+  public List<Statement> getStatements()
   {
     return statements;
   }
@@ -44,5 +83,53 @@ public class DiffAction
   public List<DiffActionReason> getDiffActionReasons()
   {
     return diffActionReasons;
+  }
+
+  public static class Statement
+  {
+    private String statement;
+    private boolean isIgnore;
+    private boolean isFailure;
+
+    public boolean isFailure()
+    {
+      return isFailure;
+    }
+
+    private String comment;
+
+    public String getStatement()
+    {
+      return statement;
+    }
+
+    public boolean isIgnore()
+    {
+      return isIgnore;
+    }
+
+    public String getComment()
+    {
+      return comment;
+    }
+
+    public Statement( String pStatement )
+    {
+      statement = pStatement;
+    }
+
+    public Statement( String pStatement, String pComment )
+    {
+      statement = pStatement;
+      comment = pComment;
+    }
+
+    public Statement( String pStatement, boolean pIsIgnore, boolean pIsFailure, String pComment )
+    {
+      statement = pStatement;
+      isIgnore = pIsIgnore;
+      isFailure = pIsFailure;
+      comment = pComment;
+    }
   }
 }

@@ -4,15 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.jdom2.Element;
 
 public class DiffActionReasonDifferent extends DiffActionReason
 {
   private List<String> diffReasonDetails = new ArrayList<>();
 
+  public List<String> getDiffReasonDetails()
+  {
+    return diffReasonDetails;
+  }
+
   public DiffActionReasonDifferent( DiffReasonKey pDiffReasonKey )
   {
     super( pDiffReasonKey );
+  }
+
+  public DiffActionReasonDifferent( DiffReasonKey pDiffReasonKey, List<String> pDiffReasonDetails )
+  {
+    super( pDiffReasonKey );
+
+    diffReasonDetails = pDiffReasonDetails;
   }
 
   public void addDiffReasonDetail( EStructuralFeature pDiffReasonDetail )
@@ -21,23 +32,21 @@ public class DiffActionReasonDifferent extends DiffActionReason
   }
 
   @Override
-  public Element getJdomElement( boolean pIncludeKey )
-  {
-    Element lReturn = super.getJdomElement( pIncludeKey );
-
-    for( String lDiffReasonDetail : diffReasonDetails )
-    {
-      Element lStatementElement = new Element( "reason-detail" );
-      lReturn.addContent( lStatementElement );
-      lStatementElement.addContent( lDiffReasonDetail );
-    }
-
-    return lReturn;
-  }
-
-  @Override
   protected String getTypeString()
   {
     return "different";
+  }
+
+  @Override
+  public boolean equals( Object pOther )
+  {
+    if( !super.equals( pOther ) )
+    {
+      return false;
+    }
+
+    DiffActionReasonDifferent lOther = (DiffActionReasonDifferent) pOther;
+
+    return diffReasonDetails.equals( lOther.diffReasonDetails );
   }
 }

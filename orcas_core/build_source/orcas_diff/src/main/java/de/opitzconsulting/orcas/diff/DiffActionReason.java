@@ -1,27 +1,45 @@
 package de.opitzconsulting.orcas.diff;
 
-import org.jdom2.Element;
-
 public abstract class DiffActionReason
 {
   private DiffReasonKey diffReasonKey;
+
+  public DiffReasonKey getDiffReasonKey()
+  {
+    return diffReasonKey;
+  }
 
   public DiffActionReason( DiffReasonKey pDiffReasonKey )
   {
     diffReasonKey = pDiffReasonKey;
   }
 
-  public Element getJdomElement( boolean pIncludeKey )
+  @Override
+  public int hashCode()
   {
-    Element lReturn = new Element( "diff-action-reason" );
+    return 1;
+  }
 
-    lReturn.setAttribute( "type", getTypeString() );
-    if( pIncludeKey )
+  @Override
+  public boolean equals( Object pOther )
+  {
+    if( getClass() != pOther.getClass() )
     {
-      lReturn.setAttribute( "key", diffReasonKey.getTextKey() );
+      return false;
+    }
+    DiffActionReason lOther = (DiffActionReason) pOther;
+
+    if( diffReasonKey == null )
+    {
+      return lOther.diffReasonKey == null;
     }
 
-    return lReturn;
+    if( lOther.diffReasonKey == null )
+    {
+      return false;
+    }
+
+    return diffReasonKey.getTextKey().equals( lOther.diffReasonKey.getTextKey() );
   }
 
   protected abstract String getTypeString();

@@ -30,8 +30,8 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setScriptpostfix( project.orcasconfiguration.scriptfolderPostfix );
     lParametersCall.setScriptfolderrecursive( project.orcasconfiguration.scriptfolderrecursive );
 
-    lParametersCall.setSpoolfile( project.file(project.orcasconfiguration.spoolfile).toString() );
-    lParametersCall.setSpoolfolder( project.file(project.orcasconfiguration.spoolfolder).toString() );
+    lParametersCall.setSpoolfile( convertOutFile(project.orcasconfiguration.spoolfile) );
+    lParametersCall.setSpoolfolder( convertOutFile(project.orcasconfiguration.spoolfolder) );
     lParametersCall.setLogname( getLogname() );
     lParametersCall.setLoglevel( project.orcasconfiguration.loglevel );
 
@@ -47,6 +47,13 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setExcludewheresequence( project.orcasconfiguration.excludewheresequence );
     lParametersCall.setDateformat( project.orcasconfiguration.dateformat );
     lParametersCall.setExtensionParameter( project.orcasconfiguration.extensionparameter );
+    lParametersCall.setAdditionsOnly( project.orcasconfiguration.additionsonly );
+    lParametersCall.setLogIgnoredStatements( project.orcasconfiguration.logignoredstatements );
+    lParametersCall.setXmlLogFile( convertOutFile( project.orcasconfiguration.xmllogfile ) );
+    lParametersCall.setXmlInputFile( project.orcasconfiguration.xmlinputfile );
+    lParametersCall.setSetUnusedInsteadOfDropColumn( project.orcasconfiguration.setunusedinsteadofdropcolumn );
+    lParametersCall.setCreateIndexOnline( project.orcasconfiguration.indexonlinecreate );
+    lParametersCall.setMinimizeStatementCount( project.orcasconfiguration.minimizestatementcount );
 
     if( project.orcasconfiguration.extensionHandler != null )
     {
@@ -113,6 +120,16 @@ public abstract class BaseOrcasTask extends DefaultTask
   protected void parameters( def pParameterModifier )
   {
     parameterModifier = pParameterModifier;
+  }
+
+  protected String convertOutFile( def pFile )
+  {
+    if( pFile == null )
+    {
+      return null;
+    }
+
+    return project.buildDir.toString() + "/" + pFile;
   }
 
   protected ParametersCall modifyParameters( ParametersCall pParameters )
