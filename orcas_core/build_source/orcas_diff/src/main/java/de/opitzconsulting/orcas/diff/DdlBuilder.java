@@ -1037,6 +1037,17 @@ public abstract class DdlBuilder
   public void alterIndexIfNeeded( StatementBuilderAlter p1, IndexDiff pIndexDiff, boolean pIsIndexmovetablespace, String pDefaultTablespace )
   {
     p1.handleAlterBuilder()//
+    .ifDifferent( INDEX_OR_UNIQUE_KEY__CONS_NAME )//
+    .handle( p ->
+    {
+      p.stmtStart( "alter index" );
+      p.stmtAppend( pIndexDiff.consNameOld );
+      p.stmtAppend( "rename to" );
+      p.stmtAppend( pIndexDiff.consNameNew );
+      p.stmtDone();
+    } );
+
+    p1.handleAlterBuilder()//
     .ifDifferent( INDEX__PARALLEL )//
     .ifDifferent( INDEX__PARALLEL_DEGREE )//
     .ignoreIfAdditionsOnly()//
@@ -2056,5 +2067,88 @@ public abstract class DdlBuilder
     .filter( p -> lRuleParts.contains( p.nameOld ) )//
     .findAny()//
     .isPresent();
+  }
+
+  public void alterUniqueKeyIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
+  {
+    p1.handleAlterBuilder()//
+    .ifDifferent( INDEX_OR_UNIQUE_KEY__CONS_NAME )//
+    .handle( p ->
+    {
+      p.stmtStartAlterTableNoCombine( pTableDiff );
+      p.stmtAppend( "rename constraint" );
+      p.stmtAppend( pUniqueKeyDiff.consNameOld );
+      p.stmtAppend( "to" );
+      p.stmtAppend( pUniqueKeyDiff.consNameNew );
+      p.stmtDone();
+
+      // different name matching only allowed with implicit index names, the
+      // index needs to be renamed as well
+      renameUnderlyingIndex( p, pTableDiff, pUniqueKeyDiff.consNameOld, pUniqueKeyDiff.consNameNew );
+    } );
+  }
+
+  public void alterForeignKeyIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff, DataHandler pDataHandler )
+  {
+    p1.handleAlterBuilder()//
+    .ifDifferent( FOREIGN_KEY__CONS_NAME )//
+    .handle( p ->
+    {
+      p.stmtStartAlterTableNoCombine( pTableDiff );
+      p.stmtAppend( "rename constraint" );
+      p.stmtAppend( pForeignKeyDiff.consNameOld );
+      p.stmtAppend( "to" );
+      p.stmtAppend( pForeignKeyDiff.consNameNew );
+      p.stmtDone();
+    } );
+  }
+
+  public void alterPrimarykeyIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff )
+  {
+    p1.handleAlterBuilder()//
+    .ifDifferent( PRIMARY_KEY__CONS_NAME )//
+    .handle( p ->
+    {
+      p.stmtStartAlterTableNoCombine( pTableDiff );
+      p.stmtAppend( "rename constraint" );
+      p.stmtAppend( pTableDiff.primary_keyDiff.consNameOld );
+      p.stmtAppend( "to" );
+      p.stmtAppend( pTableDiff.primary_keyDiff.consNameNew );
+      p.stmtDone();
+
+      renameUnderlyingIndex( p, pTableDiff, pTableDiff.primary_keyDiff.consNameOld, pTableDiff.primary_keyDiff.consNameNew );
+    } );
+  }
+
+  private void renameUnderlyingIndex( StatementBuilder p, TableDiff pTableDiff, String pIndexNameOld, String pIndexNameNew )
+  {
+    String lSchemaPrefix = "";
+
+    int lIndexOf = pTableDiff.nameNew.indexOf( '.' );
+    if( lIndexOf != -1 )
+    {
+      lSchemaPrefix = pTableDiff.nameNew.substring( 0, lIndexOf + 1 );
+    }
+
+    p.stmtStart( "alter index" );
+    p.stmtAppend( lSchemaPrefix + pTableDiff.primary_keyDiff.consNameOld );
+    p.stmtAppend( "rename to" );
+    p.stmtAppend( lSchemaPrefix + pTableDiff.primary_keyDiff.consNameNew );
+    p.stmtDone();
+  }
+
+  public void updateConstraintIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, ConstraintDiff pConstraintDiff )
+  {
+    p1.handleAlterBuilder()//
+    .ifDifferent( CONSTRAINT__CONS_NAME )//
+    .handle( p ->
+    {
+      p.stmtStartAlterTableNoCombine( pTableDiff );
+      p.stmtAppend( "rename constraint" );
+      p.stmtAppend( pConstraintDiff.consNameOld );
+      p.stmtAppend( "to" );
+      p.stmtAppend( pConstraintDiff.consNameNew );
+      p.stmtDone();
+    } );
   }
 }

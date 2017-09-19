@@ -51,6 +51,7 @@ public class OrcasDiff
   private DiffAction activeDiffAction;
   private DataHandler dataHandler;
   private AlterTableCombiner currentAlterTableCombiner;
+  private List<String> oldNames = new ArrayList<>();
 
   public OrcasDiff( CallableStatementProvider pCallableStatementProvider, Parameters pParameters, DatabaseHandler pDatabaseHandler )
   {
@@ -126,6 +127,64 @@ public class OrcasDiff
     return pValue1 < pValue2;
   }
 
+  private void loadOldNames( ModelDiff pModelDiff )
+  {
+    pModelDiff.model_elementsTableDiff//
+    .stream()//
+    .filter( p -> p.isOld )//
+    .forEach( lTableDiff ->
+    {
+      oldNames.add( lTableDiff.nameOld );
+
+      lTableDiff.columnsDiff//
+      .stream()//
+      .filter( p -> p.isOld )//
+      .map( p -> p.nameOld )//
+      .forEach( oldNames::add );
+
+      Optional.of( lTableDiff.primary_keyDiff )//
+      .filter( p -> p.isOld )//
+      .map( p -> p.consNameOld )//
+      .ifPresent( oldNames::add );
+
+      lTableDiff.ind_uksIndexDiff//
+      .stream()//
+      .filter( p -> p.isOld )//
+      .map( p -> p.consNameOld )//
+      .forEach( oldNames::add );
+
+      lTableDiff.ind_uksUniqueKeyDiff//
+      .stream()//
+      .filter( p -> p.isOld )//
+      .map( p -> p.consNameOld )//
+      .forEach( oldNames::add );
+
+      lTableDiff.constraintsDiff//
+      .stream()//
+      .filter( p -> p.isOld )//
+      .map( p -> p.consNameOld )//
+      .forEach( oldNames::add );
+
+      lTableDiff.foreign_keysDiff//
+      .stream()//
+      .filter( p -> p.isOld )//
+      .map( p -> p.consNameOld )//
+      .forEach( oldNames::add );
+    } );
+
+    pModelDiff.model_elementsMviewDiff//
+    .stream()//
+    .filter( p -> p.isOld )//
+    .map( p -> p.mview_nameOld )//
+    .forEach( oldNames::add );
+
+    pModelDiff.model_elementsSequenceDiff//
+    .stream()//
+    .filter( p -> p.isOld )//
+    .map( p -> p.sequence_nameOld )//
+    .forEach( oldNames::add );
+  }
+
   private void updateIsRecreateNeeded( ModelDiff pModelDiff )
   {
     for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
@@ -155,7 +214,7 @@ public class OrcasDiff
         }
 
         setRecreateNeededFor( lTableDiff.primary_keyDiff )//
-        .ifDifferent( PRIMARY_KEY__CONS_NAME )//
+        .ifDifferentName( PRIMARY_KEY__CONS_NAME, oldNames, lTableDiff.primary_keyDiff.consNameNew, lTableDiff.primary_keyDiff.consNameOld )//
         .ifDifferent( PRIMARY_KEY__PK_COLUMNS )//
         .ifDifferent( PRIMARY_KEY__REVERSE )//
         .ifDifferent( PRIMARY_KEY__TABLESPACE, _parameters.isIndexmovetablespace() )//
@@ -168,6 +227,7 @@ public class OrcasDiff
           boolean lNoDomainIndex = lIndexDiff.domain_index_expressionNew == null;
 
           setRecreateNeededFor( lIndexDiff )//
+          .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldNames, lIndexDiff.consNameNew, lIndexDiff.consNameOld )//
           .ifDifferent( INDEX__INDEX_COLUMNS, lNoDomainIndex )//
           .ifDifferent( INDEX__FUNCTION_BASED_EXPRESSION, lNoDomainIndex )//
           .ifDifferent( INDEX__DOMAIN_INDEX_EXPRESSION, lNoDomainIndex )//
@@ -182,6 +242,7 @@ public class OrcasDiff
         for( UniqueKeyDiff lUniqueKeyDiff : lTableDiff.ind_uksUniqueKeyDiff )
         {
           setRecreateNeededFor( lUniqueKeyDiff )//
+          .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldNames, lUniqueKeyDiff.consNameNew, lUniqueKeyDiff.consNameOld )//
           .ifDifferent( UNIQUE_KEY__UK_COLUMNS )//
           .ifDifferent( UNIQUE_KEY__INDEXNAME )//
           .ifDifferent( INDEX_OR_UNIQUE_KEY__TABLESPACE, _parameters.isIndexmovetablespace() )//
@@ -203,6 +264,7 @@ public class OrcasDiff
         for( ConstraintDiff lConstraintDiff : lTableDiff.constraintsDiff )
         {
           setRecreateNeededFor( lConstraintDiff )//
+          .ifDifferentName( CONSTRAINT__CONS_NAME, oldNames, lConstraintDiff.consNameNew, lConstraintDiff.consNameOld )//
           .ifDifferent( CONSTRAINT__RULE )//
           .ifDifferent( CONSTRAINT__DEFERRTYPE )//
           .calculate();
@@ -211,7 +273,7 @@ public class OrcasDiff
         for( ForeignKeyDiff lForeignKeyDiff : lTableDiff.foreign_keysDiff )
         {
           setRecreateNeededFor( lForeignKeyDiff )//
-          .ifDifferent( FOREIGN_KEY__CONS_NAME )//
+          .ifDifferentName( FOREIGN_KEY__CONS_NAME, oldNames, lForeignKeyDiff.consNameNew, lForeignKeyDiff.consNameOld )//
           .ifDifferent( FOREIGN_KEY__DEFERRTYPE )//
           .ifDifferent( FOREIGN_KEY__DELETE_RULE )//
           .ifDifferent( FOREIGN_KEY__DEST_COLUMNS )//
@@ -255,11 +317,10 @@ public class OrcasDiff
       }
     }
 
-    for(
-
-    MviewDiff lMviewDiff : pModelDiff.model_elementsMviewDiff )
+    for( MviewDiff lMviewDiff : pModelDiff.model_elementsMviewDiff )
     {
       setRecreateNeededFor( lMviewDiff )//
+      .ifDifferentName( MVIEW__MVIEW_NAME, oldNames, lMviewDiff.mview_nameNew, lMviewDiff.mview_nameOld )//
       .ifDifferent( MVIEW__TABLESPACE )//
       .ifDifferent( MVIEW__BUILD_MODE )//
       .ifX( p ->
@@ -381,6 +442,7 @@ public class OrcasDiff
     recreateNeededRegistry = new RecreateNeededRegistry( diffReasonKeyRegistry );
 
     _log.debug( "update recreate" );
+    loadOldNames( lModelDiff );
     updateIsRecreateNeeded( lModelDiff );
 
     implicitDropList = new ArrayList<>();
@@ -748,7 +810,7 @@ public class OrcasDiff
           }
           else
           {
-            createIfNeeded( lForeignKeyDiff, p -> ddlBuilder.createForeignKey( p, lTableDiff, lForeignKeyDiff, _parameters.getMultiSchema(), dataHandler ) );
+            createIfNeededOrAlter( lForeignKeyDiff, p -> ddlBuilder.createForeignKey( p, lTableDiff, lForeignKeyDiff, _parameters.getMultiSchema(), dataHandler ), p -> ddlBuilder.alterForeignKeyIfNeeded( p, lTableDiff, lForeignKeyDiff, dataHandler ) );
           }
         }
       } );
@@ -807,7 +869,9 @@ public class OrcasDiff
 
   private void handleUniquekey( TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
   {
-    createIfNeeded( pUniqueKeyDiff, p -> ddlBuilder.createUniqueKey( p, pTableDiff, pUniqueKeyDiff ) );
+    createIfNeededOrAlter( pUniqueKeyDiff, //
+    p -> ddlBuilder.createUniqueKey( p, pTableDiff, pUniqueKeyDiff ), //
+    p -> ddlBuilder.alterUniqueKeyIfNeeded( p, pTableDiff, pUniqueKeyDiff ) );
   }
 
   private void handleIndex( TableDiff pTableDiff, IndexDiff pIndexDiff )
@@ -824,12 +888,12 @@ public class OrcasDiff
 
   private void handleConstraint( TableDiff pTableDiff, ConstraintDiff pConstraintDiff )
   {
-    createIfNeeded( pConstraintDiff, p -> ddlBuilder.createConstraint( p, pTableDiff, pConstraintDiff ) );
+    createIfNeededOrAlter( pConstraintDiff, p -> ddlBuilder.createConstraint( p, pTableDiff, pConstraintDiff ), p -> ddlBuilder.updateConstraintIfNeeded( p, pTableDiff, pConstraintDiff ) );
   }
 
   private void handlePrimarykey( TableDiff pTableDiff )
   {
-    createIfNeeded( pTableDiff.primary_keyDiff, p -> ddlBuilder.createPrimarykey( p, pTableDiff ) );
+    createIfNeededOrAlter( pTableDiff.primary_keyDiff, p -> ddlBuilder.createPrimarykey( p, pTableDiff ), p -> ddlBuilder.alterPrimarykeyIfNeeded( p, pTableDiff ) );
   }
 
   static ForeignKeyDiff getFkForRefPartitioning( TableDiff pTableDiff )

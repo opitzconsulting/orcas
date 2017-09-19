@@ -1,7 +1,8 @@
 create table tab_check_number
 ( 	
     id		number(5),
-	constraint check_size check (ID BETWEEN 1 AND 10000)
+	constraint check_size check (ID BETWEEN 1 AND 10000),
+	constraint wrong_name check (ID BETWEEN 1 AND 99)
 );
 	
 create table tab_check_list_elements

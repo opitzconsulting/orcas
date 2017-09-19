@@ -2,9 +2,14 @@ package de.opitzconsulting.orcas.diff;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
+import org.eclipse.emf.common.util.EList;
+
+import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnMerge;
+import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
 import de.opitzconsulting.orcas.orig.diff.ConstraintDiff;
 import de.opitzconsulting.orcas.orig.diff.ConstraintMerge;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
@@ -34,6 +39,7 @@ import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.origOrcasDsl.BuildModeType;
 import de.opitzconsulting.origOrcasDsl.CharType;
 import de.opitzconsulting.origOrcasDsl.Column;
+import de.opitzconsulting.origOrcasDsl.ColumnRef;
 import de.opitzconsulting.origOrcasDsl.CompressForType;
 import de.opitzconsulting.origOrcasDsl.CompressType;
 import de.opitzconsulting.origOrcasDsl.Constraint;
@@ -228,8 +234,6 @@ public class InitDiffRepository
       }
     } );
     DiffRepository.getVarrayStorageMerge().column_nameIsConvertToUpperCase = true;
-    
-
 
     DiffRepository.setInlineCommentMerge( new InlineCommentMerge()
     {
@@ -320,32 +324,11 @@ public class InitDiffRepository
       @Override
       public List<Integer> getMergeResult( List<ForeignKeyDiff> pNewDiffValues, List<ForeignKey> pOldValues )
       {
-        List<Integer> lReturn = new ArrayList<Integer>();
-
-        for( ForeignKey lOldValue : pOldValues )
-        {
-          boolean lFound = false;
-
-          int i = 0;
-          for( ForeignKeyDiff pNewDiffValue : pNewDiffValues )
-          {
-            if( pNewDiffValue.consNameNew.equals( lOldValue.getConsName() ) )
-            {
-              lReturn.add( i );
-              lFound = true;
-              break;
-            }
-
-            i++;
-          }
-
-          if( !lFound )
-          {
-            lReturn.add( null );
-          }
-        }
-
-        return lReturn;
+        return getMergeResultByFunction( pNewDiffValues, pOldValues, //
+        ( pNewDiffValue, pOldValue ) -> pNewDiffValue.consNameNew.equals( pOldValue.getConsName() ), //
+        ( pNewDiffValue, pOldValue ) -> isColumnsEqual( pNewDiffValue.srcColumnsDiff, pOldValue.getSrcColumns() )//
+                                        && isColumnsEqual( pNewDiffValue.destColumnsDiff, pOldValue.getDestColumns() ) //
+                                        && pNewDiffValue.destTableNew.equals( pOldValue.getDestTable() ) );
       }
     } );
     DiffRepository.getForeignKeyMerge().consNameIsConvertToUpperCase = true;
@@ -449,32 +432,9 @@ public class InitDiffRepository
       @Override
       public List<Integer> getMergeResult( List<ConstraintDiff> pNewDiffValues, List<Constraint> pOldValues )
       {
-        List<Integer> lReturn = new ArrayList<Integer>();
-
-        for( Constraint lOldValue : pOldValues )
-        {
-          boolean lFound = false;
-
-          int i = 0;
-          for( ConstraintDiff pNewDiffValue : pNewDiffValues )
-          {
-            if( pNewDiffValue.consNameNew.equals( lOldValue.getConsName() ) )
-            {
-              lReturn.add( i );
-              lFound = true;
-              break;
-            }
-
-            i++;
-          }
-
-          if( !lFound )
-          {
-            lReturn.add( null );
-          }
-        }
-
-        return lReturn;
+        return getMergeResultByFunction( pNewDiffValues, pOldValues, //
+        ( pNewDiffValue, pOldValue ) -> pNewDiffValue.consNameNew.equals( pOldValue.getConsName() ), //
+        ( pNewDiffValue, pOldValue ) -> pNewDiffValue.ruleNew.equals( pOldValue.getRule() ) );
       }
     } );
     DiffRepository.getConstraintMerge().consNameIsConvertToUpperCase = true;
@@ -496,32 +456,9 @@ public class InitDiffRepository
       @Override
       public List<Integer> getMergeResult( List<UniqueKeyDiff> pNewDiffValues, List<UniqueKey> pOldValues )
       {
-        List<Integer> lReturn = new ArrayList<Integer>();
-
-        for( UniqueKey lOldValue : pOldValues )
-        {
-          boolean lFound = false;
-
-          int i = 0;
-          for( UniqueKeyDiff pNewDiffValue : pNewDiffValues )
-          {
-            if( pNewDiffValue.consNameNew.equals( lOldValue.getConsName() ) )
-            {
-              lReturn.add( i );
-              lFound = true;
-              break;
-            }
-
-            i++;
-          }
-
-          if( !lFound )
-          {
-            lReturn.add( null );
-          }
-        }
-
-        return lReturn;
+        return getMergeResultByFunction( pNewDiffValues, pOldValues //
+        , ( pNewDiffValue, pOldValue ) -> pNewDiffValue.consNameNew.equals( pOldValue.getConsName() ) //
+        , ( pNewDiffValue, pOldValue ) -> pNewDiffValue.indexnameNew == null && pOldValue.getIndexname() == null && isColumnsEqual( pNewDiffValue.uk_columnsDiff, pOldValue.getUk_columns() ) );
       }
     } );
     DiffRepository.getUniqueKeyMerge().indexnameIsConvertToUpperCase = true;
@@ -606,32 +543,9 @@ public class InitDiffRepository
       @Override
       public List<Integer> getMergeResult( List<IndexDiff> pNewDiffValues, List<Index> pOldValues )
       {
-        List<Integer> lReturn = new ArrayList<Integer>();
-
-        for( Index lOldValue : pOldValues )
-        {
-          boolean lFound = false;
-
-          int i = 0;
-          for( IndexDiff pNewDiffValue : pNewDiffValues )
-          {
-            if( pNewDiffValue.consNameNew.equals( lOldValue.getConsName() ) )
-            {
-              lReturn.add( i );
-              lFound = true;
-              break;
-            }
-
-            i++;
-          }
-
-          if( !lFound )
-          {
-            lReturn.add( null );
-          }
-        }
-
-        return lReturn;
+        return getMergeResultByFunction( pNewDiffValues, pOldValues //
+        , ( pNewDiffValue, pOldValue ) -> pNewDiffValue.consNameNew.equals( pOldValue.getConsName() ) //
+        , ( pNewDiffValue, pOldValue ) -> pNewDiffValue.function_based_expressionNew == null && pNewDiffValue.domain_index_expressionNew == null && isColumnsEqual( pNewDiffValue.index_columnsDiff, pOldValue.getIndex_columns() ) );
       }
     } );
     DiffRepository.getIndexMerge().compressionDefaultValue = CompressType.NOCOMPRESS;
@@ -803,5 +717,69 @@ public class InitDiffRepository
   public static String getDefaultTablespace()
   {
     return defaultTablespace;
+  }
+
+  private static boolean isColumnsEqual( List<ColumnRefDiff> pNewColumnsDiff, EList<ColumnRef> pOldColumns )
+  {
+    if( pNewColumnsDiff.size() != pOldColumns.size() )
+    {
+      return false;
+    }
+
+    for( int i = 0; i < pNewColumnsDiff.size(); i++ )
+    {
+      if( !pNewColumnsDiff.get( i ).column_nameNew.equals( pOldColumns.get( i ).getColumn_name() ) )
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private static <T_DIFF extends AbstractDiff, T> List<Integer> getMergeResultByFunction( List<T_DIFF> pNewDiffValues, List<T> pOldValues, BiFunction<T_DIFF, T, Boolean> pPrimaryCompare, BiFunction<T_DIFF, T, Boolean> pSecondaryCompare )
+  {
+    List<Integer> lReturn = new ArrayList<Integer>();
+
+    for( T lOldValue : pOldValues )
+    {
+      boolean lFound = false;
+
+      int i = 0;
+      for( T_DIFF pNewDiffValue : pNewDiffValues )
+      {
+        if( pPrimaryCompare.apply( pNewDiffValue, lOldValue ) )
+        {
+          lReturn.add( i );
+          lFound = true;
+          break;
+        }
+
+        i++;
+      }
+
+      if( !lFound )
+      {
+        i = 0;
+        for( T_DIFF pNewDiffValue : pNewDiffValues )
+        {
+          if( pSecondaryCompare.apply( pNewDiffValue, lOldValue ) )
+          {
+            lReturn.add( i );
+            lFound = true;
+            break;
+          }
+
+          i++;
+        }
+
+        if( !lFound )
+        {
+          lReturn.add( null );
+        }
+      }
+    }
+
+    return lReturn;
   }
 }

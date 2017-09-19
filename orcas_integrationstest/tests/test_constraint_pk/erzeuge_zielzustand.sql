@@ -7,7 +7,7 @@ create table tab_new_pk
 create table tab_wrong_pk_name
 (
   id number(15) not null,
-  constraint tab_wrong_pk_name primary key (id)
+  constraint wrong_pk_name primary key (id)
 );
 
 create table tab_wrong_pk_reverse
