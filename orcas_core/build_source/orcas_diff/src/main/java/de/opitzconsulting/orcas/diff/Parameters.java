@@ -111,6 +111,7 @@ public abstract class Parameters
   protected boolean _setUnusedInsteadOfDropColumn = false;
   protected boolean _createIndexOnline = false;
   protected boolean _minimizeStatementCount = false;
+  protected boolean _cleanupFkValuesOnDropmode = false;
 
   private InfoLogHandler _infoLogHandler;
   private String _removePromptPrefix;
@@ -281,6 +282,11 @@ public abstract class Parameters
   public boolean isDropmode()
   {
     return checkNull( _dropmode );
+  }
+
+  public boolean isCleanupFkValuesOnDropmode()
+  {
+    return isDropmode() && _cleanupFkValuesOnDropmode;
   }
 
   public boolean isIndexparallelcreate()

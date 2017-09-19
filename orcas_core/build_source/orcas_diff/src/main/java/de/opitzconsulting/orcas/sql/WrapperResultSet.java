@@ -53,6 +53,8 @@ public abstract class WrapperResultSet extends WrapperPreparedStatement
   protected final void usePreparedStatement( PreparedStatement pPreparedStatement ) throws SQLException
   {
     ResultSet lResultSet = null;
+    
+    pPreparedStatement.setFetchSize( 1000 );
 
     setParameter( pPreparedStatement );
 

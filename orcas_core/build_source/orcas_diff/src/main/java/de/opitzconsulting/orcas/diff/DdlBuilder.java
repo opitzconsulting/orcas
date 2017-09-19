@@ -1690,7 +1690,7 @@ public abstract class DdlBuilder
     String lFkFalseDataSelect;
     String lFkFalseDataWherePart;
 
-    if( pDataHandler.isDropmode() && pTableDiff.isOld )
+    if( parameters.isCleanupFkValuesOnDropmode() && pTableDiff.isOld )
     {
       lFkFalseDataWherePart = null;
       for( ColumnRefDiff lColumnRefDiffSrc : pForeignKeyDiff.srcColumnsDiff )

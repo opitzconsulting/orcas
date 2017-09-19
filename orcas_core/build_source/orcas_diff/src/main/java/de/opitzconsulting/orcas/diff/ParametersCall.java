@@ -7,6 +7,11 @@ import java.util.List;
 
 public class ParametersCall extends Parameters
 {
+  public void setCleanupFkValuesOnDropmode( boolean pIsCleanupFkValuesOnDropmode )
+  {
+    _cleanupFkValuesOnDropmode = pIsCleanupFkValuesOnDropmode;
+  }
+
   public void setMinimizeStatementCount( boolean pMinimizeStatementCount )
   {
     _minimizeStatementCount = pMinimizeStatementCount;

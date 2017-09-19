@@ -150,6 +150,8 @@ public class OrcasCoreIntegrationTest
     private String _expectfailure;
     public boolean _minimizeStatementCount;
 
+    private boolean _cleanupfkvaluesondropmode;
+
     public TestSetup( String pTestName )
     {
       try
@@ -182,6 +184,8 @@ public class OrcasCoreIntegrationTest
         _indexonlinecreation = getBooleanProperty( "indexonlinecreation", lDefaultProperties, lTestProperties );
         _expectfailure = getProperty( "expectfailure", lDefaultProperties, lTestProperties );
         _minimizeStatementCount = getBooleanProperty( "minimizestatementcount", lDefaultProperties, lTestProperties );
+        _cleanupfkvaluesondropmode = getBooleanProperty( "cleanupfkvaluesondropmode", lDefaultProperties, lTestProperties );
+
         if( _expectfailure != null && _expectfailure.trim().length() == 0 )
         {
           _expectfailure = null;
@@ -450,6 +454,7 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setXmlLogFile( lXmlLogFile );
     lParametersCall.setXmlInputFile( pXmlInputFile );
     lParametersCall.setMinimizeStatementCount( _testSetup._minimizeStatementCount );
+    lParametersCall.setCleanupFkValuesOnDropmode( _testSetup._cleanupfkvaluesondropmode );
 
     lParametersCall.setAdditionalOrcasExtensionFactory( new AdditionalExtensionFactory()
     {

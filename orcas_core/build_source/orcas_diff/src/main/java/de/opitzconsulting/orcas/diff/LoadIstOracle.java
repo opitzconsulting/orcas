@@ -125,9 +125,14 @@ public class LoadIstOracle extends LoadIst
   private Log _log = LogFactory.getLog( OrcasMain.class );
 
   private Map<String, List<String>> includeMap = new HashMap<String, List<String>>();
+  private List<String> excludeIndexList;
 
   private Map<String, Object> constraintMapForFK = new HashMap<String, Object>();
   private Map<String, Table> constraintTableMapForFK = new HashMap<String, Table>();
+
+  private Map<String, String> constraintTypes = new HashMap<String, String>();
+
+  private Map<String, Table> tableCache = new HashMap<String, Table>();
 
   private Parameters _parameters;
 
@@ -153,6 +158,7 @@ public class LoadIstOracle extends LoadIst
     isIgnoredSequence( "TEST", "TEST" );
     isIgnoredMView( "TEST", "TEST" );
     isIgnoredTable( "TEST", "TEST" );
+    isIgnoredIndex( "TEST", "TEST", "TEST" );
 
     _oracleMajorVersion = loadOracleMajorVersion();
 
@@ -306,14 +312,49 @@ public class LoadIstOracle extends LoadIst
     return isIgnored( pString, pOwner, "@", "MATERIALIZED VIEW" );
   }
 
-  private boolean isIgnoredTable( String pString, String pOwner )
+  private boolean isIgnoredTable( String pTableName, String pOwner )
   {
-    if( pString.equalsIgnoreCase( OrcasScriptRunner.ORCAS_UPDATES_TABLE ) )
+    if( pTableName.equalsIgnoreCase( OrcasScriptRunner.ORCAS_UPDATES_TABLE ) )
     {
       return true;
     }
 
-    return isIgnored( pString, pOwner, _parameters.getExcludewheretable(), "TABLE" );
+    return isIgnored( pTableName, pOwner, _parameters.getExcludewheretable(), "TABLE" );
+  }
+
+  private String getIndexNameWithOwner( String pTableName, String pIndexName, String pOwner )
+  {
+    return getNameWithOwner( pTableName + "." + pIndexName, pOwner );
+  }
+
+  private boolean isIgnoredIndex( String pTableName, String pIndexName, String pOwner )
+  {
+    if( excludeIndexList == null )
+    {
+      excludeIndexList = new ArrayList<String>();
+
+      String lSql = "select constraint_name," + //
+                    "       table_name," + //
+                    "       owner" + //
+                    "  from " + getDataDictionaryView( "constraints" ) + //
+                    " where constraint_type in ( 'U', 'P' )";
+
+      new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+      {
+        @Override
+        protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+        {
+          excludeIndexList.add( getIndexNameWithOwner( pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ), pResultSet.getString( "owner" ) ) );
+        }
+      }.execute();
+    }
+
+    if( excludeIndexList.contains( getIndexNameWithOwner( pTableName, pIndexName, pOwner ) ) )
+    {
+      return true;
+    }
+
+    return isIgnoredTable( pTableName, pOwner );
   }
 
   private int toInt( BigDecimal pBigDecimal )
@@ -351,6 +392,9 @@ public class LoadIstOracle extends LoadIst
           Sequence lSequence = new SequenceImpl();
 
           lSequence.setSequence_name( getNameWithOwner( pResultSet.getString( "sequence_name" ), pResultSet.getString( "owner" ) ) );
+
+          logLoading( "sequence", lSequence.getSequence_name() );
+
           lSequence.setIncrement_by( toInt( pResultSet.getBigDecimal( "increment_by" ) ) );
           if( pWithSequeneceMayValueSelect )
           {
@@ -382,6 +426,16 @@ public class LoadIstOracle extends LoadIst
         }
       }
     }.execute();
+  }
+
+  private void logLoading( String pType, String pName )
+  {
+    _log.debug( "laoding: " + pType + " " + pName );
+  }
+
+  private void logLoading( String pType, String pName, String pDetailName )
+  {
+    logLoading( pType, pName + "." + pDetailName );
   }
 
   private void loadMViewsIntoModel( final Model pModel )
@@ -598,12 +652,21 @@ public class LoadIstOracle extends LoadIst
 
   private Table findTable( Model pModel, String pTablename, String pOwner )
   {
+    String lTableNameWithOwner = getNameWithOwner( pTablename, pOwner );
+
+    if( tableCache.containsKey( lTableNameWithOwner ) )
+    {
+      return tableCache.get( lTableNameWithOwner );
+    }
+
     for( ModelElement lModelElement : pModel.getModel_elements() )
     {
       if( lModelElement instanceof Table )
       {
-        if( ((Table) lModelElement).getName().equals( getNameWithOwner( pTablename, pOwner ) ) )
+        if( ((Table) lModelElement).getName().equals( lTableNameWithOwner ) )
         {
+          tableCache.put( lTableNameWithOwner, (Table) lModelElement );
+
           return (Table) lModelElement;
         }
       }
@@ -657,6 +720,19 @@ public class LoadIstOracle extends LoadIst
     throw new IllegalStateException( "FK not found: " + pTablename + " " + pForeignkeyname );
   }
 
+  private Column findColumn( Model pModel, String pTablename, String pOwner, String pColumnName )
+  {
+    for( Column lColumn : findTable( pModel, pTablename, pOwner ).getColumns() )
+    {
+      if( lColumn.getName().equals( pColumnName ) )
+      {
+        return lColumn;
+      }
+    }
+
+    throw new IllegalStateException( "column not found: " + pTablename + " " + pColumnName );
+  }
+
   private void loadTableColumnsIntoModel( final Model pModel )
   {
     String lSql;
@@ -675,7 +751,6 @@ public class LoadIstOracle extends LoadIst
              "        char_length," + //
              "        nullable," + //
              "        char_used," + //
-             "        data_default," + //
              "        column_id," + //
              "        default_on_null, " + //
              "        generation_type " + //
@@ -702,7 +777,6 @@ public class LoadIstOracle extends LoadIst
              "        char_length," + //
              "        nullable," + //
              "        char_used," + //
-             "        data_default," + //
              "        column_id," + //
              "        null default_on_null," + //
              "        null generation_type" + //
@@ -731,15 +805,7 @@ public class LoadIstOracle extends LoadIst
 
           lColumn.setName( pResultSet.getString( "column_name" ) );
 
-          lColumn.setDefault_value( pResultSet.getString( "data_default" ) );
-          if( lColumn.getDefault_value() != null )
-          {
-            lColumn.setDefault_value( lColumn.getDefault_value().trim() );
-            if( lColumn.getDefault_value().length() == 0 || lColumn.getDefault_value().equalsIgnoreCase( "NULL" ) )
-            {
-              lColumn.setDefault_value( null );
-            }
-          }
+          logLoading( "column", pResultSet.getString( "table_name" ), lColumn.getName() );
 
           lColumn.setNotnull( "N".equals( pResultSet.getString( "nullable" ) ) );
 
@@ -839,16 +905,9 @@ public class LoadIstOracle extends LoadIst
              */
           }
 
-          if( lColumn.getDefault_value() != null && lColumn.getDefault_value().contains( "ISEQ$$" ) )
-          {
-            lColumn.setDefault_value( null );
-          }
-
           String lGenerationType = pResultSet.getString( "generation_type" );
           if( lGenerationType != null )
           {
-            lColumn.setDefault_value( null );
-
             ColumnIdentity lColumnIdentity = new ColumnIdentityImpl();
             lColumn.setIdentity( lColumnIdentity );
 
@@ -871,6 +930,51 @@ public class LoadIstOracle extends LoadIst
         }
       }
     }.execute();
+
+    lSql = "" + //
+           " select tab_cols.table_name," + //
+           "        tab_cols.owner," + //
+           "        tab_cols.column_name," + //
+           "        data_default" + //
+           "   from " + getDataDictionaryView( "tab_cols" ) + //
+           "  where hidden_column = 'NO'" + //
+           "    and data_default is not null" + //
+           "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
+        {
+          Column lColumn = findColumn( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ), pResultSet.getString( "column_name" ) );
+
+          logLoading( "column-default", pResultSet.getString( "table_name" ), lColumn.getName() );
+
+          lColumn.setDefault_value( pResultSet.getString( "data_default" ) );
+          if( lColumn.getDefault_value() != null )
+          {
+            lColumn.setDefault_value( lColumn.getDefault_value().trim() );
+            if( lColumn.getDefault_value().length() == 0 || lColumn.getDefault_value().equalsIgnoreCase( "NULL" ) )
+            {
+              lColumn.setDefault_value( null );
+            }
+          }
+
+          if( lColumn.getDefault_value() != null && lColumn.getDefault_value().contains( "ISEQ$$" ) )
+          {
+            lColumn.setDefault_value( null );
+          }
+
+          if( lColumn.getIdentity() != null )
+          {
+            lColumn.setDefault_value( null );
+          }
+        }
+      }
+    }.execute();
+
   }
 
   private String getDataDictionaryView( String pName )
@@ -984,15 +1088,6 @@ public class LoadIstOracle extends LoadIst
                   "        compression" + //
                   "   from " + getDataDictionaryView( "indexes" ) + //
                   "  where generated = 'N'" + //
-                  "    and (index_name,table_name,owner) not in" + //
-                  "        (" + //
-                  "        select constraint_name," + //
-                  "               table_name," + //
-                  "               owner" + //
-                  "          from " + getDataDictionaryView( "constraints" ) + //
-                  "         where constraint_type in ( 'U', 'P' )" + //
-                  "           and constraint_name = constraints.index_name" + //
-                  "        )" + //
                   "  order by table_name," + //
                   "           index_name" + //
                   "";
@@ -1002,11 +1097,13 @@ public class LoadIstOracle extends LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ) ) )
+        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "table_owner" ) ) )
         {
           final Index lIndex = new IndexImpl();
 
           lIndex.setConsName( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ) );
+
+          logLoading( "index", pResultSet.getString( "table_name" ), lIndex.getConsName() );
 
           lIndex.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
@@ -1081,15 +1178,6 @@ public class LoadIstOracle extends LoadIst
                   "  where generated = 'N'" + //
                   "     and ind_columns.index_name = indexes.index_name" + //
                   "     and ind_columns.owner = indexes.owner" + //
-                  "     and (indexes.index_name,indexes.table_name,indexes.owner) not in" + //
-                  "         (" + //
-                  "         select constraint_name," + //
-                  "                table_name," + //
-                  "                owner" + //
-                  "           from " + getDataDictionaryView( "constraints" ) + //
-                  "          where constraint_type in ( 'U', 'P' )" + //
-                  "            and constraint_name = constraints.index_name" + //
-                  "          )" + //
                   "   order by table_name," + //
                   "            index_name," + //
                   "            column_position" + //
@@ -1099,11 +1187,13 @@ public class LoadIstOracle extends LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
+        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ) )
         {
           ColumnRef lColumnRef = new ColumnRefImpl();
 
           lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
+
+          logLoading( "index-column", pResultSet.getString( "table_name" ), lColumnRef.getColumn_name() );
 
           findIndex( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ).getIndex_columns().add( lColumnRef );
         }
@@ -1163,15 +1253,6 @@ public class LoadIstOracle extends LoadIst
                   "  where generated = 'N'" + //
                   "    and ind_expressions.index_name = indexes.index_name" + //
                   "    and ind_expressions.owner = indexes.owner" + //
-                  "    and (indexes.index_name,indexes.table_name,indexes.owner) not in" + //
-                  "        (" + //
-                  "        select constraint_name," + //
-                  "               table_name," + //
-                  "               owner" + //
-                  "          from " + getDataDictionaryView( "constraints" ) + //
-                  "         where constraint_type in ( 'U', 'P' )" + //
-                  "           and constraint_name = constraints.index_name" + //
-                  "        )" + //
                   "  order by table_name," + //
                   "           index_name," + //
                   "           column_position" + //
@@ -1182,7 +1263,7 @@ public class LoadIstOracle extends LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
+        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ) )
         {
           setIndexColumnExpression( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ), pResultSet.getInt( "column_position" ), pResultSet.getString( "column_expression" ), pResultSet.getInt( "max_column_position_for_index" ) );
         }
@@ -1206,11 +1287,11 @@ public class LoadIstOracle extends LoadIst
                   "        constraints.generated," + //
                   "        constraints.index_name," + //
                   "        indexes.tablespace_name," + //
-                  "        indexes.index_type," + //
-                  "        search_condition" + //
+                  "        indexes.index_type" + //
                   "   from " + getDataDictionaryView( "constraints" ) + //
                   "   left outer join " + getDataDictionaryView( "indexes" ) + " on (constraints.index_name = indexes.index_name " + //
                   " and constraints.owner = indexes.owner)" + //
+                  " where constraint_type != 'C'" + //
                   "  order by table_name," + //
                   "           constraint_name" + //
                   "";
@@ -1224,40 +1305,19 @@ public class LoadIstOracle extends LoadIst
         {
           Table lTable = findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) );
 
-          EnableType lEnableType;
-          if( "ENABLED".equals( pResultSet.getString( "status" ) ) )
-          {
-            lEnableType = EnableType.ENABLE;
-          }
-          else
-          {
-            lEnableType = EnableType.DISABLE;
-          }
+          EnableType lEnableType = getEnableType( pResultSet );
 
-          DeferrType lDeferrType;
-          if( "DEFERRABLE".equals( pResultSet.getString( "deferrable" ) ) )
-          {
-            if( "DEFERRED".equals( pResultSet.getString( "deferred" ) ) )
-            {
-              lDeferrType = DeferrType.DEFERRED;
-            }
-            else
-            {
-              lDeferrType = DeferrType.IMMEDIATE;
-            }
-          }
-          else
-          {
-            lDeferrType = null;
-          }
+          DeferrType lDeferrType = getDeferrType( pResultSet );
 
-          boolean lGeneratedName = "GENERATED NAME".equals( pResultSet.getString( "generated" ) );
+          logLoading( "constraint-" + pResultSet.getString( "constraint_type" ), pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ) );
+
+          constraintTypes.put( getIndexNameWithOwner( pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ), pResultSet.getString( "owner" ) ), pResultSet.getString( "constraint_type" ) );
 
           if( "P".equals( pResultSet.getString( "constraint_type" ) ) )
           {
             PrimaryKey lPrimaryKey = new PrimaryKeyImpl();
 
-            if( !lGeneratedName )
+            if( !isGeneratedName( pResultSet.getString( "generated" ) ) )
             {
               lPrimaryKey.setConsName( pResultSet.getString( "constraint_name" ) );
             }
@@ -1325,43 +1385,112 @@ public class LoadIstOracle extends LoadIst
 
             lTable.getForeign_keys().add( lForeignKey );
           }
-
-          if( "C".equals( pResultSet.getString( "constraint_type" ) ) )
-          {
-            if( !lGeneratedName )
-            {
-              Constraint lConstraint = new ConstraintImpl();
-
-              lConstraint.setConsName( pResultSet.getString( "constraint_name" ) );
-
-              lConstraint.setStatus( lEnableType );
-
-              lConstraint.setDeferrtype( lDeferrType );
-
-              lConstraint.setRule( pResultSet.getString( "search_condition" ) );
-
-              lTable.getConstraints().add( lConstraint );
-            }
-          }
         }
       }
     }.execute();
+
+    lSql = "" + //
+           " select constraints.table_name," + //
+           "        constraints.owner," + //
+           "        constraint_name," + //
+           "        delete_rule," + //
+           "        deferrable," + //
+           "        deferred," + //
+           "        constraints.status," + //
+           "        constraints.generated," + //
+           "        search_condition" + //
+           "   from " + getDataDictionaryView( "constraints" ) + //
+           " where constraint_type = 'C'" + //
+           "  order by table_name," + //
+           "           constraint_name" + //
+           "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
+        {
+          Table lTable = findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) );
+
+          EnableType lEnableType = getEnableType( pResultSet );
+
+          DeferrType lDeferrType = getDeferrType( pResultSet );
+
+          boolean lGeneratedName = isGeneratedName( pResultSet.getString( "generated" ) );
+
+          logLoading( "constraint-C", pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ) );
+
+          if( !lGeneratedName )
+          {
+            Constraint lConstraint = new ConstraintImpl();
+
+            lConstraint.setConsName( pResultSet.getString( "constraint_name" ) );
+
+            lConstraint.setStatus( lEnableType );
+
+            lConstraint.setDeferrtype( lDeferrType );
+
+            lConstraint.setRule( pResultSet.getString( "search_condition" ) );
+
+            lTable.getConstraints().add( lConstraint );
+          }
+        }
+      }
+
+    }.execute();
+  }
+
+  private boolean isGeneratedName( String pName ) throws SQLException
+  {
+    return "GENERATED NAME".equals( pName );
+  }
+
+  private DeferrType getDeferrType( ResultSet pResultSet ) throws SQLException
+  {
+    DeferrType lDeferrType;
+    if( "DEFERRABLE".equals( pResultSet.getString( "deferrable" ) ) )
+    {
+      if( "DEFERRED".equals( pResultSet.getString( "deferred" ) ) )
+      {
+        lDeferrType = DeferrType.DEFERRED;
+      }
+      else
+      {
+        lDeferrType = DeferrType.IMMEDIATE;
+      }
+    }
+    else
+    {
+      lDeferrType = null;
+    }
+    return lDeferrType;
+  }
+
+  private EnableType getEnableType( ResultSet pResultSet ) throws SQLException
+  {
+    EnableType lEnableType;
+    if( "ENABLED".equals( pResultSet.getString( "status" ) ) )
+    {
+      lEnableType = EnableType.ENABLE;
+    }
+    else
+    {
+      lEnableType = EnableType.DISABLE;
+    }
+    return lEnableType;
   }
 
   private void loadTableConstraintColumnsIntoModel( final Model pModel )
   {
     String lSql = "" + //
-                  " select cons_columns.table_name," + //
-                  "        cons_columns.owner," + //
+                  " select table_name," + //
+                  "        owner," + //
                   "        column_name," + //
                   "        position," + //
-                  "        cons_columns.constraint_name," + //
-                  "        constraint_type" + //
-                  "   from " + getDataDictionaryView( "cons_columns" ) + "," + //
-                  "       " + getDataDictionaryView( "constraints" ) + //
-                  " where cons_columns.constraint_name = constraints.constraint_name" + //
-                  "   and cons_columns.table_name = constraints.table_name" + //
-                  "   and cons_columns.owner = constraints.owner" + //
+                  "        constraint_name" + //
+                  "   from " + getDataDictionaryView( "cons_columns" ) + //
                   " order by table_name," + //
                   "          constraint_name," + //
                   "          position" + //
@@ -1374,21 +1503,25 @@ public class LoadIstOracle extends LoadIst
       {
         if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
+          String lString = constraintTypes.get( getIndexNameWithOwner( pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ), pResultSet.getString( "owner" ) ) );
+
           ColumnRef lColumnRef = new ColumnRefImpl();
 
           lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
 
-          if( "P".equals( pResultSet.getString( "constraint_type" ) ) )
+          logLoading( "constraint-column-" + lString, pResultSet.getString( "table_name" ), lColumnRef.getColumn_name() );
+
+          if( "P".equals( lString ) )
           {
             findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getPrimary_key().getPk_columns().add( lColumnRef );
           }
 
-          if( "U".equals( pResultSet.getString( "constraint_type" ) ) )
+          if( "U".equals( lString ) )
           {
             findUniqueKey( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ), pResultSet.getString( "constraint_name" ) ).getUk_columns().add( lColumnRef );
           }
 
-          if( "R".equals( pResultSet.getString( "constraint_type" ) ) )
+          if( "R".equals( lString ) )
           {
             findForeignKey( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ), pResultSet.getString( "constraint_name" ) ).getSrcColumns().add( lColumnRef );
           }
@@ -1626,6 +1759,8 @@ public class LoadIstOracle extends LoadIst
 
           lTable.setName( getNameWithOwner( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) );
 
+          logLoading( "table", lTable.getName() );
+
           if( pResultSet.getString( "tablespace_name" ) != null )
           {
             lTable.setTablespace( pResultSet.getString( "tablespace_name" ) );
@@ -1684,6 +1819,8 @@ public class LoadIstOracle extends LoadIst
               lTable.setCompressionFor( pCompressForType );
             }
           } );
+
+          tableCache.put( lTable.getName(), lTable );
         }
       }
     }.execute();
