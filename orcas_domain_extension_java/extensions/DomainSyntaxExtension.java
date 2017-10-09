@@ -115,6 +115,12 @@ public class DomainSyntaxExtension extends BaseSyntaxExtension
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "|" ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
       addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "constant_part", "GenNameRulePart", true ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
+      addField( lRuleNormal, new NewFieldDataType( "regexp", "STRING", true ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
+      addField( lRuleNormal, new NewFieldDataType( "replace", "STRING", true ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")?" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")?" ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")" ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")" ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );

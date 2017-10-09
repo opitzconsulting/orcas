@@ -41,9 +41,9 @@ public class DomainExtensionHelper extends OrcasBaseExtensionWithParameter
     {
       if( lModelElement instanceof Domain )
       {
-        if( ((Domain)lModelElement).getName().equals( pDomainName ) )
+        if( ((Domain) lModelElement).getName().equals( pDomainName ) )
         {
-          return (Domain)lModelElement;
+          return (Domain) lModelElement;
         }
       }
     }
@@ -57,9 +57,9 @@ public class DomainExtensionHelper extends OrcasBaseExtensionWithParameter
     {
       if( lModelElement instanceof ColumnDomain )
       {
-        if( ((ColumnDomain)lModelElement).getName().equals( pColumnDomainName ) )
+        if( ((ColumnDomain) lModelElement).getName().equals( pColumnDomainName ) )
         {
-          return (ColumnDomain)lModelElement;
+          return (ColumnDomain) lModelElement;
         }
       }
     }
@@ -73,7 +73,12 @@ public class DomainExtensionHelper extends OrcasBaseExtensionWithParameter
     private boolean removeNext = false;
     private String removeToken = "";
 
-    void handle_next_token( String pToken )
+    void handleNextToken( String pToken, String pRegexpReplace, String pRegexpReplacement )
+    {
+      handleNextToken( pRegexpReplace == null ? pToken : pToken.replaceAll( pRegexpReplace, pRegexpReplacement == null ? "" : pRegexpReplacement ) );
+    }
+
+    void handleNextToken( String pToken )
     {
       if( pToken != null )
       {
@@ -107,7 +112,7 @@ public class DomainExtensionHelper extends OrcasBaseExtensionWithParameter
 
     for( GenNameRule lGenNameRule : pGenNameRuleList )
     {
-      lTokenBuilder.handle_next_token( lGenNameRule.getConstant_name() );
+      lTokenBuilder.handleNextToken( lGenNameRule.getConstant_name() );
 
       if( lGenNameRule.getConstant_part() == GenNameRulePart.COLUMN_NAME )
       {
@@ -115,7 +120,7 @@ public class DomainExtensionHelper extends OrcasBaseExtensionWithParameter
         {
           throw new RuntimeException( "p_column_name invalid" + pAlias + pTableName );
         }
-        lTokenBuilder.handle_next_token( pColumnName );
+        lTokenBuilder.handleNextToken( pColumnName, lGenNameRule.getRegexp(), lGenNameRule.getReplace() );
       }
       if( lGenNameRule.getConstant_part() == GenNameRulePart.COLUMN_DOMAIN_NAME )
       {
@@ -123,7 +128,7 @@ public class DomainExtensionHelper extends OrcasBaseExtensionWithParameter
         {
           throw new RuntimeException( "p_column_domain_name invalid" + pColumnName + pTableName );
         }
-        lTokenBuilder.handle_next_token( pColumnDomainName );
+        lTokenBuilder.handleNextToken( pColumnDomainName, lGenNameRule.getRegexp(), lGenNameRule.getReplace() );
       }
       if( lGenNameRule.getConstant_part() == GenNameRulePart.TABLE_NAME )
       {
@@ -131,11 +136,11 @@ public class DomainExtensionHelper extends OrcasBaseExtensionWithParameter
         {
           throw new RuntimeException( "p_table_name invalid" + pColumnName + pAlias );
         }
-        lTokenBuilder.handle_next_token( pTableName );
+        lTokenBuilder.handleNextToken( pTableName, lGenNameRule.getRegexp(), lGenNameRule.getReplace() );
       }
       if( lGenNameRule.getConstant_part() == GenNameRulePart.ALIAS_NAME )
       {
-        lTokenBuilder.handle_next_token( pAlias );
+        lTokenBuilder.handleNextToken( pAlias, lGenNameRule.getRegexp(), lGenNameRule.getReplace() );
       }
       if( lGenNameRule.getConstant_part() == GenNameRulePart.REMOVE_NEXT )
       {

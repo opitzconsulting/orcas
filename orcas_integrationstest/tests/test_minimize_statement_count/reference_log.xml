@@ -1,79 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <diff-actions>
-  <diff-action key="alter:table:TAB_DEL_COL">
-    <diff-action-reason type="surplus" key="table_foreign_key:TAB_DEL_COL.DEL_FK_MULTI" />
-    <diff-action-reason type="surplus" key="table_foreign_key:TAB_DEL_COL.DEL_FK_SINGLE_DROP_TAB" />
-    <statement ignore="false" failure="false">alter table TAB_DEL_COL
+  <diff-action type="alter" object-type="table" object-name="TAB_DEL_COL">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="foreign_key" subobject-name="DEL_FK_MULTI" />
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="foreign_key" subobject-name="DEL_FK_SINGLE_DROP_TAB" />
+    <statement>alter table TAB_DEL_COL
   drop constraint DEL_FK_MULTI
   drop constraint DEL_FK_SINGLE_DROP_TAB</statement>
   </diff-action>
-  <diff-action key="drop:table:AAA_TAB_DROP">
-    <diff-action-reason type="surplus" key="table:AAA_TAB_DROP" />
-    <statement ignore="false" failure="false">drop table AAA_TAB_DROP</statement>
+  <diff-action type="drop" object-type="table" object-name="AAA_TAB_DROP">
+    <diff-action-reason type="surplus" object-type="table" object-name="AAA_TAB_DROP" />
+    <statement>drop table AAA_TAB_DROP</statement>
   </diff-action>
-  <diff-action key="alter:table:TAB_INS_COL">
-    <diff-action-reason type="missing" key="table_column:TAB_INS_COL.CHG_COL_ADD_NOT_NULL" />
-    <diff-action-reason type="missing" key="table_column:TAB_INS_COL.CHG_COL_ADD_DEFAULT" />
-    <statement ignore="false" failure="false">alter table TAB_INS_COL add ( CHG_COL_ADD_NOT_NULL NUMBER(15) , CHG_COL_ADD_DEFAULT NUMBER(15) )</statement>
+  <diff-action type="alter" object-type="table" object-name="TAB_INS_COL">
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_INS_COL" subobject-type="column" subobject-name="CHG_COL_ADD_NOT_NULL" />
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_INS_COL" subobject-type="column" subobject-name="CHG_COL_ADD_DEFAULT" />
+    <statement>alter table TAB_INS_COL add ( CHG_COL_ADD_NOT_NULL NUMBER(15) , CHG_COL_ADD_DEFAULT NUMBER(15) )</statement>
   </diff-action>
-  <diff-action key="alter:table:TAB_DEL_COL">
-    <diff-action-reason type="surplus" key="table_constraint:TAB_DEL_COL.DEL_CHECK_MULTI" />
-    <diff-action-reason type="surplus" key="table_unique_key:TAB_DEL_COL.DEL_UK_MULTI" />
-    <statement ignore="false" failure="false">alter table TAB_DEL_COL
+  <diff-action type="alter" object-type="table" object-name="TAB_DEL_COL">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="constraint" subobject-name="DEL_CHECK_MULTI" />
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="unique_key" subobject-name="DEL_UK_MULTI" />
+    <statement>alter table TAB_DEL_COL
   drop constraint DEL_CHECK_MULTI
   drop constraint DEL_UK_MULTI</statement>
   </diff-action>
-  <diff-action key="drop:table_index:TAB_DEL_COL.DEL_COL_MULTI_COLUMN">
-    <diff-action-reason type="surplus" key="table_index:TAB_DEL_COL.DEL_COL_MULTI_COLUMN" />
-    <statement ignore="false" failure="false">drop index DEL_COL_MULTI_COLUMN</statement>
+  <diff-action type="drop" object-type="table" object-name="TAB_DEL_COL" subobject-type="index" subobject-name="DEL_COL_MULTI_COLUMN">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="index" subobject-name="DEL_COL_MULTI_COLUMN" />
+    <statement>drop index DEL_COL_MULTI_COLUMN</statement>
   </diff-action>
-  <diff-action key="alter:table:TAB_DEL_COL">
-    <diff-action-reason type="surplus" key="table_column:TAB_DEL_COL.PKCOL" />
-    <diff-action-reason type="surplus" key="table_column:TAB_DEL_COL.COL_DEFAULT" />
-    <diff-action-reason type="surplus" key="table_column:TAB_DEL_COL.COL_NOT_NULL" />
-    <diff-action-reason type="surplus" key="table_column:TAB_DEL_COL.COL_NOT_NULL_DEFAULT" />
-    <statement ignore="false" failure="false">alter table TAB_DEL_COL drop (PKCOL,COL_DEFAULT,COL_NOT_NULL,COL_NOT_NULL_DEFAULT)</statement>
+  <diff-action type="alter" object-type="table" object-name="TAB_DEL_COL">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="column" subobject-name="PKCOL" />
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="column" subobject-name="COL_DEFAULT" />
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="column" subobject-name="COL_NOT_NULL" />
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="column" subobject-name="COL_NOT_NULL_DEFAULT" />
+    <statement>alter table TAB_DEL_COL drop (PKCOL,COL_DEFAULT,COL_NOT_NULL,COL_NOT_NULL_DEFAULT)</statement>
   </diff-action>
-  <diff-action key="drop:table_constraint:TAB_DEL_COL_NOCOMBINE.DEL_CHECK_NOCOMBINE">
-    <diff-action-reason type="surplus" key="table_constraint:TAB_DEL_COL_NOCOMBINE.DEL_CHECK_NOCOMBINE" />
-    <statement ignore="false" failure="false">alter table TAB_DEL_COL_NOCOMBINE drop constraint DEL_CHECK_NOCOMBINE</statement>
+  <diff-action type="drop" object-type="table" object-name="TAB_DEL_COL_NOCOMBINE" subobject-type="constraint" subobject-name="DEL_CHECK_NOCOMBINE">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL_NOCOMBINE" subobject-type="constraint" subobject-name="DEL_CHECK_NOCOMBINE" />
+    <statement>alter table TAB_DEL_COL_NOCOMBINE drop constraint DEL_CHECK_NOCOMBINE</statement>
   </diff-action>
-  <diff-action key="drop:table_column:TAB_DEL_COL_NOCOMBINE.COL_DROP">
-    <diff-action-reason type="surplus" key="table_column:TAB_DEL_COL_NOCOMBINE.COL_DROP" />
-    <statement ignore="false" failure="false">alter table TAB_DEL_COL_NOCOMBINE drop (COL_DROP)</statement>
+  <diff-action type="drop" object-type="table" object-name="TAB_DEL_COL_NOCOMBINE" subobject-type="column" subobject-name="COL_DROP">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL_NOCOMBINE" subobject-type="column" subobject-name="COL_DROP" />
+    <statement>alter table TAB_DEL_COL_NOCOMBINE drop (COL_DROP)</statement>
   </diff-action>
-  <diff-action key="alter:table:TAB_DEL_COL_NOCOMBINE">
-    <diff-action-reason type="missing" key="table_column:TAB_DEL_COL_NOCOMBINE.COL_NEW" />
-    <diff-action-reason type="missing" key="table_constraint:TAB_DEL_COL_NOCOMBINE.COL_NEW_CONS" />
-    <statement ignore="false" failure="false">alter table TAB_DEL_COL_NOCOMBINE
+  <diff-action type="alter" object-type="table" object-name="TAB_DEL_COL_NOCOMBINE">
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_DEL_COL_NOCOMBINE" subobject-type="column" subobject-name="COL_NEW" />
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_DEL_COL_NOCOMBINE" subobject-type="constraint" subobject-name="COL_NEW_CONS" />
+    <statement>alter table TAB_DEL_COL_NOCOMBINE
   add COL_NEW NUMBER(15)
   add constraint COL_NEW_CONS check (col_new in (id,8))</statement>
   </diff-action>
-  <diff-action key="alter:table:TAB_MAX_COMBINE">
-    <diff-action-reason type="different" key="table:TAB_MAX_COMBINE">
+  <diff-action type="alter" object-type="table" object-name="TAB_MAX_COMBINE">
+    <diff-action-reason type="different" object-type="table" object-name="TAB_MAX_COMBINE">
       <reason-detail>logging</reason-detail>
       <reason-detail>parallel_degree</reason-detail>
     </diff-action-reason>
-    <diff-action-reason type="different" key="table_constraint:TAB_MAX_COMBINE.MOD_CHECK">
+    <diff-action-reason type="different" object-type="table" object-name="TAB_MAX_COMBINE" subobject-type="constraint" subobject-name="MOD_CHECK">
       <reason-detail>deferrtype</reason-detail>
     </diff-action-reason>
-    <diff-action-reason type="surplus" key="table_constraint:TAB_MAX_COMBINE.DEL_CHECK" />
-    <diff-action-reason type="surplus" key="table_unique_key:TAB_MAX_COMBINE.DEL_UK" />
-    <statement ignore="false" failure="false">alter table TAB_MAX_COMBINE
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_MAX_COMBINE" subobject-type="constraint" subobject-name="DEL_CHECK" />
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_MAX_COMBINE" subobject-type="unique_key" subobject-name="DEL_UK" />
+    <statement>alter table TAB_MAX_COMBINE
   logging
   parallel 2
   drop constraint MOD_CHECK
   drop constraint DEL_CHECK
   drop constraint DEL_UK</statement>
   </diff-action>
-  <diff-action key="alter:table:TAB_MAX_COMBINE">
-    <diff-action-reason type="missing" key="table_column:TAB_MAX_COMBINE.COL_ADD" />
-    <diff-action-reason type="missing" key="table_constraint:TAB_MAX_COMBINE.ADD_CHECK" />
-    <diff-action-reason type="different" key="table_constraint:TAB_MAX_COMBINE.MOD_CHECK">
+  <diff-action type="alter" object-type="table" object-name="TAB_MAX_COMBINE">
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_MAX_COMBINE" subobject-type="column" subobject-name="COL_ADD" />
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_MAX_COMBINE" subobject-type="constraint" subobject-name="ADD_CHECK" />
+    <diff-action-reason type="different" object-type="table" object-name="TAB_MAX_COMBINE" subobject-type="constraint" subobject-name="MOD_CHECK">
       <reason-detail>deferrtype</reason-detail>
     </diff-action-reason>
-    <diff-action-reason type="missing" key="table_unique_key:TAB_MAX_COMBINE.ADD_UK" />
-    <statement ignore="false" failure="false">alter table TAB_MAX_COMBINE
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_MAX_COMBINE" subobject-type="unique_key" subobject-name="ADD_UK" />
+    <statement>alter table TAB_MAX_COMBINE
   add COL_ADD NUMBER(15)
   add constraint ADD_CHECK check (col_add in (col_drop_c,7))
   add constraint MOD_CHECK check (col_drop_c in (id,8)) deferrable initially deferred

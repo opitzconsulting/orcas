@@ -2131,9 +2131,9 @@ public abstract class DdlBuilder
     }
 
     p.stmtStart( "alter index" );
-    p.stmtAppend( lSchemaPrefix + pTableDiff.primary_keyDiff.consNameOld );
+    p.stmtAppend( lSchemaPrefix + pIndexNameOld );
     p.stmtAppend( "rename to" );
-    p.stmtAppend( lSchemaPrefix + pTableDiff.primary_keyDiff.consNameNew );
+    p.stmtAppend( lSchemaPrefix + pIndexNameNew );
     p.stmtDone();
   }
 

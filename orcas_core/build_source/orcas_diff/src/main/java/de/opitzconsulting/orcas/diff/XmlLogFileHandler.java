@@ -21,17 +21,25 @@ import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 public class XmlLogFileHandler
 {
   private static final String TAG_REASON_DETAIL = "reason-detail";
-  private static final String TAG_DIFF_ACTION_REASON = "diff-action-reason";
-  private static final String TAG_STATEMENT = "statement";
-  private static final String TAG_DIFF_ACTION = "diff-action";
-  private static final String TAG_DIFF_ACTIONS = "diff-actions";
 
-  private static final String ATTRIBUTE_COMMENT = "comment";
-  private static final String ATTRIBUTE_IGNORE = "ignore";
-  private static final String ATTRIBUTE_FAILURE = "failure";
-  private static final String ATTRIBUTE_KEY = "key";
-  private static final String ATTRIBUTE_ACTION_REASON_KEY = "key";
-  private static final String ATTRIBUTE_ACTION_REASON_TYPE = "type";
+  private static final String TAG_DIFF_ACTION_REASON = "diff-action-reason";
+
+  private static final String TAG_STATEMENT = "statement";
+  private static final String TAG_STATEMENT_ATTRIBUTE_COMMENT = "comment";
+  private static final String TAG_STATEMENT_ATTRIBUTE_IGNORE = "ignore";
+  private static final String TAG_STATEMENT_ATTRIBUTE_FAILURE = "failure";
+
+  private static final String TAG_DIFF_ACTION = "diff-action";
+  private static final String TAG_DIFF_ACTION_ATTRIBUTE_TYPE = "type";
+  private static final String TAG_DIFF_ACTION_ATTRIBUTE_RECREATE = "recreate";
+  private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_TYPE = "object-type";
+  private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME = "object-name";
+  private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE = "subobject-type";
+  private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME = "subobject-name";
+
+  private static final String TAG_DIFF_ACTION_REASON_ATTRIBUTE_TYPE = "type";
+
+  private static final String TAG_DIFF_ACTIONS = "diff-actions";
 
   public void logXml( DiffResult pDiffResult, String pXmlLogFile )
   {
@@ -41,6 +49,11 @@ public class XmlLogFileHandler
       lDiffActionsElement.addContent( convertDiffActionToXml( lDiffAction ) );
     }
 
+    writeXmlFile( pXmlLogFile, new Document( lDiffActionsElement ) );
+  }
+
+  private void writeXmlFile( String pXmlLogFile, Document pDocument )
+  {
     try
     {
       File lXmlLogFile = new File( pXmlLogFile );
@@ -50,7 +63,7 @@ public class XmlLogFileHandler
         lXmlLogFile.getParentFile().mkdirs();
       }
 
-      new XMLOutputter( Format.getPrettyFormat() ).output( new Document( lDiffActionsElement ), new FileOutputStream( lXmlLogFile ) );
+      new XMLOutputter( Format.getPrettyFormat() ).output( pDocument, new FileOutputStream( lXmlLogFile ) );
     }
     catch( Exception e )
     {
@@ -62,7 +75,10 @@ public class XmlLogFileHandler
   {
     Element lDiffActionElement = new Element( TAG_DIFF_ACTION );
 
-    lDiffActionElement.setAttribute( ATTRIBUTE_KEY, lDiffAction.getTextKey() );
+    lDiffActionElement.setAttribute( TAG_DIFF_ACTION_ATTRIBUTE_TYPE, lDiffAction.getDiffReasonTypeNoCombinedRecreates().name().toLowerCase() );
+    setBooleanAttributeIfTrue( lDiffActionElement, TAG_DIFF_ACTION_ATTRIBUTE_RECREATE, lDiffAction.isRecreate() );
+
+    setDiffReasonKeyToElement( lDiffAction.getDiffReasonKey(), lDiffActionElement );
 
     for( DiffActionReason lDiffActionReason : lDiffAction.getDiffActionReasons() )
     {
@@ -73,25 +89,47 @@ public class XmlLogFileHandler
     {
       Element lStatementElement = new Element( TAG_STATEMENT );
       lDiffActionElement.addContent( lStatementElement );
-      lStatementElement.setAttribute( ATTRIBUTE_IGNORE, "" + lStatement.isIgnore() );
-      lStatementElement.setAttribute( ATTRIBUTE_FAILURE, "" + lStatement.isFailure() );
+      setBooleanAttributeIfTrue( lStatementElement, TAG_STATEMENT_ATTRIBUTE_IGNORE, lStatement.isIgnore() );
+      setBooleanAttributeIfTrue( lStatementElement, TAG_STATEMENT_ATTRIBUTE_FAILURE, lStatement.isFailure() );
       if( lStatement.getComment() != null )
       {
-        lStatementElement.setAttribute( ATTRIBUTE_COMMENT, lStatement.getComment() );
+        lStatementElement.setAttribute( TAG_STATEMENT_ATTRIBUTE_COMMENT, lStatement.getComment() );
       }
       lStatementElement.addContent( lStatement.getStatement() );
     }
     return lDiffActionElement;
   }
 
+  private void setBooleanAttributeIfTrue( Element pElement, String pAttribute, boolean pValue )
+  {
+    if( pValue )
+    {
+      pElement.setAttribute( pAttribute, "" + pValue );
+    }
+  }
+
+  private void setDiffReasonKeyToElement( DiffReasonKey pDiffReasonKey, Element pElement )
+  {
+    pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_TYPE, pDiffReasonKey.getTextObjectType() );
+    pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME, pDiffReasonKey.getTextObjectName() );
+    if( pDiffReasonKey.getTextSubobjectType() != null )
+    {
+      pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE, pDiffReasonKey.getTextSubobjectType() );
+    }
+    if( pDiffReasonKey.getTextSubobjectName() != null )
+    {
+      pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME, pDiffReasonKey.getTextSubobjectName() );
+    }
+  }
+
   private Element convertDiffActionReasonToXml( DiffActionReason pDiffActionReason )
   {
     Element lReturn = new Element( TAG_DIFF_ACTION_REASON );
 
-    lReturn.setAttribute( ATTRIBUTE_ACTION_REASON_TYPE, pDiffActionReason.getTypeString() );
+    lReturn.setAttribute( TAG_DIFF_ACTION_REASON_ATTRIBUTE_TYPE, pDiffActionReason.getTypeString() );
     if( pDiffActionReason.getDiffReasonKey() != null )
     {
-      lReturn.setAttribute( ATTRIBUTE_ACTION_REASON_KEY, pDiffActionReason.getDiffReasonKey().getTextKey() );
+      setDiffReasonKeyToElement( pDiffActionReason.getDiffReasonKey(), lReturn );
     }
 
     if( pDiffActionReason instanceof DiffActionReasonDifferent )
@@ -137,9 +175,9 @@ public class XmlLogFileHandler
 
   public DiffActionReason parseDiffActionReasonElement( Element pDiffActionReasonElement )
   {
-    DiffReasonKey lDiffReasonKey = DiffReasonKey.createByTextKey( pDiffActionReasonElement.getAttributeValue( ATTRIBUTE_ACTION_REASON_KEY ) );
+    DiffReasonKey lDiffReasonKey = parseDiffReasonKey( pDiffActionReasonElement );
 
-    String lTypeString = pDiffActionReasonElement.getAttributeValue( ATTRIBUTE_ACTION_REASON_TYPE );
+    String lTypeString = pDiffActionReasonElement.getAttributeValue( TAG_DIFF_ACTION_REASON_ATTRIBUTE_TYPE );
 
     switch( lTypeString )
     {
@@ -158,8 +196,52 @@ public class XmlLogFileHandler
 
   public DiffResult parseXml( String pXmlLogFile )
   {
-    List<DiffAction> lDiffActions = new ArrayList<>();
+    Document lDocument = readXmlFile( pXmlLogFile );
 
+    return new DiffResult( lDocument.getRootElement().getChildren( TAG_DIFF_ACTION )//
+    .stream()//
+    .map( this::parseDiffAction )//
+    .collect( Collectors.toList() ) );
+  }
+
+  private DiffAction parseDiffAction( Element lActionElement )
+  {
+    DiffReasonKey lDiffReasonKey = parseDiffReasonKey( lActionElement );
+    DiffAction lDiffAction = DiffAction.parseFromXml( lActionElement.getAttributeValue( TAG_DIFF_ACTION_ATTRIBUTE_TYPE ), Boolean.TRUE.toString().equals( lActionElement.getAttributeValue( TAG_DIFF_ACTION_ATTRIBUTE_RECREATE ) ), lDiffReasonKey );
+
+    for( Element lActionReasonElement : lActionElement.getChildren( TAG_DIFF_ACTION_REASON ) )
+    {
+      lDiffAction.addDiffActionReason( parseDiffActionReasonElement( lActionReasonElement ) );
+    }
+
+    for( Element lStatementElement : lActionElement.getChildren( TAG_STATEMENT ) )
+    {
+      boolean lIsFailure = Boolean.TRUE.toString().equals( lStatementElement.getAttributeValue( TAG_STATEMENT_ATTRIBUTE_FAILURE ) );
+      boolean lIsIgnored = Boolean.TRUE.toString().equals( lStatementElement.getAttributeValue( TAG_STATEMENT_ATTRIBUTE_IGNORE ) );
+      String lStatement = getContentsAsString( lStatementElement );
+      String lCommentValue = lStatementElement.getAttributeValue( TAG_STATEMENT_ATTRIBUTE_COMMENT );
+
+      if( lIsIgnored )
+      {
+        lDiffAction.addIgnoredStatement( lStatement, lCommentValue );
+      }
+      else
+      {
+        if( lIsFailure )
+        {
+          lDiffAction.addFailureStatement( lStatement, lCommentValue );
+        }
+        else
+        {
+          lDiffAction.addStatement( lStatement, lCommentValue );
+        }
+      }
+    }
+    return lDiffAction;
+  }
+
+  private Document readXmlFile( String pXmlLogFile )
+  {
     SAXBuilder lSAXBuilder = new SAXBuilder();
 
     Document lDocument;
@@ -171,43 +253,17 @@ public class XmlLogFileHandler
     {
       throw new RuntimeException( e );
     }
+    return lDocument;
+  }
 
-    for( Element lActionElement : lDocument.getRootElement().getChildren( TAG_DIFF_ACTION ) )
-    {
-      DiffAction lDiffAction = DiffAction.parseFromTextKey( lActionElement.getAttributeValue( ATTRIBUTE_KEY ) );
-      lDiffActions.add( lDiffAction );
-
-      for( Element lActionReasonElement : lActionElement.getChildren( TAG_DIFF_ACTION_REASON ) )
-      {
-        lDiffAction.addDiffActionReason( parseDiffActionReasonElement( lActionReasonElement ) );
-      }
-
-      for( Element lStatementElement : lActionElement.getChildren( TAG_STATEMENT ) )
-      {
-        boolean lIsFailure = Boolean.TRUE.toString().equals( lStatementElement.getAttributeValue( ATTRIBUTE_FAILURE ) );
-        boolean lIsIgnored = Boolean.TRUE.toString().equals( lStatementElement.getAttributeValue( ATTRIBUTE_IGNORE ) );
-        String lStatement = getContentsAsString( lStatementElement );
-        String lCommentValue = lStatementElement.getAttributeValue( ATTRIBUTE_COMMENT );
-
-        if( lIsIgnored )
-        {
-          lDiffAction.addIgnoredStatement( lStatement, lCommentValue );
-        }
-        else
-        {
-          if( lIsFailure )
-          {
-            lDiffAction.addFailureStatement( lStatement, lCommentValue );
-          }
-          else
-          {
-            lDiffAction.addStatement( lStatement, lCommentValue );
-          }
-        }
-      }
-    }
-
-    return new DiffResult( lDiffActions );
+  private DiffReasonKey parseDiffReasonKey( Element pElement )
+  {
+    DiffReasonKey lDiffReasonKey = DiffReasonKey.parseFromXml( //
+    pElement.getAttributeValue( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_TYPE )//
+    , pElement.getAttributeValue( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME )//
+    , pElement.getAttributeValue( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE )//
+    , pElement.getAttributeValue( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME ) );
+    return lDiffReasonKey;
   }
 
   private String getContentsAsString( Element pElement )
@@ -230,11 +286,11 @@ public class XmlLogFileHandler
     }
   }
 
-  private String toXmlStringInputDiffActions( List<DiffAction> pInputDiffActions )
+  private String toXmlStringInputDiffActions( List<InputDiffAction> pInputDiffActions )
   {
     return pInputDiffActions//
     .stream()//
-    .map( this::convertDiffActionToXml )//
+    .map( p -> p.diffActionElement )//
     .map( this::getXmlString )//
     .collect( Collectors.joining( "," ) );
   }
@@ -248,18 +304,136 @@ public class XmlLogFileHandler
     .collect( Collectors.joining( "," ) );
   }
 
-  public RuntimeException createDiffReasonsDifferentExcepotion( List<DiffActionReason> pOriginalDiffActionReasons, List<DiffActionReason> pInputDiffActionReasons )
+  private RuntimeException createDiffReasonsDifferentExcepotion( List<DiffActionReason> pOriginalDiffActionReasons, List<DiffActionReason> pInputDiffActionReasons )
   {
     return new RuntimeException( TAG_DIFF_ACTION_REASON + "s different: " + toXmlStringDiffActionReasons( pOriginalDiffActionReasons ) + " not equal " + toXmlStringDiffActionReasons( pInputDiffActionReasons ) );
   }
 
-  public RuntimeException createDuplicateDiffActionException( List<DiffAction> pInputDiffActions )
+  private RuntimeException createDuplicateDiffActionException( List<InputDiffAction> pInputDiffActions )
   {
     return new RuntimeException( "duplicate " + TAG_DIFF_ACTION + "s: " + toXmlStringInputDiffActions( pInputDiffActions ) );
   }
 
-  public RuntimeException createSurplusDiffActionException( List<DiffAction> pUnmatchedInputDiffActionList )
+  private RuntimeException createSurplusDiffActionException( List<InputDiffAction> pUnmatchedInputDiffActionList )
   {
     return new RuntimeException( "surplus " + TAG_DIFF_ACTION + "s: " + toXmlStringInputDiffActions( pUnmatchedInputDiffActionList ) );
+  }
+
+  private boolean isInList( DiffActionReason pDiffActionReason, List<DiffActionReason> pDiffActionReasonList )
+  {
+    return pDiffActionReasonList//
+    .stream()//
+    .filter( p -> p.equals( pDiffActionReason ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  private boolean isAnyNotInDiffActionReasonList( DiffAction pDiffAction1, DiffAction pDiffAction2 )
+  {
+    return pDiffAction1.getDiffActionReasons()//
+    .stream()//
+    .filter( p -> !isInList( p, pDiffAction2.getDiffActionReasons() ) )//
+    .findAny()//
+    .isPresent();
+  }
+
+  private void checkSameDiffReasons( DiffAction pOriginalDiffAction, DiffAction pInputDiffAction )
+  {
+    if( isAnyNotInDiffActionReasonList( pOriginalDiffAction, pInputDiffAction ) || isAnyNotInDiffActionReasonList( pInputDiffAction, pOriginalDiffAction ) )
+    {
+      throw createDiffReasonsDifferentExcepotion( pOriginalDiffAction.getDiffActionReasons(), pInputDiffAction.getDiffActionReasons() );
+    }
+  }
+
+  private InputDiffAction handleXmlInputFile( DiffAction pOriginalDiffAction, List<InputDiffAction> pInputDiffActions )
+  {
+    List<InputDiffAction> lMatchingInputDiffActions = pInputDiffActions//
+    .stream()//
+    .filter( p -> !p.used )//
+    .filter( p -> p.diffAction.getTextKey().equals( pOriginalDiffAction.getTextKey() ) )//
+    .collect( Collectors.toList() );
+
+    if( lMatchingInputDiffActions.size() > 1 )
+    {
+      throw createDuplicateDiffActionException( lMatchingInputDiffActions );
+    }
+
+    if( lMatchingInputDiffActions.size() == 1 )
+    {
+      InputDiffAction lInputDiffAction = lMatchingInputDiffActions.get( 0 );
+      DiffAction lMatchingInputDiffAction = lInputDiffAction.diffAction;
+
+      checkSameDiffReasons( pOriginalDiffAction, lMatchingInputDiffAction );
+
+      lInputDiffAction.used = true;
+
+      return lInputDiffAction;
+    }
+    else
+    {
+      return new InputDiffAction( null, pOriginalDiffAction );
+    }
+  }
+
+  private class InputDiffAction
+  {
+    private Element diffActionElement;
+    private DiffAction diffAction;
+    private boolean used = false;
+
+    private InputDiffAction( Element pDiffActionElement, DiffAction pDiffAction )
+    {
+      diffActionElement = pDiffActionElement;
+      diffAction = pDiffAction;
+    }
+  }
+
+  private List<DiffAction> handleXmlInputFile( List<DiffAction> pOriginalDiffActionList, Document pInputDocument )
+  {
+    Element lRootElement = pInputDocument.getRootElement();
+    List<InputDiffAction> lInputDiffActionList = lRootElement.getChildren( TAG_DIFF_ACTION )//
+    .stream()//
+    .map( p -> new InputDiffAction( p, parseDiffAction( p ) ) )//
+    .collect( Collectors.toList() );
+
+    lRootElement.removeChildren( TAG_DIFF_ACTION );
+
+    List<DiffAction> lDiffActions = new ArrayList<>();
+
+    pOriginalDiffActionList.forEach( p ->
+    {
+      InputDiffAction lInputDiffAction = handleXmlInputFile( p, lInputDiffActionList );
+      lDiffActions.add( lInputDiffAction.diffAction );
+      if( lInputDiffAction.diffActionElement != null )
+      {
+        lRootElement.addContent( lInputDiffAction.diffActionElement );
+      }
+      else
+      {
+        lRootElement.addContent( convertDiffActionToXml( lInputDiffAction.diffAction ) );
+      }
+    } );
+
+    List<InputDiffAction> lInputDiffActionListUnused = lInputDiffActionList.stream().filter( p -> !p.used ).collect( Collectors.toList() );
+    if( !lInputDiffActionListUnused.isEmpty() )
+    {
+      throw createSurplusDiffActionException( lInputDiffActionListUnused );
+    }
+
+    return lDiffActions;
+  }
+
+  public DiffResult handleXmlInputFile( DiffResult pOriginalDiffResult, String pXmlInputFile, String pXmlLogFile )
+  {
+    Document lInputDocument = readXmlFile( pXmlInputFile );
+
+    DiffResult lDiffResult = new DiffResult( handleXmlInputFile( pOriginalDiffResult.getDiffActions(), lInputDocument ) );
+
+    if( pXmlLogFile != null )
+    {
+      writeXmlFile( pXmlLogFile, lInputDocument );
+    }
+
+    return lDiffResult;
   }
 }

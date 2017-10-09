@@ -24,16 +24,16 @@ public class DiffReasonKey
   private DiffReasonSubEntity diffReasonSubEntity;
   private String subName;
 
-  static DiffReasonKey createByTextKey( String pTextKey )
+  static DiffReasonKey parseFromXml( String pObjectType, String pObjectName, String pSubobjectType, String pSubobjectName )
   {
-    return new DiffReasonKey()
+    DiffReasonKey lDiffReasonKey = new DiffReasonKey( DiffReasonEntity.valueOf( pObjectType.toUpperCase() ), pObjectName );
+
+    if( pSubobjectType != null )
     {
-      @Override
-      public String getTextKey()
-      {
-        return pTextKey;
-      }
-    };
+      return new DiffReasonKey( lDiffReasonKey, DiffReasonSubEntity.valueOf( pSubobjectType.toUpperCase() ), pSubobjectName );
+    }
+
+    return lDiffReasonKey;
   }
 
   private DiffReasonKey()
@@ -114,6 +114,26 @@ public class DiffReasonKey
   public String getTextKey()
   {
     return "" + diffReasonEntity.name().toLowerCase() + (diffReasonSubEntity == null ? "" : "_" + diffReasonSubEntity.name().toLowerCase()) + ":" + name + (subName == null ? "" : "." + subName);
+  }
+
+  public String getTextObjectType()
+  {
+    return diffReasonEntity.name().toLowerCase();
+  }
+
+  public String getTextSubobjectType()
+  {
+    return diffReasonSubEntity == null ? null : diffReasonSubEntity.name().toLowerCase();
+  }
+
+  public String getTextObjectName()
+  {
+    return name;
+  }
+
+  public String getTextSubobjectName()
+  {
+    return subName;
   }
 
   public enum DiffReasonEntity

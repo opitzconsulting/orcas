@@ -44,3 +44,17 @@ create table tab_check_drop
 	constraint check_dropme check(bestand >= 0) disable
 );
 
+create table tab_mixed_name_1
+(
+	id				number(9)
+	constraint fk_mixed_name_2 check(ID BETWEEN 1 AND 500),
+	constraint fk_mixed_name_intab_2 check(ID BETWEEN 1 AND 501),
+	constraint fk_mixed_name_intab_1 check(ID BETWEEN 1 AND 502)
+);
+
+create table tab_mixed_name_2
+(
+	id				number(9),
+	constraint fk_mixed_name_1 check(ID BETWEEN 1 AND 500)
+);
+

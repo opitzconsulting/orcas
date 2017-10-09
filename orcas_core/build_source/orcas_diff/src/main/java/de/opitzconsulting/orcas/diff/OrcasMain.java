@@ -3,7 +3,6 @@ package de.opitzconsulting.orcas.diff;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.opitzconsulting.orcas.diff.DiffAction.Statement;
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
@@ -97,15 +96,17 @@ public class OrcasMain extends Orcas
     if( pParameters.getXmlInputFile() != null )
     {
       logInfo( "applying xml input file: " + pParameters.getXmlInputFile() );
-      lDiffResult = handleXmlInputFile( lDiffResult, getXmlLogFileHandler().parseXml( pParameters.getXmlInputFile() ) );
+      lDiffResult = getXmlLogFileHandler().handleXmlInputFile( lDiffResult, pParameters.getXmlInputFile(), getParameters().getXmlLogFile() );
+    }
+    else
+    {
+      if( getParameters().getXmlLogFile() != null )
+      {
+        getXmlLogFileHandler().logXml( lDiffResult, getParameters().getXmlLogFile() );
+      }
     }
 
     List<String> lScriptLines = new ArrayList<String>();
-
-    if( getParameters().getXmlLogFile() != null )
-    {
-      getXmlLogFileHandler().logXml( lDiffResult, getParameters().getXmlLogFile() );
-    }
 
     for( DiffAction lDiffAction : lDiffResult.getDiffActions() )
     {
@@ -173,79 +174,6 @@ public class OrcasMain extends Orcas
   private XmlLogFileHandler getXmlLogFileHandler()
   {
     return new XmlLogFileHandler();
-  }
-
-  private boolean isInList( DiffActionReason pDiffActionReason, List<DiffActionReason> pDiffActionReasonList )
-  {
-    return pDiffActionReasonList//
-    .stream()//
-    .filter( p -> p.equals( pDiffActionReason ) )//
-    .findAny()//
-    .isPresent();
-  }
-
-  private boolean isAnyNotInDiffActionReasonList( DiffAction pDiffAction1, DiffAction pDiffAction2 )
-  {
-    return pDiffAction1.getDiffActionReasons()//
-    .stream()//
-    .filter( p -> !isInList( p, pDiffAction2.getDiffActionReasons() ) )//
-    .findAny()//
-    .isPresent();
-  }
-
-  private void checkSameDiffReasons( DiffAction pOriginalDiffAction, DiffAction pInputDiffAction )
-  {
-    if( isAnyNotInDiffActionReasonList( pOriginalDiffAction, pInputDiffAction ) || isAnyNotInDiffActionReasonList( pInputDiffAction, pOriginalDiffAction ) )
-    {
-      throw getXmlLogFileHandler().createDiffReasonsDifferentExcepotion( pOriginalDiffAction.getDiffActionReasons(), pInputDiffAction.getDiffActionReasons() );
-    }
-  }
-
-  private DiffAction handleXmlInputFile( DiffAction pOriginalDiffAction, List<DiffAction> pInputDiffActions )
-  {
-    List<DiffAction> lMatchingInputDiffActions = pInputDiffActions//
-    .stream()//
-    .filter( p -> p.getTextKey().equals( pOriginalDiffAction.getTextKey() ) )//
-    .collect( Collectors.toList() );
-
-    if( lMatchingInputDiffActions.size() > 1 )
-    {
-      throw getXmlLogFileHandler().createDuplicateDiffActionException( lMatchingInputDiffActions );
-    }
-
-    if( lMatchingInputDiffActions.size() == 1 )
-    {
-      DiffAction lMatchingInputDiffAction = lMatchingInputDiffActions.get( 0 );
-
-      checkSameDiffReasons( pOriginalDiffAction, lMatchingInputDiffAction );
-
-      pInputDiffActions.remove( lMatchingInputDiffAction );
-
-      return lMatchingInputDiffAction;
-    }
-    else
-    {
-      return pOriginalDiffAction;
-    }
-  }
-
-  private DiffResult handleXmlInputFile( DiffResult pOriginalDiffResult, DiffResult pInputDiffResult )
-  {
-    List<DiffAction> lInputDiffActionList = new ArrayList<>( pInputDiffResult.getDiffActions() );
-
-    List<DiffAction> lDiffActions = new ArrayList<>();
-
-    pOriginalDiffResult.getDiffActions().forEach( p ->
-    {
-      lDiffActions.add( handleXmlInputFile( p, lInputDiffActionList ) );
-    } );
-
-    if( !lInputDiffActionList.isEmpty() )
-    {
-      throw getXmlLogFileHandler().createSurplusDiffActionException( lInputDiffActionList );
-    }
-
-    return new DiffResult( lDiffActions );
   }
 
   private void doSchemaSync( final Parameters pParameters ) throws Exception

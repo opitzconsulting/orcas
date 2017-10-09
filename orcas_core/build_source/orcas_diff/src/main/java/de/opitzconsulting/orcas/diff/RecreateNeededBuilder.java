@@ -158,6 +158,21 @@ class RecreateNeededBuilder<T extends AbstractDiff> implements RecreateNeededBui
     return this;
   }
 
+  public RecreateNeededBuilder<T> ifDifferentName( EStructuralFeature pEAttribute, Map<String, List<String>> pOldNames, String pNewName, String pOldName )
+  {
+    if( pNewName == null || pOldName == null )
+    {
+      ifDifferent( pEAttribute );
+    }
+
+    if( pOldNames.values().stream().filter( p -> p.contains( pNewName ) ).findAny().isPresent() )
+    {
+      ifDifferent( pEAttribute );
+    }
+
+    return this;
+  }
+
   public void calculate()
   {
     if( diff.isMatched )

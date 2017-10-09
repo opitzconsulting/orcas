@@ -46,6 +46,25 @@ public class DiffAction
     return diffReasonType;
   }
 
+  public DiffReasonType getDiffReasonTypeNoCombinedRecreates()
+  {
+    if( diffReasonType == DiffReasonType.RECREATE_CREATE )
+    {
+      return DiffReasonType.CREATE;
+    }
+    if( diffReasonType == DiffReasonType.RECREATE_DROP )
+    {
+      return DiffReasonType.DROP;
+    }
+
+    return diffReasonType;
+  }
+
+  public boolean isRecreate()
+  {
+    return diffReasonType == DiffReasonType.RECREATE || diffReasonType == DiffReasonType.RECREATE_CREATE || diffReasonType == DiffReasonType.RECREATE_DROP;
+  }
+
   public void addDiffActionReason( DiffActionReason pDiffActionReason )
   {
     diffActionReasons.add( pDiffActionReason );
@@ -56,13 +75,29 @@ public class DiffAction
     CREATE, RECREATE, RECREATE_CREATE, ALTER, DROP, RECREATE_DROP
   }
 
-  public static DiffAction parseFromTextKey( String pTextKey )
+  public static DiffAction parseFromXml( String pType, boolean pIsRecreate, DiffReasonKey pDiffReasonKey )
   {
-    String[] lSplit = pTextKey.split( ":" );
-    String lDiffReasonType = lSplit[0];
-    String lDiffReasonKey = lSplit[1] + ":" + lSplit[2];
+    DiffReasonType lDiffReasonType = DiffReasonType.valueOf( pType.toUpperCase() );
 
-    return new DiffAction( DiffReasonKey.createByTextKey( lDiffReasonKey ), DiffReasonType.valueOf( lDiffReasonType.toUpperCase() ) );
+    if( pIsRecreate )
+    {
+      switch( lDiffReasonType )
+      {
+        case CREATE:
+          lDiffReasonType = DiffReasonType.RECREATE_CREATE;
+          break;
+        case DROP:
+          lDiffReasonType = DiffReasonType.RECREATE_DROP;
+          break;
+        case RECREATE:
+          break;
+
+        default:
+          throw new IllegalArgumentException( "cant handle recreate for " + lDiffReasonType );
+      }
+    }
+
+    return new DiffAction( pDiffReasonKey, lDiffReasonType );
   }
 
   public String getTextKey()

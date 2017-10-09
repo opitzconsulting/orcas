@@ -490,7 +490,10 @@ public class OrcasCoreIntegrationTest
       new OrcasMain().mainRun( lParametersCall );
     }
 
-    assertXmlLogFileParse( pSpoolName, lXmlLogFile );
+    if( pXmlInputFile == null )
+    {
+      assertXmlLogFileParse( pSpoolName, lXmlLogFile );
+    }
   }
 
   private String getLogfileName( String pSpoolName )

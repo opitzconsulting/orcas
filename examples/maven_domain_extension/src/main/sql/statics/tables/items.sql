@@ -1,6 +1,7 @@
 create table items alias item domain default_table
 (
   ctgr_id         domain fk_column,
+  ctgr_sub_id     domain fk_column,
   name            domain identifier,
   description     varchar2(1000)           not null,
   image_location  varchar2(255),
