@@ -394,9 +394,12 @@ public class OrcasDiff
     return recreateNeededRegistry.createRecreateNeededBuilder( pDiff );
   }
 
-  private Optional<TableDiff> findTableDiff( ModelDiff pModelDiff, String pTableName )
+  private Optional<TableDiff> findTableDiffByOldName( ModelDiff pModelDiff, String pTableName )
   {
-    return pModelDiff.model_elementsTableDiff.stream().filter( p -> p.nameOld.equals( pTableName ) ).findAny();
+    return pModelDiff.model_elementsTableDiff.stream()//
+    .filter( p -> p.isOld )//
+    .filter( p -> p.nameOld.equals( pTableName ) )//
+    .findAny();
   }
 
   private List<DiffActionReason> getRefConstraintRecreate( ModelDiff pModelDiff, String pDestTableName, List<ColumnRefDiff> pDestColumnsDiff )
@@ -548,7 +551,7 @@ public class OrcasDiff
           return false;
         }
 
-        Optional<TableDiff> lDestTableDiff = findTableDiff( pModelDiff, pDiff.destTableOld );
+        Optional<TableDiff> lDestTableDiff = findTableDiffByOldName( pModelDiff, pDiff.destTableOld );
         if( lDestTableDiff.isPresent() )
         {
           return ddlBuilder.isAllColumnsNew( pDiff.destColumnsDiff, lDestTableDiff.get() );
