@@ -2,6 +2,7 @@
 change version in (remove snapshot marker):
 build_source/build.gradle
 orcas_maven_plugin/pom.xml (4 entries)
+orcas_integrationstest/build.gradle
 upload_maven_central/build.gradle
 
 run this in orcas_core/build_source:
@@ -30,7 +31,6 @@ github release  release tag: e.g. "2.6.2", release name e.g. "orcas version 2.6.
 change version to a new snapshot-version:
 build_source/build.gradle
 orcas_maven_plugin/pom.xml (4 entries)
-orcas_integrationstest/build.gradle
 
 git commit/push
 
