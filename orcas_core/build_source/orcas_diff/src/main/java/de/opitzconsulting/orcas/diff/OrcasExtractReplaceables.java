@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -112,7 +113,7 @@ public class OrcasExtractReplaceables extends Orcas
                 lOutputStream = new FileOutputStream( lFileName );
               }
 
-              OutputStreamWriter lOutputStreamWriter = new OutputStreamWriter( lOutputStream, "utf8" );
+              OutputStreamWriter lOutputStreamWriter = new OutputStreamWriter( lOutputStream, getParameters().getEncoding() );
 
               if( !lFullMode )
               {
@@ -128,7 +129,7 @@ public class OrcasExtractReplaceables extends Orcas
 
               if( isCollectDataOnly() )
               {
-                handleCollectedData( lFileName, ((ByteArrayOutputStream)lOutputStream).toByteArray() );
+                handleCollectedData( lFileName, ((ByteArrayOutputStream) lOutputStream).toByteArray() );
               }
             }
             catch( IOException e )
@@ -196,7 +197,7 @@ public class OrcasExtractReplaceables extends Orcas
                     fileNameCollectData = pFileName;
                   }
                   _out = new ByteArrayOutputStream();
-                  writer = new OutputStreamWriter( _out );
+                  writer = new OutputStreamWriter( _out, pParameters.getEncoding() );
                 }
                 else
                 {
@@ -237,7 +238,7 @@ public class OrcasExtractReplaceables extends Orcas
               {
                 if( pLine.equals( "@&1" ) )
                 {
-                  runReader( new InputStreamReader( new ByteArrayInputStream( _dummyFileContent ) ), pCallableStatementProvider, pParameters, null, pSpoolHandler );
+                  runReader( new InputStreamReader( new ByteArrayInputStream( _dummyFileContent ), pParameters.getEncoding() ), pCallableStatementProvider, pParameters, null, pSpoolHandler );
                 }
                 else
                 {
@@ -246,7 +247,7 @@ public class OrcasExtractReplaceables extends Orcas
               }
             };
           }
-        }.runURL( SqlplusDirAccessDbobjects.getURL_extract_replaceables_sources(), pCallableStatementProvider, getParameters(), lDummyFileName, lExistingFolderString + "/" + lFilePrefix, pType, "%" );
+        }.runURL( SqlplusDirAccessDbobjects.getURL_extract_replaceables_sources(), pCallableStatementProvider, getParameters(), StandardCharsets.UTF_8, lDummyFileName, lExistingFolderString + "/" + lFilePrefix, pType, "%" );
 
         getParameters().setInfoLogHandler( lOriginalInfoLogHandler );
       }

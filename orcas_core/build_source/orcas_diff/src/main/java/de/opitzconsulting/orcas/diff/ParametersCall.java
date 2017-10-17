@@ -2,6 +2,7 @@ package de.opitzconsulting.orcas.diff;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
@@ -92,6 +93,16 @@ public class ParametersCall extends Parameters
     _excludewheretable = convertNullString( pExcludewheretable );
   }
 
+  public void setCharsetName( String pCharsetName )
+  {
+    _charsetName = pCharsetName;
+  }
+
+  public void setCharsetNameSqlLog( String pCharsetNameSqlLog )
+  {
+    _charsetNameSqlLog = pCharsetNameSqlLog;
+  }
+
   public void setExcludewheresequence( String pExcludewheresequence )
   {
     _excludewheresequence = convertNullString( pExcludewheresequence );
@@ -177,10 +188,11 @@ public class ParametersCall extends Parameters
     _extensionParameter = convertNullString( pExtensionParameter );
   }
 
-  public void setScriptUrl( URL pScriptUrl, String pFilename )
+  public void setScriptUrl( URL pScriptUrl, String pFilename, Charset pScriptUrlCharset )
   {
     _scriptUrl = pScriptUrl;
     _scriptUrlFilename = pFilename;
+    _scriptUrlCharset = pScriptUrlCharset;
   }
 
   public void setInitializeChecksumTotal( String pInitializeChecksumTotal )

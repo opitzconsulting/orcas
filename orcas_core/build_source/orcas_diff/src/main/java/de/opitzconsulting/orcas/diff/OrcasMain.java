@@ -173,7 +173,7 @@ public class OrcasMain extends Orcas
 
   private XmlLogFileHandler getXmlLogFileHandler()
   {
-    return new XmlLogFileHandler();
+    return new XmlLogFileHandler( getParameters() );
   }
 
   private void doSchemaSync( final Parameters pParameters ) throws Exception

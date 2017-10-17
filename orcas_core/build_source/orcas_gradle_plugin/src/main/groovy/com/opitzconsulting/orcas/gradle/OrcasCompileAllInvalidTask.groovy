@@ -1,5 +1,6 @@
 package com.opitzconsulting.orcas.gradle;
 
+import java.nio.charset.StandardCharsets;
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
@@ -19,7 +20,7 @@ public class OrcasCompileAllInvalidTask extends BaseOrcasTask
   {
     if( !isRunOnlyIfReplaceablesExists() || project.file(project.orcasconfiguration.replaceablesfolder).exists() )
     {
-      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql" );
+      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql", StandardCharsets.UTF_8 );
       pParameters.setIsOneTimeScriptMode( false );
       pParameters.setAdditionalParameters( null );
 

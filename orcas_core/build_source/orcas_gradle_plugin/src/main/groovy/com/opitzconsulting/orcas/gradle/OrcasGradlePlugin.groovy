@@ -73,6 +73,8 @@ class OrcasGradlePluginExtension {
   def boolean setunusedinsteadofdropcolumn = false;
   def boolean indexonlinecreate = false;
   def boolean minimizestatementcount = false;
+  def String charsetname = "UTF-8";
+  def String charsetnamesqllog = null;
 
   def String orcasjdbcdriver = "oracle.jdbc.OracleDriver";
   def String orcasjdbcurl;

@@ -47,7 +47,7 @@ public class OrcasUpdateReplaceables extends Orcas
       {
         try
         {
-          lDatabaseMap.put( pFileName, OrcasScriptRunner.parseReaderToLines( new InputStreamReader( new ByteArrayInputStream( pByteArray ) ) ) );
+          lDatabaseMap.put( pFileName, OrcasScriptRunner.parseReaderToLines( new InputStreamReader( new ByteArrayInputStream( pByteArray ), getParameters().getEncoding() ) ) );
           lDatabaseDropMap.put( pFileName, getDropStatementForFile( pFileName ) );
         }
         catch( IOException e )
@@ -116,7 +116,7 @@ public class OrcasUpdateReplaceables extends Orcas
       lFilename = lFilename.substring( lFilePrefix.length() + 1 );
       lFilename = lFilename.replace( "\\", "/" );
 
-      lFileMap.put( lFilename, OrcasScriptRunner.parseReaderToLines( new InputStreamReader( new FileInputStream( lFile ) ) ) );
+      lFileMap.put( lFilename, OrcasScriptRunner.parseReaderToLines( new InputStreamReader( new FileInputStream( lFile ), getParameters().getEncoding() ) ) );
     }
 
     JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), new RunWithCallableStatementProvider()

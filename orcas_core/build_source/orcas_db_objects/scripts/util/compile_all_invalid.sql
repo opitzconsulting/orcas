@@ -108,6 +108,11 @@ select name,
           and user_source.line = user_errors.line
        ) as line_text
   from user_errors
+ where name in 
+       ( 
+         select object_name
+           from user_objects 
+       )
  order by 1, 3, 4;
 
 

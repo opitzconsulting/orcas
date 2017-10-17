@@ -54,6 +54,8 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setSetUnusedInsteadOfDropColumn( project.orcasconfiguration.setunusedinsteadofdropcolumn );
     lParametersCall.setCreateIndexOnline( project.orcasconfiguration.indexonlinecreate );
     lParametersCall.setMinimizeStatementCount( project.orcasconfiguration.minimizestatementcount );
+    lParametersCall.setCharsetName( project.orcasconfiguration.charsetname );
+    lParametersCall.setCharsetNameSqlLog( project.orcasconfiguration.charsetnamesqllog );
 
     if( project.orcasconfiguration.extensionHandler != null )
     {

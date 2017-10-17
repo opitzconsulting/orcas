@@ -41,6 +41,13 @@ public class XmlLogFileHandler
 
   private static final String TAG_DIFF_ACTIONS = "diff-actions";
 
+  private Parameters _parameters;
+
+  public XmlLogFileHandler( Parameters pParameters )
+  {
+    _parameters = pParameters;
+  }
+
   public void logXml( DiffResult pDiffResult, String pXmlLogFile )
   {
     Element lDiffActionsElement = new Element( TAG_DIFF_ACTIONS );
@@ -63,7 +70,9 @@ public class XmlLogFileHandler
         lXmlLogFile.getParentFile().mkdirs();
       }
 
-      new XMLOutputter( Format.getPrettyFormat() ).output( pDocument, new FileOutputStream( lXmlLogFile ) );
+      Format lFormat = Format.getPrettyFormat();
+      lFormat.setEncoding( _parameters.getEncodingForSqlLog().name() );
+      new XMLOutputter( lFormat ).output( pDocument, new FileOutputStream( lXmlLogFile ) );
     }
     catch( Exception e )
     {
@@ -111,11 +120,11 @@ public class XmlLogFileHandler
   private void setDiffReasonKeyToElement( DiffReasonKey pDiffReasonKey, Element pElement )
   {
     pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_TYPE, pDiffReasonKey.getTextObjectType() );
-    pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME, pDiffReasonKey.getTextObjectName() );
     if( pDiffReasonKey.getTextSubobjectType() != null )
     {
       pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE, pDiffReasonKey.getTextSubobjectType() );
     }
+    pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME, pDiffReasonKey.getTextObjectName() );
     if( pDiffReasonKey.getTextSubobjectName() != null )
     {
       pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME, pDiffReasonKey.getTextSubobjectName() );

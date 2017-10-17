@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -96,7 +97,7 @@ public class OrcasCoreIntegrationTest
   {
     try
     {
-      BufferedReader lBufferedReader = new BufferedReader( new InputStreamReader( new FileInputStream( pFile ) ) );
+      BufferedReader lBufferedReader = new BufferedReader( new InputStreamReader( new FileInputStream( pFile ), StandardCharsets.UTF_8 ) );
 
       List<String> lLines = new ArrayList<String>();
 
@@ -503,7 +504,9 @@ public class OrcasCoreIntegrationTest
 
   private void assertXmlLogFileParse( String pSpoolName, String pXmlLogFile )
   {
-    XmlLogFileHandler lXmlLogFileHandler = new XmlLogFileHandler();
+    ParametersCall lParametersCall = new ParametersCall();
+
+    XmlLogFileHandler lXmlLogFileHandler = new XmlLogFileHandler( lParametersCall );
     DiffResult lParseXmlDiffResult = lXmlLogFileHandler.parseXml( pXmlLogFile );
     String lXmlLogFileFromXmlLogFileHandlerParse = getSpoolFolder( pSpoolName + "_log_reparse.xml" );
     lXmlLogFileHandler.logXml( lParseXmlDiffResult, lXmlLogFileFromXmlLogFileHandlerParse );

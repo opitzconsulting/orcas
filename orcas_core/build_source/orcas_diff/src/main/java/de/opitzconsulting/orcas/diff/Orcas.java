@@ -1,13 +1,14 @@
 package de.opitzconsulting.orcas.diff;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
@@ -99,7 +100,7 @@ public abstract class Orcas
     {
       return new DatabaseHandlerMySql();
     }
-    
+
     return new DatabaseHandlerOracle();
   }
 
@@ -130,7 +131,7 @@ public abstract class Orcas
 
       public void fileCopy( File pSpoolLognamefolder ) throws IOException
       {
-        Orcas.fileCopy( pScriptFile, new File( pSpoolLognamefolder, pScriptFile.getName() ) );
+        Orcas.fileCopy( pScriptFile, getParameters().getEncoding(), new File( pSpoolLognamefolder, pScriptFile.getName() ), getParameters().getEncodingForSqlLog() );
       }
     } );
   }
@@ -195,7 +196,7 @@ public abstract class Orcas
     }
   }
 
-  protected void addSpoolfolderScriptIfNeeded( final URL pScriptURL, final String pFilename )
+  protected void addSpoolfolderScriptIfNeeded( final URL pScriptURL, final String pFilename, Charset pCharset )
   {
     addSpoolfolderScriptIfNeeded( new FileHandlerForLog()
     {
@@ -206,7 +207,7 @@ public abstract class Orcas
 
       public void fileCopy( File pSpoolLognamefolder ) throws IOException
       {
-        Orcas.fileCopy( pScriptURL, new File( pSpoolLognamefolder, pFilename ) );
+        Orcas.fileCopy( pScriptURL, pCharset, new File( pSpoolLognamefolder, pFilename ), getParameters().getEncodingForSqlLog() );
       }
     } );
   }
@@ -222,7 +223,7 @@ public abstract class Orcas
 
       public void fileCopy( File pSpoolLognamefolder ) throws IOException
       {
-        OutputStreamWriter lOutputStreamWriter = new OutputStreamWriter( new FileOutputStream( new File( pSpoolLognamefolder, pFilename ) ) );
+        OutputStreamWriter lOutputStreamWriter = new OutputStreamWriter( new FileOutputStream( new File( pSpoolLognamefolder, pFilename ) ), getParameters().getEncodingForSqlLog() );
 
         for( String lLine : pLines )
         {
@@ -234,19 +235,51 @@ public abstract class Orcas
     } );
   }
 
-  private static void fileCopy( File pSrcFile, File pDstFile ) throws IOException
+  private static void fileCopy( File pSrcFile, Charset pSrcCharset, File pDstFile, Charset pDstCharset ) throws IOException
   {
-    Files.copy( pSrcFile.toPath(), pDstFile.toPath(), StandardCopyOption.REPLACE_EXISTING );
+    writeLinesToFile( pDstFile, pDstCharset, OrcasScriptRunner.parseReaderToLines( new InputStreamReader( new FileInputStream( pSrcFile ), pSrcCharset ) ) );
   }
 
-  private static void fileCopy( URL pSrcFile, File pDstFile ) throws IOException
+  private static void fileCopy( URL pSrcFile, Charset pSrcCharset, File pDstFile, Charset pDstCharset ) throws IOException
   {
-    Files.copy( pSrcFile.openStream(), pDstFile.toPath(), StandardCopyOption.REPLACE_EXISTING );
+    writeLinesToFile( pDstFile, pDstCharset, OrcasScriptRunner.parseReaderToLines( new InputStreamReader( pSrcFile.openStream(), pSrcCharset ) ) );
+  }
+
+  @SuppressWarnings( "resource" )
+  private static void writeLinesToFile( File pDstFile, Charset pDstCharset, List<String> pLines ) throws FileNotFoundException, IOException
+  {
+    OutputStreamWriter lOutputStreamWriter = new OutputStreamWriter( new FileOutputStream( pDstFile ), pDstCharset );
+
+    pLines.forEach( p ->
+    {
+      try
+      {
+        lOutputStreamWriter.append( p );
+        lOutputStreamWriter.append( "\n" );
+      }
+      catch( IOException e )
+      {
+        throw new RuntimeException( e );
+      }
+    } );
+
+    lOutputStreamWriter.close();
   }
 
   private void fileAppendLine( File pFile, String pLine ) throws IOException
   {
-    Files.write( pFile.toPath(), Collections.singletonList( pLine ), StandardOpenOption.APPEND );
+    List<String> lLines;
+    if( pFile.exists() )
+    {
+      lLines = OrcasScriptRunner.parseReaderToLines( new InputStreamReader( new FileInputStream( pFile ), getParameters().getEncodingForSqlLog() ) );
+      lLines.add( pLine );
+    }
+    else
+    {
+      lLines = Collections.singletonList( pLine );
+    }
+
+    writeLinesToFile( pFile, getParameters().getEncodingForSqlLog(), lLines );
   }
 
   protected void setParameters( Parameters pParameters )

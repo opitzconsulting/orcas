@@ -56,7 +56,7 @@ public abstract class XtextFileLoader<T extends EObject>
     lResourceSet.addLoadOption( XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE );
 
     Map<Object, Object> lLoadOptions = lResourceSet.getLoadOptions();
-    lLoadOptions.put( XtextResource.OPTION_ENCODING, "utf8" );
+    lLoadOptions.put( XtextResource.OPTION_ENCODING, pParameters.getEncoding().name() );
 
     T lReturn = createModelInstance();
 

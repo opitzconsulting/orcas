@@ -7,9 +7,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
+import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 import de.opitzconsulting.orcas.diff.ParametersCommandline;
-import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 
 public abstract class BaseOrcasMojo extends AbstractMojo
 {
@@ -65,19 +65,21 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   private File spoolfolder;
 
   /**
-   * The logleve. Possible values: info, error, debug.
+   * The logleve. Possible values: info, error, debug. Defaults to null which
+   * uses info by default an debug if the maven-loglevel is debug.
    */
-  @Parameter( defaultValue = "info" )
   private String loglevel;
 
   /**
-   * How to handle errors while exceuting scripts: NEVER: do nothing. ALWAYS: fail. IGNORE_DROP: fail, but ignore failures of drop statements.
+   * How to handle errors while exceuting scripts: NEVER: do nothing. ALWAYS:
+   * fail. IGNORE_DROP: fail, but ignore failures of drop statements.
    */
   @Parameter( defaultValue = "ALWAYS" )
   private FailOnErrorMode failOnErrorMode;
 
   /**
-   * The schema-name of the orcas user. Only needed if orcas should be installed into the database.
+   * The schema-name of the orcas user. Only needed if orcas should be installed
+   * into the database.
    */
   @Parameter( defaultValue = "" )
   private String usernameorcas;
@@ -89,25 +91,29 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   private boolean logonly;
 
   /**
-   * If true drop table and drop column-statements are always executed. If false they are only executed if the column or table is empty.
+   * If true drop table and drop column-statements are always executed. If false
+   * they are only executed if the column or table is empty.
    */
   @Parameter( defaultValue = "false" )
   private boolean dropmode;
 
   /**
-   * If true indexes are created in parallel (they are afterward set to noparalle if specified as noparallel).
+   * If true indexes are created in parallel (they are afterward set to
+   * noparalle if specified as noparallel).
    */
   @Parameter( defaultValue = "true" )
   private boolean indexparallelcreate;
 
   /**
-   * If true tablespaces of indexes are adjusted if neede. If false index-tablespaces are only used when creating an index.
+   * If true tablespaces of indexes are adjusted if neede. If false
+   * index-tablespaces are only used when creating an index.
    */
   @Parameter( defaultValue = "true" )
   private boolean indexmovetablespace;
 
   /**
-   * If true tablespaces of tables are adjusted if neede. If false index-tablespaces are only used when creating a table.
+   * If true tablespaces of tables are adjusted if neede. If false
+   * index-tablespaces are only used when creating a table.
    */
   @Parameter( defaultValue = "true" )
   private boolean tablemovetablespace;
@@ -149,11 +155,12 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   private String targetplsql;
 
   /**
-   * Default folder for replaceable scripts (scripts that contain objects that can be recreated without data-loss or performance issues).
+   * Default folder for replaceable scripts (scripts that contain objects that
+   * can be recreated without data-loss or performance issues).
    */
   @Parameter( defaultValue = "src/main/sql/replaceables" )
   protected File replaceablesfolder;
-  
+
   /**
    * Default folder for tbale-scripts.
    */
@@ -161,25 +168,29 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   protected File staticsfolder;
 
   /**
-   * The JDBC-Driver of the orcas user. Only needed if orcas should be installed into the database.
+   * The JDBC-Driver of the orcas user. Only needed if orcas should be installed
+   * into the database.
    */
   @Parameter( defaultValue = "oracle.jdbc.OracleDriver" )
   protected String orcasjdbcdriver;
 
   /**
-   * The JDBC-URL of the orcas user. Only needed if orcas should be installed into the database.
+   * The JDBC-URL of the orcas user. Only needed if orcas should be installed
+   * into the database.
    */
   @Parameter
   protected String orcasjdbcurl;
 
   /**
-   * The schema-name of the orcas user. Only needed if orcas should be installed into the database.
+   * The schema-name of the orcas user. Only needed if orcas should be installed
+   * into the database.
    */
   @Parameter
   protected String orcasusername;
 
   /**
-   * The schema-password of the orcas user. Only needed if orcas should be installed into the database.
+   * The schema-password of the orcas user. Only needed if orcas should be
+   * installed into the database.
    */
   @Parameter
   protected String orcaspassword;
@@ -191,7 +202,8 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   private String extensionhandlerClass;
 
   /**
-   * If true orcas will generate only schema additions. Contraints will be widened to allow both model-versions.
+   * If true orcas will generate only schema additions. Contraints will be
+   * widened to allow both model-versions.
    */
   @Parameter( defaultValue = "false" )
   private boolean additionsonly;
@@ -209,7 +221,8 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   private String xmllogfile;
 
   /**
-   * The filename for the xml-input-file. This file has the same format as the xml-log an can be specified to override oracs ddl-statements.
+   * The filename for the xml-input-file. This file has the same format as the
+   * xml-log an can be specified to override oracs ddl-statements.
    */
   private String xmlinputfile;
 
@@ -220,7 +233,8 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   private boolean setunusedinsteadofdropcolumn;
 
   /**
-   * If true orcas will add the online keyword for create index statements. Note that this requires the corresponding oracle-enterprise-option.
+   * If true orcas will add the online keyword for create index statements. Note
+   * that this requires the corresponding oracle-enterprise-option.
    */
   @Parameter( defaultValue = "false" )
   private boolean indexonlinecreate;
@@ -231,6 +245,16 @@ public abstract class BaseOrcasMojo extends AbstractMojo
   @Parameter( defaultValue = "false" )
   private boolean minimizestatementcount;
 
+  /**
+   * Enconding for textfile-handling.
+   */
+  @Parameter( defaultValue = "UTF-8" )
+  private String charsetname;
+
+  /**
+   * Enconding for sql-logfies-handling, defaults to charsetname.
+   */
+  private String charsetnamesqllog;
 
   public void execute() throws MojoExecutionException
   {
@@ -250,7 +274,22 @@ public abstract class BaseOrcasMojo extends AbstractMojo
     lParametersCall.setSpoolfile( spoolfile.toString() );
     lParametersCall.setSpoolfolder( spoolfolder.toString() );
     lParametersCall.setLogname( getLogname() );
-    lParametersCall.setLoglevel( loglevel );
+
+    if( loglevel != null )
+    {
+      lParametersCall.setLoglevel( loglevel );
+    }
+    else
+    {
+      if( getLog().isDebugEnabled() )
+      {
+        lParametersCall.setLoglevel( "debug" );
+      }
+      else
+      {
+        lParametersCall.setLoglevel( "info" );
+      }
+    }
 
     lParametersCall.setFailOnErrorMode( failOnErrorMode );
 
@@ -271,6 +310,8 @@ public abstract class BaseOrcasMojo extends AbstractMojo
     lParametersCall.setSetUnusedInsteadOfDropColumn( setunusedinsteadofdropcolumn );
     lParametersCall.setCreateIndexOnline( indexonlinecreate );
     lParametersCall.setMinimizeStatementCount( minimizestatementcount );
+    lParametersCall.setCharsetName( charsetname );
+    lParametersCall.setCharsetNameSqlLog( charsetnamesqllog );
 
     if( extensionhandlerClass != null && !extensionhandlerClass.equals( "" ) )
     {

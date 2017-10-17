@@ -2,6 +2,8 @@ package de.opitzconsulting.orcas.diff;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -100,6 +102,7 @@ public abstract class Parameters
   protected List<File> _modelFiles;
   protected URL _scriptUrl;
   protected String _scriptUrlFilename;
+  protected Charset _scriptUrlCharset;
   protected Boolean _loadExtractWithReverseExtensions = true;
   protected Boolean _multiSchema = false;
   protected Boolean _multiSchemaDbaViews = false;
@@ -115,6 +118,9 @@ public abstract class Parameters
 
   private InfoLogHandler _infoLogHandler;
   private String _removePromptPrefix;
+
+  protected String _charsetName = StandardCharsets.UTF_8.name();
+  protected String _charsetNameSqlLog = null;
 
   private AdditionalExtensionFactory _additionalExtensionFactory = new AdditionalExtensionFactory()
   {
@@ -339,6 +345,11 @@ public abstract class Parameters
     return _scriptUrl;
   }
 
+  public Charset getScriptUrlCharset()
+  {
+    return _scriptUrlCharset;
+  }
+
   public String getScriptUrlFilename()
   {
     return _scriptUrlFilename;
@@ -463,5 +474,15 @@ public abstract class Parameters
   public boolean isCreateIndexOnline()
   {
     return _createIndexOnline;
+  }
+
+  public Charset getEncoding()
+  {
+    return Charset.forName( _charsetName );
+  }
+
+  public Charset getEncodingForSqlLog()
+  {
+    return _charsetNameSqlLog == null ? getEncoding() : Charset.forName( _charsetNameSqlLog );
   }
 }

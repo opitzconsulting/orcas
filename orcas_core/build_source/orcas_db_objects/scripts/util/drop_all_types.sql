@@ -2,7 +2,7 @@ declare
   drop_count number := 0;
   old_drop_count number;
 begin
-  -- Types löschen (falls moeglich)
+  -- Types lÃ¶schen (falls moeglich)
   loop 
     old_drop_count := drop_count;
 

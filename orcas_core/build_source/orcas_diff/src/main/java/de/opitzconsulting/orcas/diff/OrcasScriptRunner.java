@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,7 +69,7 @@ public class OrcasScriptRunner extends Orcas
         {
           public void run( final CallableStatementProvider pOrcasCallableStatementProvider ) throws Exception
           {
-            final Map<String,Date> lExecutedFilesMap = new HashMap<String,Date>();
+            final Map<String, Date> lExecutedFilesMap = new HashMap<String, Date>();
 
             if( getParameters().isOneTimeScriptMode() )
             {
@@ -92,8 +93,8 @@ public class OrcasScriptRunner extends Orcas
             {
               if( getParameters().getScriptUrl() != null )
               {
-                runURL( getParameters().getScriptUrl(), pCallableStatementProvider, getParameters() );
-                addSpoolfolderScriptIfNeeded( getParameters().getScriptUrl(), getParameters().getScriptUrlFilename() );
+                runURL( getParameters().getScriptUrl(), pCallableStatementProvider, getParameters(), getParameters().getScriptUrlCharset() );
+                addSpoolfolderScriptIfNeeded( getParameters().getScriptUrl(), getParameters().getScriptUrlFilename(), getParameters().getScriptUrlCharset() );
               }
               else
               {
@@ -118,7 +119,7 @@ public class OrcasScriptRunner extends Orcas
                         addSpoolfolderScriptIfNeeded( lFile );
                       }
 
-                      getDatabaseHandler().insertIntoOrcasUpdatesTable( ORCAS_UPDATES_TABLE, pOrcasCallableStatementProvider, lFilePart, getParameters().getLogname()  );
+                      getDatabaseHandler().insertIntoOrcasUpdatesTable( ORCAS_UPDATES_TABLE, pOrcasCallableStatementProvider, lFilePart, getParameters().getLogname() );
                     }
                     else
                     {
@@ -159,12 +160,12 @@ public class OrcasScriptRunner extends Orcas
     return getParameters().getModelFiles() == null ? (": " + getParameters().getModelFile()) : "";
   }
 
-  public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters ) throws Exception
+  public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters, Charset pCharset ) throws Exception
   {
-    runReader( new InputStreamReader( pURL.openStream() ), pCallableStatementProvider, pParameters, null, null );
+    runReader( new InputStreamReader( pURL.openStream(), pCharset ), pCallableStatementProvider, pParameters, null, null );
   }
 
-  public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters, String... pAdditionalParameters ) throws Exception
+  public void runURL( URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters, Charset pCharset, String... pAdditionalParameters ) throws Exception
   {
     setParameters( pParameters );
 
@@ -181,7 +182,7 @@ public class OrcasScriptRunner extends Orcas
 
     try
     {
-      runURL( pURL, pCallableStatementProvider, pParameters );
+      runURL( pURL, pCallableStatementProvider, pParameters, pCharset );
     }
     finally
     {
@@ -239,7 +240,7 @@ public class OrcasScriptRunner extends Orcas
       _log.debug( "execute script: " + pFile + " " + pParameters.getAdditionalParameters() );
     }
 
-    runReader( new InputStreamReader( new FileInputStream( pFile ) ), pCallableStatementProvider, pParameters, pFile, pSpoolHandler );
+    runReader( new InputStreamReader( new FileInputStream( pFile ), pParameters.getEncoding() ), pCallableStatementProvider, pParameters, pFile, pSpoolHandler );
   }
 
   static List<String> parseReaderToLines( Reader pReader ) throws IOException
@@ -471,8 +472,7 @@ public class OrcasScriptRunner extends Orcas
                 }
               }
             }.execute();
-          }
-          while( keepRunning[0] );
+          } while( keepRunning[0] );
         }
 
         lCurrent = null;
@@ -671,7 +671,7 @@ public class OrcasScriptRunner extends Orcas
       }
 
       spoolFile = new FileOutputStream( lFile );
-      writer = new OutputStreamWriter( spoolFile );
+      writer = new OutputStreamWriter( spoolFile, getParameters().getEncodingForSqlLog() );
     }
 
     private boolean isSpoolActive()

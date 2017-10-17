@@ -1,5 +1,6 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.nio.charset.StandardCharsets;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -120,18 +121,18 @@ public class OrcasInitializeOrcasDbImpl extends BaseParameterBasedHandler
   {
     for( URL lURL : SqlplusDirAccessExtenions.getFileURLs() )
     {
-      pOrcasScriptRunner.runURL( lURL, pOrcasCallableStatementProvider, getParameters() );
+      pOrcasScriptRunner.runURL( lURL, pOrcasCallableStatementProvider, getParameters(), StandardCharsets.UTF_8 );
     }
 
-    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), pOrcasCallableStatementProvider, getParameters() );
+    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), pOrcasCallableStatementProvider, getParameters(), StandardCharsets.UTF_8 );
 
-    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_update_checksum(), pOrcasCallableStatementProvider, getParameters(), getInitializeChecksumTotal(), getInitializeChecksumExtension() );
+    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_update_checksum(), pOrcasCallableStatementProvider, getParameters(), StandardCharsets.UTF_8, getInitializeChecksumTotal(), getInitializeChecksumExtension() );
   }
 
   private void installFull( OrcasScriptRunner pOrcasScriptRunner, CallableStatementProvider pOrcasCallableStatementProvider ) throws Exception
   {
-    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_delete_replacable_objects(), pOrcasCallableStatementProvider, getParameters(), "object_name not like '%'", "object_name not like '%'", "object_name not like '%'", "object_name not like '%'", "object_name not like '%'" );
-    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_drop_all_types(), pOrcasCallableStatementProvider, getParameters(), "object_name not like '%'" );
+    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_delete_replacable_objects(), pOrcasCallableStatementProvider, getParameters(), StandardCharsets.UTF_8, "object_name not like '%'", "object_name not like '%'", "object_name not like '%'", "object_name not like '%'", "object_name not like '%'" );
+    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_drop_all_types(), pOrcasCallableStatementProvider, getParameters(), StandardCharsets.UTF_8, "object_name not like '%'" );
 
     List<URL> lURLs = new ArrayList<URL>();
     lURLs.addAll( SqlplusDirAccessSyex.getFileURLs() );
@@ -139,11 +140,11 @@ public class OrcasInitializeOrcasDbImpl extends BaseParameterBasedHandler
     lURLs.addAll( SqlplusDirAccessDbobjects.getFileURLs() );
     for( URL lURL : lURLs )
     {
-      pOrcasScriptRunner.runURL( lURL, pOrcasCallableStatementProvider, getParameters() );
+      pOrcasScriptRunner.runURL( lURL, pOrcasCallableStatementProvider, getParameters(), StandardCharsets.UTF_8 );
     }
 
-    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), pOrcasCallableStatementProvider, getParameters() );
+    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), pOrcasCallableStatementProvider, getParameters(), StandardCharsets.UTF_8 );
 
-    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_update_checksum(), pOrcasCallableStatementProvider, getParameters(), getInitializeChecksumTotal(), getInitializeChecksumExtension() );
+    pOrcasScriptRunner.runURL( SqlplusDirAccessDbobjects.getURL_update_checksum(), pOrcasCallableStatementProvider, getParameters(), StandardCharsets.UTF_8, getInitializeChecksumTotal(), getInitializeChecksumExtension() );
   }
 }

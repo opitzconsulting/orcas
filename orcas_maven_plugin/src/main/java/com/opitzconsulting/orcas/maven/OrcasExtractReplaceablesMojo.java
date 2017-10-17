@@ -29,6 +29,10 @@ public class OrcasExtractReplaceablesMojo extends BaseOrcasMojo
   @Parameter
   protected File extractmodelinputfolder;
 
+  /**
+   * View extract-mode. "full" or "text". "full" includes schema-name and column
+   * definitions.
+   */
   @Parameter( defaultValue = "text" )
   private String viewextractmode;
 
@@ -48,7 +52,7 @@ public class OrcasExtractReplaceablesMojo extends BaseOrcasMojo
     }
     pParameters.setSpoolfolder( "" + extractreplaceablesoutfolder );
     pParameters.setViewExtractMode( viewextractmode );
- 
+
     new OrcasExtractReplaceables().mainRun( pParameters );
   }
 }

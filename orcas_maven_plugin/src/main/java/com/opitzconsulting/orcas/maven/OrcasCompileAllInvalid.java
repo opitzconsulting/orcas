@@ -1,11 +1,14 @@
 package com.opitzconsulting.orcas.maven;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
+
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
-import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
 
 /**
  * Compiles pl/sql code in the database.
@@ -30,7 +33,7 @@ public class OrcasCompileAllInvalid extends BaseOrcasMojo
   {
     if( !isRunOnlyIfReplaceablesExists() || replaceablesfolder.exists() )
     {
-      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql" );
+      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql", StandardCharsets.UTF_8 );
       pParameters.setIsOneTimeScriptMode( false );
       pParameters.setAdditionalParameters( null );
 
