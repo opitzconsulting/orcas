@@ -18,7 +18,7 @@
   </target>
 
   <target name="orcas_initialize" depends="show_location">
-    <orcas_initialize orcasprebuildversion="com.opitzconsulting.orcas:orcas-main:4.1.1"/>
+    <orcas_initialize orcasprebuildversion="com.opitzconsulting.orcas:orcas-main:4.1.2"/>
   </target>
 
   <target name="build_tables" depends="show_location,orcas_initialize">
