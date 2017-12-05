@@ -872,7 +872,7 @@ public abstract class DdlBuilder
   {
     for( LobStorageDiff lLobStorageDiff : pTableDiff.lobStoragesDiff )
     {
-      if( lLobStorageDiff.column_nameNew.equals( pColumnName ) )
+      if( lLobStorageDiff.isNew && lLobStorageDiff.column_nameNew.equals( pColumnName ) )
       {
         return lLobStorageDiff;
       }
