@@ -2,69 +2,124 @@
 layout: page
 title: Was ist Orcas?
 permalink: /de/
+navigation: false
+titlepage: true
 categories:
 - de
 ---
 
-Orcas ist ein Open Source Deploymentframework mit dem ein bestehendes **Datenbankschema** in einen mit **Textdateien** beschriebenen Soll-Zustand **überführt** werden kann.  
-Durch die Verwendung einfacher Textdateien ist eine **Integration** in bestehendende Projekte mit **Versionsverwaltung** denkbar einfach. Orcas bietet dazu auch die Möglichkeit **kompliziertere Überführungen** zu **integrieren**.  
-Orcas hat zudem einen **Extension**-Mechanismus, mit dem die **Definition** des Datenbankschemas deutlich **vereinfach** und **vereinheitlicht** werden kann.
+<div id="titlepage-title"><h1>Was ist Orcas?</h1></div>
+<div class="clearfix" id="short-description-container">
+    <div>
+        <img src="../assets/db_icon.png">
+        <h4>DEPLOYMENTFRAMEWORK</h4>
+        <p>Überführung von Datenbankschemas in gewünschten Sollzustand</p>
+    </div>
+    <div>
+        <img src="../assets/script_icon.png"/>
+        <h4>VERSIONSVERWALTUNG</h4>
+        <p>Vereinfachte Datenbankschema-Verwaltung durch Integration mittels Textdateien</p>
+    </div>
+    <div>
+        <img  src="../assets/cc_icon.png">
+        <h4>OPEN SOURCE</h4>
+        <p>Oracle Adaptive Systems ist frei verfügbar und mit Oracle RDBMS kompatibel</p>
+    </div>
+</div>
 
-Orcas steht für **Or**a**c**le **a**daptive **s**chemas und ist nur mit Oracle RDBMS kompatibel.
+<div class="clearfix" id="container">
+<h2>BEI WELCHEN PROBLEMEN KANN ORCAS UNTERSTÜTZEN?</h2>
+    <div><h1>Development</h1></div>
+    <div>
+        <div id="container-first-child">
+            <ul>
+                <li>Unterschiedliche Spaltengrößen bei bei Testsystemen und Entwicklerdatenbanken</li>
+                <li>Fragen zur SVN/Git Versionskompatibilität der Entwicklerdatenbank</li>
+                <li>Indexfehler der Produktionsdatenbank</li>
+                <li>Nachverfolgen von Veränderungen</li>
+                <li>Weniger umständliche Syntax</li>
+                <li>Primärschlüsselfehler</li>
+             </ul>
+        </div>
+    </div>
+    <div><h1>Go-LIVE Date</h1></div>
+    <div>
+        <div id="container-second-child">
+            <ul>
+                <li>Vereinheitlichte Version zwischen Entwicklungs-, Test- und Produktionsdatenbanken</li>
+                <li>Versionieren, branchen und mergen von Datenbanken</li>
+                <li>Paralleler Zugriff auf Entwicklerdatenbanken</li>
+                <li>Umsetzung von Datenbankkonventionen</li>
+                <li>Betrieb von agilen Datenbanken</li>
+            </ul>
+        </div>
+    </div>
+</div>
 
-## Problemstellung
+<div class="clearfix" id="description-panel">
+    <h2>EINFÜHRUNG</h2>
+    <div class="description-pt1">
+    Orcas ist ein Deploymentframework mit dem ein bestehendes Schema in einen in Orcas beschriebenen Soll-Zustand überführt werden kann. Der Zustand des bestehenden Schemas ist dabei größtenteils irrelevant. Bei Bedarf werden "überflüssige" Indizes, Constraints, Spalten oder Tabellen verworfen bzw. neue Tabellen oder Spalten hinzugefügt.
+    </div>
+    <input id="expand" type="checkbox" class="panel">
+    <label for="expand" id="expand-title">mehr</label>
+    <div class="description-pt2"> 
+    Änderungen von Datentypen werden, sofern möglich, durchgeführt. Der Soll-Zustand wird dabei in Form von einfachen SQL Skriptdateien vorgehalten, die in ihrer Syntax stark an die "CREATE TABLE" Syntax angelehnt sind.
+    Die Nutzung von Orcas hat viele Vorteile. Ein großer Vorteil ist, dass die Tabellenskripte versioniert werden können, was bei einem Projektteam eine enorme Erleichterung ist, da Änderungen nachvollzogen und auch rückgängig gemacht werden können. Ein weiterer Vorteil ist, dass ohne große Umstände auf verschiedenen Datenbanken deployed werden und somit ein einheitlicher Datenbankstand auf beliebig vielen Schemata hergestellt werden kann.
+    </div>
+</div>
 
-Folgende Problemfälle treten bei der Datenbankentwicklung immer wieder auf, meist genau dann, wenn man sie am wenigsten gebrauchen kann:
+<div class="clearfix" id="documentation-list">
+    <h2>DOKUMENTATION</h2>
+    <p>Hier sind die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:</p>
+    <div><img src="../assets/docs_icon.png"/></div>
+    <div>
+        <ul>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/usage/">Wie arbeitet man mit Orcas?</a>
+            </li>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/installation/">Installation</a> Was muss ich tun, um Orcas in meinem Projekt einsetzen zu können?
+            </li>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/examples/">Examples</a> Beispielprojekte
+            </li>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/ant-tasks/">ant Tasks</a> Wie erstelle ich einen Gesamtablauf mit ant?
+            </li>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/statics-syntax/">Tabellen Syntax</a> Wie sehen die Tabellenskripte aus?
+            </li>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/domain-extension/">Domain Extensions </a> 
+                Wie kann ich projektspezifische Erweiterungen einfach integrieren?
+            </li>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/extensions/">Extensions</a>
+                Wie kann ich spezielle projektspezifische Erweiterungen integrieren?
+            </li>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/how-it-works/">Funktionsweise Orcas </a>   
+                Wie funktioniert Orcas?
+            </li>
+        </ul>
+    </div>
+</div>
 
-- Wieso ist die Spaltengröße auf dem Testsystem kleiner als auf der Entwicklungsdatenbank?
-- Wieso fehlt auf der Produktionsdatenbank ein Index?
-- Wer hat bei der Tabelle den PK vergessen?
-- Warum muss ich `ALTER TABLE mytable ADD COLUM` schreiben? Ich schreibe ja auch nicht `ALTER CLASS myclass.java ADD INSTANCE VARIABLE`
-- Welche SVN/Git-Version passt eigentlich noch zu meiner Entwicklungsdatenbank?
-- Wer hat gerade meine View-Änderungen überschrieben?
-
-Wenn man nicht gerade damit beschäftigt ist den GO-LIVE-Termin zu retten oder zu erklären warum das Budget doch nicht gereicht hat, dann kommt man oft zu folgenden Fragestellungen:
-
-- Wie kann man die Entwicklungs-, Test- und Produktionsdatenbank auf dem gleichen Versionsstand halten?
-- Wie kann man Datenbanken versionieren, branchen oder mergen?
-- Wie kann man einheitliche Datenbankkonventionen umsetzen?
-- Wie kann man agile Datenbankentwicklung betreiben?
-- Wie können mehrere Entwickler auf der Entwicklungsdatenbank parallel entwickeln?
-
-Oder kurz:
-
-- Wie macht man das mit der Datenbankentwicklung eigentlich richtig?
-
-Orcas ist zwar kein Allheilmittel. Richtig eingesetzt kann es aber bei all diesen Fragestellungen eine praktikable Lösung anbieten.
-
-## Einführung
-
-Orcas ist ein Deploymentframework mit dem ein bestehendes Schema in einen in Orcas beschriebenen Soll-Zustand überführt werden kann. Der Zustand des bestehenden Schemas ist dabei größtenteils irrelevant. Bei Bedarf werden "überflüssige" Indizes, Constraints, Spalten oder Tabellen verworfen bzw. neue Tabellen oder Spalten hinzugefügt. Änderungen von Datentypen werden, sofern möglich, durchgeführt. Der Soll-Zustand wird dabei in Form von einfachen SQL Skriptdateien vorgehalten, die in ihrer Syntax stark an die "CREATE TABLE" Syntax angelehnt sind.
-Die Nutzung von Orcas hat viele Vorteile. Ein großer Vorteil ist, dass die Tabellenskripte versioniert werden können, was bei einem Projektteam eine enorme Erleichterung ist, da Änderungen nachvollzogen und auch rückgängig gemacht werden können. Ein weiterer Vorteil ist, dass ohne große Umstände auf verschiedenen Datenbanken deployed werden und somit ein einheitlicher Datenbankstand auf beliebig vielen Schemata hergestellt werden kann.
-
-## Dokumentation
-
-Hier sind die wichtigsten Bereiche der Dokumentation mit kurzer Beschreibung:
-
-- [Wie arbeitet man mit Orcas?]({{site.baseurl}}/docs/de/usage/)
-- [Installation]({{site.baseurl}}/docs/de/installation/) - Was muss ich tun, um Orcas in meinem Projekt einsetzen zu können?
-- [Examples]({{site.baseurl}}/docs/de/examples/) - Beispielprojekte
-- [ant Tasks]({{site.baseurl}}/docs/de/ant-tasks/) - Wie erstelle ich einen Gesamtablauf mit ant?
-- [Tabellen Syntax]({{site.baseurl}}/docs/de/statics-syntax/) - Wie sehen die Tabellenskripte aus?
-- [Domain-Extension]({{site.baseurl}}/docs/de/domain-extension/) - Wie kann ich projektspezifische Erweiterungen einfach integrieren?
-- [Extensions]({{site.baseurl}}/docs/de/extensions/) - Wie kann ich spezielle projektspezifische Erweiterungen integrieren?
-- [Funktionsweise Orcas]({{site.baseurl}}/docs/de/how-it-works/) - Wie funktioniert Orcas?
-
-## Welche Vorteile/Nachteile gibt es?
-
-### Vorteile
-
-- Der Soll-Zustand wird in einfachen Textskriptdateien verwaltet. Damit kann man alle Vorteile einer Versionsverwaltung nutzen (Versionen nachhalten, nachvollziehen wer wann welche Änderung gemacht hat, einheitliche Versionsstände, Mergeunterstützung, ...).
-- Die Skripte sind eine echte "Referenz", man muss also nicht in diversen Schemata suchen wenn man eine aktuelle Package-Version haben will bzw. man braucht keine organisatorische Festlegungen welches Schema als Referenzschema verwendet wird.
-- Umständliche und fehleranfällige DB-Releaseskripte werden nicht benötigt.
-- Es können beliebig viele Schemata für Entwicklungs- und Testzwecke erstellt werden, ohne dass ein gewaltiger, fehleranfälliger Abgleichaufwand entsteht.
-
-### Nachteile
-
-- Wenn Datenbank-Funktionen verwendet werden, die Orcas nicht unterstützt, müssen diese Teilbereiche "manuell" verwaltet werden.
-- Projektmitarbeiter müssen wissen, wie man mit Orcas arbeitet.
+<div class="clearfix" id="pros-cons">
+    <h2>VORTEILE | NACHTEILE</h2>
+    <div class="pros">
+        <ul>
+            <li>Soll-Zustand in Textskriptdateien vereinfacht Versionsverwaltung</li>
+            <li>Skripte dienen als echte "Referenz" und können Referenzschema ersetzt</li>
+            <li>Fehleranfällige DB-Releaseskripte werden nicht benötigt</li>
+            <li>Beliebig viele Schemata für Entwicklung und Tests ohne Abgleichaufaufwand</li>
+        </ul>
+    </div>
+    <div class="cons">
+        <ul>
+            <li>Bei von Orcas nicht unterstützten Datenbankfunktionen müssen Teilbereiche manuell verwaltet werden</li>
+            <li>Projektarbeiter müssen wissen, wie man mit Orcas arbeitet</li>
+        </ul>
+    </div>
+</div>

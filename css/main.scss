@@ -4,17 +4,18 @@
 @charset "utf-8";
 
 // Our variables
-$base-font-family: Lato, Helvetica, Arial, sans-serif;
+$base-font-family: "Open Sans", Helvetica, Arial, sans-serif;
 $base-font-size:   15px;
 $small-font-size:  $base-font-size * 0.875;
 $base-line-height: 1.75;
 
 $spacing-unit:     30px;
 
-$text-color:       #333;
-$heading-color:    #111;
-$background-color: #fdfdfd;
-$brand-color:      #db4800;
+$text-color:       white;
+$heading-color:    white;
+$background-color: rgb(64, 64, 64);
+$brand-color:      rgb(0, 122, 255);
+$brand-color-dark: rgb(0, 68, 111);
 
 $grey-color:       #828282;
 $grey-color-light: lighten($grey-color, 40%);
@@ -63,3 +64,4 @@ $on-laptop:        800px;
         "layout",
         "syntax-highlighting"
 ;
+@import url('https://fonts.googleapis.com/css?family=Open+Sans|Roboto+Slab')

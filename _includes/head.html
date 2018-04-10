@@ -12,4 +12,12 @@
 
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
   <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}" />
+  <link rel="icon" href="./assets/orcas.ico">
+  {% if page.categories %}
+    {% for language in page.categories %}
+      {% if language == 'de' %}
+      <link rel="icon" href="{{site.baseurl}}/assets/page_icon.ico">
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 </head>

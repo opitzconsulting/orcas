@@ -5,17 +5,17 @@
 
       {% if language == 'de' %}
         {% unless page.navigation-de == false %}
-          {% include navigation-de.html %}
+            {% include navigation-de.html %}
         {% endunless %}
       {% else %}
         {% unless page.navigation == false %}
-          {% include navigation-en.html %}
+            {% include navigation-en.html %}
         {% endunless %}
       {% endif %}
     {% endfor %}
   {% else %}
     {% unless page.navigation == false %}
-      {% include navigation-en.html %}
+        {% include navigation-en.html %}
     {% endunless %}
   {% endif %}
 

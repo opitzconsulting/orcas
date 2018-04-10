@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -5,15 +6,25 @@
 
   <body>
 
-    {% include header.html %}
+      {% include navbar.html %}  
+
+      {% if page.title == "Was ist Orcas?" %}
+        <div class="header-img index-img"></div>
+      {% else %}
+        {% if page.title == "About Orcas" %}
+        <div class="header-img index-img"></div>
+        {% endif %}
+      {% endif %}
 
     <div class="page-content">
       <div class="wrapper">
-
-		{% unless page.navigation == false %}
-			{% include navigation.html %}
-		{% endunless %}
-
+          {% unless page.navigation == false %}
+          {% if page.title != 'Was ist Orcas?' %}
+          {% if page.title != 'About Orcas' %}
+            {% include navigation.html %}
+            {% endif %}
+            {% endif %}
+          {% endunless %}
         {{ content }}
       </div>
     </div>
