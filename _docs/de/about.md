@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: index
 title: Was ist Orcas?
 permalink: /de/
 navigation: false
@@ -12,12 +12,14 @@ categories:
 <div class="clearfix" id="short-description-container">
     <div>
         <img src="../assets/db_icon.png">
-        <h4>DEPLOYMENTFRAMEWORK</h4>
+        <h4 class="long-header">DEPLOYMENTFRAMEWORK</h4>
+        <h4 class="separated-header">DEPLOYMENT-FRAMEWORK</h4>
         <p>Überführung von Datenbankschemas in gewünschten Sollzustand</p>
     </div>
     <div>
         <img src="../assets/script_icon.png"/>
-        <h4>VERSIONSVERWALTUNG</h4>
+        <h4 class="long-header">VERSIONSVERWALTUNG</h4>
+        <h4 class="separated-header">VERSIONS-VERWALTUNG</h4>
         <p>Vereinfachte Datenbankschema-Verwaltung durch Integration mittels Textdateien</p>
     </div>
     <div>
@@ -123,3 +125,4 @@ categories:
         </ul>
     </div>
 </div>
+<p class="credit">Icon made by Freepik from www.flaticon.com <p>

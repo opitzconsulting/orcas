@@ -1,0 +1,20 @@
+<header class="site-header">
+  
+  <div class="wrapper">
+    
+    {% if page.categories %}
+    {% for language in page.categories %}
+    
+    {% if language == 'de' %}
+    <a class="site-title" href="{{ site.baseurl }}/de/"><strong></strong>Orcas - Automatisches Deployment für die Datenbank</strong></a>
+    {% else %}
+    <a class="site-title" href="{{ site.baseurl }}/">{{site.title}}</a>
+    {% endif %}
+    {% endfor %}
+    {% else %}
+    <a class="site-title" href="{{ site.baseurl }}/">{{site.title}}</a>
+    {% endif %}
+    
+  </div>
+  
+</header>

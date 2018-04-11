@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: index
 title: About Orcas
 permalink: /
 navigation: false
