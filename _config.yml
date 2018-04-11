@@ -15,7 +15,7 @@ github:
   repository_url: https://github.com/opitzconsulting/orcas
 
 # Build settings
-baseurl: /orcas
+baseurl:
 permalink: docs/:title
 markdown: kramdown
 highlighter: rouge

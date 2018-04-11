@@ -76,7 +76,16 @@
     font-family: 'Open Sans', sans-serif;
   }
   .topnav a:first-child{
-      padding:5px 30% 10px 10px;
+      padding:5px 50% 10px 10px;
+      @media screen and (max-width:1300px) {
+        padding-right: 40%;
+        
+    }
+
+      @media screen and (max-width:1150px) {
+          padding-right: 25%;
+          
+      }
   }
   
   .topnav a:hover {
@@ -89,7 +98,7 @@
     top: 15px;
   }
   
-  @media screen and (max-width: 1000px) {
+  @media screen and (max-width: 900px) {
     .topnav {margin: 0; width: 100%}
     .topnav a:not(:nth-child(2)) {display: none;}
     .topnav a.icon {
@@ -99,7 +108,7 @@
     }
   }
   
-  @media screen and (max-width: 1000px) {
+  @media screen and (max-width: 900px) {
     .topnav.responsive {position: relative;
     height: auto;}
     .topnav.responsive .icon {
