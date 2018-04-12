@@ -488,14 +488,20 @@ Index-page
     padding-top:10px;
     margin-left: -$spacing-unit*3;
     padding-right: $spacing-unit*5;
-    text-indent: $spacing-unit*4;
+    text-indent: $spacing-unit*3;
     font-size: 2.5em;
+    text-align: center;
 
     @include media-query($on-laptop) {
         margin-left: -$spacing-unit;
         text-indent: $spacing-unit;
         padding-right: $spacing-unit*2;
         font-size: 1.5em;
+    }
+    @media screen and (max-width: 600px){
+        text-indent: 0;
+        padding-left: 10%
+        
     }
 }
 
@@ -637,14 +643,15 @@ Index-page
 #description-panel{
     padding: 50px 25% 50px 20%;
     background-color: rgb(224, 224, 224);
-    margin: 0 -25% 0 -25%;
+    margin: 0 -27% 0 -25%;
     color:black;
     border-bottom: 3px solid $brand-color;
     border-top:3px solid $brand-color;
 
     @media screen and(max-width:800px) {
         margin: 0 -35% 0 -25%;
-        padding-right: 33%
+        padding-right: 31%;
+        padding-left:22%;
     }
 }
 #description-panel h2{
@@ -755,6 +762,7 @@ Index-page
     @media screen and (max-width: 600px){
         width: 100%;
         border-right: 3px dotted white;
+        padding-right: 7px;
     }
 
 }
