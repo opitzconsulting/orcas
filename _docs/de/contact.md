@@ -9,8 +9,8 @@ categories:
 ---
 <div class="header-img contact-img"></div>
 <div id="titlepage-title"><h1>Kontakt</h1></div>
-
-OPITZ Consulting ist der Innitiatior der Entwicklung von Orcas. Sollten Sie Fragen haben, Hilfe bei der Implementierung des Frameworks suchen oder Schulungen benötigen, können Sie uns gerne kontaktieren. 
+<br>
+OPITZ CONSULTING ist der Innitiatior der Entwicklung von Orcas. Sollten Sie Fragen haben, Hilfe bei der Implementierung des Frameworks suchen oder Schulungen benötigen, können Sie uns gerne kontaktieren. 
 
 
 OPITZ CONSULTING Deutschland GmbH<br>

@@ -68,6 +68,9 @@ categories:
     <div class="description-pt2"> 
     Änderungen von Datentypen werden, sofern möglich, durchgeführt. Der Soll-Zustand wird dabei in Form von einfachen SQL Skriptdateien vorgehalten, die in ihrer Syntax stark an die "CREATE TABLE" Syntax angelehnt sind.
     Die Nutzung von Orcas hat viele Vorteile. Ein großer Vorteil ist, dass die Tabellenskripte versioniert werden können, was bei einem Projektteam eine enorme Erleichterung ist, da Änderungen nachvollzogen und auch rückgängig gemacht werden können. Ein weiterer Vorteil ist, dass ohne große Umstände auf verschiedenen Datenbanken deployed werden und somit ein einheitlicher Datenbankstand auf beliebig vielen Schemata hergestellt werden kann.
+    <br>
+    <br>
+    Weitere Informationen finden Sie es in unserem <a href="https://www.opitz-consulting.com/fileadmin/user_upload/Collaterals/Artikel/whitepaper-orcas_sicher.pdf" target="_blank">Whitepaper:</a> Orcas - Continuous Delivery für die Datenbank
     </div>
 </div>
 
