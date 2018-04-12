@@ -35,7 +35,7 @@ categories:
     <div>
         <div id="container-first-child">
             <ul>
-                <li>Unterschiedliche Spaltengrößen bei bei Testsystemen und Entwicklerdatenbanken</li>
+                <li>Unterschiedliche Spaltengrößen bei Testsystemen und Entwicklerdatenbanken</li>
                 <li>Fragen zur SVN/Git Versionskompatibilität der Entwicklerdatenbank</li>
                 <li>Indexfehler der Produktionsdatenbank</li>
                 <li>Nachverfolgen von Veränderungen</li>

@@ -541,7 +541,6 @@ Index-page
     color:white;
     min-height: 275px;
 
-
     @media screen and(max-width: 600px){
         float: none;
         max-width: 90%;
@@ -554,6 +553,9 @@ Index-page
     @media screen and(max-width: 1000px){
         display: inline;
     }
+    @media screen and(max-width: 600px){
+        display:none;
+    }
 }
 .long-header{
     color: white;
@@ -561,6 +563,9 @@ Index-page
 
     @media screen and(max-width: 1000px){
          display: none;   
+    }
+    @media screen and(max-width: 600px){
+        display: inline;
     }
 
 }
@@ -577,9 +582,8 @@ Index-page
 
 #container{
     margin-top: 30px;
-    margin-right: $spacing-unit;
     background-color: $grey-color-dark;
-    padding: 20px 20px 20px 20px
+    padding: 20px 0 20px 10px;
 }
 #container div div{
     width: 100%;
@@ -607,10 +611,9 @@ Index-page
 
 #container div{
     float:left;
-    width: 47%;
+    width: 45%;
     @media screen and(max-width: 600px){
         float: none;
-        text-align: justify;
         width: 90%;
         padding: none;
         
@@ -632,7 +635,7 @@ Index-page
 }
 
 #description-panel{
-    padding: 50px 20% 50px 20%;
+    padding: 50px 25% 50px 20%;
     background-color: rgb(224, 224, 224);
     margin: 0 -25% 0 -25%;
     color:black;
@@ -641,6 +644,7 @@ Index-page
 
     @media screen and(max-width:800px) {
         margin: 0 -35% 0 -25%;
+        padding-right: 33%
     }
 }
 #description-panel h2{
@@ -721,7 +725,7 @@ Index-page
     height:auto;
     width: 50%;
     text-align: center;
-    padding: 50px 0 10px 50px;
+    padding: 50px 0 10px 80px;
     filter: drop-shadow(0 0 1em black);
 }
 #documentation-list div ul li{
@@ -731,7 +735,6 @@ Index-page
     text-align: center
 }
 #pros-cons{
-    margin-right: $spacing-unit;
     margin-top: 30px;
     background-color: $grey-color-dark;
 }
