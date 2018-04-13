@@ -589,7 +589,12 @@ Index-page
 #container{
     margin-top: 30px;
     background-color: $grey-color-dark;
-    padding: 20px 0 20px 10px;
+    padding: 20px 0 20px 5%;
+    @media screen and (max-width: 1700){
+        padding-left: 0!important;
+        
+    }
+
 }
 #container div div{
     width: 100%;
@@ -617,7 +622,7 @@ Index-page
 
 #container div{
     float:left;
-    width:39%;
+    width:35%;
     @media screen and(max-width:1700px){
         width: 43%
     }
