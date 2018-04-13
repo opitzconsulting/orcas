@@ -617,7 +617,10 @@ Index-page
 
 #container div{
     float:left;
-    width: 45%;
+    width:39%;
+    @media screen and(max-width:1700px){
+        width: 43%
+    }
     @media screen and(max-width: 600px){
         float: none;
         width: 90%;
