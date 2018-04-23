@@ -65,6 +65,9 @@ categories:
     <label for="expand" id="expand-title">more</label>
     <div class="description-pt2">
         Data types will be changed if possible. The target state will be provided in the form of SQL files, which are based on the CREATE / ALTER TABLE syntax. The use of Orcas has many advantages. One huge advantage is the possibility of versioning table creation scripts, which is a great help when working in a team, because changes can easily be recognized and undone if needed. An additional benefit is the ease of deployment on different databases without hassle so you have the same version of your source code on any number of databases.
+        <br>
+        <br>
+        More information can be found in our <a href="http://www.opitz-consulting.com/fileadmin/user_upload/Collaterals/Artikel/whitepaper-orcas-EN.pdf" target="_blank">Whitepaper: Orcas -  Continuous Delivery for Databases</a> 
      </div>
 </div>
 
