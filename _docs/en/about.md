@@ -21,8 +21,8 @@ categories:
         <p>Simplified maintenance and integration into existing projects via text files</p>
     </div>
     <div>
-        <img  src="./assets/cc_icon.png">
-        <h4>OPEN SOURCE</h4>
+        <img  src="./assets/osi_keyhole.png">
+        <h4>open source initiative</h4>
         <p>Oracle Adaptive Systems is free and compatible with Oracle RDBMS</p>
     </div>
 </div>
