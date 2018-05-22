@@ -23,8 +23,8 @@ categories:
         <p>Vereinfachte Datenbankschema-Verwaltung durch Integration mittels Textdateien</p>
     </div>
     <div>
-        <img  src="../assets/cc_icon.png">
-        <h4>OPEN SOURCE</h4>
+        <img  src="../assets/osi_keyhole.png">
+        <h4>open source initiative</h4>
         <p>Oracle Adaptive Systems ist frei verfügbar und mit Oracle RDBMS kompatibel</p>
     </div>
 </div>
