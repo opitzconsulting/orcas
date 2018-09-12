@@ -3,9 +3,11 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "danmikita/centos"
   config.vm.provision :shell, path: "bootstrap.sh"
+  config.ssh.username = "vagrant"
+  config.ssh.password = "vagrant"
   # make oracle availabel form host
   config.vm.network :forwarded_port, guest: 1521, host: 1531 # Oracle XE
-  
+
   # mount orcas directory to vm
   config.vm.synced_folder "..", "/orcas/orcas", create: true
   # mount vagrant-distribution directory to vm
