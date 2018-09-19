@@ -50,7 +50,7 @@ task(generateXtext, dependsOn: copyFilesToBuild, type: JavaExec)
   main = "org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher"
   args "${project.ext.mwe2_file_name}"
   logging.captureStandardOutput LogLevel.INFO
-  logging.captureStandardError LogLevel.INFO
+  logging.captureStandardError LogLevel.ERROR
 
   doFirst
   {
