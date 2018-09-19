@@ -12,6 +12,7 @@ dependencies
   if( project.ext.prebuildorcasversion != null )
   {
     xtextDistribution project.ext.prebuildorcasversion
+    xtextDistribution project.ext.prebuildorcasversion.replace( 'orcas-main', 'orcas-main-extensionhandler' );
   }
   else
   {
