@@ -243,6 +243,7 @@ public class DomainSyntaxExtension extends BaseSyntaxExtension
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( "default" ) );
       addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "default_value", "STRING", true ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")?" ) );
+      addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "identity", "ColumnIdentity", false ) );
       addField( lRuleNormal, new NewFieldConstant( "notnull", "not" ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( "null" ) );

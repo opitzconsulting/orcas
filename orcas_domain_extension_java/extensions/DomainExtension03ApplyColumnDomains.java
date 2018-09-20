@@ -68,6 +68,11 @@ public class DomainExtension03ApplyColumnDomains extends OrcasBaseExtensionWithP
           lColumn.setDefault_value( lColumnDomain.getDefault_value() );
         }
 
+        if( lColumnDomain.getIdentity() != null )
+        {
+          lColumn.setIdentity( lColumnDomain.getIdentity() );
+        }
+
         if( lColumnDomain.isNotnull() )
         {
           lColumn.setNotnull( true );
@@ -85,13 +90,13 @@ public class DomainExtension03ApplyColumnDomains extends OrcasBaseExtensionWithP
           {
             PrimaryKey lPrimaryKey = new PrimaryKeyImpl();
             lPrimaryKey.getPk_columns().add( lColumnRef );            
-            lPrimaryKey.setConsName( lPkName );
+            lPrimaryKey.setConsName( lPkName.length() == 0 ? null : lPkName );
 
             pTable.setPrimary_key( lPrimaryKey );
           }
           else
           {
-            if( !lPkName.equalsIgnoreCase( pTable.getPrimary_key().getConsName() ) )
+            if( !lPkName.equalsIgnoreCase( pTable.getPrimary_key().getConsName() ) && (!( lPkName.length() == 0 && pTable.getPrimary_key().getConsName() == null )) )
             {
               throw new RuntimeException( "pk setup invalid: " + pTable.getPrimary_key().getConsName() + " " + lPkName );
             }

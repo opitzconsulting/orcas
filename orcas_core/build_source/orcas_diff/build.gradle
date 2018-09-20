@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 apply from: '../maven_publish.gradle'
 project.ext.maven_artifactId_postfix = 'main'
-project.ext.extensiondependent = true
+project.ext.extensiondependent = false
 project.ext.maven_description = 'orcas main api'
 
 dependencies 
