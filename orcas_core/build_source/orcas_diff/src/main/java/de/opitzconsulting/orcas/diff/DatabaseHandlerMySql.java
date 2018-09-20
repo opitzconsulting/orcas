@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
+import de.opitzconsulting.orcas.sql.WrapperExecutePreparedStatement;
 import de.opitzconsulting.orcas.sql.WrapperExecuteStatement;
 import de.opitzconsulting.origOrcasDsl.CharType;
 
@@ -62,5 +63,11 @@ public class DatabaseHandlerMySql extends DatabaseHandler
   public DdlBuilder createDdlBuilder( Parameters pParameters )
   {
     return new DdlBuilderMySql( pParameters );
+  }
+
+  @Override
+  public void executeDiffResultStatement( String pStatementToExecute, CallableStatementProvider pCallableStatementProvider )
+  {
+    new WrapperExecutePreparedStatement( pStatementToExecute, pCallableStatementProvider ).execute();
   }
 }

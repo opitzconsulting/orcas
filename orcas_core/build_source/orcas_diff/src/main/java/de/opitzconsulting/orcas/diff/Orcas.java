@@ -96,7 +96,7 @@ public abstract class Orcas
 
   protected DatabaseHandler getDatabaseHandler()
   {
-    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:mysql" ) )
+    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:mysql" ) || getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:mariadb" ) )
     {
       return new DatabaseHandlerMySql();
     }

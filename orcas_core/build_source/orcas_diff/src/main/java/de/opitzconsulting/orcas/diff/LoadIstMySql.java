@@ -16,15 +16,13 @@ import de.opitzconsulting.orcas.sql.WrapperIteratorResultSet;
 import de.opitzconsulting.origOrcasDsl.Column;
 import de.opitzconsulting.origOrcasDsl.ColumnRef;
 import de.opitzconsulting.origOrcasDsl.CommentObjectType;
-import de.opitzconsulting.origOrcasDsl.CompressType;
 import de.opitzconsulting.origOrcasDsl.DataType;
+import de.opitzconsulting.origOrcasDsl.FkDeleteRuleType;
 import de.opitzconsulting.origOrcasDsl.ForeignKey;
 import de.opitzconsulting.origOrcasDsl.Index;
-import de.opitzconsulting.origOrcasDsl.IndexGlobalType;
 import de.opitzconsulting.origOrcasDsl.IndexOrUniqueKey;
 import de.opitzconsulting.origOrcasDsl.InlineComment;
 import de.opitzconsulting.origOrcasDsl.LobStorage;
-import de.opitzconsulting.origOrcasDsl.LoggingType;
 import de.opitzconsulting.origOrcasDsl.Model;
 import de.opitzconsulting.origOrcasDsl.ModelElement;
 import de.opitzconsulting.origOrcasDsl.ParallelType;
@@ -33,6 +31,7 @@ import de.opitzconsulting.origOrcasDsl.Table;
 import de.opitzconsulting.origOrcasDsl.UniqueKey;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnRefImpl;
+import de.opitzconsulting.origOrcasDsl.impl.ForeignKeyImpl;
 import de.opitzconsulting.origOrcasDsl.impl.IndexImpl;
 import de.opitzconsulting.origOrcasDsl.impl.InlineCommentImpl;
 import de.opitzconsulting.origOrcasDsl.impl.LobStorageImpl;
@@ -76,8 +75,10 @@ public class LoadIstMySql extends LoadIst
 
     /*
      * loadLobstorageIntoModel( pModel );
-     *
-     * loadIndexesIntoModel( pModel ); loadIndexColumnsIntoModel( pModel );
+     */
+    loadIndexesIntoModel( pModel );
+    loadIndexColumnsIntoModel( pModel );
+    /*
      * loadIndexExpressionsIntoModel( pModel );
      */
     loadTableConstraintsIntoModel( pModel );
@@ -311,11 +312,14 @@ public class LoadIstMySql extends LoadIst
 
           lColumn.setName( pResultSet.getString( "column_name" ) );
 
-          lColumn.setDefault_value( pResultSet.getString( "column_default" ) );
+          if( !"NULL".equals( pResultSet.getString( "column_default" ) ) )
+          {
+            lColumn.setDefault_value( pResultSet.getString( "column_default" ) );
+          }
 
           lColumn.setNotnull( "NO".equals( pResultSet.getString( "is_nullable" ) ) );
 
-          if( pResultSet.getString( "column_type" ).startsWith( "numeric" ) )
+          if( pResultSet.getString( "column_type" ).startsWith( "numeric" ) || pResultSet.getString( "column_type" ).startsWith( "decimal" ) )
           {
             lColumn.setData_type( DataType.NUMBER );
             lColumn.setPrecision( pResultSet.getInt( "numeric_precision" ) );
@@ -360,27 +364,20 @@ public class LoadIstMySql extends LoadIst
   private void loadIndexesIntoModel( final Model pModel )
   {
     String lSql = "" + //
-                  " select index_name," + //
+                  " select distinct" + //
+                  "        index_name," + //
                   "        owner," + //
                   "        table_name," + //
-                  "        table_owner," + //
-                  "        uniqueness," + //
-                  "        tablespace_name," + //
-                  "        logging," + //
-                  "        degree," + //
-                  "        partitioned," + //
-                  "        index_type," + //
-                  "        compression" + //
-                  "   from " + getDataDictionaryView( "indexes" ) + //
-                  "  where generated = 'N'" + //
-                  "    and (index_name,table_name,owner) not in" + //
+                  "        database() as table_owner," + //
+                  "        non_unique" + //
+                  "   from " + getDataDictionaryView( "statistics" ) + //
+                  "  where (index_name,table_name,owner) not in" + //
                   "        (" + //
                   "        select constraint_name," + //
                   "               table_name," + //
                   "               owner" + //
-                  "          from " + getDataDictionaryView( "constraints" ) + //
-                  "         where constraint_type in ( 'U', 'P' )" + //
-                  "           and constraint_name = constraints.index_name" + //
+                  "          from " + getDataDictionaryView( "table_constraints" ) + //
+                  "         where constraint_type in ( 'PRIMARY KEY', 'UNIQUE' )" + //
                   "        )" + //
                   "  order by table_name," + //
                   "           index_name" + //
@@ -397,58 +394,9 @@ public class LoadIstMySql extends LoadIst
 
           lIndex.setConsName( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ) );
 
-          lIndex.setTablespace( pResultSet.getString( "tablespace_name" ) );
-
-          if( "UNIQUE".equals( pResultSet.getString( "uniqueness" ) ) )
+          if( "0".equals( pResultSet.getString( "non_unique" ) ) )
           {
             lIndex.setUnique( "unique" );
-          }
-
-          if( "BITMAP".equals( pResultSet.getString( "index_type" ) ) )
-          {
-            lIndex.setBitmap( "bitmap" );
-          }
-
-          handleDegree( pResultSet.getString( "degree" ), new DegreeHandler()
-          {
-            public void setDegree( ParallelType pParallelType, int ParallelDegree )
-            {
-              lIndex.setParallel( pParallelType );
-              lIndex.setParallel_degree( ParallelDegree );
-            }
-          } );
-
-          if( "YES".equals( pResultSet.getString( "logging" ) ) )
-          {
-            lIndex.setLogging( LoggingType.LOGGING );
-          }
-          else
-          {
-            lIndex.setLogging( LoggingType.NOLOGGING );
-          }
-
-          if( "NO".equals( pResultSet.getString( "partitioned" ) ) )
-          {
-            if( !"BITMAP".equals( pResultSet.getString( "index_type" ) ) )
-            {
-              lIndex.setGlobal( IndexGlobalType.GLOBAL );
-            }
-          }
-          else
-          {
-            lIndex.setGlobal( IndexGlobalType.LOCAL );
-            // set logging; logging is not set in Data-Dictionary since it is
-            // enabled at partition level
-            lIndex.setLogging( LoggingType.LOGGING );
-          }
-
-          if( "ENABLED".equals( pResultSet.getString( "compression" ) ) )
-          {
-            lIndex.setCompression( CompressType.COMPRESS );
-          }
-          if( "DISABLED".equals( pResultSet.getString( "compression" ) ) )
-          {
-            lIndex.setCompression( CompressType.NOCOMPRESS );
           }
 
           findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ) ).getInd_uks().add( lIndex );
@@ -460,29 +408,25 @@ public class LoadIstMySql extends LoadIst
   private void loadIndexColumnsIntoModel( final Model pModel )
   {
     String lSql = "" + //
-                  " select ind_columns.table_name," + //
-                  "        ind_columns.index_name," + //
-                  "        column_name," + //
-                  "        ind_columns.owner," + //
-                  "        indexes.table_owner" + //
-                  "   from " + getDataDictionaryView( "ind_columns" ) + "," + //
-                  "        " + getDataDictionaryView( "indexes" ) + //
-                  "  where generated = 'N'" + //
-                  "     and ind_columns.index_name = indexes.index_name" + //
-                  "     and ind_columns.owner = indexes.owner" + //
-                  "     and (indexes.index_name,indexes.table_name,indexes.owner) not in" + //
-                  "         (" + //
-                  "         select constraint_name," + //
-                  "                table_name," + //
-                  "                owner" + //
-                  "           from " + getDataDictionaryView( "constraints" ) + //
-                  "          where constraint_type in ( 'U', 'P' )" + //
-                  "            and constraint_name = constraints.index_name" + //
-                  "          )" + //
+                  " select index_name," + //
+                  "        owner," + //
+                  "        table_name," + //
+                  "        database() as table_owner," + //
+                  "        column_name" + //
+                  "   from " + getDataDictionaryView( "statistics" ) + //
+                  "  where (index_name,table_name,owner) not in" + //
+                  "        (" + //
+                  "        select constraint_name," + //
+                  "               table_name," + //
+                  "               owner" + //
+                  "          from " + getDataDictionaryView( "table_constraints" ) + //
+                  "         where constraint_type in ( 'PRIMARY KEY', 'UNIQUE' )" + //
+                  "        )" + //
                   "   order by table_name," + //
                   "            index_name," + //
-                  "            column_position" + //
+                  "            seq_in_index" + //
                   "";
+
     new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
@@ -585,7 +529,14 @@ public class LoadIstMySql extends LoadIst
                   " select table_name," + //
                   "        owner," + //
                   "        constraint_name," + //
-                  "        constraint_type" + //
+                  "        constraint_type," + //
+                  "        (" + //
+                  "        select delete_rule" + //
+                  "          from information_schema.referential_constraints" + //
+                  "         where referential_constraints.table_name = table_constraints.table_name" + //
+                  "           and referential_constraints.constraint_schema = table_constraints.owner" + //
+                  "           and referential_constraints.constraint_name = table_constraints.constraint_name" + //
+                  "        ) delete_rule" + //
                   "   from " + getDataDictionaryView( "table_constraints" ) + //
                   "  order by table_name," + //
                   "           constraint_name" + //
@@ -625,38 +576,28 @@ public class LoadIstMySql extends LoadIst
             lTable.getInd_uks().add( lUniqueKey );
           }
 
-          // if( "R".equals( pResultSet.getString( "constraint_type" ) ) )
-          // {
-          // ForeignKey lForeignKey = new ForeignKeyImpl();
-          //
-          // lForeignKey.setConsName( pResultSet.getString( "constraint_name" )
-          // );
-          //
-          // lForeignKey.setStatus( lEnableType );
-          //
-          // lForeignKey.setDeferrtype( lDeferrType );
-          //
-          // // in desttable wird der ref-constraintname zwischengespeichert,
-          // // wird durch update_foreignkey_srcdata dann korrekt aktualisiert
-          // lForeignKey.setDestTable( getNameWithOwner( pResultSet.getString(
-          // "r_constraint_name" ), pResultSet.getString( "r_owner" ) ) );
-          //
-          // if( "NO ACTION".equals( pResultSet.getString( "delete_rule" ) ) )
-          // {
-          // lForeignKey.setDelete_rule( FkDeleteRuleType.NO_ACTION );
-          // }
-          // if( "SET NULL".equals( pResultSet.getString( "delete_rule" ) ) )
-          // {
-          // lForeignKey.setDelete_rule( FkDeleteRuleType.SET_NULL );
-          // }
-          // if( "CASCADE".equals( pResultSet.getString( "delete_rule" ) ) )
-          // {
-          // lForeignKey.setDelete_rule( FkDeleteRuleType.CASCADE );
-          // }
-          //
-          // lTable.getForeign_keys().add( lForeignKey );
-          // }
-          //
+          if( "FOREIGN KEY".equals( pResultSet.getString( "constraint_type" ) ) )
+          {
+            ForeignKey lForeignKey = new ForeignKeyImpl();
+
+            lForeignKey.setConsName( pResultSet.getString( "constraint_name" ) );
+
+            if( "RESTRICTED".equals( pResultSet.getString( "delete_rule" ) ) )
+            {
+              lForeignKey.setDelete_rule( FkDeleteRuleType.NO_ACTION );
+            }
+            if( "SET NULL".equals( pResultSet.getString( "delete_rule" ) ) )
+            {
+              lForeignKey.setDelete_rule( FkDeleteRuleType.SET_NULL );
+            }
+            if( "CASCADE".equals( pResultSet.getString( "delete_rule" ) ) )
+            {
+              lForeignKey.setDelete_rule( FkDeleteRuleType.CASCADE );
+            }
+
+            lTable.getForeign_keys().add( lForeignKey );
+          }
+
           // if( "C".equals( pResultSet.getString( "constraint_type" ) ) )
           // {
           // if( !lGeneratedName )
@@ -687,6 +628,8 @@ public class LoadIstMySql extends LoadIst
                   "        key_column_usage.owner," + //
                   "        column_name," + //
                   "        ordinal_position," + //
+                  "        referenced_table_name," + //
+                  "        referenced_column_name," + //
                   "        key_column_usage.constraint_name," + //
                   "        table_constraints.constraint_type" + //
                   "   from " + getDataDictionaryView( "key_column_usage" ) + "," + //
@@ -720,12 +663,16 @@ public class LoadIstMySql extends LoadIst
             findUniqueKey( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ), pResultSet.getString( "constraint_name" ) ).getUk_columns().add( lColumnRef );
           }
 
-          // if( "R".equals( pResultSet.getString( "constraint_type" ) ) )
-          // {
-          // findForeignKey( pModel, pResultSet.getString( "table_name" ),
-          // pResultSet.getString( "owner" ), pResultSet.getString(
-          // "constraint_name" ) ).getSrcColumns().add( lColumnRef );
-          // }
+          if( "FOREIGN KEY".equals( pResultSet.getString( "constraint_type" ) ) )
+          {
+            ForeignKey lForeignKey = findForeignKey( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ), pResultSet.getString( "constraint_name" ) );
+            lForeignKey.getSrcColumns().add( lColumnRef );
+            lForeignKey.setDestTable( pResultSet.getString( "referenced_table_name" ) );
+
+            ColumnRef lDestColumnRef = new ColumnRefImpl();
+            lDestColumnRef.setColumn_name( pResultSet.getString( "referenced_column_name" ) );
+            lForeignKey.getDestColumns().add( lDestColumnRef );
+          }
         }
       }
     }.execute();

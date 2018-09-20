@@ -15,5 +15,7 @@ public abstract class DatabaseHandler
 
   public abstract String getDefaultTablespace( CallableStatementProvider pCallableStatementProvider );
 
-  public abstract DdlBuilder createDdlBuilder(Parameters pParameters);
+  public abstract DdlBuilder createDdlBuilder( Parameters pParameters );
+
+  public abstract void executeDiffResultStatement( String pStatementToExecute, CallableStatementProvider pCallableStatementProvider );
 }

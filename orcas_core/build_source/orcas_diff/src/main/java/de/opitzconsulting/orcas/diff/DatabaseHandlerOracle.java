@@ -80,4 +80,10 @@ public class DatabaseHandlerOracle extends DatabaseHandler
   {
     return new DdlBuilderOracle( pParameters );
   }
+
+  @Override
+  public void executeDiffResultStatement( String pStatementToExecute, CallableStatementProvider pCallableStatementProvider )
+  {
+    new WrapperExecuteStatement( pStatementToExecute, pCallableStatementProvider ).execute();
+  }
 }

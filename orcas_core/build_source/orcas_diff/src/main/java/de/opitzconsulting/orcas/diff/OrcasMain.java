@@ -160,7 +160,7 @@ public class OrcasMain extends Orcas
 
         if( !pParameters.isLogonly() && !lStatementClass.isIgnore() )
         {
-          new WrapperExecuteStatement( lStatementToExecute, pCallableStatementProvider ).execute();
+          getDatabaseHandler().executeDiffResultStatement( lStatementToExecute, pCallableStatementProvider );         
         }
       }
     }

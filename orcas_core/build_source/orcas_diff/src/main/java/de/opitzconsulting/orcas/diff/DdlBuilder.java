@@ -138,7 +138,7 @@ public abstract class DdlBuilder
     return lReturn;
   }
 
-  private void dropTableConstraintByName( StatementBuilder p, TableDiff pTableDiff, String pCconstraintName, boolean pIsgnoreIfAdditionsOnly )
+  protected void dropTableConstraintByName( StatementBuilder p, TableDiff pTableDiff, String pCconstraintName, boolean pIsgnoreIfAdditionsOnly )
   {
     p.stmtStartAlterTable( pTableDiff );
     p.stmtAppend( "drop constraint " + pCconstraintName );
