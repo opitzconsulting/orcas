@@ -1448,6 +1448,7 @@ public abstract class DdlBuilder
     p.stmtAppend( pTableDiff.nameNew );
     p.stmtAppend( "(" );
     p.stmtAppend( createColumnClause( pTableDiff.columnsDiff ) );
+    p.stmtAppend( createPkCreateWithTableCreate( pTableDiff.primary_keyDiff ) );
     p.stmtAppend( createRefFkClause( pTableDiff ) );
     p.stmtAppend( ")" );
     if( pTableDiff.transactionControlNew != null )
@@ -1492,6 +1493,11 @@ public abstract class DdlBuilder
     handleParallel( p, pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, false );
 
     p.stmtDone();
+  }
+
+  protected String createPkCreateWithTableCreate( PrimaryKeyDiff pPrimary_keyDiff )
+  {
+    return "";
   }
 
   public void createMview( StatementBuilder p, MviewDiff pMviewDiff )
@@ -1766,7 +1772,7 @@ public abstract class DdlBuilder
     return pName.substring( 0, pName.indexOf( '.' ) );
   }
 
-  private String getColumnList( List<ColumnRefDiff> pColumnRefDiffList )
+  protected String getColumnList( List<ColumnRefDiff> pColumnRefDiffList )
   {
     String lReturn = null;
     for( ColumnRefDiff lColumnRefDiff : pColumnRefDiffList )

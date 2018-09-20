@@ -319,7 +319,7 @@ public class LoadIstMySql extends LoadIst
 
           lColumn.setNotnull( "NO".equals( pResultSet.getString( "is_nullable" ) ) );
 
-          if( pResultSet.getString( "column_type" ).startsWith( "numeric" ) || pResultSet.getString( "column_type" ).startsWith( "decimal" ) )
+          if( pResultSet.getString( "column_type" ).startsWith( "numeric" ) || pResultSet.getString( "column_type" ).startsWith( "decimal" ) || pResultSet.getString( "column_type" ).startsWith( "bigint" ) || pResultSet.getString( "column_type" ).startsWith( "int" ) )
           {
             lColumn.setData_type( DataType.NUMBER );
             lColumn.setPrecision( pResultSet.getInt( "numeric_precision" ) );
