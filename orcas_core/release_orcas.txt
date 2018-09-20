@@ -22,6 +22,7 @@ release repository on https://oss.sonatype.org/#stagingRepositories
 
 change version of examples to released version:
 examples/gradle*/build.gradle
+examples/mariadb/build.gradle
 examples/maven*/pom.xml
 examples/orderentry/db/build.xml
 
