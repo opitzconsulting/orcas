@@ -6,16 +6,16 @@ orcas_integrationstest/build.gradle
 upload_maven_central/build.gradle
 
 run this in orcas_core/build_source:
-gradle clean
-gradle publishToMavenLocal -Pextensionname_internal=domainextension -Porcas_extension_folder=../../../orcas_domain_extension_java/extensions -Porcas_extension_extract_file=../../../orcas_domain_extension_java/xslt_extract/orcas_domain_extract.xsl
-gradle publishToMavenLocal 
+./gradlew clean
+./gradlew publishToMavenLocal -Pextensionname_internal=domainextension -Porcas_extension_folder=../../../orcas_domain_extension_java/extensions -Porcas_extension_extract_file=../../../orcas_domain_extension_java/xslt_extract/orcas_domain_extract.xsl
+./gradlew publishToMavenLocal 
 
 in orcas_maven_plugin:
 mvn clean install
 mvn site install
 
 run this in upload_maven_central:
-gradle clean publish
+./gradlew clean publish
 
 close repository on https://oss.sonatype.org/#stagingRepositories
 release repository on https://oss.sonatype.org/#stagingRepositories
