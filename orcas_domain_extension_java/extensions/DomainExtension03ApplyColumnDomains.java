@@ -25,9 +25,28 @@ import de.opitzconsulting.orcasDsl.impl.PrimaryKeyImpl;
 import de.opitzconsulting.orcasDsl.impl.SequenceImpl;
 import de.opitzconsulting.orcasDsl.impl.TableImpl;
 import de.opitzconsulting.orcasDsl.impl.UniqueKeyImpl;
+import de.opitzconsulting.orcasDsl.ColumnIdentity;
+import de.opitzconsulting.orcasDsl.impl.ColumnIdentityImpl;
 
 public class DomainExtension03ApplyColumnDomains extends OrcasBaseExtensionWithParameter
 {
+  private ColumnIdentity copyColumnIdentity( ColumnIdentity pColumnIdentity )
+  {
+    ColumnIdentity lReturn = new ColumnIdentityImpl();
+
+    lReturn.setAlways( pColumnIdentity.getAlways() );
+    lReturn.setBy_default( pColumnIdentity.getBy_default() );
+    lReturn.setCache( pColumnIdentity.getCache() );
+    lReturn.setCycle( pColumnIdentity.getCycle() );
+    lReturn.setIncrement_by( pColumnIdentity.getIncrement_by() );
+    lReturn.setMaxvalue( pColumnIdentity.getMaxvalue() );
+    lReturn.setMinvalue( pColumnIdentity.getMinvalue() );
+    lReturn.setOn_null( pColumnIdentity.getOn_null() );
+    lReturn.setOrder( pColumnIdentity.getOrder() );
+
+    return lReturn;
+  }
+  
   @Override
   public Model transformModel( Model pModel )
   {
@@ -70,7 +89,7 @@ public class DomainExtension03ApplyColumnDomains extends OrcasBaseExtensionWithP
 
         if( lColumnDomain.getIdentity() != null )
         {
-          lColumn.setIdentity( lColumnDomain.getIdentity() );
+          lColumn.setIdentity( copyColumnIdentity( lColumnDomain.getIdentity() ) );
         }
 
         if( lColumnDomain.isNotnull() )
