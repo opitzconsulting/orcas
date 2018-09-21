@@ -55,6 +55,7 @@
     <apply-templates select="domain" />     
     <apply-templates select="data_type" />
     <apply-templates select="precision" />
+    <apply-templates select="unsigned" />
     <apply-templates select="with_time_zone" />
     <apply-templates select="object_type" />
     <apply-templates select="identity" />

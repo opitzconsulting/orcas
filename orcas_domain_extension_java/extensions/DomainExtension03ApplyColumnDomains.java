@@ -81,6 +81,7 @@ public class DomainExtension03ApplyColumnDomains extends OrcasBaseExtensionWithP
         lColumn.setPrecision( lColumnDomain.getPrecision() );
         lColumn.setScale( lColumnDomain.getScale() );
         lColumn.setByteorchar( lColumnDomain.getByteorchar() );
+        lColumn.setUnsigned( lColumnDomain.isUnsigned() );    
 
         if( lColumnDomain.getDefault_value() != null )
         {

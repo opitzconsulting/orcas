@@ -1830,6 +1830,11 @@ public abstract class DdlBuilder
         lDatatype = lDatatype + ")";
       }
 
+      if( pColumnDiff.unsignedNew )
+      {
+        lDatatype = lDatatype + " unsigned";
+      }
+
       if( "with_time_zone".equals( pColumnDiff.with_time_zoneNew ) )
       {
         lDatatype = lDatatype + " with time zone";

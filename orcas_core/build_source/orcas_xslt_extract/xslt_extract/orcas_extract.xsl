@@ -203,6 +203,7 @@
     <apply-templates select="name" />
     <apply-templates select="data_type" />
     <apply-templates select="precision" />
+    <apply-templates select="unsigned" />
     <apply-templates select="with_time_zone" />
     <apply-templates select="object_type" />
     <apply-templates select="identity" />
@@ -219,6 +220,12 @@
 
   <template match="by_default">
     <text>by default</text>
+  </template>
+
+  <template match="unsigned">
+    <if test=". = 'true'">
+      <text> unsigned</text>
+    </if>  
   </template>
 
   <template match="on_null">

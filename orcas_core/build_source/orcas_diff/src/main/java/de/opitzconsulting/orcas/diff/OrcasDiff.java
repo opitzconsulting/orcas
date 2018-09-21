@@ -116,6 +116,11 @@ public class OrcasDiff
     {
       lReturn.add( COLUMN__OBJECT_TYPE );
     }
+    
+    if( !pColumnDiff.unsignedIsEqual )
+    {
+      lReturn.add( COLUMN__UNSIGNED );
+    }
 
     return lReturn;
   }

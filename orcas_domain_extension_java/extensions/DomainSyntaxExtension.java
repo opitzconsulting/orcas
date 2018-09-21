@@ -239,6 +239,7 @@ public class DomainSyntaxExtension extends BaseSyntaxExtension
       addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "byteorchar", "CharType", false ) );
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( ")" ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")?" ) );
+      addField( lRuleNormal, new NewFieldConstant( "unsigned", "unsigned" ) );      
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( "default" ) );
       addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "default_value", "STRING", true ) );

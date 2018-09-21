@@ -15,10 +15,17 @@ public class DomainReverseExtension02SetAlias extends OrcasBaseExtensionWithPara
     {
       if( lModelElement instanceof Table )
       {
-        Table lTable = (Table)lModelElement;
+        Table lTable = (Table) lModelElement;
         if( lTable.getPrimary_key() != null )
         {
-          lTable.setAlias( lTable.getPrimary_key().getConsName().substring( 0, lTable.getPrimary_key().getConsName().length() - 3 ) );
+          if( lTable.getPrimary_key().getConsName() != null )
+          {
+            lTable.setAlias( lTable.getPrimary_key().getConsName().substring( 0, lTable.getPrimary_key().getConsName().length() - 3 ) );
+          }
+          else
+          {
+            lTable.setAlias( lTable.getPrimary_key().getPk_columns().get( 0 ).getColumn_name().substring( 0, 4 ) );
+          }
         }
       }
     }

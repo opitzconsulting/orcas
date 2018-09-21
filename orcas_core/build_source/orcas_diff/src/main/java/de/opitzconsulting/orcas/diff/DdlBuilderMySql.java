@@ -37,31 +37,28 @@ public class DdlBuilderMySql extends DdlBuilder
   }
 
   @Override
-  protected String getColumnDatatype( ColumnDiff pColumnDiff )
+  public void setComment( StatementBuilder p, TableDiff pTableDiff, InlineCommentDiff pInlineCommentDiff )
   {
-    if( pColumnDiff.identityDiff.isNew )
+    if( pInlineCommentDiff.column_nameNew == null )
     {
-      if( pColumnDiff.precisionNew == null || (pColumnDiff.precisionNew.intValue() != 10 && pColumnDiff.precisionNew.intValue() != 19) )
-      {
-        throw new RuntimeException( "precision must be 10 (INT) or 19 (BIGINT) for autoincrement int-determination: " + pColumnDiff.nameNew + " " + pColumnDiff.precisionNew );
-      }
+      p.stmtStart( "alter table" );
+      p.stmtAppend( pTableDiff.nameNew );
 
-      if( pColumnDiff.precisionNew.intValue() != 10 )
-      {
-        return "BIGINT(" + pColumnDiff.precisionNew + ")";
-      }
-      else
-      {
-        return "INT(" + pColumnDiff.precisionNew + ")";
-      }
+      p.stmtAppend( "comment" );
+      p.stmtAppend( "'" + pInlineCommentDiff.commentNew.replace( "'", "''" ) + "'" );
+      p.stmtDone();
     }
-
-    return super.getColumnDatatype( pColumnDiff );
   }
 
   @Override
-  public void setComment( StatementBuilder pP, TableDiff pTableDiff, InlineCommentDiff pInlineCommentDiff )
+  public void dropComment( StatementBuilder p, TableDiff pTableDiff, InlineCommentDiff pCommentDiff )
   {
+    p.stmtStart( "alter table" );
+    p.stmtAppend( pTableDiff.nameOld );
+
+    p.stmtAppend( "comment" );
+    p.stmtAppend( "''" );
+    p.stmtDone();
   }
 
   @Override

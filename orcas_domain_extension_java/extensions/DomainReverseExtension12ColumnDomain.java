@@ -2,7 +2,6 @@ package de.opitzconsulting.orcas.extensions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import de.opitzconsulting.orcas.extensions.OrcasBaseExtensionWithParameter;
 import de.opitzconsulting.orcasDsl.Column;
@@ -28,7 +27,7 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
     {
       if( lModelElement instanceof Table )
       {
-        Table pTable = (Table)lModelElement;
+        Table pTable = (Table) lModelElement;
         for( final Column lColumn : pTable.getColumns() )
         {
           final ColumnDomain lColumnDomain = findBestMatchColumnDomain( lColumn, pTable, pModel );
@@ -43,7 +42,7 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
 
     for( Object[] lEntry : lReverseColumnDomainsList )
     {
-      reverseApplyColumnDomain( (ColumnDomain)lEntry[0], (Column)lEntry[1], (Table)lEntry[2], pModel );
+      reverseApplyColumnDomain( (ColumnDomain) lEntry[0], (Column) lEntry[1], (Table) lEntry[2], pModel );
     }
 
     return pModel;
@@ -55,7 +54,7 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
     {
       if( lIndexOrUniqueKey.getConsName().equalsIgnoreCase( pUkName ) )
       {
-        return (UniqueKey)lIndexOrUniqueKey;
+        return (UniqueKey) lIndexOrUniqueKey;
       }
     }
 
@@ -90,7 +89,7 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
 
   private Integer rateColumnDomain( ColumnDomain pColumnDomain, Column pColumn, Table pTable, Model pModel )
   {
-    if( pColumnDomain.getData_type() == pColumn.getData_type() && DomainExtensionHelper.isIntEqual( pColumnDomain.getPrecision(), pColumn.getPrecision() ) && DomainExtensionHelper.isIntEqual( pColumnDomain.getScale(), pColumn.getScale() ) && pColumnDomain.getByteorchar() == pColumn.getByteorchar() )
+    if( pColumnDomain.getData_type() == pColumn.getData_type() && DomainExtensionHelper.isIntEqual( pColumnDomain.getPrecision(), pColumn.getPrecision() ) && DomainExtensionHelper.isIntEqual( pColumnDomain.getScale(), pColumn.getScale() ) && pColumnDomain.getByteorchar() == pColumn.getByteorchar() && pColumnDomain.isUnsigned() == pColumn.isUnsigned() )
     {
       int lReturn = 0;
 
@@ -126,7 +125,10 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
           return null;
         }
 
-        if( !lPrimaryKey.getConsName().equalsIgnoreCase( DomainExtensionHelper.getGeneratedNameColumn( pColumnDomain.getGeneratePk().getConstraintNameRules(), pColumn.getName(), pTable.getName(), pTable.getAlias() ) ) )
+        String lIsPkName = lPrimaryKey.getConsName();
+        String lExpectedPkName = DomainExtensionHelper.getGeneratedNameColumn( pColumnDomain.getGeneratePk().getConstraintNameRules(), pColumn.getName(), pTable.getName(), pTable.getAlias() );
+        boolean lBothNull = lIsPkName == null && (lExpectedPkName == null || lExpectedPkName.length() == 0);
+        if( !lBothNull && !lIsPkName.equalsIgnoreCase( lExpectedPkName ) )
         {
           return null;
         }
@@ -256,7 +258,7 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
     {
       if( lModelElement instanceof Table )
       {
-        Table lTable = (Table)lModelElement;
+        Table lTable = (Table) lModelElement;
 
         if( lTable.getName().equalsIgnoreCase( pDestTable ) )
         {
@@ -277,14 +279,14 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
     {
       if( lModelElement instanceof ColumnDomain )
       {
-        Integer lRating = rateColumnDomain( (ColumnDomain)lModelElement, pColumn, pTable, pModel );
+        Integer lRating = rateColumnDomain( (ColumnDomain) lModelElement, pColumn, pTable, pModel );
 
         if( lRating != null )
         {
           if( lBestRating == null || lRating > lBestRating )
           {
             lBestRating = lRating;
-            lReturn = (ColumnDomain)lModelElement;
+            lReturn = (ColumnDomain) lModelElement;
           }
         }
       }
@@ -300,6 +302,7 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
     pColumn.setPrecision( DomainExtensionHelper.getIntNullValue() );
     pColumn.setScale( DomainExtensionHelper.getIntNullValue() );
     pColumn.setByteorchar( null );
+    pColumn.setUnsigned( false );
 
     if( pColumnDomain.isNotnull() )
     {
@@ -323,7 +326,7 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
         {
           if( lModelElement instanceof Sequence )
           {
-            Sequence lSequence = (Sequence)lModelElement;
+            Sequence lSequence = (Sequence) lModelElement;
 
             if( lSequence.getSequence_name().equalsIgnoreCase( lSequenceName ) )
             {

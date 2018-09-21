@@ -322,11 +322,32 @@ public class LoadIstMySql extends LoadIst
 
           lColumn.setNotnull( "NO".equals( pResultSet.getString( "is_nullable" ) ) );
 
-          if( pResultSet.getString( "column_type" ).startsWith( "numeric" ) || pResultSet.getString( "column_type" ).startsWith( "decimal" ) || pResultSet.getString( "column_type" ).startsWith( "bigint" ) || pResultSet.getString( "column_type" ).startsWith( "int" ) )
+          if( pResultSet.getString( "column_type" ).startsWith( "numeric" ) || pResultSet.getString( "column_type" ).startsWith( "decimal" ) )
           {
             lColumn.setData_type( DataType.NUMBER );
             lColumn.setPrecision( pResultSet.getInt( "numeric_precision" ) );
             lColumn.setScale( pResultSet.getInt( "numeric_scale" ) );
+          }
+          if( pResultSet.getString( "column_type" ).startsWith( "tinyint" ) )
+          {
+            lColumn.setData_type( DataType.TINYINT );
+          }
+          if( pResultSet.getString( "column_type" ).startsWith( "smallint" ) )
+          {
+            lColumn.setData_type( DataType.SMALLINT );
+          }
+          if( pResultSet.getString( "column_type" ).startsWith( "int" ) )
+          {
+            lColumn.setData_type( DataType.INT );
+          }
+          if( pResultSet.getString( "column_type" ).startsWith( "bigint" ) )
+          {
+            lColumn.setData_type( DataType.BIGINT );
+          }
+          if( pResultSet.getString( "column_type" ).startsWith( "bit" ) )
+          {
+            lColumn.setData_type( DataType.BIT );
+            lColumn.setPrecision( pResultSet.getInt( "numeric_precision" ) );
           }
           if( pResultSet.getString( "column_type" ).startsWith( "blob" ) )
           {
@@ -351,10 +372,16 @@ public class LoadIstMySql extends LoadIst
             lColumn.setData_type( DataType.DATE );
           }
 
+          if( pResultSet.getString( "column_type" ).endsWith( "unsigned" ) )
+          {
+            lColumn.setUnsigned( true );
+          }
+
           findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getColumns().add( lColumn );
         }
       }
     }.execute();
+
   }
 
   private String getDataDictionaryView( String pName )
@@ -872,7 +899,8 @@ public class LoadIstMySql extends LoadIst
   {
     String lSql = "" + //
                   " select tables.table_name," + //
-                  "        tables.owner" + //
+                  "        tables.owner," + //
+                  "        tables.table_comment" + //
                   "   from " + getDataDictionaryView( "tables" ) + //
                   "  order by table_name" + //
                   "";
@@ -887,6 +915,16 @@ public class LoadIstMySql extends LoadIst
           final Table lTable = new TableImpl();
 
           lTable.setName( getNameWithOwner( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) );
+
+          if( pResultSet.getString( "table_comment" ) != null && pResultSet.getString( "table_comment" ).trim().length() != 0 )
+          {
+            InlineComment lInlineComment = new InlineCommentImpl();
+
+            lInlineComment.setComment( pResultSet.getString( "table_comment" ) );
+            lInlineComment.setComment_object( CommentObjectType.TABLE );
+
+            lTable.getComments().add( lInlineComment );
+          }
 
           pModel.getModel_elements().add( lTable );
         }
