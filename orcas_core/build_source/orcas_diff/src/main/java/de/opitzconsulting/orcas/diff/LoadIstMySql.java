@@ -13,9 +13,11 @@ import org.eclipse.emf.common.util.EList;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperIteratorResultSet;
+import de.opitzconsulting.orcas.sql.WrapperReturnFirstValue;
 import de.opitzconsulting.origOrcasDsl.Column;
 import de.opitzconsulting.origOrcasDsl.ColumnRef;
 import de.opitzconsulting.origOrcasDsl.CommentObjectType;
+import de.opitzconsulting.origOrcasDsl.Constraint;
 import de.opitzconsulting.origOrcasDsl.DataType;
 import de.opitzconsulting.origOrcasDsl.FkDeleteRuleType;
 import de.opitzconsulting.origOrcasDsl.ForeignKey;
@@ -31,6 +33,7 @@ import de.opitzconsulting.origOrcasDsl.Table;
 import de.opitzconsulting.origOrcasDsl.UniqueKey;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnRefImpl;
+import de.opitzconsulting.origOrcasDsl.impl.ConstraintImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ForeignKeyImpl;
 import de.opitzconsulting.origOrcasDsl.impl.IndexImpl;
 import de.opitzconsulting.origOrcasDsl.impl.InlineCommentImpl;
@@ -598,25 +601,62 @@ public class LoadIstMySql extends LoadIst
             lTable.getForeign_keys().add( lForeignKey );
           }
 
-          // if( "C".equals( pResultSet.getString( "constraint_type" ) ) )
-          // {
-          // if( !lGeneratedName )
-          // {
-          // Constraint lConstraint = new ConstraintImpl();
-          //
-          // lConstraint.setConsName( pResultSet.getString( "constraint_name" )
-          // );
-          //
-          // lConstraint.setStatus( lEnableType );
-          //
-          // lConstraint.setDeferrtype( lDeferrType );
-          //
-          // lConstraint.setRule( pResultSet.getString( "search_condition" ) );
-          //
-          // lTable.getConstraints().add( lConstraint );
-          // }
-          // }
+          if( "CHECK".equals( pResultSet.getString( "constraint_type" ) ) )
+          {
+            Constraint lConstraint = new ConstraintImpl();
+
+            lConstraint.setConsName( pResultSet.getString( "constraint_name" ) );
+
+            lConstraint.setRule( parseCheckConstraintValue( lTable, lConstraint.getConsName() ) );
+
+            lTable.getConstraints().add( lConstraint );
+          }
         }
+      }
+
+      private String parseCheckConstraintValue( Table pTable, String pCheckConstraintName )
+      {
+        String lShowCreateResult = getShowCreateResult( pTable );
+
+        String lConstraintStart = "CONSTRAINT `" + pCheckConstraintName + "` CHECK ";
+
+        lShowCreateResult = lShowCreateResult.substring( lShowCreateResult.indexOf( lConstraintStart ) + lConstraintStart.length() + 1 );
+
+        StringBuilder lReturn = new StringBuilder( "" );
+
+        int lNestLevel = 1;
+        for( int i = 0;; i++ )
+        {
+          if( lShowCreateResult.charAt( i ) == '(' )
+          {
+            lNestLevel++;
+          }
+          if( lShowCreateResult.charAt( i ) == ')' )
+          {
+            lNestLevel--;
+            if( lNestLevel == 0 )
+            {
+              return lReturn.toString();
+            }
+          }
+
+          if( lShowCreateResult.charAt( i ) != '`' )
+          {
+            lReturn.append( lShowCreateResult.charAt( i ) );
+          }
+        }
+      }
+
+      private String getShowCreateResult( Table lTable )
+      {
+        return (String) new WrapperReturnFirstValue( "SHOW CREATE TABLE " + lTable.getName(), getCallableStatementProvider() )
+        {
+          @Override
+          protected int getObjectIndex()
+          {
+            return 2;
+          };
+        }.executeForValue();
       }
     }.execute();
   }

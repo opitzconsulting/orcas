@@ -2,12 +2,16 @@ package de.opitzconsulting.orcas.diff;
 
 import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ForeignKeyDiff;
 import de.opitzconsulting.orcas.orig.diff.IndexDiff;
 import de.opitzconsulting.orcas.orig.diff.InlineCommentDiff;
 import de.opitzconsulting.orcas.orig.diff.PrimaryKeyDiff;
 import de.opitzconsulting.orcas.orig.diff.TableDiff;
+import de.opitzconsulting.orcas.orig.diff.UniqueKeyDiff;
 import de.opitzconsulting.origOrcasDsl.DataType;
 
 public class DdlBuilderMySql extends DdlBuilder
@@ -58,6 +62,14 @@ public class DdlBuilderMySql extends DdlBuilder
   @Override
   public void setComment( StatementBuilder pP, TableDiff pTableDiff, InlineCommentDiff pInlineCommentDiff )
   {
+  }
+
+  @Override
+  public void recreateColumn( StatementBuilder pP, TableDiff pTableDiff, ColumnDiff pColumnDiff )
+  {
+    pP.failIfAdditionsOnly( "can't recreate columns" );
+
+    pP.addStmt( "alter table " + pTableDiff.nameNew + " modify column " + createColumnCreatePart( pColumnDiff, false ) );
   }
 
   @Override
@@ -145,5 +157,39 @@ public class DdlBuilderMySql extends DdlBuilder
   public void dropIndex( StatementBuilder pP, TableDiff pTableDiff, IndexDiff pIndexDiff )
   {
     pP.addStmt( "drop index " + pIndexDiff.consNameOld + " on " + pTableDiff.nameOld, !pTableDiff.isNew || pIndexDiff.uniqueOld == null || isAllColumnsOnlyOld( pTableDiff, pIndexDiff.index_columnsDiff ) );
+  }
+
+  @Override
+  public void dropUniqueKey( StatementBuilder pP, TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
+  {
+    pP.stmtStartAlterTable( pTableDiff );
+    pP.stmtAppend( "drop index " + pUniqueKeyDiff.consNameOld );
+    pP.stmtDone( !pTableDiff.isNew || isAllColumnsOnlyOld( pTableDiff, pUniqueKeyDiff.uk_columnsDiff ) );
+  }
+
+  @Override
+  public Runnable getColumnDropHandler( StatementBuilder pP, TableDiff pTableDiff, List<ColumnDiff> pColumnDiffList )
+  {
+    Runnable lAdditionsOnlyAlternativeHandler = () ->
+    {
+      pColumnDiffList.stream()//
+      .filter( pColumnDiff -> pColumnDiff.notnullOld && pColumnDiff.default_valueOld == null )//
+      .forEach( pColumnDiff ->
+      {
+        pP.stmtStartAlterTable( pTableDiff );
+        pP.stmtAppend( "modify ( " + pColumnDiff.nameOld );
+        pP.stmtAppend( "null" );
+        pP.stmtAppend( ")" );
+        pP.stmtDone( StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT );
+      } );
+    };
+
+    return () ->
+    {
+      pP.stmtStartAlterTableNoCombine( pTableDiff );
+
+      pP.stmtAppend( pColumnDiffList.stream().map( pColumnDiff -> " drop " + pColumnDiff.nameOld ).collect( Collectors.joining( "," ) ) );
+      pP.stmtDone( lAdditionsOnlyAlternativeHandler );
+    };
   }
 }

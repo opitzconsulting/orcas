@@ -58,6 +58,7 @@ public class OrcasDiff
   private List<String> oldObjectNames = new ArrayList<>();
   private Map<String, List<String>> newContraintNames = new HashMap<>();
   private List<String> newObjectNames = new ArrayList<>();
+  private DatabaseHandler databaseHandler;
 
   public OrcasDiff( CallableStatementProvider pCallableStatementProvider, Parameters pParameters, DatabaseHandler pDatabaseHandler )
   {
@@ -66,6 +67,7 @@ public class OrcasDiff
     dataHandler = new DataHandler( pCallableStatementProvider, pParameters );
 
     ddlBuilder = pDatabaseHandler.createDdlBuilder( pParameters );
+    databaseHandler = pDatabaseHandler;
   }
 
   private List<DiffActionReason> getIndexRecreate( TableDiff pTableDiff, String pIndexname )
@@ -251,7 +253,7 @@ public class OrcasDiff
         }
 
         setRecreateNeededFor( lTableDiff.primary_keyDiff )//
-        .ifDifferentName( PRIMARY_KEY__CONS_NAME, oldContraintNames, lTableDiff.primary_keyDiff.consNameNew, lTableDiff.primary_keyDiff.consNameOld )//
+        .ifDifferentName( PRIMARY_KEY__CONS_NAME, oldContraintNames, lTableDiff.primary_keyDiff.consNameNew, lTableDiff.primary_keyDiff.consNameOld, databaseHandler.isRenamePrimaryKey() )//
         .ifDifferent( PRIMARY_KEY__PK_COLUMNS )//
         .ifDifferent( PRIMARY_KEY__REVERSE )//
         .ifDifferent( PRIMARY_KEY__TABLESPACE, _parameters.isIndexmovetablespace() )//
@@ -264,7 +266,7 @@ public class OrcasDiff
           boolean lNoDomainIndex = lIndexDiff.domain_index_expressionNew == null;
 
           setRecreateNeededFor( lIndexDiff )//
-          .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldObjectNames, lIndexDiff.consNameNew, lIndexDiff.consNameOld )//
+          .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldObjectNames, lIndexDiff.consNameNew, lIndexDiff.consNameOld, databaseHandler.isRenameIndex() )//
           .ifDifferent( INDEX__INDEX_COLUMNS, lNoDomainIndex )//
           .ifDifferent( INDEX__FUNCTION_BASED_EXPRESSION, lNoDomainIndex )//
           .ifDifferent( INDEX__DOMAIN_INDEX_EXPRESSION, lNoDomainIndex )//
@@ -279,7 +281,7 @@ public class OrcasDiff
         for( UniqueKeyDiff lUniqueKeyDiff : lTableDiff.ind_uksUniqueKeyDiff )
         {
           setRecreateNeededFor( lUniqueKeyDiff )//
-          .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldContraintNames, lUniqueKeyDiff.consNameNew, lUniqueKeyDiff.consNameOld )//
+          .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldContraintNames, lUniqueKeyDiff.consNameNew, lUniqueKeyDiff.consNameOld, databaseHandler.isRenameUniqueKey() )//
           .ifDifferent( UNIQUE_KEY__UK_COLUMNS )//
           .ifDifferent( UNIQUE_KEY__INDEXNAME )//
           .ifDifferent( INDEX_OR_UNIQUE_KEY__TABLESPACE, _parameters.isIndexmovetablespace() )//
@@ -301,7 +303,7 @@ public class OrcasDiff
         for( ConstraintDiff lConstraintDiff : lTableDiff.constraintsDiff )
         {
           setRecreateNeededFor( lConstraintDiff )//
-          .ifDifferentName( CONSTRAINT__CONS_NAME, oldContraintNames, lConstraintDiff.consNameNew, lConstraintDiff.consNameOld )//
+          .ifDifferentName( CONSTRAINT__CONS_NAME, oldContraintNames, lConstraintDiff.consNameNew, lConstraintDiff.consNameOld, databaseHandler.isRenameConstraint() )//
           .ifDifferent( CONSTRAINT__RULE )//
           .ifDifferent( CONSTRAINT__DEFERRTYPE )//
           .calculate();
@@ -310,7 +312,7 @@ public class OrcasDiff
         for( ForeignKeyDiff lForeignKeyDiff : lTableDiff.foreign_keysDiff )
         {
           setRecreateNeededFor( lForeignKeyDiff )//
-          .ifDifferentName( FOREIGN_KEY__CONS_NAME, oldContraintNames, lForeignKeyDiff.consNameNew, lForeignKeyDiff.consNameOld )//
+          .ifDifferentName( FOREIGN_KEY__CONS_NAME, oldContraintNames, lForeignKeyDiff.consNameNew, lForeignKeyDiff.consNameOld, databaseHandler.isRenameForeignKey() )//
           .ifDifferent( FOREIGN_KEY__DEFERRTYPE )//
           .ifDifferent( FOREIGN_KEY__DELETE_RULE )//
           .ifDifferent( FOREIGN_KEY__DEST_COLUMNS )//
@@ -357,7 +359,7 @@ public class OrcasDiff
     for( MviewDiff lMviewDiff : pModelDiff.model_elementsMviewDiff )
     {
       setRecreateNeededFor( lMviewDiff )//
-      .ifDifferentName( MVIEW__MVIEW_NAME, oldObjectNames, lMviewDiff.mview_nameNew, lMviewDiff.mview_nameOld )//
+      .ifDifferentName( MVIEW__MVIEW_NAME, oldObjectNames, lMviewDiff.mview_nameNew, lMviewDiff.mview_nameOld, databaseHandler.isRenameMView() )//
       .ifDifferent( MVIEW__TABLESPACE )//
       .ifDifferent( MVIEW__BUILD_MODE )//
       .ifX( p ->

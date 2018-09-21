@@ -18,4 +18,16 @@ public abstract class DatabaseHandler
   public abstract DdlBuilder createDdlBuilder( Parameters pParameters );
 
   public abstract void executeDiffResultStatement( String pStatementToExecute, CallableStatementProvider pCallableStatementProvider );
+
+  public abstract boolean isRenamePrimaryKey();
+
+  public abstract boolean isRenameIndex();
+
+  public abstract boolean isRenameMView();
+
+  public abstract boolean isRenameForeignKey();
+
+  public abstract boolean isRenameUniqueKey();
+
+  public abstract boolean isRenameConstraint();
 }

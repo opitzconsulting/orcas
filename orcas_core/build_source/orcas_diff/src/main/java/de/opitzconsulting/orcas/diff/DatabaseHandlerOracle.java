@@ -86,4 +86,40 @@ public class DatabaseHandlerOracle extends DatabaseHandler
   {
     new WrapperExecuteStatement( pStatementToExecute, pCallableStatementProvider ).execute();
   }
+
+  @Override
+  public boolean isRenamePrimaryKey()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean isRenameIndex()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean isRenameMView()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean isRenameForeignKey()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean isRenameUniqueKey()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean isRenameConstraint()
+  {
+    return true;
+  }
 }

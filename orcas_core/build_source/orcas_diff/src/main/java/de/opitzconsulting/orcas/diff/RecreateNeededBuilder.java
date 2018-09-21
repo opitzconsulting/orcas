@@ -148,9 +148,9 @@ class RecreateNeededBuilder<T extends AbstractDiff> implements RecreateNeededBui
     return this;
   }
 
-  public RecreateNeededBuilder<T> ifDifferentName( EStructuralFeature pEAttribute, List<String> pOldNames, String pNewName, String pOldName )
+  public RecreateNeededBuilder<T> ifDifferentName( EStructuralFeature pEAttribute, List<String> pOldNames, String pNewName, String pOldName, boolean pIsRenamePossible )
   {
-    if( pNewName == null || pOldName == null || pOldNames.contains( pNewName ) )
+    if( pNewName == null || pOldName == null || pOldNames.contains( pNewName ) || !pIsRenamePossible )
     {
       ifDifferent( pEAttribute );
     }
@@ -158,9 +158,9 @@ class RecreateNeededBuilder<T extends AbstractDiff> implements RecreateNeededBui
     return this;
   }
 
-  public RecreateNeededBuilder<T> ifDifferentName( EStructuralFeature pEAttribute, Map<String, List<String>> pOldNames, String pNewName, String pOldName )
+  public RecreateNeededBuilder<T> ifDifferentName( EStructuralFeature pEAttribute, Map<String, List<String>> pOldNames, String pNewName, String pOldName, boolean pIsRenamePossible )
   {
-    if( pNewName == null || pOldName == null )
+    if( pNewName == null || pOldName == null || !pIsRenamePossible )
     {
       ifDifferent( pEAttribute );
     }

@@ -52,7 +52,12 @@ public class WrapperReturnFirstValue extends WrapperReturnValueFromResultSet
       throw new NoDataFoundException();
     }
 
-    return pResultSet.getObject( 1 );
+    return pResultSet.getObject( getObjectIndex() );
+  }
+
+  protected int getObjectIndex()
+  {
+    return 1;
   }
 
   public class NoDataFoundException extends RuntimeException

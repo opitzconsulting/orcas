@@ -70,4 +70,40 @@ public class DatabaseHandlerMySql extends DatabaseHandler
   {
     new WrapperExecutePreparedStatement( pStatementToExecute, pCallableStatementProvider ).execute();
   }
+
+  @Override
+  public boolean isRenamePrimaryKey()
+  {
+    return false;
+  }
+
+  @Override
+  public boolean isRenameIndex()
+  {
+    return false;
+  }
+
+  @Override
+  public boolean isRenameMView()
+  {
+    return false;
+  }
+
+  @Override
+  public boolean isRenameForeignKey()
+  {
+    return false;
+  }
+
+  @Override
+  public boolean isRenameUniqueKey()
+  {
+    return false;
+  }
+
+  @Override
+  public boolean isRenameConstraint()
+  {
+    return false;
+  }
 }
