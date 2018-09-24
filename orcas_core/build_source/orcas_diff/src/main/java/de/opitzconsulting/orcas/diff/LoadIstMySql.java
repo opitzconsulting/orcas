@@ -29,6 +29,7 @@ import de.opitzconsulting.origOrcasDsl.Model;
 import de.opitzconsulting.origOrcasDsl.ModelElement;
 import de.opitzconsulting.origOrcasDsl.ParallelType;
 import de.opitzconsulting.origOrcasDsl.PrimaryKey;
+import de.opitzconsulting.origOrcasDsl.Sequence;
 import de.opitzconsulting.origOrcasDsl.Table;
 import de.opitzconsulting.origOrcasDsl.UniqueKey;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnImpl;
@@ -40,6 +41,7 @@ import de.opitzconsulting.origOrcasDsl.impl.InlineCommentImpl;
 import de.opitzconsulting.origOrcasDsl.impl.LobStorageImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ModelImpl;
 import de.opitzconsulting.origOrcasDsl.impl.PrimaryKeyImpl;
+import de.opitzconsulting.origOrcasDsl.impl.SequenceImpl;
 import de.opitzconsulting.origOrcasDsl.impl.TableImpl;
 import de.opitzconsulting.origOrcasDsl.impl.UniqueKeyImpl;
 
@@ -72,6 +74,8 @@ public class LoadIstMySql extends LoadIst
     isIgnoredTable( "TEST", "TEST" );
 
     Model pModel = new ModelImpl();
+
+    loadSequencesIntoModel( pModel, true );
 
     loadTablesIntoModel( pModel );
     loadTableColumnsIntoModel( pModel );
@@ -115,6 +119,16 @@ public class LoadIstMySql extends LoadIst
       includeMap.put( pType, new ArrayList<String>() );
 
       String lSql = "select table_name, owner, 0 is_exclude from " + getDataDictionaryView( "tables" );
+
+      if( pType.equals( "TABLE" ) )
+      {
+        lSql += "  where table_type = 'BASE TABLE'";
+      }
+
+      if( pType.equals( "SEQUENCE" ) )
+      {
+        lSql += "  where table_type = 'SEQUENCE'";
+      }
 
       new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
       {
@@ -164,6 +178,11 @@ public class LoadIstMySql extends LoadIst
     }
 
     return isIgnored( pString, pOwner, _parameters.getExcludewheretable(), "TABLE" );
+  }
+
+  private boolean isIgnoredSequence( String pString, String pOwner )
+  {
+    return isIgnored( pString, pOwner, _parameters.getExcludewheretable(), "SEQUENCE" );
   }
 
   private int toInt( BigDecimal pBigDecimal )
@@ -553,6 +572,51 @@ public class LoadIstMySql extends LoadIst
     }.execute();
   }
 
+  private void loadSequencesIntoModel( final Model pModel, final boolean pWithSequeneceMayValueSelect )
+  {
+    String lSql = "" + //
+                  " select table_name," + //
+                  "        owner" + //
+                  "   from " + getDataDictionaryView( "tables" ) + //
+                  "  where table_type = 'SEQUENCE'" + //
+                  "  order by table_name" + //
+                  "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        if( !isIgnoredSequence( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
+        {
+          Sequence lSequence = new SequenceImpl();
+
+          lSequence.setSequence_name( getNameWithOwner( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) );
+
+          /*
+           * lSequence.setIncrement_by( toInt( pResultSet.getBigDecimal(
+           * "increment_by" ) ) ); if( pWithSequeneceMayValueSelect ) {
+           * lSequence.setMax_value_select( pResultSet.getString( "last_number"
+           * ) ); } lSequence.setCache( toInt( pResultSet.getBigDecimal(
+           * "cache_size" ) ) ); lSequence.setMinvalue( toInt(
+           * pResultSet.getBigDecimal( "min_value" ) ) ); lSequence.setMaxvalue(
+           * toInt( pResultSet.getBigDecimal( "max_value" ) ) );
+           * 
+           * if( "Y".equals( pResultSet.getString( "cycle_flag" ) ) ) {
+           * lSequence.setCycle( CycleType.CYCLE ); } else { lSequence.setCycle(
+           * CycleType.NOCYCLE ); }
+           * 
+           * if( "Y".equals( pResultSet.getString( "order_flag" ) ) ) {
+           * lSequence.setOrder( OrderType.ORDER ); } else { lSequence.setOrder(
+           * OrderType.NOORDER ); }
+           */
+
+          pModel.getModel_elements().add( lSequence );
+        }
+      }
+    }.execute();
+  }
+
   private void loadTableConstraintsIntoModel( final Model pModel )
   {
     String lSql = "" + //
@@ -902,6 +966,7 @@ public class LoadIstMySql extends LoadIst
                   "        tables.owner," + //
                   "        tables.table_comment" + //
                   "   from " + getDataDictionaryView( "tables" ) + //
+                  "  where table_type = 'BASE TABLE'" + //
                   "  order by table_name" + //
                   "";
 

@@ -5,11 +5,13 @@ import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.opitzconsulting.orcas.diff.OrcasDiff.DataHandler;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ForeignKeyDiff;
 import de.opitzconsulting.orcas.orig.diff.IndexDiff;
 import de.opitzconsulting.orcas.orig.diff.InlineCommentDiff;
 import de.opitzconsulting.orcas.orig.diff.PrimaryKeyDiff;
+import de.opitzconsulting.orcas.orig.diff.SequenceDiff;
 import de.opitzconsulting.orcas.orig.diff.TableDiff;
 import de.opitzconsulting.orcas.orig.diff.UniqueKeyDiff;
 import de.opitzconsulting.origOrcasDsl.DataType;
@@ -34,6 +36,11 @@ public class DdlBuilderMySql extends DdlBuilder
     }
 
     return super.getDatatypeName( pData_typeNew );
+  }
+
+  @Override
+  public void alterSequenceIfNeeded( StatementBuilderAlter pP1, SequenceDiff pSequenceDiff, DataHandler pDataHandler )
+  {
   }
 
   @Override
