@@ -27,7 +27,14 @@ public class OrcasDropReplaceablesTask extends BaseOrcasTask
       List<String> lAdditionalParameters = new ArrayList<String>();
       pParameters.setAdditionalParameters( lAdditionalParameters );
 
-      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_delete_replacable_objects(), "delete_replacable_objects.sql", StandardCharsets.UTF_8 );
+      if( isMariadb() )
+      {
+        pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_mariadb_delete_replacable_objects(), "mariadb_delete_replacable_objects.sql", StandardCharsets.UTF_8 );
+      }
+      else
+      {
+        pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_delete_replacable_objects(), "delete_replacable_objects.sql", StandardCharsets.UTF_8 );
+      }
       lAdditionalParameters.clear();
       lAdditionalParameters.add( project.orcasconfiguration.excludewherepackage );
       lAdditionalParameters.add( project.orcasconfiguration.excludewheretrigger );
@@ -36,10 +43,13 @@ public class OrcasDropReplaceablesTask extends BaseOrcasTask
       lAdditionalParameters.add( project.orcasconfiguration.excludewhereprocedure );
       new OrcasScriptRunner().mainRun( modifyParameters( pParameters ) );
 
-      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_drop_all_types(), "drop_all_types.sql", StandardCharsets.UTF_8 );
-      lAdditionalParameters.clear();
-      lAdditionalParameters.add( project.orcasconfiguration.excludewhereobjecttype );
-      new OrcasScriptRunner().mainRun( pParameters );
+      if( !isMariadb() )
+      {
+        pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_drop_all_types(), "drop_all_types.sql", StandardCharsets.UTF_8 );
+        lAdditionalParameters.clear();
+        lAdditionalParameters.add( project.orcasconfiguration.excludewhereobjecttype );
+        new OrcasScriptRunner().mainRun( pParameters );
+      }
     }
     else
     {

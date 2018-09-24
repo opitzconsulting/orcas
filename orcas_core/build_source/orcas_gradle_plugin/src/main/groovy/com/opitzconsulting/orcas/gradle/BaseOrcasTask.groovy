@@ -109,6 +109,11 @@ public abstract class BaseOrcasTask extends DefaultTask
     executeOrcasTaskWithParameters( lParametersCall );
   }
 
+  protected boolean isMariadb()
+  {
+    return project.orcasconfiguration.jdbcurl.startsWith( "jdbc:mysql" ) || project.orcasconfiguration.jdbcurl.startsWith( "jdbc:mariadb" );
+  }
+
   protected void logInfo( String pLogMessage )
   {
     LogLevel lLogLevel = nologging ? LogLevel.QUIET : LogLevel.ERROR;

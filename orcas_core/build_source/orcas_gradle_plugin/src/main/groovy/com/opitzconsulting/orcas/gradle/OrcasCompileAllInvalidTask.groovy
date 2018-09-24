@@ -18,17 +18,20 @@ public class OrcasCompileAllInvalidTask extends BaseOrcasTask
   @Override
   protected void executeOrcasTaskWithParameters( ParametersCall pParameters )
   {
-    if( !isRunOnlyIfReplaceablesExists() || project.file(project.orcasconfiguration.replaceablesfolder).exists() )
+    if( !isMariadb() )
     {
-      pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql", StandardCharsets.UTF_8 );
-      pParameters.setIsOneTimeScriptMode( false );
-      pParameters.setAdditionalParameters( null );
-
-      new OrcasScriptRunner().mainRun( modifyParameters( pParameters ) );
-    }
-    else
-    {
-      logInfo( "no replaceables found" );
+      if( !isRunOnlyIfReplaceablesExists() || project.file(project.orcasconfiguration.replaceablesfolder).exists() )
+      {
+        pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql", StandardCharsets.UTF_8 );
+        pParameters.setIsOneTimeScriptMode( false );
+        pParameters.setAdditionalParameters( null );
+  
+        new OrcasScriptRunner().mainRun( modifyParameters( pParameters ) );
+      }
+      else
+      {
+        logInfo( "no replaceables found" );
+      }
     }
   }
 
