@@ -45,7 +45,7 @@ public class OrcasScriptRunner extends Orcas
 
   private boolean isInMemorySpoolFile( String pFileName )
   {
-    return pFileName.startsWith( "INMEMORY:" );
+    return pFileName.startsWith( "inmemory:" );
   }
 
   @Override

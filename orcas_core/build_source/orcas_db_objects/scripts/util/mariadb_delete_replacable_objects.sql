@@ -1,4 +1,4 @@
-spool INMEMORY:1
+spool inmemory:1
 
     select concat( 'drop view ', table_name, ';' )
       from information_schema.views
@@ -20,5 +20,5 @@ spool INMEMORY:1
 
 spool off
 
-@INMEMORY:1
+@inmemory:1
 
