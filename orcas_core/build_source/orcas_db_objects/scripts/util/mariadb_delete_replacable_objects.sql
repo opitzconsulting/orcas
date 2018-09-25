@@ -1,4 +1,4 @@
-spool build/drop_replaceables.sql
+spool INMEMORY:1
 
     select concat( 'drop view ', table_name, ';' )
       from information_schema.views
@@ -20,5 +20,5 @@ spool build/drop_replaceables.sql
 
 spool off
 
-@build/drop_replaceables.sql
+@INMEMORY:1
 

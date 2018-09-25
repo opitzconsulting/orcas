@@ -1,12 +1,15 @@
 package de.opitzconsulting.orcas.diff;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -38,6 +41,11 @@ public class OrcasScriptRunner extends Orcas
   public static void main( String[] pArgs )
   {
     new OrcasScriptRunner().mainRun( pArgs );
+  }
+
+  private boolean isInMemorySpoolFile( String pFileName )
+  {
+    return pFileName.startsWith( "INMEMORY:" );
   }
 
   @Override
@@ -260,6 +268,7 @@ public class OrcasScriptRunner extends Orcas
   }
 
   private boolean _serveroutput = false;
+  private Map<String, byte[]> inMemorySpoolFileMap = new HashMap<>();
 
   protected void runReader( Reader pReader, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile, SpoolHandler pSpoolHandler ) throws Exception
   {
@@ -273,6 +282,8 @@ public class OrcasScriptRunner extends Orcas
 
   void runLines( List<String> pLines, final CallableStatementProvider pCallableStatementProvider, final Parameters pParameters, File pFile, SpoolHandler pSpoolHandler ) throws Exception
   {
+    inMemorySpoolFileMap.clear();
+
     boolean lHasPlSqlModeTerminator = false;
 
     for( String lFileLine : pLines )
@@ -590,9 +601,10 @@ public class OrcasScriptRunner extends Orcas
 
   class SpoolHandler implements CommandHandler
   {
-    private FileOutputStream spoolFile;
+    private OutputStream spoolFile;
     protected Writer writer;
     private Parameters parameters;
+    private String inMemorySpoolFileName;
 
     public SpoolHandler( Parameters pParameters )
     {
@@ -663,15 +675,25 @@ public class OrcasScriptRunner extends Orcas
     protected void openSpoolFile( String pFileName ) throws FileNotFoundException
     {
       logInfo( "start spooling: " + pFileName );
-      File lFile = new File( pFileName );
 
-      if( lFile.getParentFile() != null )
+      if( isInMemorySpoolFile( pFileName ) )
       {
-        lFile.getParentFile().mkdirs();
+        spoolFile = new ByteArrayOutputStream();
+        writer = new OutputStreamWriter( spoolFile, getParameters().getEncodingForSqlLog() );
+        inMemorySpoolFileName = pFileName;
       }
+      else
+      {
+        File lFile = new File( pFileName );
 
-      spoolFile = new FileOutputStream( lFile );
-      writer = new OutputStreamWriter( spoolFile, getParameters().getEncodingForSqlLog() );
+        if( lFile.getParentFile() != null )
+        {
+          lFile.getParentFile().mkdirs();
+        }
+
+        spoolFile = new FileOutputStream( lFile );
+        writer = new OutputStreamWriter( spoolFile, getParameters().getEncodingForSqlLog() );
+      }
     }
 
     private boolean isSpoolActive()
@@ -685,6 +707,11 @@ public class OrcasScriptRunner extends Orcas
       writer.close();
       writer = null;
       spoolFile.close();
+      if( inMemorySpoolFileName != null )
+      {
+        inMemorySpoolFileMap.put( inMemorySpoolFileName, ((ByteArrayOutputStream) spoolFile).toByteArray() );
+        inMemorySpoolFileName = null;
+      }
       spoolFile = null;
     }
   }
@@ -755,7 +782,17 @@ public class OrcasScriptRunner extends Orcas
       }
       else
       {
-        lFile = new File( doReplace( lTrimLine.substring( 1 ).trim(), parameters ) );
+        String lFilename = doReplace( lTrimLine.substring( 1 ).trim(), parameters );
+
+        if( isInMemorySpoolFile( lFilename ) && inMemorySpoolFileMap.containsKey( lFilename ) )
+        {
+          runReader( new InputStreamReader( new ByteArrayInputStream( inMemorySpoolFileMap.get( lFilename ) ), parameters.getEncodingForSqlLog() ), callableStatementProvider, parameters, null, spoolHandler );
+          return;
+        }
+        else
+        {
+          lFile = new File( lFilename );
+        }
       }
 
       runFile( lFile, callableStatementProvider, parameters, spoolHandler );

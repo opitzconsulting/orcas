@@ -310,6 +310,7 @@ public class LoadIstMySql extends LoadIst
            "        character_maximum_length," + //
            "        numeric_precision," + //
            "        numeric_scale," + //
+           "        datetime_precision," + //
            "        is_nullable," + //
            "        column_default," + //
            "        ordinal_position," + //
@@ -392,6 +393,11 @@ public class LoadIstMySql extends LoadIst
           if( pResultSet.getString( "column_type" ).startsWith( "datetime" ) )
           {
             lColumn.setData_type( DataType.DATE );
+          }
+          if( pResultSet.getString( "column_type" ).startsWith( "timestamp" ) )
+          {
+            lColumn.setData_type( DataType.TIMESTAMP );
+            lColumn.setPrecision( pResultSet.getInt( "datetime_precision" ) );
           }
 
           if( pResultSet.getString( "column_type" ).endsWith( "unsigned" ) )
