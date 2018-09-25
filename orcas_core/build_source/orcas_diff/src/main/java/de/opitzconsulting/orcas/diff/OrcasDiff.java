@@ -116,7 +116,7 @@ public class OrcasDiff
     {
       lReturn.add( COLUMN__OBJECT_TYPE );
     }
-    
+
     if( !pColumnDiff.unsignedIsEqual )
     {
       lReturn.add( COLUMN__UNSIGNED );
@@ -864,6 +864,14 @@ public class OrcasDiff
   {
     if( isCleanupTableDetailsGlobalNeeded( pTableDiff ) == pGlobalMode )
     {
+      if( databaseHandler.isUpdateIdentity() )
+      {
+        for( ColumnDiff lColumnDiff : pTableDiff.columnsDiff )
+        {
+          dropIfNeeded( lColumnDiff.identityDiff, p -> ddlBuilder.dropColumnIdentity( p, pTableDiff, lColumnDiff, lColumnDiff.identityDiff ) );
+        }
+      }
+
       dropIfNeeded( pTableDiff.constraintsDiff, p -> ddlBuilder.dropConstraint( p, pTableDiff, p.diff ) );
 
       dropIfNeeded( pTableDiff.mviewLogDiff, p -> ddlBuilder.dropMaterializedViewLog( p, pTableDiff ) );

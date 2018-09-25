@@ -15,6 +15,7 @@ import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperIteratorResultSet;
 import de.opitzconsulting.orcas.sql.WrapperReturnFirstValue;
 import de.opitzconsulting.origOrcasDsl.Column;
+import de.opitzconsulting.origOrcasDsl.ColumnIdentity;
 import de.opitzconsulting.origOrcasDsl.ColumnRef;
 import de.opitzconsulting.origOrcasDsl.CommentObjectType;
 import de.opitzconsulting.origOrcasDsl.Constraint;
@@ -32,6 +33,7 @@ import de.opitzconsulting.origOrcasDsl.PrimaryKey;
 import de.opitzconsulting.origOrcasDsl.Sequence;
 import de.opitzconsulting.origOrcasDsl.Table;
 import de.opitzconsulting.origOrcasDsl.UniqueKey;
+import de.opitzconsulting.origOrcasDsl.impl.ColumnIdentityImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ColumnRefImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ConstraintImpl;
@@ -310,7 +312,8 @@ public class LoadIstMySql extends LoadIst
            "        numeric_scale," + //
            "        is_nullable," + //
            "        column_default," + //
-           "        ordinal_position" + //
+           "        ordinal_position," + //
+           "        extra" + //
            "   from " + getDataDictionaryView( "columns" ) + //
            "";
 
@@ -394,6 +397,16 @@ public class LoadIstMySql extends LoadIst
           if( pResultSet.getString( "column_type" ).endsWith( "unsigned" ) )
           {
             lColumn.setUnsigned( true );
+          }
+
+          if( pResultSet.getString( "extra" ) != null && pResultSet.getString( "extra" ).contains( "auto_increment" ) )
+          {
+            ColumnIdentity lColumnIdentity = new ColumnIdentityImpl();
+
+            lColumnIdentity.setBy_default( "default" );
+            lColumnIdentity.setOn_null( "null" );
+
+            lColumn.setIdentity( lColumnIdentity );
           }
 
           findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getColumns().add( lColumn );

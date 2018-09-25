@@ -122,4 +122,10 @@ public class DatabaseHandlerOracle extends DatabaseHandler
   {
     return true;
   }
+
+  @Override
+  public boolean isUpdateIdentity()
+  {
+    return false;
+  }
 }

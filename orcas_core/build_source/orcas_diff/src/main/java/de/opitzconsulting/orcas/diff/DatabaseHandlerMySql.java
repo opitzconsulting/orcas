@@ -105,4 +105,10 @@ public class DatabaseHandlerMySql extends DatabaseHandler
   {
     return false;
   }
+
+  @Override
+  public boolean isUpdateIdentity()
+  {
+    return false;
+  }
 }

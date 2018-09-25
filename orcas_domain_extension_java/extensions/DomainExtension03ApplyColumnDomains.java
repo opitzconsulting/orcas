@@ -162,27 +162,88 @@ public class DomainExtension03ApplyColumnDomains extends OrcasBaseExtensionWithP
 
   private void setupFkTable( ColumnDomain pColumnDomain, Column pColumn, Table pTable, ForeignKey pForeignKey, Model pModel )
   {
-    for( ModelElement lModelElement : pModel.getModel_elements() )
+    if( pColumnDomain.getGenerateFk().getPkColumnNameRules() != null && !pColumnDomain.getGenerateFk().getPkColumnNameRules().isEmpty() )
     {
-      if( lModelElement instanceof Table )
+      for( ModelElement lModelElement : pModel.getModel_elements() )
       {
-        Table lTable = (Table)lModelElement;
-
-        if( lTable.getPrimary_key() != null )
+        if( lModelElement instanceof Table )
         {
-
-          String lExpectedPkColumnName = DomainExtensionHelper.getGeneratedNameColumn( pColumnDomain.getGenerateFk().getPkColumnNameRules(), pColumn.getName(), pTable.getName(), pTable.getAlias() );
-
-          for( ColumnRef lColumnRef : lTable.getPrimary_key().getPk_columns() )
+          Table lTable = (Table)lModelElement;
+  
+          if( lTable.getPrimary_key() != null )
           {
-            if( lExpectedPkColumnName.equalsIgnoreCase( lColumnRef.getColumn_name() ) )
+  
+            String lExpectedPkColumnName = DomainExtensionHelper.getGeneratedNameColumn( pColumnDomain.getGenerateFk().getPkColumnNameRules(), pColumn.getName(), pTable.getName(), pTable.getAlias() );
+  
+            for( ColumnRef lColumnRef : lTable.getPrimary_key().getPk_columns() )
             {
-              ColumnRef lDestColumnRef = new ColumnRefImpl();
-              lDestColumnRef.setColumn_name( lColumnRef.getColumn_name() );
-              pForeignKey.getDestColumns().add( lDestColumnRef );
-              pForeignKey.setDestTable( lTable.getName() );
+              if( lExpectedPkColumnName.equalsIgnoreCase( lColumnRef.getColumn_name() ) )
+              {
+                ColumnRef lDestColumnRef = new ColumnRefImpl();
+                lDestColumnRef.setColumn_name( lColumnRef.getColumn_name() );
+                pForeignKey.getDestColumns().add( lDestColumnRef );
+                pForeignKey.setDestTable( lTable.getName() );
+  
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
 
-              return;
+    if( pColumnDomain.getGenerateFk().getAliasNameRules() != null && !pColumnDomain.getGenerateFk().getAliasNameRules().isEmpty() )
+    {
+      for( ModelElement lModelElement : pModel.getModel_elements() )
+      {
+        if( lModelElement instanceof Table )
+        {
+          Table lTable = (Table)lModelElement;
+  
+          if( lTable.getPrimary_key() != null && lTable.getPrimary_key().getPk_columns().size() == 1 )
+          {
+            String lExpectedAliasName = DomainExtensionHelper.getGeneratedNameColumn( pColumnDomain.getGenerateFk().getAliasNameRules(), pColumn.getName(), pTable.getName(), pTable.getAlias() );
+  
+            for( ColumnRef lColumnRef : lTable.getPrimary_key().getPk_columns() )
+            {
+              if( lExpectedAliasName.equalsIgnoreCase( lTable.getAlias() ) )
+              {
+                ColumnRef lDestColumnRef = new ColumnRefImpl();
+                lDestColumnRef.setColumn_name( lColumnRef.getColumn_name() );
+                pForeignKey.getDestColumns().add( lDestColumnRef );
+                pForeignKey.setDestTable( lTable.getName() );
+  
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if( pColumnDomain.getGenerateFk().getTableNameRules() != null && !pColumnDomain.getGenerateFk().getTableNameRules().isEmpty() )
+    {
+      for( ModelElement lModelElement : pModel.getModel_elements() )
+      {
+        if( lModelElement instanceof Table )
+        {
+          Table lTable = (Table)lModelElement;
+  
+          if( lTable.getPrimary_key() != null && lTable.getPrimary_key().getPk_columns().size() == 1 )
+          {
+            String lExpectedTableName = DomainExtensionHelper.getGeneratedNameColumn( pColumnDomain.getGenerateFk().getTableNameRules(), pColumn.getName(), pTable.getName(), pTable.getAlias() );
+  
+            for( ColumnRef lColumnRef : lTable.getPrimary_key().getPk_columns() )
+            {
+              if( lExpectedTableName.equalsIgnoreCase( lTable.getName() ) )
+              {
+                ColumnRef lDestColumnRef = new ColumnRefImpl();
+                lDestColumnRef.setColumn_name( lColumnRef.getColumn_name() );
+                pForeignKey.getDestColumns().add( lDestColumnRef );
+                pForeignKey.setDestTable( lTable.getName() );
+  
+                return;
+              }
             }
           }
         }

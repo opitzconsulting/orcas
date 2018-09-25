@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import de.opitzconsulting.orcas.diff.OrcasDiff.DataHandler;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
+import de.opitzconsulting.orcas.orig.diff.ColumnIdentityDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
 import de.opitzconsulting.orcas.orig.diff.ConstraintDiff;
 import de.opitzconsulting.orcas.orig.diff.ForeignKeyDiff;
@@ -2161,5 +2162,9 @@ public abstract class DdlBuilder
       p.stmtAppend( pConstraintDiff.consNameNew );
       p.stmtDone();
     } );
+  }
+
+  public void dropColumnIdentity( StatementBuilder pP, TableDiff pTableDiff, ColumnDiff pColumnDiff, ColumnIdentityDiff pIdentityDiff )
+  {
   }
 }

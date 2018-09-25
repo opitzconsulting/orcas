@@ -30,4 +30,6 @@ public abstract class DatabaseHandler
   public abstract boolean isRenameUniqueKey();
 
   public abstract boolean isRenameConstraint();
+  
+  public abstract boolean isUpdateIdentity();
 }

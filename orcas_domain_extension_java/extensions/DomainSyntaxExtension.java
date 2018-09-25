@@ -206,7 +206,25 @@ public class DomainSyntaxExtension extends BaseSyntaxExtension
       lRuleNormal.getRule_entries().add( createMultiValueRuleEntry( "pkColumnNameRules", "GenNameRule" ) );
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")*" ) );
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( ")" ) );
-      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")?" ) );
+
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( "alias-name" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createMultiValueRuleEntry( "aliasNameRules", "GenNameRule" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")*" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( ")" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")?" ) );
+
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( "table-name" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createMultiValueRuleEntry( "tableNameRules", "GenNameRule" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")*" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( ")" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")?" ) );
 
       lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( "on" ) );
