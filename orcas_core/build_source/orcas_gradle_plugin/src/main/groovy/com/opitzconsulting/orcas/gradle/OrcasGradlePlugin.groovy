@@ -37,6 +37,8 @@ class OrcasGradlePlugin implements Plugin<Project> {
         pProject.extract.dependsOn pProject.extractStatics,  pProject.extractReplaceables
 
         pProject.task('schemaSyncStatics', type: OrcasSchemaSyncStaticsTask)
+
+        pProject.task('dbdoc', type: OrcasDbDocTask)
     }
 }
 

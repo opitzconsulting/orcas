@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'com.opitzconsulting.orcas', name: 'orcas-domainextension-gradle-plugin',
-                  version: '5.1.2'
+                  version: '5.1.3-SNAPSHOT'
 
         classpath "com.oracle:ojdbc6:11.1.0.7"
 
@@ -36,3 +36,56 @@ orcasconfiguration {
           extractmodelinputfolder = "src/main/sql/statics/domains"
 }
 
+
+// dbdoc example:
+dbdoc.configure {
+  tableregistry {
+    nonHistTables {
+      includes = ".*";
+      exclude ".*_H";
+    }
+    histTables {
+      includes = ".*_H";
+    }
+    allTables {
+      includes = ".*";
+    }
+    orderTables {
+      include "ORDER.*";
+      exclude ".*_H";
+    }
+  }
+
+  diagram {
+    label = "Database-Full"
+    tablegroup = tableregistry.allTables
+    subinnclude = "diagramsonly"
+
+    diagram {
+      label = "Database"
+      tablegroup = tableregistry.nonHistTables
+    }
+
+    diagram {
+      label = "Hist-Tables"
+      tablegroup = tableregistry.histTables
+    }
+  }
+
+  styles {
+    diagrams {
+    }
+    tables {
+      style {
+        name = "fillcolor"
+        value = "#40ff40"
+        tablegroup = tableregistry.orderTables
+      }
+      style {
+        name = "fillcolor"
+        value = "#808080"
+        tablegroup = tableregistry.histTables
+      }
+    }
+  }
+}

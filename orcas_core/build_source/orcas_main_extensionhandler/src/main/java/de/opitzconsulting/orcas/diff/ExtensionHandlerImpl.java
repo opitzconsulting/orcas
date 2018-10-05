@@ -65,6 +65,11 @@ public class ExtensionHandlerImpl extends BaseExtensionHandlerImpl<de.opitzconsu
   @Override
   public Model loadModel()
   {
+    return TransformSyexOrig.convertModel( loadSyexModel() );
+  }
+
+  public de.opitzconsulting.orcasDsl.Model loadSyexModel()
+  {
     de.opitzconsulting.orcasDsl.Model lSyexModel;
     if( getParameters().getModelFile().endsWith( "xml" ) )
     {
@@ -122,7 +127,7 @@ public class ExtensionHandlerImpl extends BaseExtensionHandlerImpl<de.opitzconsu
       }
     }
 
-    return TransformSyexOrig.convertModel( lSyexModel );
+    return lSyexModel;
   }
 
   @Override
