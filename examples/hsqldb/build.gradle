@@ -1,0 +1,24 @@
+buildscript {
+    repositories {
+       mavenLocal()
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
+                  version: '5.2.2-SNAPSHOT'
+
+        classpath group: 'org.hsqldb', name: 'hsqldb', version: '2.4.0'
+
+    }
+}
+
+apply plugin: 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+               
+orcasconfiguration {
+          jdbcurl = "jdbc:hsqldb:mem:mydb"
+          jdbcdriver = "org.hsqldb.jdbc.JDBCDriver"
+          username = "SA"
+          password = ""
+          loglevel = "info"
+}
+
