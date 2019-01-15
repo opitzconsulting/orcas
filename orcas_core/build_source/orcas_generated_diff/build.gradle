@@ -42,4 +42,13 @@ task(generateDiffJava, dependsOn: createGenDirs, type: JavaExec)
 compileJava.source "${buildDir}/srcgen"
 compileJava.dependsOn generateDiffJava
 
+/*sourceSets {
+  main {
+    java {
+      srcDirs "${buildDir}/srcgen/src"
+    }
+  }
+}*/
+
+
 

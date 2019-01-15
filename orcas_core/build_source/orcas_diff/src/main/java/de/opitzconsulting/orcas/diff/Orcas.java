@@ -101,9 +101,14 @@ public abstract class Orcas
       return new DatabaseHandlerMySql();
     }
 
-    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:hsqldb" ) || getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:h2" ) )
+    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:hsqldb" ) )
     {
       return new DatabaseHandlerHsqlDb();
+    }
+
+    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:h2" ) )
+    {
+      return new DatabaseHandlerH2();
     }
 
     return new DatabaseHandlerOracle();
