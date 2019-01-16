@@ -75,14 +75,15 @@ generateXtext.dependsOn copyOriginalFilesToBuild
 compileJava.source generateXtext.outputs.files, new File("${project.ext.copy_folder}/src")
 compileJava.dependsOn generateXtext
 
-/*sourceSets {
+sourceSets {
   main {
     java {
-      srcDirs generateXtext.outputs.files
+      srcDirs new File("${project.ext.copy_folder}")
+      srcDirs new File("${project.ext.copy_folder_root}/xtext-generated")
       srcDirs new File("${project.ext.copy_folder}/src")
     }
   }
-}*/
+}
 
 // include java sources and generated resources
 jar.from compileJava.source

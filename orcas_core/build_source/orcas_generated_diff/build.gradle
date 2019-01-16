@@ -39,16 +39,16 @@ task(generateDiffJava, dependsOn: createGenDirs, type: JavaExec)
   outputs.file args[0]
 }
 
-compileJava.source "${buildDir}/srcgen"
+//compileJava.source "${buildDir}/srcgen"
 compileJava.dependsOn generateDiffJava
 
-/*sourceSets {
+sourceSets {
   main {
     java {
       srcDirs "${buildDir}/srcgen/src"
     }
   }
-}*/
+}
 
 
 
