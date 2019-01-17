@@ -1831,6 +1831,12 @@ public abstract class DdlBuilder
         lDatatype = lDatatype + ")";
       }
 
+      if( isNumericDatatypeUnsignedSupported() ) {
+        if (pColumnDiff.unsignedNew) {
+          lDatatype = lDatatype + " unsigned";
+        }
+      }
+
       if( "with_time_zone".equals( pColumnDiff.with_time_zoneNew ) )
       {
         lDatatype = lDatatype + " with time zone";
@@ -1838,6 +1844,11 @@ public abstract class DdlBuilder
     }
 
     return lDatatype;
+  }
+
+  protected boolean isNumericDatatypeUnsignedSupported()
+  {
+    return false;
   }
 
   protected String getDatatypeName( DataType pData_typeNew )

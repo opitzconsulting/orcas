@@ -164,6 +164,12 @@ public class DdlBuilderMySql extends DdlBuilder
   }
 
   @Override
+  protected boolean isNumericDatatypeUnsignedSupported()
+  {
+    return true;
+  }
+
+  @Override
   public void dropUniqueKey( StatementBuilder pP, TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
   {
     pP.stmtStartAlterTable( pTableDiff );
