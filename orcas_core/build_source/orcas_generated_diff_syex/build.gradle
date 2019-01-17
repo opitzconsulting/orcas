@@ -76,7 +76,15 @@ task(generateXmlExport, dependsOn: createGenDirs, type: JavaExec)
   outputs.file args[0]
 }
 
-compileJava.source "${buildDir}/srcgen"
+//compileJava.source "${buildDir}/srcgen"
 compileJava.dependsOn generateTransformerJava, generateDataReader, generateDataWriter, generateXmlExport
+
+sourceSets {
+  main {
+    java {
+      srcDirs "${buildDir}/srcgen"
+    }
+  }
+}
 
 

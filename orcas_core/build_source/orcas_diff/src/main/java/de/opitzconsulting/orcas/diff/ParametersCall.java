@@ -255,4 +255,46 @@ public class ParametersCall extends Parameters
   {
     _createIndexOnline = pCreateIndexOnline;
   }
+
+  public static ParametersCall createWithDefaults()
+  {
+    ParametersCall lReturn = new ParametersCall();
+
+    lReturn.getJdbcConnectParameters().setJdbcDriver(ParameterDefaults.jdbcdriver);
+    lReturn.setScriptpostfix(ParameterDefaults.scriptfolderPostfix);
+    lReturn.setScriptprefix(ParameterDefaults.scriptfolderPrefix);
+    lReturn.setScriptfolderrecursive(ParameterDefaults.scriptfolderrecursive);
+    lReturn.setSpoolfile(ParameterDefaults.spoolfile);
+    lReturn.setSpoolfolder(ParameterDefaults.spoolfolder);
+    lReturn.setLoglevel(ParameterDefaults.loglevel);
+    lReturn.setFailOnErrorMode(ParameterDefaults.failOnErrorMode);
+    lReturn.setOrcasDbUser(ParameterDefaults.usernameorcas);
+    lReturn.setLogonly(ParameterDefaults.logonly);
+    lReturn.setDropmode(ParameterDefaults.dropmode);
+    lReturn.setIndexparallelcreate(ParameterDefaults.indexparallelcreate);
+    lReturn.setIndexmovetablespace(ParameterDefaults.indexmovetablespace);
+    lReturn.setTablemovetablespace(ParameterDefaults.tablemovetablespace);
+    lReturn.setCreatemissingfkindexes(ParameterDefaults.createmissingfkindexes);
+    lReturn.setExcludewheretable(ParameterDefaults.excludewheretable);
+    lReturn.setExcludewheresequence(ParameterDefaults.excludewheresequence);
+    lReturn.setDateformat(ParameterDefaults.dateformat);
+    lReturn.setExtensionParameter(ParameterDefaults.extensionparameter);
+    lReturn.setTargetplsql(ParameterDefaults.targetplsql);
+
+    lReturn.setAdditionsOnly(ParameterDefaults.additionsonly);
+    lReturn.setLogIgnoredStatements(ParameterDefaults.logignoredstatements);
+    lReturn.setXmlLogFile(ParameterDefaults.xmllogfile);
+    lReturn.setSetUnusedInsteadOfDropColumn(ParameterDefaults.setunusedinsteadofdropcolumn);
+    lReturn.setCreateIndexOnline(ParameterDefaults.indexonlinecreate);
+    lReturn.setMinimizeStatementCount(ParameterDefaults.minimizestatementcount);
+    lReturn.setCharsetName(ParameterDefaults.charsetname);
+    lReturn.setCharsetNameSqlLog(ParameterDefaults.charsetnamesqllog);
+
+    lReturn.getOrcasJdbcConnectParameters().setJdbcDriver(ParameterDefaults.orcasjdbcdriver);
+
+    lReturn.setRemoveDefaultValuesFromModel(ParameterDefaults.extractremovedefaultvaluesfrommodel);
+    lReturn.setViewExtractMode(ParameterDefaults.viewextractmode);
+
+    return lReturn;
+  }
 }

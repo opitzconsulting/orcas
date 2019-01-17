@@ -10,7 +10,7 @@ import de.oc.dbdoc.ant.OrcasDbDoc;
 import de.oc.dbdoc.ant.Tablegroup;
 import de.oc.dbdoc.ant.Tableregistry;
 
-public class TestTablegroup
+public class TestTablegroup extends BaseTableRegistrySetup
 {
   private Tablegroup _tablegroup;
   private Tablegroup _excludeTablegroup;
@@ -39,8 +39,8 @@ public class TestTablegroup
   @Test
   public void testSimple()
   {
-    assertTrue( _rootDiagram.isTableIncluded( "ABC" ) );
-    assertTrue( _rootDiagram.isTableIncluded( "DEF" ) );
+    assertTrue( _rootDiagram.isTableIncluded( "ABC", tableregistry ) );
+    assertTrue( _rootDiagram.isTableIncluded( "DEF", tableregistry ) );
   }
 
   @Test
@@ -48,8 +48,8 @@ public class TestTablegroup
   {
     _tablegroup.setIncludes( "ABC" );
 
-    assertTrue( _rootDiagram.isTableIncluded( "ABC" ) );
-    assertFalse( _rootDiagram.isTableIncluded( "DEF" ) );
+    assertTrue( _rootDiagram.isTableIncluded( "ABC", tableregistry ) );
+    assertFalse( _rootDiagram.isTableIncluded( "DEF", tableregistry ) );
   }
 
   @Test
@@ -58,8 +58,8 @@ public class TestTablegroup
     _tablegroup.setIncludes( "AB.*" );
     _tablegroup.setExcludes( "ABC" );
 
-    assertFalse( _rootDiagram.isTableIncluded( "ABC" ) );
-    assertTrue( _rootDiagram.isTableIncluded( "ABE" ) );
+    assertFalse( _rootDiagram.isTableIncluded( "ABC", tableregistry ) );
+    assertTrue( _rootDiagram.isTableIncluded( "ABE", tableregistry ) );
   }
 
   @Test
@@ -69,10 +69,10 @@ public class TestTablegroup
     _tablegroup.createExclude().setName( "ABC.*" );
     _tablegroup.createInclude().setName( "ABC" );
 
-    assertTrue( _rootDiagram.isTableIncluded( "ABE" ) );
-    assertFalse( _rootDiagram.isTableIncluded( "ABCD" ) );
-    assertTrue( _rootDiagram.isTableIncluded( "ABC" ) );
-    assertFalse( _rootDiagram.isTableIncluded( "DEF" ) );
+    assertTrue( _rootDiagram.isTableIncluded( "ABE", tableregistry ) );
+    assertFalse( _rootDiagram.isTableIncluded( "ABCD", tableregistry ) );
+    assertTrue( _rootDiagram.isTableIncluded( "ABC", tableregistry ) );
+    assertFalse( _rootDiagram.isTableIncluded( "DEF", tableregistry ) );
   }
 
   @Test
@@ -81,8 +81,8 @@ public class TestTablegroup
     _tablegroup.setIncludes( "AB.*" );
     _tablegroup.createExclude().setName( "ABC.*" );
 
-    assertTrue( _rootDiagram.isTableIncluded( "ABE" ) );
-    assertFalse( _rootDiagram.isTableIncluded( "ABC" ) );
+    assertTrue( _rootDiagram.isTableIncluded( "ABE", tableregistry ) );
+    assertFalse( _rootDiagram.isTableIncluded( "ABC", tableregistry ) );
   }
 
   @Test
@@ -91,8 +91,8 @@ public class TestTablegroup
     _tablegroup.setExcludes( "ABC.*" );
     _tablegroup.createInclude().setName( "AB.*" );
 
-    assertTrue( _rootDiagram.isTableIncluded( "ABE" ) );
-    assertFalse( _rootDiagram.isTableIncluded( "ABC" ) );
+    assertTrue( _rootDiagram.isTableIncluded( "ABE", tableregistry ) );
+    assertFalse( _rootDiagram.isTableIncluded( "ABC", tableregistry ) );
   }
 
   @Test
@@ -101,7 +101,7 @@ public class TestTablegroup
     _tablegroup.createExclude().setTablegroup( _excludeTableGroupName );
     _excludeTablegroup.setIncludes( "ABC.*" );
 
-    assertTrue( _rootDiagram.isTableIncluded( "ABE" ) );
-    assertFalse( _rootDiagram.isTableIncluded( "ABC" ) );
+    assertTrue( _rootDiagram.isTableIncluded( "ABE", tableregistry ) );
+    assertFalse( _rootDiagram.isTableIncluded( "ABC", tableregistry ) );
   }
 }

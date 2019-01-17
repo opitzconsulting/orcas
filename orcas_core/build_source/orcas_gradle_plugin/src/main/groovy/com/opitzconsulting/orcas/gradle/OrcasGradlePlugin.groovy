@@ -1,5 +1,6 @@
 package com.opitzconsulting.orcas.gradle
 
+import de.opitzconsulting.orcas.diff.ParameterDefaults
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 
@@ -43,58 +44,58 @@ class OrcasGradlePlugin implements Plugin<Project> {
 }
 
 class OrcasGradlePluginExtension {
-  def String jdbcdriver = "oracle.jdbc.OracleDriver";
+  def String jdbcdriver = ParameterDefaults.jdbcdriver;
   def String jdbcurl;
   def String username;
   def String password;
-  def String scriptfolderPostfix = ".sql";
-  def String scriptfolderPrefix = "";
-  def boolean scriptfolderrecursive = true;
-  def String spoolfile = "orcas_spoolfile.sql";
-  def String spoolfolder = "log/";
-  def String loglevel = "info";
-  def FailOnErrorMode failOnErrorMode = FailOnErrorMode.ALWAYS;
-  def String usernameorcas = "";
-  def boolean logonly = false;
-  def boolean dropmode = false;
-  def boolean indexparallelcreate = true;
-  def boolean indexmovetablespace = true;
-  def boolean tablemovetablespace = true;
-  def boolean createmissingfkindexes = true;
-  def String excludewheretable = 'object_name like \'%$%\'';
-  def String excludewheresequence = 'object_name like \'%$%\'';
-  def String dateformat = "dd.mm.yy";
-  def String extensionparameter = "";
-  def String targetplsql = "";
-  def String replaceablesfolder = "src/main/sql/replaceables";
-  def String staticsfolder = "src/main/sql/statics" ;
-  def boolean additionsonly = false;
-  def boolean logignoredstatements = true;
-  def String xmllogfile = "log.xml";
+  def String scriptfolderPostfix = ParameterDefaults.scriptfolderPostfix;
+  def String scriptfolderPrefix = ParameterDefaults.scriptfolderPrefix;
+  def boolean scriptfolderrecursive = ParameterDefaults.scriptfolderrecursive;
+  def String spoolfile = ParameterDefaults.spoolfile;
+  def String spoolfolder = ParameterDefaults.spoolfolder;
+  def String loglevel = ParameterDefaults.loglevel;
+  def FailOnErrorMode failOnErrorMode = ParameterDefaults.failOnErrorMode;
+  def String usernameorcas = ParameterDefaults.usernameorcas;
+  def boolean logonly = ParameterDefaults.logonly;
+  def boolean dropmode = ParameterDefaults.dropmode;
+  def boolean indexparallelcreate = ParameterDefaults.indexparallelcreate;
+  def boolean indexmovetablespace = ParameterDefaults.indexmovetablespace;
+  def boolean tablemovetablespace = ParameterDefaults.tablemovetablespace;
+  def boolean createmissingfkindexes = ParameterDefaults.createmissingfkindexes;
+  def String excludewheretable = ParameterDefaults.excludewheretable;
+  def String excludewheresequence = ParameterDefaults.excludewheresequence;
+  def String dateformat = ParameterDefaults.dateformat;
+  def String extensionparameter = ParameterDefaults.extensionparameter;
+  def String targetplsql = ParameterDefaults.targetplsql;
+  def String replaceablesfolder = ParameterDefaults.replaceablesfolder;
+  def String staticsfolder = ParameterDefaults.staticsfolder;
+  def boolean additionsonly = ParameterDefaults.additionsonly;
+  def boolean logignoredstatements = ParameterDefaults.logignoredstatements;
+  def String xmllogfile = ParameterDefaults.xmllogfile;
   def String xmlinputfile;
-  def boolean setunusedinsteadofdropcolumn = false;
-  def boolean indexonlinecreate = false;
-  def boolean minimizestatementcount = false;
-  def String charsetname = "UTF-8";
-  def String charsetnamesqllog = null;
+  def boolean setunusedinsteadofdropcolumn = ParameterDefaults.setunusedinsteadofdropcolumn;
+  def boolean indexonlinecreate = ParameterDefaults.indexonlinecreate;
+  def boolean minimizestatementcount = ParameterDefaults.minimizestatementcount;
+  def String charsetname = ParameterDefaults.charsetname;
+  def String charsetnamesqllog = ParameterDefaults.charsetnamesqllog;
 
-  def String orcasjdbcdriver = "oracle.jdbc.OracleDriver";
+  def String orcasjdbcdriver = ParameterDefaults.orcasjdbcdriver;
   def String orcasjdbcurl;
   def String orcasusername;
   def String orcaspassword;
 
-  def String excludewhereview = 'object_name not like \'%\'';
-  def String excludewhereobjecttype = 'object_name not like \'%\'';
-  def String excludewherepackage = 'object_name not like \'%\'';
-  def String excludewheretrigger = 'object_name not like \'%\'';
-  def String excludewherefunction = 'object_name not like \'%\'';
-  def String excludewhereprocedure = 'object_name not like \'%\'';
+  def String excludewhereview = ParameterDefaults.excludewhereview;
+  def String excludewhereobjecttype = ParameterDefaults.excludewhereobjecttype;
+  def String excludewherepackage = ParameterDefaults.excludewherepackage;
+  def String excludewheretrigger = ParameterDefaults.excludewheretrigger;
+  def String excludewherefunction = ParameterDefaults.excludewherefunction;
+  def String excludewhereprocedure = ParameterDefaults.excludewhereprocedure;
 
   def String extractstaticsoutfolder;
   def String extractmodelinputfolder;
-  def boolean extractremovedefaultvaluesfrommodel = true;
+  def boolean extractremovedefaultvaluesfrommodel = ParameterDefaults.extractremovedefaultvaluesfrommodel;
   def String extractreplaceablesoutfolder;
-  def String viewextractmode = "text";
+  def String viewextractmode = ParameterDefaults.viewextractmode;
 
   def String srcjdbcurl;
   def String srcusername;

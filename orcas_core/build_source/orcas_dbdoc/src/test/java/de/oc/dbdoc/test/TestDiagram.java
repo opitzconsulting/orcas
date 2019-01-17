@@ -15,10 +15,10 @@ public class TestDiagram extends BaseTableRegistrySetup
     Diagram lRootDiagram = _orcasDbDoc.createDiagram();
     lRootDiagram.setTablegroup( "ABC.*" );
 
-    assertTrue( lRootDiagram.isTableIncluded( "ABC" ) );
-    assertFalse( lRootDiagram.isTableIncluded( "ALBI" ) );
-    assertTrue( lRootDiagram.isTableIncluded( "GH" ) );
-    assertFalse( lRootDiagram.isTableIncluded( "DEF" ) );
+    assertTrue( lRootDiagram.isTableIncluded( "ABC", tableregistry ) );
+    assertFalse( lRootDiagram.isTableIncluded( "ALBI", tableregistry ) );
+    assertTrue( lRootDiagram.isTableIncluded( "GH", tableregistry ) );
+    assertFalse( lRootDiagram.isTableIncluded( "DEF", tableregistry ) );
   }
 
   @Test
@@ -30,8 +30,8 @@ public class TestDiagram extends BaseTableRegistrySetup
     lDiagramLevel1.setSubinnclude( "tables" );
     lDiagramLevel2.setTablegroup( "ABC.*" );
 
-    assertTrue( lDiagramLevel2.isTableIncluded( "ABC" ) );
-    assertTrue( lDiagramLevel1.isTableIncluded( "ABC" ) );
-    assertFalse( lRootDiagram.isTableIncluded( "ABC" ) );
+    assertTrue( lDiagramLevel2.isTableIncluded( "ABC", tableregistry ) );
+    assertTrue( lDiagramLevel1.isTableIncluded( "ABC", tableregistry ) );
+    assertFalse( lRootDiagram.isTableIncluded( "ABC", tableregistry ) );
   }
 }

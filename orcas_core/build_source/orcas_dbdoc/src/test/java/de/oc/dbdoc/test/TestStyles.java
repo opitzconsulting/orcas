@@ -32,8 +32,8 @@ public class TestStyles extends BaseTableRegistrySetup
       lStyle.setValue( "filled" );
     }
 
-    assertEquals( "fillcolor=\"ff4040\", style=\"filled\"", lStyles.getStyleForTable( "ABC" ) );
-    assertEquals( "style=\"filled\"", lStyles.getStyleForTable( "ALBI" ) );
+    assertEquals( "fillcolor=\"ff4040\", style=\"filled\"", lStyles.getStyleForTable( "ABC", tableregistry ) );
+    assertEquals( "style=\"filled\"", lStyles.getStyleForTable( "ALBI", tableregistry ) );
   }
 
   @Test

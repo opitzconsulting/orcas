@@ -10,6 +10,7 @@ dependencies
   compile project(':orcas_syex')
   compile project(':orcas_main_extensionhandler')
   compile "org.apache.velocity:velocity:1.7"
+  testCompile 'junit:junit:4.12'
 }
 
 

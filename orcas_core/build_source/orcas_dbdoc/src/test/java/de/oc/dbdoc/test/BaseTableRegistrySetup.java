@@ -9,26 +9,27 @@ import de.oc.dbdoc.ant.Tableregistry;
 public class BaseTableRegistrySetup
 {
   protected OrcasDbDoc _orcasDbDoc;
+  protected Tableregistry tableregistry;
 
   @Before
   public void setup()
   {
     _orcasDbDoc = new OrcasDbDoc();
 
-    Tableregistry lTableregistry = _orcasDbDoc.createTableregistry();
+    tableregistry = _orcasDbDoc.createTableregistry();
 
     {
-      Tablegroup lTablegroup = lTableregistry.createTablegroup();
+      Tablegroup lTablegroup = tableregistry.createTablegroup();
       lTablegroup.setName( "ABC_1" );
       lTablegroup.setIncludes( "ABC" );
     }
     {
-      Tablegroup lTablegroup = lTableregistry.createTablegroup();
+      Tablegroup lTablegroup = tableregistry.createTablegroup();
       lTablegroup.setName( "ABC_2" );
       lTablegroup.setIncludes( "G.*" );
     }
     {
-      Tablegroup lTablegroup = lTableregistry.createTablegroup();
+      Tablegroup lTablegroup = tableregistry.createTablegroup();
       lTablegroup.setName( "OTHER" );
 
       lTablegroup.createInclude().setName( "ALBI" );

@@ -31,7 +31,7 @@ import de.oc.dbdoc.schemadata.Column;
 import de.oc.dbdoc.schemadata.Schema;
 import de.oc.dbdoc.schemadata.Table;
 
-public class TestGraphPrinting
+public class TestGraphPrinting extends BaseTableRegistrySetup
 {
   private static final String COLUMN_NAME_3 = "C3";
   private static final String COLUMN_NAME_ID = "C_ID";
@@ -183,7 +183,7 @@ public class TestGraphPrinting
   @Test
   public void testGraphTable1Table3()
   {
-    Diagram lDiagram = new Diagram( _orcasDbDoc );
+    Diagram lDiagram = new Diagram();
     lDiagram.setLabel( "D1" );
     lDiagram.setTablegroup( createTableGroup( _table1, _table3 ) );
 
@@ -201,7 +201,7 @@ public class TestGraphPrinting
   @Test
   public void testGraphTable1Table3OutrefOnly()
   {
-    Diagram lDiagram = new Diagram( _orcasDbDoc );
+    Diagram lDiagram = new Diagram();
     lDiagram.setLabel( "D1" );
     lDiagram.setTablegroup( createTableGroup( _table1, _table3 ) );
 
@@ -218,7 +218,7 @@ public class TestGraphPrinting
   @Test
   public void testGraphTable1Table2()
   {
-    Diagram lDiagram = new Diagram( _orcasDbDoc );
+    Diagram lDiagram = new Diagram();
     lDiagram.setLabel( "D1" );
     lDiagram.setTablegroup( createTableGroup( _table1, _table2 ) );
 
@@ -254,13 +254,13 @@ public class TestGraphPrinting
     switch( pAllAncestors )
     {
       case ALL_ANCESTORS:
-        lGraphForSingleTable = new GraphForSingleTableAncestors( pTable, new ArrayList<Graph>(), _styles );
+        lGraphForSingleTable = new GraphForSingleTableAncestors( pTable, new ArrayList<Graph>(), _styles, tableregistry );
         break;
       case ALL_DESCENDANTS:
-        lGraphForSingleTable = new GraphForSingleTableDescendants( pTable, new ArrayList<Graph>(), _styles );
+        lGraphForSingleTable = new GraphForSingleTableDescendants( pTable, new ArrayList<Graph>(), _styles, tableregistry );
         break;
       case NORMAL:
-        lGraphForSingleTable = new GraphForSingleTable( pTable, new ArrayList<Graph>(), _styles );
+        lGraphForSingleTable = new GraphForSingleTable( pTable, new ArrayList<Graph>(), _styles, tableregistry );
         break;
       default:
         throw new RuntimeException();
@@ -276,7 +276,7 @@ public class TestGraphPrinting
 
   private void runExportForDiagram( Diagram pDiagram, boolean pOutRefsOnly )
   {
-    runExport( new GraphForDiagram( pDiagram, _styles, null ), pOutRefsOnly );
+    runExport( new GraphForDiagram( pDiagram, _styles, null, tableregistry ), pOutRefsOnly );
   }
 
   private void runExport( Graph pGraph, boolean pOutRefsOnly )
