@@ -5,6 +5,18 @@ project.ext.maven_artifactId_postfix = 'gradle-plugin'
 project.ext.extensiondependent = true
 project.ext.maven_description = 'orcas gradle plugin'
 
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.10.0"
+    }
+}
+
+apply plugin: "com.gradle.plugin-publish"
 dependencies {
     compile gradleApi()
     compile localGroovy()
@@ -24,3 +36,16 @@ javadocJar.dependsOn groovydoc
 
 javadocJar.from groovydoc.destinationDir
 
+pluginBundle {
+    website = 'http://www.orcasdb.org/'
+    vcsUrl = 'https://github.com/opitzconsulting/orcas'
+    description = 'Orcas is a schema management and deployment framework for Oracle Databases.'
+    tags = ['sql', 'oracle']
+
+    plugins {
+        orcasPlugin {
+            id = 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+            displayName = 'Orcas plugin'
+        }
+    }
+}
