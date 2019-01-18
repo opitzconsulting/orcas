@@ -34,8 +34,6 @@ public class ParameterDefaults {
   public static final String charsetname = "UTF-8";
   public static final String charsetnamesqllog = null;
 
-  public static final String orcasjdbcdriver = "oracle.jdbc.OracleDriver";
-
   public static final String excludewhereview = "object_name not like '%'";
   public static final String excludewhereobjecttype = "object_name not like '%'";
   public static final String excludewherepackage = "object_name not like '%'";
@@ -45,4 +43,6 @@ public class ParameterDefaults {
 
   public static final boolean extractremovedefaultvaluesfrommodel = true;
   public static final String viewextractmode = "text";
+  public static boolean sqlplustable = false;
+  public static boolean orderColumnsByName = false;
 }

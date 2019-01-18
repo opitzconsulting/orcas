@@ -79,7 +79,7 @@ class OrcasGradlePluginExtension {
   def String charsetname = ParameterDefaults.charsetname;
   def String charsetnamesqllog = ParameterDefaults.charsetnamesqllog;
 
-  def String orcasjdbcdriver = ParameterDefaults.orcasjdbcdriver;
+  def String orcasjdbcdriver = ParameterDefaults.jdbcdriver;
   def String orcasjdbcurl;
   def String orcasusername;
   def String orcaspassword;

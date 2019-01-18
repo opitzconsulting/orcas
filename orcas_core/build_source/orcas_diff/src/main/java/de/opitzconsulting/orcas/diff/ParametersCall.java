@@ -290,10 +290,13 @@ public class ParametersCall extends Parameters
     lReturn.setCharsetName(ParameterDefaults.charsetname);
     lReturn.setCharsetNameSqlLog(ParameterDefaults.charsetnamesqllog);
 
-    lReturn.getOrcasJdbcConnectParameters().setJdbcDriver(ParameterDefaults.orcasjdbcdriver);
-
     lReturn.setRemoveDefaultValuesFromModel(ParameterDefaults.extractremovedefaultvaluesfrommodel);
     lReturn.setViewExtractMode(ParameterDefaults.viewextractmode);
+
+    lReturn.setSqlplustable(ParameterDefaults.sqlplustable);
+    lReturn.setOrderColumnsByName(ParameterDefaults.orderColumnsByName);
+    
+    lReturn.setOrcasJdbcConnectParameters(lReturn.getJdbcConnectParameters());
 
     return lReturn;
   }
