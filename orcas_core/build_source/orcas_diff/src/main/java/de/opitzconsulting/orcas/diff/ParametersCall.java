@@ -33,6 +33,11 @@ public class ParametersCall extends Parameters
     _orcasJdbcConnectParameters = pOrcasJdbcConnectParameters;
   }
 
+  public void setProxyJdbcConnectParameters( JdbcConnectParameters pProxyJdbcConnectParameters )
+  {
+    _proxyJdbcConnectParameters = pProxyJdbcConnectParameters;
+  }
+
   private String convertNullString( String pValue )
   {
     return pValue == null ? "" : pValue;

@@ -68,6 +68,7 @@ public abstract class Parameters
   protected JdbcConnectParameters _jdbcConnectParameters = new JdbcConnectParameters();
   protected JdbcConnectParameters _srcJdbcConnectParameters;
   protected JdbcConnectParameters _orcasJdbcConnectParameters;
+  protected JdbcConnectParameters _proxyJdbcConnectParameters;
   protected Boolean _logonly;
   protected Boolean _dropmode;
   protected Boolean _indexparallelcreate;
@@ -173,6 +174,10 @@ public abstract class Parameters
   public JdbcConnectParameters getOrcasJdbcConnectParameters()
   {
     return checkNull( _orcasJdbcConnectParameters );
+  }
+
+  public JdbcConnectParameters getProxyJdbcConnectParameters() {
+    return _proxyJdbcConnectParameters;
   }
 
   public String getTargetplsql()

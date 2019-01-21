@@ -851,6 +851,8 @@ ${orcas_sql_output}
     <attribute name="password" default="${orcas.default_password}" />
     <attribute name="userorcas" default="${orcas.default_user_orcas}" />
     <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="userproxy" default="" />
+    <attribute name="passwordproxy" default="" />
     <attribute name="tnsname" default="${orcas.default_tnsname}" />
     <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
     <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
@@ -916,6 +918,8 @@ ${orcas_sql_output}
         <arg value="prefix_@{jdbcurl}"/>
         <arg value="prefix_@{userorcas}"/>
         <arg value="prefix_@{passwordorcas}"/>
+        <arg value="prefix_@{userproxy}"/>
+        <arg value="prefix_@{passwordproxy}"/>
       </java>
     </sequential>
   </macrodef>

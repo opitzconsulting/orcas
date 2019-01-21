@@ -101,6 +101,9 @@ class OrcasGradlePluginExtension {
   def String srcusername;
   def String srcpassword;
 
+  def String proxyusername;
+  def String proxypassword;
+
   def de.opitzconsulting.orcas.diff.ExtensionHandler extensionHandler;
 }
 

@@ -74,21 +74,36 @@ public class JdbcConnectionHandler
         }
       }
 
-      Properties lProperties = new Properties();
-      lProperties.setProperty( "user", pJdbcConnectParameters.getJdbcUser() );
-      lProperties.setProperty( "password", pJdbcConnectParameters.getJdbcPassword() );
+      boolean lIsProxyUsed;
+      try
+      {
+        lIsProxyUsed = pJdbcConnectParameters._jdbcUrl.startsWith( "jdbc:oracle" )
+                       && pParameters.getProxyJdbcConnectParameters() != null
+                       && !pParameters.getProxyJdbcConnectParameters().getJdbcUser().equals("");
+      }
+      catch (IllegalArgumentException e) {
+        lIsProxyUsed = false;
+      }
 
       Connection lConnection;
 
-      try
+      if (lIsProxyUsed)
       {
-        lConnection = DriverManager.getConnection( pJdbcConnectParameters.getJdbcUrl(), lProperties );
-        // Connection lConnection = lDriver.connect(
-        // pJdbcConnectParameters.getJdbcUrl(), lProperties );
+        lConnection = OracleDriverSpecificHandler.openProxyConnection(pParameters, pJdbcConnectParameters);
       }
-      catch( Exception e )
+      else
       {
-        throw new RuntimeException( "connection failed: jdbc-url:" + pJdbcConnectParameters.getJdbcUrl() + " user: " + pJdbcConnectParameters.getJdbcUser(), e );
+        Properties lProperties = new Properties();
+        lProperties.setProperty( "user", pJdbcConnectParameters.getJdbcUser() );
+        lProperties.setProperty( "password", pJdbcConnectParameters.getJdbcPassword() );
+
+        try
+        {
+          lConnection = DriverManager.getConnection(pJdbcConnectParameters.getJdbcUrl(), lProperties);
+        }
+        catch (Exception e) {
+          throw new RuntimeException("connection failed: jdbc-url:" + pJdbcConnectParameters.getJdbcUrl() + " user: " + pJdbcConnectParameters.getJdbcUser(), e);
+        }
       }
 
       try
@@ -97,6 +112,10 @@ public class JdbcConnectionHandler
       }
       finally
       {
+        if (lIsProxyUsed)
+        {
+          OracleDriverSpecificHandler.closeConnection(lConnection);
+        }
         lConnection.close();
       }
     }

@@ -92,6 +92,17 @@ public abstract class BaseOrcasTask extends DefaultTask
       lParametersCall.setOrcasJdbcConnectParameters( lParametersCall.getJdbcConnectParameters() );
     }
 
+    if ( project.orcasconfiguration.jdbcurl.startsWith( "jdbc:oracle" )
+            && project.orcasconfiguration.proxyusername != null )
+    {
+      JdbcConnectParameters lProxyJdbcConnectParameters = new JdbcConnectParameters();
+      lProxyJdbcConnectParameters.setJdbcDriver( project.orcasconfiguration.jdbcdriver );
+      lProxyJdbcConnectParameters.setJdbcUrl( project.orcasconfiguration.jdbcurl );
+      lProxyJdbcConnectParameters.setJdbcUser( project.orcasconfiguration.proxyusername );
+      lProxyJdbcConnectParameters.setJdbcPassword( project.orcasconfiguration.proxypassword );
+      lParametersCall.setProxyJdbcConnectParameters( lProxyJdbcConnectParameters );
+    }
+
     nologging = "nologging".equals( lParametersCall.getloglevel() ); 
 
     lParametersCall.setInfoLogHandler(
