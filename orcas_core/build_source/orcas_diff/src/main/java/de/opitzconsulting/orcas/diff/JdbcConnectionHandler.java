@@ -74,21 +74,25 @@ public class JdbcConnectionHandler
         }
       }
 
+      boolean lIsProxyUsed = pParameters.getProxyUser() != null;
+
+      Connection lConnection;
+
       Properties lProperties = new Properties();
       lProperties.setProperty( "user", pJdbcConnectParameters.getJdbcUser() );
       lProperties.setProperty( "password", pJdbcConnectParameters.getJdbcPassword() );
 
-      Connection lConnection;
-
       try
       {
-        lConnection = DriverManager.getConnection( pJdbcConnectParameters.getJdbcUrl(), lProperties );
-        // Connection lConnection = lDriver.connect(
-        // pJdbcConnectParameters.getJdbcUrl(), lProperties );
+        lConnection = DriverManager.getConnection(pJdbcConnectParameters.getJdbcUrl(), lProperties);
       }
-      catch( Exception e )
+      catch (Exception e) {
+        throw new RuntimeException("connection failed: jdbc-url:" + pJdbcConnectParameters.getJdbcUrl() + " user: " + pJdbcConnectParameters.getJdbcUser(), e);
+      }
+
+      if (lIsProxyUsed)
       {
-        throw new RuntimeException( "connection failed: jdbc-url:" + pJdbcConnectParameters.getJdbcUrl() + " user: " + pJdbcConnectParameters.getJdbcUser(), e );
+        OracleDriverSpecificHandler.openProxyConnection(pParameters, lConnection);
       }
 
       try
@@ -97,6 +101,10 @@ public class JdbcConnectionHandler
       }
       finally
       {
+        if (lIsProxyUsed)
+        {
+          OracleDriverSpecificHandler.closeConnection(lConnection);
+        }
         lConnection.close();
       }
     }

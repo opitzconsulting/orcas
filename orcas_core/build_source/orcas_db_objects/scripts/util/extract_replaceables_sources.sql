@@ -18,19 +18,24 @@ select text
        (
        select replace
               (
-                'prompt LINE_BEGIN' ||
-                case 
-                  when( line = 1 )
-                    then
-                      'create or replace '
-                    else
-                      null
-                end ||
-                text ||
-                ';',
-                chr(10),
+                replace
+                (
+                  'prompt LINE_BEGIN' ||
+                  case
+                    when( line = 1 )
+                      then
+                        'create or replace '
+                      else
+                        null
+                  end ||
+                  text ||
+                  ';',
+                  chr(10),
+                  ''
+                ),
+                chr(13),
                 ''
-              ) as text,              
+              ) as text,
               line,
               name,
               type

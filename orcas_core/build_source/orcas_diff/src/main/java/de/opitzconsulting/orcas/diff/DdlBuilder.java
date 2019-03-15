@@ -286,7 +286,7 @@ public abstract class DdlBuilder
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__MAXVALUE )//
     .failIfAdditionsOnly()//
-    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + pSequenceDiff.maxvalueNew ) );
+    .handle(p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + nvl( pSequenceDiff.maxvalueNew, "9999999999999999999999999999" )));
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__MINVALUE )//
@@ -451,7 +451,7 @@ public abstract class DdlBuilder
 
   public void createPrimarykey( StatementBuilder p, TableDiff pTableDiff )
   {
-    boolean lHasIndexParameters = pTableDiff.primary_keyDiff.tablespaceNew != null || pTableDiff.primary_keyDiff.reverseNew != null;
+    boolean lHasIndexParameters = pTableDiff.primary_keyDiff.indexnameNew != null || pTableDiff.primary_keyDiff.tablespaceNew != null || pTableDiff.primary_keyDiff.reverseNew != null;
 
     if( lHasIndexParameters )
     {
@@ -471,6 +471,11 @@ public abstract class DdlBuilder
     if( lHasIndexParameters )
     {
       p.stmtAppend( "using index" );
+
+      if( pTableDiff.primary_keyDiff.indexnameNew != null )
+      {
+        p.stmtAppend( pTableDiff.primary_keyDiff.indexnameNew );
+      }
 
       if( pTableDiff.primary_keyDiff.reverseNew != null )
       {

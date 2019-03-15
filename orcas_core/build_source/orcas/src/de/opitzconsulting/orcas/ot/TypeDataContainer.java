@@ -1,5 +1,6 @@
 package de.opitzconsulting.orcas.ot;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +107,7 @@ public class TypeDataContainer
       {
         lSqlName = "varchar2(2000)";
       }
-      if( lClass == int.class || lClass == Integer.class )
+      if( lClass == int.class || lClass == Integer.class || lClass == BigInteger.class)
       {
         lSqlName = "number";
       }

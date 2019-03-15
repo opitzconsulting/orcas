@@ -36,6 +36,7 @@ public class JavaXmlGenerator extends JavaGenerator
     writePackage( pOut );
     pOut.println();
     pOut.println( "import java.util.*;" );
+    pOut.println( "import java.math.*;" );
     pOut.println( "import de.opitzconsulting.orcasDsl.*;" );
     pOut.println( "import org.apache.commons.lang3.StringEscapeUtils;" );    
     pOut.println();
@@ -88,6 +89,11 @@ public class JavaXmlGenerator extends JavaGenerator
     pOut.println( "  private void addTextEscaped( int pInput, Integer pIndent )" );
     pOut.println( "  {" );
     pOut.println( "    addText( \"\"+pInput, pIndent );" );
+    pOut.println( "  }" );
+    pOut.println( "" );
+    pOut.println( "  private void addTextEscaped( BigInteger pInput, Integer pIndent )" );
+    pOut.println( "  {" );
+    pOut.println( "    addText( pInput.toString(), pIndent );" );
     pOut.println( "  }" );
     pOut.println( "" );
     pOut.println( "  private void addNewline( Integer pIndent )" );

@@ -499,13 +499,13 @@ public class OrcasDiff
       updateImplicitDropList( lModelDiff );
     }
 
-    _log.debug( "hanlde all tables" );
+    _log.debug( "handle all tables" );
     handleAllTables( lModelDiff );
 
-    _log.debug( "hanlde all sequences" );
+    _log.debug( "handle all sequences" );
     handleAllSequences( lModelDiff );
 
-    _log.debug( "hanlde all mviews" );
+    _log.debug( "handle all mviews" );
     handleAllMviews( lModelDiff );
 
     if( _parameters.isAdditionsOnly() )

@@ -108,10 +108,10 @@ ForeignKey :
   "constraint" consName=DBNAME "foreign" "key" ("("(srcColumns+=ColumnRef)*")")? "references" destTable=DBNAME_WITH_SCHEMA ("("(destColumns+=ColumnRef)+")")? ("on" "delete" (delete_rule=FkDeleteRuleType))? ("deferrable" "initially" deferrtype=DeferrType)? (status=EnableType)? (",")?;
    
 PrimaryKey :
-  ("constraint" consName=DBNAME)? "primary" "key" "(" (pk_columns+=ColumnRef)+ ")" (status=EnableType)? ("using" "index" (reverse="reverse")? ("tablespace" tablespace=DBNAME)?)? (",")?;  
+  ("constraint" consName=DBNAME)? "primary" "key" "(" (pk_columns+=ColumnRef)+ ")" (status=EnableType)? ("using" "index" (reverse="reverse")? ("tablespace" tablespace=DBNAME)? (indexname=DBNAME_WITH_SCHEMA)?)? (",")?;
 
 UniqueKey :
-  "constraint" consName=DBNAME "unique" "(" (uk_columns+=ColumnRef)+ ")" ("using" "index" ("tablespace" tablespace=DBNAME)? (indexname=DBNAME)?)? (status=EnableType)? (",")?;  
+  "constraint" consName=DBNAME "unique" "(" (uk_columns+=ColumnRef)+ ")" ("using" "index" ("tablespace" tablespace=DBNAME)? (indexname=DBNAME_WITH_SCHEMA)?)? (status=EnableType)? (",")?;
   
 Index :
   "index" consName=DBNAME_WITH_SCHEMA ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? (",")?;  
@@ -177,7 +177,7 @@ ColumnRef :
   column_name=DBNAME (",")?;  
   
 Sequence:
- "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("start" "with" startwith=INT)? ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
+ "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("start" "with" startwith=BIGINT)? ("increment" "by" increment_by=BIGINT)? ("maxvalue" maxvalue=BIGINT)? ("minvalue" minvalue=BIGINT)? (cycle=CycleType)? ("cache" cache=BIGINT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
 
 ColumnIdentity:
  "generated" ( always="always"|"by" by_default="default" ("on" on_null="null")? ) "as" "identity" ( "(" ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ")" )?;
@@ -204,6 +204,9 @@ DBNAME_WITH_SCHEMA:
   DBNAME ( '.' DBNAME )?;
 
 NULLABLE_INT returns ecore::EIntegerObject:
+  INT;
+
+BIGINT returns ecore::EBigInteger:
   INT;
 
 terminal DBNAME :

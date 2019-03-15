@@ -1,7 +1,9 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 import org.eclipse.emf.common.util.EList;
@@ -376,42 +378,42 @@ public class InitDiffRepository
         return lReturn;
       }
 
-      public int cacheCleanValueIfNeeded( int pValue )
+      public BigInteger cacheCleanValueIfNeeded( BigInteger pValue )
       {
-        if( pValue == 0 || pValue == 20 )
-        {
-          return DiffRepository.getNullIntValue();
+        if (Objects.equals(pValue, BigInteger.valueOf(20))) {
+
+          return null;
         }
 
         return pValue;
       }
 
       @Override
-      public int increment_byCleanValueIfNeeded( int pValue )
+      public BigInteger increment_byCleanValueIfNeeded( BigInteger pValue )
       {
-        if( pValue == 0 || pValue == 1 )
+        if(Objects.equals(pValue, BigInteger.ONE))
         {
-          return DiffRepository.getNullIntValue();
+          return null;
         }
 
         return pValue;
       }
 
-      public int maxvalueCleanValueIfNeeded( int pValue )
+      public BigInteger maxvalueCleanValueIfNeeded( BigInteger pValue )
       {
-        if( pValue == 0 || pValue == Integer.MAX_VALUE || pValue == 268435455 )
+        if(Objects.equals(pValue, new BigInteger("9999999999999999999999999999")))
         {
-          return DiffRepository.getNullIntValue();
+          return null;
         }
 
         return pValue;
       }
 
-      public int minvalueCleanValueIfNeeded( int pValue )
+      public BigInteger minvalueCleanValueIfNeeded( BigInteger pValue )
       {
-        if( pValue == 0 || pValue == 1 )
+        if(Objects.equals(pValue, BigInteger.ONE))
         {
-          return DiffRepository.getNullIntValue();
+          return null;
         }
 
         return pValue;
