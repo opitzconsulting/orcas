@@ -357,6 +357,15 @@ public class LoadIstOracle extends LoadIst
     return isIgnoredTable( pTableName, pOwner );
   }
 
+  private BigInteger toBigInt( BigDecimal pBigDecimal )
+  {
+    if( pBigDecimal == null )
+    {
+      return null;
+    }
+    return pBigDecimal.toBigInteger();
+  }
+
   private int toInt( BigDecimal pBigDecimal )
   {
     if( pBigDecimal == null )
@@ -395,14 +404,14 @@ public class LoadIstOracle extends LoadIst
 
           logLoading( "sequence", lSequence.getSequence_name() );
 
-          lSequence.setIncrement_by( toInt( pResultSet.getBigDecimal( "increment_by" ) ) );
+          lSequence.setIncrement_by( toBigInt( pResultSet.getBigDecimal( "increment_by" ) ) );
           if( pWithSequeneceMayValueSelect )
           {
             lSequence.setMax_value_select( pResultSet.getString( "last_number" ) );
           }
-          lSequence.setCache( toInt( pResultSet.getBigDecimal( "cache_size" ) ) );
-          lSequence.setMinvalue( toInt( pResultSet.getBigDecimal( "min_value" ) ) );
-          lSequence.setMaxvalue( toInt( pResultSet.getBigDecimal( "max_value" ) ) );
+          lSequence.setCache( toBigInt( pResultSet.getBigDecimal( "cache_size" ) ) );
+          lSequence.setMinvalue( toBigInt( pResultSet.getBigDecimal( "min_value" ) ) );
+          lSequence.setMaxvalue( toBigInt( pResultSet.getBigDecimal( "max_value" ) ) );
 
           if( "Y".equals( pResultSet.getString( "cycle_flag" ) ) )
           {
@@ -430,7 +439,7 @@ public class LoadIstOracle extends LoadIst
 
   private void logLoading( String pType, String pName )
   {
-    _log.debug( "laoding: " + pType + " " + pName );
+    _log.debug( "loading: " + pType + " " + pName );
   }
 
   private void logLoading( String pType, String pName, String pDetailName )
@@ -642,7 +651,7 @@ public class LoadIstOracle extends LoadIst
   {
     if( _parameters.getMultiSchema() )
     {
-      return pOwner + "." + pObjectName;
+      return pOwner.toString() + "." + pObjectName;
     }
     else
     {
@@ -895,7 +904,7 @@ public class LoadIstOracle extends LoadIst
           if( lColumn.getData_type() == null && pResultSet.getString( "data_type_owner" ) != null )
           {
             lColumn.setData_type( DataType.OBJECT );
-            lColumn.setObject_type( pResultSet.getString( "data_type" ) );
+            lColumn.setObject_type( getNameWithOwner(pResultSet.getString( "data_type" ), pResultSet.getString( "data_type_owner" )) );
 
             // TODO
             /*
@@ -1328,6 +1337,11 @@ public class LoadIstOracle extends LoadIst
 
             lPrimaryKey.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
+            if(  pResultSet.getString( "index_name" ) != null && lPrimaryKey.getConsName() != null && !lPrimaryKey.getConsName().equals( pResultSet.getString( "index_name" ) ) )
+            {
+              lPrimaryKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );
+            }
+
             if( "NORMAL/REV".equals( pResultSet.getString( "index_type" ) ) )
             {
               lPrimaryKey.setReverse( "reverse" );
@@ -1350,7 +1364,7 @@ public class LoadIstOracle extends LoadIst
 
             if( !lUniqueKey.getConsName().equals( pResultSet.getString( "index_name" ) ) )
             {
-              lUniqueKey.setIndexname( pResultSet.getString( "index_name" ) );
+              lUniqueKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );
             }
 
             lTable.getInd_uks().add( lUniqueKey );

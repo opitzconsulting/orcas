@@ -44,7 +44,7 @@ public class JavaDataReaderGenerator extends JavaGenerator
     pOut.println( "import java.sql.*;" );
     pOut.println( "import de.opitzconsulting.orcasDsl.*;" );
     pOut.println( "import de.opitzconsulting.orcasDsl.impl.*;" );
-    pOut.println( "import java.math.BigDecimal;" );
+    pOut.println( "import java.math.*;" );
 
     pOut.println();
     pOut.print( "public class DataReader" );
@@ -153,7 +153,11 @@ public class JavaDataReaderGenerator extends JavaGenerator
               if( lType.getJavaName().equals( "Integer" ) )
               {
                 lValueString = "lAttributes[" + i + "] == null ? null : ((BigDecimal)lAttributes[" + i + "] ).intValue()";
-              }              
+              }
+              if( lType.getJavaName().equals( "BigInteger" ) )
+              {
+                lValueString = "lAttributes[" + i + "] == null ? null : ((BigDecimal)lAttributes[" + i + "] ).toBigInteger()";
+              }
               if( lType.getJavaName().equals( "boolean" ) )
               {
                 lValueString = "((BigDecimal)lAttributes[" + i + "] ).intValue() == 1";

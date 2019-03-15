@@ -101,6 +101,10 @@ class OrcasGradlePluginExtension {
   def String srcusername;
   def String srcpassword;
 
+  def boolean multischema;
+  def boolean multischemadbaviews;
+  def String multischemaexcludewhereowner;
+
   def de.opitzconsulting.orcas.diff.ExtensionHandler extensionHandler;
 }
 

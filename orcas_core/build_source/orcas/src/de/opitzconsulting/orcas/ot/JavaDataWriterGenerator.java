@@ -142,7 +142,11 @@ public class JavaDataWriterGenerator extends JavaGenerator
                 if( lType.getJavaName().equals( "Integer" ) )
                 {
                   lValueString = "pValue." + lFieldData.getJavaGetterCall();
-                }                
+                }
+                if( lType.getJavaName().equals( "BigInteger" ) )
+                {
+                  lValueString = "pValue." + lFieldData.getJavaGetterCall();
+                }
                 if( lType.getJavaName().equals( "boolean" ) )
                 {
                   lValueString = "pValue." + lFieldData.getJavaGetterCall() + " ? new BigDecimal(1) : new BigDecimal(0)";

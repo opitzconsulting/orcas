@@ -1,9 +1,13 @@
 package de.opitzconsulting.orcas.sql.oracle;
 
+import de.opitzconsulting.orcas.diff.Parameters;
+
 import java.sql.Array;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.util.Properties;
 
 /**
  * Execute OracleDirver-specific Methods via Reflection to prevent compile-time-dependencies. These Methods are optional anyways and are onla required if orcas is deployed to a database.
@@ -74,6 +78,43 @@ public class OracleDriverSpecificHandler
       getClass( "oracle.jdbc.OraclePreparedStatement" ).getMethod( "sendBatch" ).invoke( pPreparedStatement );
     }
     catch( Exception e )
+    {
+      throw new RuntimeException( e );
+    }
+  }
+
+  public static Connection openProxyConnection(Parameters pParameters, Connection pConnection) {
+
+    try
+    {
+      Class<?> oracleConnection = getClass( "oracle.jdbc.OracleConnection" );
+
+      Properties lProxyProperties = new Properties();
+      lProxyProperties.setProperty( (String) oracleConnection.getDeclaredField( "PROXY_USER_NAME" ).get( null ), pParameters.getProxyUser() );
+
+      try
+      {
+        oracleConnection.getMethod( "openProxySession", int.class, Properties.class ).invoke(pConnection, (int) oracleConnection.getDeclaredField("PROXYTYPE_USER_NAME").get(null), lProxyProperties);
+      }
+      catch ( Exception e )
+      {
+        throw new RuntimeException( "proxy authentication failed: proxy user: " + pParameters.getProxyUser(), e );
+      }
+    }
+    catch ( Exception e )
+    {
+      throw new RuntimeException( e );
+    }
+    return pConnection;
+  }
+
+  public static void closeConnection(Connection pConnection) {
+    try
+    {
+      Class<?> oracleConnection = getClass( "oracle.jdbc.OracleConnection" );
+      oracleConnection.getMethod( "close" , int.class).invoke( pConnection, (int) oracleConnection.getDeclaredField( "PROXY_SESSION" ).get( null ) );
+    }
+    catch ( Exception e )
     {
       throw new RuntimeException( e );
     }

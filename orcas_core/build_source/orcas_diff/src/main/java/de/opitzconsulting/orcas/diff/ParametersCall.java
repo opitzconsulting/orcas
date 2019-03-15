@@ -33,6 +33,11 @@ public class ParametersCall extends Parameters
     _orcasJdbcConnectParameters = pOrcasJdbcConnectParameters;
   }
 
+  public void setProxyUser( String pProxyUser )
+  {
+    _proxyUser = pProxyUser;
+  }
+
   private String convertNullString( String pValue )
   {
     return pValue == null ? "" : pValue;
@@ -295,7 +300,7 @@ public class ParametersCall extends Parameters
 
     lReturn.setSqlplustable(ParameterDefaults.sqlplustable);
     lReturn.setOrderColumnsByName(ParameterDefaults.orderColumnsByName);
-    
+
     lReturn.setOrcasJdbcConnectParameters(lReturn.getJdbcConnectParameters());
 
     return lReturn;

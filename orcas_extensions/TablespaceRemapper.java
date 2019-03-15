@@ -30,8 +30,17 @@ public class TablespaceRemapper extends OrcasBaseExtensionWithParameter
 
         for( LobStorage lLobStorage : ((Table)lModelElement).getLobStorages() )
         {
-          ((LobStorage)lLobStorage).setTablespace( _replaceTablespace( ((LobStorage)lLobStorage).getTablespace() ) );
-        }        
+          LobStorageParameters lLobStorageParameters = lLobStorage.getLobStorageParameters();
+          if( lLobStorageParameters != null )
+          {
+            lLobStorageParameters.setTablespace( _replaceTablespace( lLobStorageParameters.getTablespace() ) );
+          }
+        }
+        MviewLog lMviewLog = ((Table)lModelElement).getMviewLog();
+        if( lMviewLog != null )
+        {
+          lMviewLog.setTablespace( _replaceTablespace( lMviewLog.getTablespace() ) );
+        }
 
         if( ((Table)lModelElement).getTablePartitioning() instanceof HashPartitions )
         {
@@ -66,7 +75,11 @@ public class TablespaceRemapper extends OrcasBaseExtensionWithParameter
       if( lModelElement instanceof IndexExTable )
       {
         ((IndexExTable)lModelElement).setTablespace( _replaceTablespace( ((IndexExTable)lModelElement).getTablespace() ) );
-      }      
+      }
+      if( lModelElement instanceof Mview )
+      {
+        ((Mview)lModelElement).setTablespace( _replaceTablespace( ((Mview)lModelElement).getTablespace() ) );
+      }
     }
 
     return pModel;

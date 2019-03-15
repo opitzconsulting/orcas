@@ -56,10 +56,13 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setMinimizeStatementCount( project.orcasconfiguration.minimizestatementcount );
     lParametersCall.setCharsetName( project.orcasconfiguration.charsetname );
     lParametersCall.setCharsetNameSqlLog( project.orcasconfiguration.charsetnamesqllog );
+    lParametersCall.setMultiSchema( project.orcasconfiguration.multischema );
+    lParametersCall.setMultiSchemaDbaViews( project.orcasconfiguration.multischemadbaviews );
+    lParametersCall.setMultiSchemaExcludewhereowner( project.orcasconfiguration.multischemaexcludewhereowner );
 
     if( project.orcasconfiguration.extensionHandler != null )
     {
-      lParametersCall.setExtensionHandler( project.orcasconfiguration.extensionHandler ); 
+      lParametersCall.setExtensionHandler( project.orcasconfiguration.extensionHandler );
     }
 
     if( !project.orcasconfiguration.usernameorcas.equals( "" ) )
@@ -92,7 +95,18 @@ public abstract class BaseOrcasTask extends DefaultTask
       lParametersCall.setOrcasJdbcConnectParameters( lParametersCall.getJdbcConnectParameters() );
     }
 
-    nologging = "nologging".equals( lParametersCall.getloglevel() ); 
+    String lUsername = project.orcasconfiguration.username;
+    if ( project.orcasconfiguration.jdbcurl.startsWith( "jdbc:oracle" )
+            && lUsername != null
+            && lUsername.matches(/.+\[.+]$/))
+    {
+      int startOfProxy = lUsername.indexOf("[");
+
+      lParametersCall.setProxyUser(lUsername.substring(startOfProxy+1, lUsername.length()-1));
+      lParametersCall.getJdbcConnectParameters().setJdbcUser(lUsername.substring(0, startOfProxy));
+    }
+
+    nologging = "nologging".equals( lParametersCall.getloglevel() );
 
     lParametersCall.setInfoLogHandler(
       new InfoLogHandler() 
