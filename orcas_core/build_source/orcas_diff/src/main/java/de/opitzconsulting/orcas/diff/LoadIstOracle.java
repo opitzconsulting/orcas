@@ -1,6 +1,7 @@
 package de.opitzconsulting.orcas.diff;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Date;
 import java.sql.ResultSet;

@@ -230,6 +230,7 @@ public class JavaOdGenerator extends JavaGenerator
     pOut.println();
     writeOrcasImport( pOut );
     pOut.println( "import java.util.*;" );
+    pOut.println( "import java.math.*;" );
     pOut.println();
     pOut.print( "public class " + pClassDataType.getMergeJavaName() );
     pOut.println( "{" );
@@ -455,6 +456,7 @@ public class JavaOdGenerator extends JavaGenerator
     pOut.println();
     writeOrcasImport( pOut );
     pOut.println( "import java.util.*;" );
+    pOut.println( "import java.math.*;" );
     pOut.println();
     pOut.print( "public class " + pClassDataType.getDiffJavaName() );
 
