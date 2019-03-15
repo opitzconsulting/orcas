@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
-                  version: '5.3.3'
+                  version: '5.3.4'
 
         classpath group: 'org.hsqldb', name: 'hsqldb', version: '2.4.0'
 
