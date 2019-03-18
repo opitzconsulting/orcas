@@ -43,7 +43,7 @@ public class JavaDataWriterGenerator extends JavaGenerator
     pOut.println( "import java.sql.*;" );
     pOut.println( "import de.opitzconsulting.orcasDsl.*;" );
     pOut.println( "import de.opitzconsulting.orcasDsl.impl.*;" );
-    pOut.println( "import java.math.BigDecimal;" );
+    pOut.println( "import java.math.*;" );
 
     pOut.println();
     pOut.print( "public abstract class DataWriter" );
