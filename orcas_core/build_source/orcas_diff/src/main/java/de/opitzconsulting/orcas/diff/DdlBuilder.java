@@ -2001,7 +2001,14 @@ public abstract class DdlBuilder
 
     if( pColumnDiff.default_valueNew != null )
     {
-      lReturn = lReturn + " default " + pColumnDiff.default_valueNew;
+      if ( "virtual".equals( pColumnDiff.virtualNew ) )
+      {
+        lReturn = lReturn + " as (" + pColumnDiff.default_valueNew + ") virtual";
+      }
+      else
+      {
+        lReturn = lReturn + " default " + pColumnDiff.default_valueNew;
+      }
     }
 
     if( pColumnDiff.identityDiff.isNew )
