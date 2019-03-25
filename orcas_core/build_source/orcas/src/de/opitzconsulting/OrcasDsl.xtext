@@ -210,5 +210,5 @@ BIGINT returns ecore::EBigInteger:
   INT;
 
 terminal DBNAME :
-  ('A'..'Z'|'a'..'z')('A'..'Z'|'a'..'z'|'_'|'0'..'9'|'#')*;
+  ('A'..'Z'|'a'..'z')('A'..'Z'|'a'..'z'|'_'|'0'..'9'|'#'|'$')*;
 
