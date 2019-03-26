@@ -369,16 +369,23 @@ public abstract class DdlBuilder
 
     p.stmtStartAlterTableNoCombine( pTableDiff );
     p.stmtAppend( "add " + lTmpNewColumnameNew + " " + getColumnDatatype( pColumnDiff ) );
+    if ( "virtual".equals( pColumnDiff.virtualNew ) )
+    {
+      p.stmtAppend( "as (" + pColumnDiff.default_valueNew + ") virtual" );
+    }
     p.stmtDone();
 
-    p.addStmt( "update " + pTableDiff.nameNew + " set " + lTmpNewColumnameNew + " = " + pColumnDiff.nameOld );
-    p.addStmt( "commit" );
+    if ( !"virtual".equals( pColumnDiff.virtualNew ) )
+    {
+      p.addStmt("update " + pTableDiff.nameNew + " set " + lTmpNewColumnameNew + " = " + pColumnDiff.nameOld);
+      p.addStmt( "commit" );
+    }
 
     p.addStmt( "alter table " + pTableDiff.nameNew + " rename column " + pColumnDiff.nameOld + " to " + lTmpOldColumnameNew );
     p.addStmt( "alter table " + pTableDiff.nameNew + " rename column " + lTmpNewColumnameNew + " to " + pColumnDiff.nameNew );
     p.addStmt( "alter table " + pTableDiff.nameNew + " drop column " + lTmpOldColumnameNew );
 
-    if( pColumnDiff.default_valueNew != null )
+    if( pColumnDiff.default_valueNew != null && !"virtual".equals( pColumnDiff.virtualNew ) )
     {
       p.stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default" );
       p.stmtAppend( pColumnDiff.default_valueNew );
@@ -409,25 +416,51 @@ public abstract class DdlBuilder
     } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( COLUMN__DEFAULT_VALUE )//
-    .ignoreIfAdditionsOnly( pColumnDiff.default_valueNew == null )//
-    .failIfAdditionsOnly( pColumnDiff.default_valueOld != null, "can't change default" )//
-    .handle( p ->
+    .ifDifferent( COLUMN__VIRTUAL)
+    .failIfAdditionsOnly("virtual".equals(pColumnDiff.virtualNew), "can't make existing column virtual")
+    .failIfAdditionsOnly(!"virtual".equals(pColumnDiff.virtualNew), "can't materialize virtual column")
+    .handle(p ->
     {
-      p.stmtStartAlterTable( pTableDiff );
-      p.stmtAppend( "modify ( " + pColumnDiff.nameNew + " default" );
 
-      if( pColumnDiff.default_valueNew == null )
+    });
+
+    if (pColumnDiff.virtualIsEqual) {
+      p1.handleAlterBuilder()//
+      .ifDifferent(COLUMN__DEFAULT_VALUE)//
+      .ignoreIfAdditionsOnly(pColumnDiff.default_valueNew == null)//
+      .failIfAdditionsOnly(pColumnDiff.default_valueOld != null, "can't change default")//
+      .handle(p ->
       {
-        p.stmtAppend( "null" );
-      }
-      else
-      {
-        p.stmtAppend( pColumnDiff.default_valueNew );
-      }
-      p.stmtAppend( ")" );
-      p.stmtDone();
-    } );
+        p.stmtStartAlterTable(pTableDiff);
+        p.stmtAppend("modify ( " + pColumnDiff.nameNew);
+
+        if ("virtual".equals(pColumnDiff.virtualNew))
+        {
+          p.stmtAppend("as (");
+        }
+        else
+        {
+          p.stmtAppend("default");
+        }
+
+        if (pColumnDiff.default_valueNew == null)
+        {
+          p.stmtAppend("null");
+        }
+        else
+        {
+          p.stmtAppend(pColumnDiff.default_valueNew);
+        }
+
+        if ("virtual".equals(pColumnDiff.virtualNew))
+        {
+          p.stmtAppend(") virtual");
+        }
+
+        p.stmtAppend(")");
+        p.stmtDone();
+      });
+    }
 
     p1.handleAlterBuilder()//
     .ifDifferent( COLUMN__NOTNULL )//

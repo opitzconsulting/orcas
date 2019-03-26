@@ -122,6 +122,11 @@ public class OrcasDiff
       lReturn.add( COLUMN__UNSIGNED );
     }
 
+    if( !pColumnDiff.virtualIsEqual )
+    {
+      lReturn.add( COLUMN__VIRTUAL );
+    }
+
     return lReturn;
   }
 
