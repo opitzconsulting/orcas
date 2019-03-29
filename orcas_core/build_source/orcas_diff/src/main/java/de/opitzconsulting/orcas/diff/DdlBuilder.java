@@ -2139,7 +2139,10 @@ public abstract class DdlBuilder
       p.stmtAppend( pTableDiff.primary_keyDiff.consNameNew );
       p.stmtDone();
 
-      renameUnderlyingIndex( p, pTableDiff, pTableDiff.primary_keyDiff.consNameOld, pTableDiff.primary_keyDiff.consNameNew );
+      if ( pTableDiff.primary_keyDiff.indexnameOld == null && pTableDiff.primary_keyDiff.indexnameNew == null )
+      {
+        renameUnderlyingIndex(p, pTableDiff, pTableDiff.primary_keyDiff.consNameOld, pTableDiff.primary_keyDiff.consNameNew);
+      }
     } );
   }
 
