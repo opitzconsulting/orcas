@@ -110,16 +110,6 @@ public class ParametersCommandline extends Parameters
       _orcasJdbcConnectParameters._jdbcUrl = getParameterString( lParameterMap.get( lParameterIndex++ ) );
       _orcasJdbcConnectParameters._jdbcUser = getParameterString( lParameterMap.get( lParameterIndex++ ) );
       _orcasJdbcConnectParameters._jdbcPassword = getParameterString( lParameterMap.get( lParameterIndex++ ) );
-
-      if (_jdbcConnectParameters._jdbcUrl.startsWith( "jdbc:oracle" )
-                     && _jdbcConnectParameters._jdbcUser != null
-                     && _jdbcConnectParameters._jdbcUser.matches("\\.+\\[\\.+\\]$")) {
-
-        int startOfProxy = _jdbcConnectParameters._jdbcUser.indexOf("[");
-
-        _proxyUser = _jdbcConnectParameters._jdbcUser.substring(startOfProxy+1, _jdbcConnectParameters._jdbcUser.length()-1);
-        _jdbcConnectParameters._jdbcUser = _jdbcConnectParameters._jdbcUser.substring(0, startOfProxy);
-      }
     }
 
     if( pParameterTypeMode == ParameterTypeMode.ORCAS_EXTRACT_STATICS )

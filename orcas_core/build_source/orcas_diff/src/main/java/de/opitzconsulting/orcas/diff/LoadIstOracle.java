@@ -945,7 +945,8 @@ public class LoadIstOracle extends LoadIst
            " select tab_cols.table_name," + //
            "        tab_cols.owner," + //
            "        tab_cols.column_name," + //
-           "        data_default" + //
+           "        data_default," + //
+           "        virtual_column" + //
            "   from " + getDataDictionaryView( "tab_cols" ) + //
            "  where hidden_column = 'NO'" + //
            "    and data_default is not null" + //
@@ -980,6 +981,14 @@ public class LoadIstOracle extends LoadIst
           if( lColumn.getIdentity() != null )
           {
             lColumn.setDefault_value( null );
+          }
+
+          if (lColumn.getDefault_value() != null)
+          {
+            if ( pResultSet.getString( "virtual_column" ).equals( "YES" ) )
+            {
+              lColumn.setVirtual( "virtual" );
+            }
           }
         }
       }

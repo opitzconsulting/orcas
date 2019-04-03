@@ -208,7 +208,21 @@
     <apply-templates select="with_time_zone" />
     <apply-templates select="object_type" />
     <apply-templates select="identity" />
-    <apply-templates select="default_value" />
+    <if test="default_value">
+      <choose>
+        <when test="virtual">
+          <text> as ("</text>
+          <apply-templates select="default_value" />
+          <text>") </text>
+          <apply-templates select="virtual" />
+        </when>
+        <otherwise>
+          <text> default "</text>
+          <apply-templates select="default_value" />
+          <text>"</text>
+        </otherwise>
+      </choose>
+    </if>
     <apply-templates select="notnull" />
     <if test="position() != last()">
       <text>,</text>
@@ -277,12 +291,6 @@
     <if test=". = 'true'">
       <text> not null</text>
     </if>  
-  </template>
-
-  <template match="default_value">
-    <text> default "</text>
-    <value-of select="." />
-    <text>"</text>
   </template>
 
   <template match="consName | destTable | column_name | name | sequence_name | mview_name">
