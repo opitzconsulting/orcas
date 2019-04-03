@@ -9,7 +9,7 @@ dependencies
 {
   compile 'junit:junit:4.12'
   compile group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler',
-                  version: '5.3.4'
+                  version: '5.4.0'
 
   compile "com.oracle:ojdbc6:11.1.0.7"
 
