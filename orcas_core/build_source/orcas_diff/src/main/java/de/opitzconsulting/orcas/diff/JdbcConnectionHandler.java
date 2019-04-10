@@ -74,7 +74,17 @@ public class JdbcConnectionHandler
         }
       }
 
-      boolean lIsProxyUsed = pParameters.getProxyUser() != null;
+      String lUsername = pJdbcConnectParameters.getJdbcUser();
+      String lProxyUser = null;
+      if ( pJdbcConnectParameters.getJdbcUrl().startsWith( "jdbc:oracle" )
+           && lUsername != null
+           && lUsername.matches("\\.+\\[\\.+\\]$"))
+      {
+        int startOfProxy = lUsername.indexOf("[");
+
+        lProxyUser = lUsername.substring(startOfProxy+1, lUsername.length()-1);
+        pJdbcConnectParameters.setJdbcUser(lUsername.substring(0, startOfProxy));
+      }
 
       Connection lConnection;
 
@@ -90,9 +100,9 @@ public class JdbcConnectionHandler
         throw new RuntimeException("connection failed: jdbc-url:" + pJdbcConnectParameters.getJdbcUrl() + " user: " + pJdbcConnectParameters.getJdbcUser(), e);
       }
 
-      if (lIsProxyUsed)
+      if (lProxyUser != null)
       {
-        OracleDriverSpecificHandler.openProxyConnection(pParameters, lConnection);
+        OracleDriverSpecificHandler.openProxyConnection(lConnection, lProxyUser);
       }
 
       try
@@ -101,7 +111,7 @@ public class JdbcConnectionHandler
       }
       finally
       {
-        if (lIsProxyUsed)
+        if (lProxyUser != null)
         {
           OracleDriverSpecificHandler.closeConnection(lConnection);
         }

@@ -122,6 +122,11 @@ public class OrcasDiff
       lReturn.add( COLUMN__UNSIGNED );
     }
 
+    if( !pColumnDiff.virtualIsEqual )
+    {
+      lReturn.add( COLUMN__VIRTUAL );
+    }
+
     return lReturn;
   }
 
@@ -261,6 +266,7 @@ public class OrcasDiff
         .ifDifferentName( PRIMARY_KEY__CONS_NAME, oldContraintNames, lTableDiff.primary_keyDiff.consNameNew, lTableDiff.primary_keyDiff.consNameOld, databaseHandler.isRenamePrimaryKey() )//
         .ifDifferent( PRIMARY_KEY__PK_COLUMNS )//
         .ifDifferent( PRIMARY_KEY__REVERSE )//
+        .ifDifferent( PRIMARY_KEY__INDEXNAME )//
         .ifDifferent( PRIMARY_KEY__TABLESPACE, _parameters.isIndexmovetablespace() )//
         .ifColumnDependentRecreate( lRecreateColumnNames, lTableDiff.primary_keyDiff.pk_columnsDiff )//
         .calculate();
@@ -825,11 +831,18 @@ public class OrcasDiff
 
   private void handleTableDetailsNoColumns( TableDiff pTableDiff )
   {
+    if ( pTableDiff.primary_keyDiff.indexnameNew != null )
+    {
+      pTableDiff.ind_uksIndexDiff.stream()
+                                 .filter( p -> p.consNameNew.toLowerCase().equals( pTableDiff.primary_keyDiff.indexnameNew.toLowerCase() ) )
+                                 .forEach( p -> handleIndex( pTableDiff, p ) );
+    }
+
     handlePrimarykey( pTableDiff );
 
     pTableDiff.constraintsDiff.forEach( p -> handleConstraint( pTableDiff, p ) );
 
-    pTableDiff.ind_uksIndexDiff.forEach( p -> handleIndex( pTableDiff, p ) );
+    pTableDiff.ind_uksIndexDiff.stream().filter( p -> pTableDiff.primary_keyDiff.indexnameNew == null || !p.consNameNew.toLowerCase().equals( pTableDiff.primary_keyDiff.indexnameNew.toLowerCase() ) ).forEach( p -> handleIndex( pTableDiff, p ) );
 
     pTableDiff.ind_uksUniqueKeyDiff.forEach( p -> handleUniquekey( pTableDiff, p ) );
 
@@ -872,6 +885,8 @@ public class OrcasDiff
         }
       }
 
+      dropIfNeeded( pTableDiff.primary_keyDiff, p -> ddlBuilder.dropPrimaryKey( p, pTableDiff, pTableDiff.primary_keyDiff ) );
+
       dropIfNeeded( pTableDiff.constraintsDiff, p -> ddlBuilder.dropConstraint( p, pTableDiff, p.diff ) );
 
       dropIfNeeded( pTableDiff.mviewLogDiff, p -> ddlBuilder.dropMaterializedViewLog( p, pTableDiff ) );
@@ -891,8 +906,6 @@ public class OrcasDiff
           }
         }
       }
-
-      dropIfNeeded( pTableDiff.primary_keyDiff, p -> ddlBuilder.dropPrimaryKey( p, pTableDiff, pTableDiff.primary_keyDiff ) );
 
       List<ColumnDiff> lDropColumnDiffList = pTableDiff.columnsDiff.stream()//
       .filter( p -> !p.isNew )//

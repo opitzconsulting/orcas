@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -945,7 +946,8 @@ public class LoadIstOracle extends LoadIst
            " select tab_cols.table_name," + //
            "        tab_cols.owner," + //
            "        tab_cols.column_name," + //
-           "        data_default" + //
+           "        data_default," + //
+           "        virtual_column" + //
            "   from " + getDataDictionaryView( "tab_cols" ) + //
            "  where hidden_column = 'NO'" + //
            "    and data_default is not null" + //
@@ -980,6 +982,14 @@ public class LoadIstOracle extends LoadIst
           if( lColumn.getIdentity() != null )
           {
             lColumn.setDefault_value( null );
+          }
+
+          if (lColumn.getDefault_value() != null)
+          {
+            if ( pResultSet.getString( "virtual_column" ).equals( "YES" ) )
+            {
+              lColumn.setVirtual( "virtual" );
+            }
           }
         }
       }
@@ -1294,10 +1304,12 @@ public class LoadIstOracle extends LoadIst
                   "        deferrable," + //
                   "        deferred," + //
                   "        constraints.status," + //
-                  "        constraints.generated," + //
+                  "        constraints.generated constraint_generated," + //
                   "        constraints.index_name," + //
                   "        indexes.tablespace_name," + //
-                  "        indexes.index_type" + //
+                  "        indexes.index_type," + //
+                  "        indexes.generated index_generated," + //
+                  "        indexes.owner index_owner" + //
                   "   from " + getDataDictionaryView( "constraints" ) + //
                   "   left outer join " + getDataDictionaryView( "indexes" ) + " on (constraints.index_name = indexes.index_name " + //
                   " and constraints.owner = indexes.owner)" + //
@@ -1327,7 +1339,7 @@ public class LoadIstOracle extends LoadIst
           {
             PrimaryKey lPrimaryKey = new PrimaryKeyImpl();
 
-            if( !isGeneratedName( pResultSet.getString( "generated" ) ) )
+            if( !isGeneratedName( pResultSet.getString( "constraint_generated" ) ) )
             {
               lPrimaryKey.setConsName( pResultSet.getString( "constraint_name" ) );
             }
@@ -1338,7 +1350,7 @@ public class LoadIstOracle extends LoadIst
 
             lPrimaryKey.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
-            if(  pResultSet.getString( "index_name" ) != null && lPrimaryKey.getConsName() != null && !lPrimaryKey.getConsName().equals( pResultSet.getString( "index_name" ) ) )
+            if( "N".equals(pResultSet.getString("index_generated")) && !Objects.equals(lPrimaryKey.getConsName(), pResultSet.getString("index_name")))
             {
               lPrimaryKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );
             }

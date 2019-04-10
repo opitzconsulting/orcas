@@ -1,7 +1,5 @@
 package de.opitzconsulting.orcas.sql.oracle;
 
-import de.opitzconsulting.orcas.diff.Parameters;
-
 import java.sql.Array;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -83,14 +81,14 @@ public class OracleDriverSpecificHandler
     }
   }
 
-  public static Connection openProxyConnection(Parameters pParameters, Connection pConnection) {
+  public static Connection openProxyConnection(Connection pConnection, String pProxyUser) {
 
     try
     {
       Class<?> oracleConnection = getClass( "oracle.jdbc.OracleConnection" );
 
       Properties lProxyProperties = new Properties();
-      lProxyProperties.setProperty( (String) oracleConnection.getDeclaredField( "PROXY_USER_NAME" ).get( null ), pParameters.getProxyUser() );
+      lProxyProperties.setProperty( (String) oracleConnection.getDeclaredField( "PROXY_USER_NAME" ).get( null ), pProxyUser );
 
       try
       {
@@ -98,7 +96,7 @@ public class OracleDriverSpecificHandler
       }
       catch ( Exception e )
       {
-        throw new RuntimeException( "proxy authentication failed: proxy user: " + pParameters.getProxyUser(), e );
+        throw new RuntimeException( "proxy authentication failed: proxy user: " + pProxyUser, e );
       }
     }
     catch ( Exception e )
