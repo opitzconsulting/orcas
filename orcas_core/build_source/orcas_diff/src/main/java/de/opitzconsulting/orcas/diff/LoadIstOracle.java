@@ -884,6 +884,10 @@ public class LoadIstOracle extends LoadIst
           {
             lColumn.setData_type( DataType.ROWID );
           }
+          if( "UROWID".equals( pResultSet.getString( "data_type" ) ) )
+          {
+            lColumn.setData_type( DataType.UROWID );
+          }
           if( "LONG RAW".equals( pResultSet.getString( "data_type" ) ) )
           {
             lColumn.setData_type( DataType.LONG_RAW );
