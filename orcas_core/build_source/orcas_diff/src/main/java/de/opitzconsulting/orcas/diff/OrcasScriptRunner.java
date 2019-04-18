@@ -387,6 +387,7 @@ public class OrcasScriptRunner extends Orcas
         {
           if( lTrimedLine.startsWith( "--" ) )
           {
+        	  lAppend = lLine;
           }
           else
           {
