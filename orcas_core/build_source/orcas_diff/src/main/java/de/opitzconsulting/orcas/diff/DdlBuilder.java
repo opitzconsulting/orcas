@@ -3,6 +3,7 @@ package de.opitzconsulting.orcas.diff;
 import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -297,11 +298,11 @@ public abstract class DdlBuilder
     .ifDifferent( SEQUENCE__CYCLE )//
     .failIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() ) );
-
+    
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__CACHE )//
     .ignoreIfAdditionsOnly()//
-    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " cache " + nvl( pSequenceDiff.cacheNew, 20 ) ) );
+    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + (( ((BigInteger) nvl( pSequenceDiff.cacheNew, 20 )).compareTo(BigInteger.ONE) <= 0  ) ? " nocache " : (" cache " + nvl( pSequenceDiff.cacheNew, 20 ))) ) );
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__ORDER )//
@@ -349,7 +350,12 @@ public abstract class DdlBuilder
 
     if( pSequenceDiff.cacheNew != null )
     {
-      p.stmtAppend( "cache " + pSequenceDiff.cacheNew );
+      if ( pSequenceDiff.cacheNew.compareTo(BigInteger.ONE) > 0  ) {
+    	  p.stmtAppend( "cache " + pSequenceDiff.cacheNew );  
+      } else {
+    	  p.stmtAppend( "nocache ");
+      }
+      
     }
 
     if( pSequenceDiff.orderNew != null )

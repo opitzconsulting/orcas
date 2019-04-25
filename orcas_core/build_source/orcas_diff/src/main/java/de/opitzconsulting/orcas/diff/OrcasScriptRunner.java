@@ -356,7 +356,7 @@ public class OrcasScriptRunner extends Orcas
     } );
     lCommandHandlerList.add( createStartHandler( pCallableStatementProvider, pParameters, lSpoolHandler ) );
 
-    StringBuffer lCurrent = new StringBuffer();
+    StringBuffer lCurrent = null;
     for( String lLine : pLines )
     {
       boolean lCurrentEnd = false;
@@ -387,7 +387,9 @@ public class OrcasScriptRunner extends Orcas
         {
           if( lTrimedLine.startsWith( "--" ) )
           {
-        	  lAppend = lLine;
+        	  if (lCurrent != null) {
+        		  lAppend = lLine;
+        	  }
           }
           else
           {
