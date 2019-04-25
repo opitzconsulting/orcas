@@ -194,7 +194,9 @@
       <text> using index</text>
       <apply-templates select="reverse" />
       <apply-templates select="tablespace" />
-      <apply-templates select="indexname" />
+      <if test="tablespace == ''">
+      	<apply-templates select="indexname" />
+      </if>
     </if>
   </template>
 
@@ -327,7 +329,9 @@
     <if test="tablespace != '' or indexname != ''">
       <text> using index</text>
       <apply-templates select="tablespace" />
-      <apply-templates select="indexname" />
+      <if test="tablespace ==''">
+      	<apply-templates select="indexname" />
+      </if>if>
     </if>
     <if test="position() != last()">
       <text>,</text>
