@@ -223,15 +223,15 @@
       </variable>
       <choose>
         <when test="virtual">
-          <text> as (</text><xsl:value-of select="$quote"/>
+          <text> as (</text><value-of select="$quote"/>
           <apply-templates select="default_value" />
-          <xsl:value-of select="$quote"/><text>) </text>
+          <value-of select="$quote"/><text>) </text>
           <apply-templates select="virtual" />
         </when>
         <otherwise>
-          <text> default </text><xsl:value-of select="$quote"/>
+          <text> default </text><value-of select="$quote"/>
           <apply-templates select="default_value" />
-          <xsl:value-of select="$quote"/>
+          <value-of select="$quote"/>
         </otherwise>
       </choose>
     </if>
