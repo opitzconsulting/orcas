@@ -35,4 +35,4 @@ create sequence seq_test_cache cache 100;
 
 create sequence seq_test_update_cache cache 50;
 
-create sequence seq_test_cache_nocache nocache;
+create sequence seq_test_cache_nocache cache 0;
