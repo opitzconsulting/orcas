@@ -213,15 +213,15 @@
     <if test="default_value">
       <choose>
         <when test="virtual">
-          <text> as ("</text>
+          <text> as ('</text>
           <apply-templates select="default_value" />
-          <text>") </text>
+          <text>') </text>
           <apply-templates select="virtual" />
         </when>
         <otherwise>
-          <text> default "</text>
+          <text> default '</text>
           <apply-templates select="default_value" />
-          <text>"</text>
+          <text>'</text>
         </otherwise>
       </choose>
     </if>
