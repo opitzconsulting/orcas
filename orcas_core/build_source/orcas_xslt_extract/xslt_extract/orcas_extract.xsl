@@ -214,10 +214,10 @@
       <variable name="quote">	
         <choose>
           <when test="contains(default_value, '&quot;')">
-            <value-of select="'"/>
+            <text>'</text>
           </when>
           <otherwise>
-            <value-of select='"'/>
+            <text>"</text>
           </otherwise>
         </choose>
       </variable>
