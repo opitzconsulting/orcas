@@ -193,10 +193,10 @@
     <if test="tablespace != '' or reverse != '' or indexname != ''">
       <text> using index</text>
       <apply-templates select="reverse" />
-      <apply-templates select="tablespace" />
-      <if test="tablespace == ''">
-      	<apply-templates select="indexname" />
+      <if test="indexname = ''">
+        <apply-templates select="tablespace" />
       </if>
+      <apply-templates select="indexname" />
     </if>
   </template>
 
@@ -213,15 +213,15 @@
     <if test="default_value">
       <choose>
         <when test="virtual">
-          <text> as ('</text>
+          <text> as ("</text>
           <apply-templates select="default_value" />
-          <text>') </text>
+          <text>") </text>
           <apply-templates select="virtual" />
         </when>
         <otherwise>
-          <text> default '</text>
+          <text> default "</text>
           <apply-templates select="default_value" />
-          <text>'</text>
+          <text>"</text>
         </otherwise>
       </choose>
     </if>
@@ -329,9 +329,7 @@
     <if test="tablespace != '' or indexname != ''">
       <text> using index</text>
       <apply-templates select="tablespace" />
-      <if test="tablespace ==''">
-      	<apply-templates select="indexname" />
-      </if>if>
+      <apply-templates select="indexname" />
     </if>
     <if test="position() != last()">
       <text>,</text>
