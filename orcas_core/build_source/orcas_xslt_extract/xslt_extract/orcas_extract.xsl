@@ -211,16 +211,16 @@
     <apply-templates select="object_type" />
     <apply-templates select="identity" />
     <if test="default_value">
-      <xsl:variable name="quote">	
-        <xsl:choose>
-          <xsl:when test="contains(default_value, '&quot;')">
-            <xsl:value-of select="'"/>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select='"'/>
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:variable>
+      <variable name="quote">	
+        <choose>
+          <when test="contains(default_value, '&quot;')">
+            <value-of select="'"/>
+          </when>
+          <otherwise>
+            <value-of select='"'/>
+          </otherwise>
+        </choose>
+      </variable>
       <choose>
         <when test="virtual">
           <text> as (</text><xsl:value-of select="$quote"/>
