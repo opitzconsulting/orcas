@@ -514,6 +514,11 @@ public abstract class DdlBuilder
       if( pTableDiff.primary_keyDiff.indexnameNew != null )
       {
         p.stmtAppend( pTableDiff.primary_keyDiff.indexnameNew );
+      } else {
+          if( pTableDiff.primary_keyDiff.tablespaceNew != null )
+          {
+            p.stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
+          }    	  
       }
 
       if( pTableDiff.primary_keyDiff.reverseNew != null )
@@ -521,10 +526,6 @@ public abstract class DdlBuilder
         p.stmtAppend( "reverse" );
       }
 
-      if( pTableDiff.primary_keyDiff.tablespaceNew != null )
-      {
-        p.stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
-      }
     }
 
     p.stmtDone( pTableDiff.isOld );
