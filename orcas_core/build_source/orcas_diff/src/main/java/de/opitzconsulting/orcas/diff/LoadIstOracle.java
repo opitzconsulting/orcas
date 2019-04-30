@@ -1353,6 +1353,7 @@ public class LoadIstOracle extends LoadIst
             if( "N".equals(pResultSet.getString("index_generated")) && !Objects.equals(lPrimaryKey.getConsName(), pResultSet.getString("index_name")))
             {
               lPrimaryKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );
+              lPrimaryKey.setTablespace( null );
             }
 
             if( "NORMAL/REV".equals( pResultSet.getString( "index_type" ) ) )
@@ -1377,7 +1378,9 @@ public class LoadIstOracle extends LoadIst
 
             if( !lUniqueKey.getConsName().equals( pResultSet.getString( "index_name" ) ) )
             {
-              lUniqueKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );
+            	if (pResultSet.getString( "index_name" ) != null) {
+            		lUniqueKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );	
+            	}
             }
 
             lTable.getInd_uks().add( lUniqueKey );
