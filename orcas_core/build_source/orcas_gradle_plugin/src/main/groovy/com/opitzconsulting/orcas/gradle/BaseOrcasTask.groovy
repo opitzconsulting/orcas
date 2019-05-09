@@ -60,6 +60,8 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setMultiSchemaDbaViews( project.orcasconfiguration.multischemadbaviews );
     lParametersCall.setMultiSchemaExcludewhereowner( project.orcasconfiguration.multischemaexcludewhereowner );
 
+    lParametersCall.setDbdocPlantuml( project.orcasconfiguration.dbdocPlantuml );
+
     if( project.orcasconfiguration.extensionHandler != null )
     {
       lParametersCall.setExtensionHandler( project.orcasconfiguration.extensionHandler );

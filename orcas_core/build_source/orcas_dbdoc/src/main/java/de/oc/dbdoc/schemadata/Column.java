@@ -9,10 +9,12 @@ package de.oc.dbdoc.schemadata;
 public class Column
 {
   private String _columnName;
+  private String _columnType;
 
-  public Column( String pColumnName )
+  public Column( String pColumnName, String pColumnType )
   {
     _columnName = pColumnName;
+    _columnType = pColumnType;
     
     _columnName = _columnName.replaceAll("ß", "SS");
     _columnName = _columnName.replaceAll("Ä", "AE");
@@ -27,5 +29,10 @@ public class Column
   public String getColumnName()
   {
     return _columnName;
+  }
+
+  public String getColumnType()
+  {
+    return _columnType;
   }
 }
