@@ -315,7 +315,7 @@ public class OrcasDiff
         {
           setRecreateNeededFor( lConstraintDiff )//
           .ifDifferentName( CONSTRAINT__CONS_NAME, oldContraintNames, lConstraintDiff.consNameNew, lConstraintDiff.consNameOld, databaseHandler.isRenameConstraint() )//
-          .ifDifferent( CONSTRAINT__RULE )//
+          .ifDifferent( CONSTRAINT__RULE, databaseHandler.isExpressionDifferent(lConstraintDiff.ruleNew,lConstraintDiff.ruleOld) )//
           .ifDifferent( CONSTRAINT__DEFERRTYPE )//
           .calculate();
         }

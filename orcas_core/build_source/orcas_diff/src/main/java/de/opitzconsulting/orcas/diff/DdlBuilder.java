@@ -59,10 +59,16 @@ import de.opitzconsulting.origOrcasDsl.SynchronousType;
 public abstract class DdlBuilder
 {
   private Parameters parameters;
+  private DatabaseHandler databaseHandler;
 
-  public DdlBuilder( Parameters pParameters )
+  protected DatabaseHandler getDatabaseHandler() {
+    return databaseHandler;
+  }
+
+  public DdlBuilder( Parameters pParameters, DatabaseHandler pDatabaseHandler )
   {
     parameters = pParameters;
+    databaseHandler = pDatabaseHandler;
   }
 
   public boolean isAllColumnsNew( List<ColumnRefDiff> pColumns, TableDiff pTableDiff )
