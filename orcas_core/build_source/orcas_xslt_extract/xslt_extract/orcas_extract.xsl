@@ -909,6 +909,16 @@
   </template>    
   
   <template match="viewSelectCLOB">
+   <variable name="quote">	
+      <choose>
+        <when test="contains(. , '&quot;')">
+          <text>'</text>
+        </when>
+        <otherwise>
+          <text>"</text>
+        </otherwise>
+      </choose>
+    </variable>
     <text> as </text> 
     <text>"</text> 
     <value-of select="myfunc:split-by-linefeed(.)" />
