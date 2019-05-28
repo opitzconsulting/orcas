@@ -19,7 +19,7 @@
     <func:result>
       <value-of select="java_string:toLowerCase(java_string:new($string_param))" />
     </func:result>
-  </func:function>
+  </func:function>                                                  
   
  <func:function name="myfunc:format-mview-filename">
     <param name="string_param" />
@@ -31,7 +31,8 @@
   <func:function name="myfunc:split-by-linefeed">
     <param name="string_param" />
     <func:result>
-      <value-of select="java_string:replaceAll(java_string:new($string_param),'(.{1000})','$1--line.separator--')" />
+      <value-of select="java_string:replaceAll(java_string:new($string_param),',',',&#10;')" />
+      <!-- &#10; -->
     </func:result>
   </func:function>
 
@@ -920,12 +921,9 @@
       </choose>
     </variable>
     <text> as </text> 
-    <text>"</text> 
-    <value-of select="myfunc:split-by-linefeed(.)" />
-    <text>"</text> 
+    <value-of select="$quote"/> 
+    <value-of select="." />
+    <value-of select="$quote"/> 
   </template>      
 
 </stylesheet>
-
-
-
