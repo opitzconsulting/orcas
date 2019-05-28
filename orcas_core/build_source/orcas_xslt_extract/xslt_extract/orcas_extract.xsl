@@ -193,7 +193,9 @@
     <if test="tablespace != '' or reverse != '' or indexname != ''">
       <text> using index</text>
       <apply-templates select="reverse" />
-      <apply-templates select="tablespace" />
+      <if test="indexname = ''">
+        <apply-templates select="tablespace" />
+      </if>
       <apply-templates select="indexname" />
     </if>
   </template>
@@ -209,17 +211,27 @@
     <apply-templates select="object_type" />
     <apply-templates select="identity" />
     <if test="default_value">
+      <variable name="quote">	
+        <choose>
+          <when test="contains(default_value, '&quot;')">
+            <text>'</text>
+          </when>
+          <otherwise>
+            <text>"</text>
+          </otherwise>
+        </choose>
+      </variable>
       <choose>
         <when test="virtual">
-          <text> as ("</text>
+          <text> as (</text><value-of select="$quote"/>
           <apply-templates select="default_value" />
-          <text>") </text>
+          <value-of select="$quote"/><text>) </text>
           <apply-templates select="virtual" />
         </when>
         <otherwise>
-          <text> default "</text>
+          <text> default </text><value-of select="$quote"/>
           <apply-templates select="default_value" />
-          <text>"</text>
+          <value-of select="$quote"/>
         </otherwise>
       </choose>
     </if>

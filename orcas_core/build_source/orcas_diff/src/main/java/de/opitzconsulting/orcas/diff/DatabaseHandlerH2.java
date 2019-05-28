@@ -61,7 +61,7 @@ public class DatabaseHandlerH2 extends DatabaseHandler
   @Override
   public DdlBuilder createDdlBuilder( Parameters pParameters )
   {
-    return new DdlBuilderHsqlDb( pParameters );
+    return new DdlBuilderHsqlDb( pParameters, this );
   }
 
   @Override

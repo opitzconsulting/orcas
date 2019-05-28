@@ -18,9 +18,9 @@ import de.opitzconsulting.origOrcasDsl.DataType;
 
 public class DdlBuilderMySql extends DdlBuilder
 {
-  public DdlBuilderMySql( Parameters pParameters )
+  public DdlBuilderMySql( Parameters pParameters, DatabaseHandler pDatabaseHandler )
   {
-    super( pParameters );
+    super( pParameters, pDatabaseHandler );
   }
 
   @Override

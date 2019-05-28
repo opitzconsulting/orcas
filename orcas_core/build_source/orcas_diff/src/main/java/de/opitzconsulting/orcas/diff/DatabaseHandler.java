@@ -32,4 +32,20 @@ public abstract class DatabaseHandler
   public abstract boolean isRenameConstraint();
   
   public abstract boolean isUpdateIdentity();
+
+  public final boolean isExpressionDifferent(String pExpression1, String pExpression2)
+  {
+    if( pExpression1==null && pExpression2==null ) {
+      return false;
+    }
+    if( pExpression1==null || pExpression2==null ) {
+      return true;
+    }
+    return isExpressionDifferentNotNull(pExpression1,pExpression2);
+  }
+
+  protected boolean isExpressionDifferentNotNull(String pExpression1, String pExpression2)
+  {
+    return !pExpression1.equals(pExpression2);
+  }
 }

@@ -256,6 +256,12 @@ public class ParametersCall extends Parameters
     _createIndexOnline = pCreateIndexOnline;
   }
 
+
+  public void setDbdocPlantuml( boolean pDbdocPlantuml )
+  {
+    _dbdocPlantuml = pDbdocPlantuml;
+  }
+
   public static ParametersCall createWithDefaults()
   {
     ParametersCall lReturn = new ParametersCall();
@@ -297,6 +303,8 @@ public class ParametersCall extends Parameters
     lReturn.setOrderColumnsByName(ParameterDefaults.orderColumnsByName);
 
     lReturn.setOrcasJdbcConnectParameters(lReturn.getJdbcConnectParameters());
+
+    lReturn.setDbdocPlantuml(ParameterDefaults.dbdocPlantuml);
 
     return lReturn;
   }
