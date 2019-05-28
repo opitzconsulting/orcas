@@ -61,7 +61,7 @@ public class DatabaseHandlerMySql extends DatabaseHandler
   @Override
   public DdlBuilder createDdlBuilder( Parameters pParameters )
   {
-    return new DdlBuilderMySql( pParameters );
+    return new DdlBuilderMySql( pParameters, this );
   }
 
   @Override

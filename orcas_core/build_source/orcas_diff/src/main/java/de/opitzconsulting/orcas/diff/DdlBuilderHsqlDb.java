@@ -18,9 +18,9 @@ import de.opitzconsulting.origOrcasDsl.DataType;
 
 public class DdlBuilderHsqlDb extends DdlBuilder
 {
-  public DdlBuilderHsqlDb( Parameters pParameters )
+  public DdlBuilderHsqlDb( Parameters pParameters, DatabaseHandler pDatabaseHandler )
   {
-    super( pParameters );
+    super( pParameters, pDatabaseHandler );
   }
 
   @Override

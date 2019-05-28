@@ -78,7 +78,7 @@ public class DatabaseHandlerOracle extends DatabaseHandler
   @Override
   public DdlBuilder createDdlBuilder( Parameters pParameters )
   {
-    return new DdlBuilderOracle( pParameters );
+    return new DdlBuilderOracle( pParameters, this );
   }
 
   @Override

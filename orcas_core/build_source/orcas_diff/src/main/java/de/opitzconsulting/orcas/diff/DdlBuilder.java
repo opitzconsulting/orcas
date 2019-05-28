@@ -3,6 +3,7 @@ package de.opitzconsulting.orcas.diff;
 import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -58,10 +59,16 @@ import de.opitzconsulting.origOrcasDsl.SynchronousType;
 public abstract class DdlBuilder
 {
   private Parameters parameters;
+  private DatabaseHandler databaseHandler;
 
-  public DdlBuilder( Parameters pParameters )
+  protected DatabaseHandler getDatabaseHandler() {
+    return databaseHandler;
+  }
+
+  public DdlBuilder( Parameters pParameters, DatabaseHandler pDatabaseHandler )
   {
     parameters = pParameters;
+    databaseHandler = pDatabaseHandler;
   }
 
   public boolean isAllColumnsNew( List<ColumnRefDiff> pColumns, TableDiff pTableDiff )
@@ -297,11 +304,11 @@ public abstract class DdlBuilder
     .ifDifferent( SEQUENCE__CYCLE )//
     .failIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() ) );
-
+    
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__CACHE )//
     .ignoreIfAdditionsOnly()//
-    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " cache " + nvl( pSequenceDiff.cacheNew, 20 ) ) );
+    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + (( ((BigInteger) nvl( pSequenceDiff.cacheNew, 20 )).compareTo(BigInteger.ONE) <= 0  ) ? " nocache " : (" cache " + nvl( pSequenceDiff.cacheNew, 20 ))) ) );
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__ORDER )//
@@ -349,7 +356,12 @@ public abstract class DdlBuilder
 
     if( pSequenceDiff.cacheNew != null )
     {
-      p.stmtAppend( "cache " + pSequenceDiff.cacheNew );
+      if ( pSequenceDiff.cacheNew.compareTo(BigInteger.ONE) > 0  ) {
+    	  p.stmtAppend( "cache " + pSequenceDiff.cacheNew );  
+      } else {
+    	  p.stmtAppend( "nocache ");
+      }
+      
     }
 
     if( pSequenceDiff.orderNew != null )
@@ -508,6 +520,11 @@ public abstract class DdlBuilder
       if( pTableDiff.primary_keyDiff.indexnameNew != null )
       {
         p.stmtAppend( pTableDiff.primary_keyDiff.indexnameNew );
+      } else {
+          if( pTableDiff.primary_keyDiff.tablespaceNew != null )
+          {
+            p.stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
+          }    	  
       }
 
       if( pTableDiff.primary_keyDiff.reverseNew != null )
@@ -515,10 +532,6 @@ public abstract class DdlBuilder
         p.stmtAppend( "reverse" );
       }
 
-      if( pTableDiff.primary_keyDiff.tablespaceNew != null )
-      {
-        p.stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
-      }
     }
 
     p.stmtDone( pTableDiff.isOld );

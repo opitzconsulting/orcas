@@ -19,6 +19,7 @@ import de.oc.dbdoc.ant.Styles;
 import de.oc.dbdoc.ant.Tableregistry;
 import de.oc.dbdoc.export.DotExport;
 import de.oc.dbdoc.export.DotWriterImpl;
+import de.oc.dbdoc.export.PlantUmlWriterImpl;
 import de.oc.dbdoc.graphdata.Graph;
 import de.oc.dbdoc.graphdata.GraphForDiagram;
 import de.oc.dbdoc.graphdata.GraphForSingleTable;
@@ -35,6 +36,8 @@ import de.oc.dbdoc.schemadata.Table;
  */
 public class Main
 {
+  private static boolean isPlantuml;
+
   public static class GraphRef
   {
     private Graph _graph;
@@ -109,8 +112,9 @@ public class Main
 
   }
 
-  public static void writeDiagramsRecursive( Diagram pRootDiagram, Styles pStyles, Schema pSchema, String pHtmlOutDir, String pDotOutDir, String pTableSourcefileFolder, Tableregistry pTableregistry, boolean pIsSvg )
+  public static void writeDiagramsRecursive( Diagram pRootDiagram, Styles pStyles, Schema pSchema, String pHtmlOutDir, String pDotOutDir, String pTableSourcefileFolder, Tableregistry pTableregistry, boolean pIsSvg, boolean pIsPlantuml )
   {
+    isPlantuml = pIsPlantuml;
     try
     {
       GraphForDiagram lRootGraph = new GraphForDiagram( pRootDiagram, pStyles, null, pTableregistry );
@@ -216,11 +220,19 @@ public class Main
 
   private static void _writeSingleGraph( GraphRef pGraphRef, Schema pSchema, String pHtmlOutDir, String pDotOutDir, String pTableSourcefileFolder, Tableregistry pTableregistry, boolean pIsSvg ) throws Exception
   {
-    System.out.println( "writing graph: " + getFileNameForGraph( pGraphRef, pGraphRef.getGraph().getDotExecutable() ) );
-    _writeHTML( pHtmlOutDir, pGraphRef, pSchema, pTableSourcefileFolder, pTableregistry, pIsSvg );
-    FileWriter lFileWriter = new FileWriter( pDotOutDir + "/" + getFileNameForGraph( pGraphRef, pGraphRef.getGraph().getDotExecutable() ) );
-    new DotExport().export( pGraphRef.getGraph(), pSchema, new DotWriterImpl( lFileWriter ), pGraphRef.isOutref() );
-    lFileWriter.close();
+    if(isPlantuml){
+      System.out.println( "writing graph: " + getFileNameForGraph( pGraphRef, "plantuml" ) );
+      FileWriter lPlantUmlFileWriter = new FileWriter( pHtmlOutDir + "/" + getFileNameForGraph( pGraphRef, "plantuml" ) );
+      new DotExport().export( pGraphRef.getGraph(), pSchema, new PlantUmlWriterImpl( lPlantUmlFileWriter ), pGraphRef.isOutref() );
+      lPlantUmlFileWriter.close();
+    }
+    else {
+      System.out.println( "writing graph: " + getFileNameForGraph( pGraphRef, pGraphRef.getGraph().getDotExecutable() ) );
+      _writeHTML(pHtmlOutDir, pGraphRef, pSchema, pTableSourcefileFolder, pTableregistry, pIsSvg);
+      FileWriter lFileWriter = new FileWriter(pDotOutDir + "/" + getFileNameForGraph(pGraphRef, pGraphRef.getGraph().getDotExecutable()));
+      new DotExport().export(pGraphRef.getGraph(), pSchema, new DotWriterImpl(lFileWriter), pGraphRef.isOutref());
+      lFileWriter.close();
+    }
   }
 
   private static boolean _hasOutrefVersion( Graph pGraph, Schema pSchema )

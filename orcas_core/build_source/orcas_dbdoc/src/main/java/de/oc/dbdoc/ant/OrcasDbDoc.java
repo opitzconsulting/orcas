@@ -117,7 +117,7 @@ public class OrcasDbDoc
       Schema lSchema = new DbLoader().loadSchema( _diagram, lExtensionHandlerImpl.loadSyexModel(), _tableregistry );
       lSchema.mergeAssociations();
 
-      Main.writeDiagramsRecursive( _diagram, _styles, lSchema, _outfolder, _tmpfolder, pParameters.getModelFile() + "/tables", _tableregistry, _svg );
+      Main.writeDiagramsRecursive( _diagram, _styles, lSchema, _outfolder, _tmpfolder, pParameters.getModelFile() + "/tables", _tableregistry, _svg, pParameters.getDbdocPlantuml() );
     }
     catch( Exception e )
     {

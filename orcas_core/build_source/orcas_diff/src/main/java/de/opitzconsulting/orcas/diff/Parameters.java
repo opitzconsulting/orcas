@@ -122,6 +122,8 @@ public abstract class Parameters
   protected String _charsetName = StandardCharsets.UTF_8.name();
   protected String _charsetNameSqlLog = null;
 
+  protected boolean _dbdocPlantuml = false;
+
   private AdditionalExtensionFactory _additionalExtensionFactory = new AdditionalExtensionFactory()
   {
     @SuppressWarnings( "unchecked" )
@@ -484,5 +486,10 @@ public abstract class Parameters
   public Charset getEncodingForSqlLog()
   {
     return _charsetNameSqlLog == null ? getEncoding() : Charset.forName( _charsetNameSqlLog );
+  }
+
+  public boolean getDbdocPlantuml()
+  {
+    return _dbdocPlantuml;
   }
 }

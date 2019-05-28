@@ -44,8 +44,28 @@ pluginBundle {
 
     plugins {
         orcasPlugin {
-            id = 'com.opitzconsulting.orcas.orcas-gradle-plugin'
-            displayName = 'Orcas plugin'
+            if(getRootProject().hasProperty('extensionname_internal'))
+            {
+              id = 'com.opitzconsulting.orcas.orcas-gradle-plugin-' + getRootProject().extensionname_internal
+              displayName = 'Orcas plugin (' + getRootProject().extensionname_internal + ")"
+            }
+            else
+            {
+              id = 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+              displayName = 'Orcas plugin'
+            }
         }
     }
+    mavenCoordinates {
+        groupId = project.group
+        if(getRootProject().hasProperty('extensionname_internal'))
+        {
+          artifactId = "orcas-" + getRootProject().extensionname_internal + "-gradle-plugin"
+        }
+        else
+        {
+          artifactId = "orcas-gradle-plugin"
+        }
+        version = project.version
+   }
 }

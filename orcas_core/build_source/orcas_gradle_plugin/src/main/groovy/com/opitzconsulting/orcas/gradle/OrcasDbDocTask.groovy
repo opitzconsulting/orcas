@@ -1,8 +1,9 @@
 package com.opitzconsulting.orcas.gradle
 
 import de.oc.dbdoc.ant.*;
-import de.opitzconsulting.orcas.diff.ParametersCall;
-import org.gradle.api.file.FileCollection;
+import de.opitzconsulting.orcas.diff.ParametersCall
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.OutputDirectory;
 
 public class OrcasDbDocTask extends BaseOrcasTask
 {
@@ -15,19 +16,30 @@ public class OrcasDbDocTask extends BaseOrcasTask
     return logname;
   }
 
-  private String getOutfolder()
+  @OutputDirectory
+  public String getOutfolder()
   {
-    return "build/dbdoc";
+    return project.buildDir.toString() + "/dbdoc";
+  }
+
+  @InputDirectory
+  public String getInputfolder()
+  {
+    return project.file(project.orcasconfiguration.staticsfolder).toString();
   }
 
   private String getTmpfolder()
   {
-    return "build/tmpdbdoc";
+    return project.buildDir.toString() + "/tmpdbdoc";
   }
 
   public void diagram(pClosure) {
     orcasDbDoc.setDiagram( new DiagramWrapper() );
     callClosure( pClosure, orcasDbDoc.getDiagram() );
+  }
+
+  public OrcasDbDoc getOrcasDbDoc() {
+    return orcasDbDoc;
   }
 
   public void styles(pClosure) {
@@ -56,15 +68,18 @@ public class OrcasDbDocTask extends BaseOrcasTask
   @Override
   protected void executeOrcasTaskWithParameters( ParametersCall pParameters )
   {
-    pParameters.setModelFile( project.file(project.orcasconfiguration.staticsfolder).toString() );
+    pParameters.setModelFile( getInputfolder() );
 
     pParameters.setSqlplustable( false );
     pParameters.setOrderColumnsByName( false );
 
     new File(getOutfolder()).deleteDir();
     new File(getOutfolder()).mkdirs();
-    new File(getTmpfolder()).deleteDir();
-    new File(getTmpfolder()+"/mapfiles").mkdirs();
+
+    if(!pParameters.getDbdocPlantuml()) {
+      new File(getTmpfolder()).deleteDir();
+      new File(getTmpfolder() + "/mapfiles").mkdirs();
+    }
 
     orcasDbDoc.setOutfolder( getOutfolder() );
     orcasDbDoc.setTmpfolder( getTmpfolder() );
@@ -104,17 +119,18 @@ public class OrcasDbDocTask extends BaseOrcasTask
     orcasDbDoc.execute( modifyParameters( pParameters ) );
 
     def lTmpfolder = new File(getTmpfolder());
-    
-    Arrays.stream( lTmpfolder.listFiles() ).parallel().forEach
-    { p ->
-      def lDotIndex = p.getName().lastIndexOf('.');
-      if( lDotIndex > 0 )
-      {
-        dotExec( (String)p.getName().substring(lDotIndex+1), (String)p.getName() );
-      }
-    }
 
-    de.oc.dbdoc.postprocessing.Main.main( getOutfolder(), "${getTmpfolder()}/mapfiles" );
+    if(!pParameters.getDbdocPlantuml()) {
+      Arrays.stream(lTmpfolder.listFiles()).parallel().forEach
+              { p ->
+                def lDotIndex = p.getName().lastIndexOf('.');
+                if (lDotIndex > 0) {
+                  dotExec((String) p.getName().substring(lDotIndex + 1), (String) p.getName());
+                }
+              }
+
+      de.oc.dbdoc.postprocessing.Main.main(getOutfolder(), "${getTmpfolder()}/mapfiles");
+    }
   }
 
   public void dotExec( String pDotExecutable, String pDotFile )

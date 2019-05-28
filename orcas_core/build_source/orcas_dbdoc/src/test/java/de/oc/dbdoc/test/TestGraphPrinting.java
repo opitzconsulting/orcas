@@ -57,9 +57,9 @@ public class TestGraphPrinting extends BaseTableRegistrySetup
   private Table createTable( String pTableName )
   {
     Table lTable = new Table( pTableName );
-    lTable.addColumn( new Column( COLUMN_NAME_ID ) );
-    lTable.addColumn( new Column( COLUMN_NAME_REF ) );
-    lTable.addColumn( new Column( COLUMN_NAME_3 ) );
+    lTable.addColumn( new Column( COLUMN_NAME_ID, "type" ) );
+    lTable.addColumn( new Column( COLUMN_NAME_REF, "type" ) );
+    lTable.addColumn( new Column( COLUMN_NAME_3, "type" ) );
 
     _schema.addTable( lTable );
 

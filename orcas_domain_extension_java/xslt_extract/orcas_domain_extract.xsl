@@ -59,7 +59,31 @@
     <apply-templates select="with_time_zone" />
     <apply-templates select="object_type" />
     <apply-templates select="identity" />
-    <apply-templates select="default_value" />
+    <if test="default_value">
+      <variable name="quote">	
+        <choose>
+          <when test="contains(default_value, '&quot;')">
+            <text>'</text>
+          </when>
+          <otherwise>
+            <text>"</text>
+          </otherwise>
+        </choose>
+      </variable>
+      <choose>
+        <when test="virtual">
+          <text> as (</text><value-of select="$quote"/>
+          <apply-templates select="default_value" />
+          <value-of select="$quote"/><text>) </text>
+          <apply-templates select="virtual" />
+        </when>
+        <otherwise>
+          <text> default </text><value-of select="$quote"/>
+          <apply-templates select="default_value" />
+          <value-of select="$quote"/>
+        </otherwise>
+      </choose>
+    </if>
     <apply-templates select="notnull" />
     <if test="position() != last()">
       <text>,</text>

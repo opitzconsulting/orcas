@@ -106,6 +106,8 @@ class OrcasGradlePluginExtension {
   def String multischemaexcludewhereowner;
 
   def de.opitzconsulting.orcas.diff.ExtensionHandler extensionHandler;
+
+  def boolean dbdocPlantuml = ParameterDefaults.dbdocPlantuml;
 }
 
 

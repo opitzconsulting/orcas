@@ -28,7 +28,7 @@ public class DbLoader
 
         lSchema.addTable( lTable );
 
-        pTable.getColumns().forEach( pColumn -> lTable.addColumn( new Column( pColumn.getName() ) ) );
+        pTable.getColumns().forEach( pColumn -> lTable.addColumn( new Column( pColumn.getName(), pColumn.getObject_type() != null ? pColumn.getObject_type() : pColumn.getData_type().getName() ) ) );
       }
     } );
 
