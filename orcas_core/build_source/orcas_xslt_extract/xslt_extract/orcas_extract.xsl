@@ -27,14 +27,6 @@
       <value-of select="java_string:concat('mv_',java_string:toLowerCase(java_string:new($string_param)))" />
     </func:result>
   </func:function>  
-  
-  <func:function name="myfunc:split-by-linefeed">
-    <param name="string_param" />
-    <func:result>
-      <value-of select="java_string:replaceAll(java_string:new($string_param),',',',&#10;')" />
-      <!-- &#10; -->
-    </func:result>
-  </func:function>
 
   <func:function name="myfunc:format-dbname">
     <param name="string_param" />
@@ -61,6 +53,13 @@
     <param name="string_param" />
     <func:result>
       <value-of select="java_string:replaceAll(java_string:new($string_param),'\\','\\\\')" />
+    </func:result>
+  </func:function>
+
+  <func:function name="myfunc:escape-quote">
+    <param name="string_param" />
+    <func:result>
+      <value-of select="java_string:replaceAll(java_string:new($string_param),'\&quot;','\\\&quot;')" />
     </func:result>
   </func:function>
 
@@ -910,20 +909,10 @@
   </template>    
   
   <template match="viewSelectCLOB">
-   <variable name="quote">	
-      <choose>
-        <when test="contains(. , '&quot;')">
-          <text>'</text>
-        </when>
-        <otherwise>
-          <text>"</text>
-        </otherwise>
-      </choose>
-    </variable>
-    <text> as </text> 
-    <value-of select="$quote"/> 
-    <value-of select="." />
-    <value-of select="$quote"/> 
+    <text> as </text>
+    <text>"</text>  
+    <value-of select="myfunc:escape-quote(.)" />
+    <text>"</text> 
   </template>      
 
 </stylesheet>
