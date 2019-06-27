@@ -51,6 +51,7 @@ create table tab_datatypes
   col_timestamp_6_timezone timestamp(6) with_time_zone,
   col_timestamp_9_timezone timestamp(9) with_time_zone,
   col_rowid rowid,
+  col_urowid urowid,
   col_raw raw(10),
   col_float_2 float(2),
   col_float_def float,
