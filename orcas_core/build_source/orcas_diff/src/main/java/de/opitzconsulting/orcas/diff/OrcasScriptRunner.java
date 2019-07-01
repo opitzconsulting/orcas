@@ -285,12 +285,19 @@ public class OrcasScriptRunner extends Orcas
     inMemorySpoolFileMap.clear();
 
     boolean lHasPlSqlModeTerminator = false;
-
+    boolean inComment = false;
+    
     for( String lFileLine : pLines )
     {
-      if( lFileLine.trim().toLowerCase().equals( "/" ) )
+      if(lFileLine.trim().toLowerCase().startsWith("/*")) {
+    	  inComment = true;
+      }
+      if( lFileLine.trim().toLowerCase().equals( "/" ) && !inComment)
       {
         lHasPlSqlModeTerminator = true;
+      }
+      if(lFileLine.trim().toLowerCase().endsWith("*/")) {
+    	  inComment = false;
       }
     }
 
@@ -357,15 +364,26 @@ public class OrcasScriptRunner extends Orcas
     lCommandHandlerList.add( createStartHandler( pCallableStatementProvider, pParameters, lSpoolHandler ) );
 
     StringBuffer lCurrent = null;
+    inComment = false;
     for( String lLine : pLines )
     {
       boolean lCurrentEnd = false;
       String lAppend = null;
       String lTrimedLine = lLine.trim().toLowerCase();
-
+      
+      //check wether we are in a block comment
+      if (lTrimedLine.startsWith( "/*" )) {
+    	  inComment = true;
+      }
+      
+      //check wether we are in a block comment
+      if (lTrimedLine.endsWith("*/")) {
+    	  inComment = false;
+      }
+      
       if( lPlSqlMode )
       {
-        if( lTrimedLine.equals( "/" ) )
+        if( lTrimedLine.equals( "/" ) && !inComment)
         {
           lCurrentEnd = true;
           lPlSqlMode = false;
