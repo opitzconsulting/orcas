@@ -1,6 +1,6 @@
 #!/bin/sh
 
-new_orcas_version=5.8.0
+new_orcas_version=5.8.1
 
 cd ..
 
@@ -10,7 +10,9 @@ cd orcas_core/build_source
 
 ./gradlew clean
 ./gradlew publishToMavenLocal -Pextensionname_internal=domainextension -Porcas_extension_folder=../../../orcas_domain_extension_java/extensions -Porcas_extension_extract_file=../../../orcas_domain_extension_java/xslt_extract/orcas_domain_extract.xsl
+./gradlew publishPlugins -Pextensionname_internal=domainextension -Porcas_extension_folder=../../../orcas_domain_extension_java/extensions -Porcas_extension_extract_file=../../../orcas_domain_extension_java/xslt_extract/orcas_domain_extract.xsl
 ./gradlew publishToMavenLocal 
+./gradlew publishPlugins
 
 cd ../../orcas_maven_plugin
 
