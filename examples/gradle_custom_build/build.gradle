@@ -1,0 +1,70 @@
+buildscript {
+    repositories {
+       mavenLocal()
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
+                  version: '5.8.1'
+
+        classpath "com.oracle:ojdbc6:11.1.0.7"
+
+
+			/*
+			  you need to provide the oracle jdbc driver here.
+			  please make sure you find a way that works with the oracle license terms
+
+                          you can install it to your local maven-repository:
+                          mvn install:install-file "-Dfile=C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar" -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.1.0.7 -Dpackaging=jar
+ 
+                          you can also provide a direct path to it:
+                          classpath files('C:/oracle/product/11.1.0/client_32/jdbc/lib/ojdbc6.jar')
+
+                          the driver is also accessible via http://maven.oracle.com, note that this requires a login-configuration
+*/
+
+    }
+}
+
+import com.opitzconsulting.orcas.gradle.*;
+
+extensions.create("orcasconfiguration", OrcasGradlePluginExtension)
+
+task('cleanLog', type:  OrcasCleanLogTask)
+
+task('preStatics', dependsOn: 'cleanLog', type: ExecuteOrcasOneTimeScriptsTask){
+  scriptfolder="src/main/scripts/pre-statics"
+  logname="pre-statics"
+}
+
+task('statics', dependsOn: 'preStatics', type:  OrcasUpdateStaticsTask){
+//scriptFiles=project.fileTree("src/main/sql/statics")
+}
+
+task('dropReplaceables', dependsOn: 'statics', type:  OrcasDropReplaceablesTask)
+
+task('installReplaceables', dependsOn: 'dropReplaceables', type: ExecuteOrcasScriptsTask){
+  scriptFiles=project.fileTree("src/main/sql/replaceables")
+  logname="replaceables"
+}
+
+task('compileReplaceables',dependsOn: 'installReplaceables', type:  OrcasCompileAllInvalidTask)
+
+task('postCompile', dependsOn: 'compileReplaceables', type: ExecuteOrcasOneTimeScriptsTask){
+  scriptfolder="src/main/scripts/post-compile"
+  logname="post-compile"
+}
+
+
+task('databaseDeployment', dependsOn: 'postCompile')
+
+
+task('checkConnection', type: OrcasCheckConnectionTask)
+       
+orcasconfiguration {
+          jdbcurl = "jdbc:oracle:thin:@localhost:1521:XE"
+          username = "orcas_orderentry"
+          password = "orcas_orderentry"
+          loglevel = "info"
+}
+
