@@ -6,7 +6,7 @@ import org.gradle.api.file.FileCollection;
 
 public class OrcasUpdateStaticsTask extends BaseOrcasTask
 {
-  private String logname = "update-statics";
+  public String logname = "update-statics";
 
   FileCollection scriptFiles;
 
@@ -25,6 +25,7 @@ public class OrcasUpdateStaticsTask extends BaseOrcasTask
     }
     else
     {
+      pParameters.setModelFile( "" );
       pParameters.setModelFiles( scriptFiles as List );
     }
 

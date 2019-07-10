@@ -38,7 +38,7 @@ task('preStatics', dependsOn: 'cleanLog', type: ExecuteOrcasOneTimeScriptsTask){
 }
 
 task('statics', dependsOn: 'preStatics', type:  OrcasUpdateStaticsTask){
-//scriptFiles=project.fileTree("src/main/sql/statics")
+  scriptFiles=project.fileTree("src/main/sql/statics")
 }
 
 task('dropReplaceables', dependsOn: 'statics', type:  OrcasDropReplaceablesTask)

@@ -25,7 +25,7 @@ public class ExecuteOrcasScriptsTask extends BaseOrcasTask
   {
     if( scriptFiles == null )
     {
-      pParameters.setModelFile( project.file(scriptfolder) );
+      pParameters.setModelFile( project.file(scriptfolder).toString() );
     }
     else
     {
