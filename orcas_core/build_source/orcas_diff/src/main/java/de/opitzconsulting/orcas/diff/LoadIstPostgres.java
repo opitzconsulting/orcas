@@ -19,6 +19,7 @@ import de.opitzconsulting.origOrcasDsl.ColumnRef;
 import de.opitzconsulting.origOrcasDsl.CommentObjectType;
 import de.opitzconsulting.origOrcasDsl.Constraint;
 import de.opitzconsulting.origOrcasDsl.DataType;
+import de.opitzconsulting.origOrcasDsl.DeferrType;
 import de.opitzconsulting.origOrcasDsl.FkDeleteRuleType;
 import de.opitzconsulting.origOrcasDsl.ForeignKey;
 import de.opitzconsulting.origOrcasDsl.Index;
@@ -271,16 +272,13 @@ public class LoadIstPostgres extends LoadIst {
             + "         where ad.adrelid = c.oid\n"
             + "           and ad.adnum = a.attnum\n"
             + "       ) as column_default"
-            + "  from pg_class c,\n"
+            + "  from " + getDataDictionaryView("pg_class", "c") + ",\n"
             + "       pg_attribute a,\n"
-            + "       pg_type t,\n"
-            + "       pg_namespace n\n"
+            + "       pg_type t\n"
             + " where c.relkind = 'r'\n"
             + "   and a.attnum > 0\n"
             + "   and a.attrelid = c.oid\n"
-            + "   and a.atttypid = t.oid\n"
-            + "   and c.relnamespace = n.oid\n"
-            + "   and n.nspname = 'public'\n";
+            + "   and a.atttypid = t.oid\n";
 
         if (_parameters.isOrderColumnsByName()) {
             lSql += " order by c.relname, a.attname, a.attnum";
@@ -357,35 +355,41 @@ public class LoadIstPostgres extends LoadIst {
     }
 
     private String getDataDictionaryView(String pName) {
-        String lViewName = "pg_" + pName;
-
-        return "(select pg_" + pName + ".*, user as owner from " + lViewName + " where schemaname = 'public' and tableowner = user ) " + pName;
+        return getDataDictionaryView(pName, pName);
     }
 
-    private String getDataDictionaryViewNoTableowner(String pName) {
-        String lViewName = "pg_" + pName;
+    private String getDataDictionaryView(String pName, String pAliasName) {
+        String lViewName = pName.startsWith("pg_") ? pName : "pg_" + pName;
 
-        return "(select pg_" + pName + ".*, user as owner from " + lViewName + " where schemaname = 'public' ) " + pName;
-    }
+        if (lViewName.equals("pg_class")) {
+            return "(select "
+                + lViewName
+                + ".oid, "
+                + lViewName
+                + ".*, user as owner from "
+                + lViewName
+                + " where relnamespace in (select oid from pg_namespace where nspname = 'public' or nspname = user) and relowner = (select usesysid from pg_user where usename = user) ) "
+                + pAliasName;
+        }
 
-    private String getDataDictionaryViewInformationSchema(String pName) {
-        String lViewName = "information_schema." + pName;
-
-        return "(select " + pName + ".*, user as owner from " + lViewName + " where table_schema = 'public' and table_catalog = user ) " + pName;
+        return "(select "
+            + lViewName
+            + ".*, user as owner from "
+            + lViewName
+            + " where (schemaname = 'public' or schemaname = user) and tableowner = user ) "
+            + pName;
     }
 
     private void loadIndexesIntoModel(final Model pModel) {
         String lSql = "select ct.relname            as table_name,\n"
-            + "       ci.relname            as index_name\n"
-            + "  from pg_class ct,\n"
+            + "       ci.relname            as index_name,\n"
+            + "       indisunique\n"
+            + "  from " + getDataDictionaryView("pg_class", "ct") + ",\n"
             + "       pg_class ci,\n"
-            + "       pg_namespace n,\n"
             + "       pg_index i\n"
             + " where i.indrelid = ct.oid\n"
             + "   and i.indexrelid = ci.oid\n"
-            + "   and ct.relnamespace = n.oid\n"
-            + "   and n.nspname = 'public'\n"
-            + "   and indisunique = false\n"
+            + "   and (indisunique = false or ci.relname not in (select conname from pg_constraint co where co.conrelid = ct.oid))\n"
             + " order by ci.relname";
 
         new WrapperIteratorResultSet(lSql, getCallableStatementProvider()) {
@@ -395,6 +399,9 @@ public class LoadIstPostgres extends LoadIst {
                     final Index lIndex = new IndexImpl();
 
                     lIndex.setConsName(getNameWithOwner(pResultSet.getString("index_name"), null));
+                    if(pResultSet.getBoolean("indisunique")) {
+                      lIndex.setUnique( "unique" );
+                    }
 
                     findTable(pModel, pResultSet.getString("table_name"), null).getInd_uks().add(lIndex);
                 }
@@ -406,20 +413,17 @@ public class LoadIstPostgres extends LoadIst {
         String lSql = "select a.attname            as column_name,\n"
             + "       ct.relname            as table_name,\n"
             + "       ci.relname            as index_name\n"
-            + "  from pg_class ct,\n"
+            + "  from " + getDataDictionaryView("pg_class", "ct") + ",\n"
             + "       pg_class ci,\n"
             + "       pg_attribute a,\n"
             + "       pg_type t,\n"
-            + "       pg_namespace n,\n"
             + "       pg_index i\n"
             + " where i.indrelid = ct.oid\n"
             + "   and i.indexrelid = ci.oid\n"
             + "   and a.attnum > 0\n"
             + "   and a.attrelid = ci.oid\n"
             + "   and a.atttypid = t.oid\n"
-            + "   and ct.relnamespace = n.oid\n"
-            + "   and n.nspname = 'public'\n"
-            + "   and indisunique = false\n"
+            + "   and (indisunique = false or ci.relname not in (select conname from pg_constraint co where co.conrelid = ct.oid))\n"
             + " order by ci.relname, a.attnum";
 
         new WrapperIteratorResultSet(lSql, getCallableStatementProvider()) {
@@ -529,7 +533,7 @@ public class LoadIstPostgres extends LoadIst {
     private void loadSequencesIntoModel(final Model pModel, final boolean pWithSequeneceMayValueSelect) {
         String lSql = "" + //
             " select relname" + //
-            "   from pg_class" + //
+            "   from " + getDataDictionaryView("pg_class") +
             "  where relkind = 'S'" + //
             "  order by relname " + //
             "";
@@ -571,14 +575,12 @@ public class LoadIstPostgres extends LoadIst {
             + "       c.relname as table_name,\n"
             + "       contype as constraint_type,\n"
             + "       confdeltype as delete_rule,\n"
+            + "       condeferred,\n"
             + "       consrc\n"
             + "  from pg_constraint co,\n"
-            + "       pg_class c,\n"
-            + "       pg_namespace n\n"
+            + "       " + getDataDictionaryView("pg_class", "c") + "\n"
             + " where co.conrelid = c.oid\n"
             + "   and c.relkind = 'r'\n"
-            + "   and c.relnamespace = n.oid\n"
-            + "   and n.nspname = 'public'\n"
             + " order by c.relname, conname";
 
         new WrapperIteratorResultSet(lSql, getCallableStatementProvider()) {
@@ -625,6 +627,10 @@ public class LoadIstPostgres extends LoadIst {
                             lForeignKey.setDelete_rule(FkDeleteRuleType.CASCADE);
                         }
 
+                        if(pResultSet.getBoolean("condeferred")){
+                            lForeignKey.setDeferrtype(DeferrType.DEFERRED);
+                        }
+
                         lTable.getForeign_keys().add(lForeignKey);
                     }
 
@@ -635,6 +641,10 @@ public class LoadIstPostgres extends LoadIst {
 
                         String lConsrc = pResultSet.getString("consrc");
                         lConstraint.setRule(lConsrc.substring(1, lConsrc.length() - 1).toUpperCase());
+
+                        if(pResultSet.getBoolean("condeferred")){
+                            lConstraint.setDeferrtype(DeferrType.DEFERRED);
+                        }
 
                         lTable.getConstraints().add(lConstraint);
                     }
@@ -648,16 +658,13 @@ public class LoadIstPostgres extends LoadIst {
             + "       ct.relname as table_name,\n"
             + "       c.conname as constraint_name,\n"
             + "       contype as constraint_type\n"
-            + "  from pg_class ct,\n"
+            + "  from " + getDataDictionaryView("pg_class", "ct") + ",\n"
             + "       pg_attribute a,\n"
-            + "       pg_namespace n,\n"
             + "       pg_constraint c\n"
             + " where c.conrelid = ct.oid\n"
             + "   and a.attnum > 0\n"
             + "   and a.attnum=ANY(c.conkey)\n"
             + "   and a.attrelid = ct.oid\n"
-            + "   and ct.relnamespace = n.oid\n"
-            + "   and n.nspname = 'public'\n"
             + "   and contype != 'c'\n"
             + "   and contype != 'f'\n"
             + " order by ct.relname, a.attnum";
@@ -695,11 +702,10 @@ public class LoadIstPostgres extends LoadIst {
             + "       ct.relname as table_name,\n"
             + "       ctr.relname as referenced_table_name,\n"
             + "       c.conname as constraint_name\n"
-            + "  from pg_class ct,\n"
+            + "  from " + getDataDictionaryView("pg_class", "ct") + ",\n"
             + "       pg_class ctr,\n"
             + "       pg_attribute a,\n"
             + "       pg_attribute ar,\n"
-            + "       pg_namespace n,\n"
             + "       pg_constraint c\n"
             + " where c.conrelid = ct.oid\n"
             + "   and c.confrelid = ctr.oid\n"
@@ -709,8 +715,6 @@ public class LoadIstPostgres extends LoadIst {
             + "   and ar.attnum > 0\n"
             + "   and ar.attrelid = ctr.oid\n"
             + "   and ar.attnum=ANY(c.confkey)\n"
-            + "   and ct.relnamespace = n.oid\n"
-            + "   and n.nspname = 'public'\n"
             + "   and contype = 'f'\n"
             + "   and array_position(c.conkey,a.attnum) = array_position(c.confkey,ar.attnum)\n"
             + " order by ct.relname, array_position(c.conkey,a.attnum)";

@@ -149,6 +149,9 @@ public class DdlBuilderPostgres extends DdlBuilder {
                 p.stmtAppend(" " + pIndexDiff.parallel_degreeNew);
             }
         }
+
+        boolean lIgnoreIfAdditionsOnly = pTableDiff.isOld && pIndexDiff.uniqueNew != null && !isAllColumnsOnlyNew( pTableDiff, pIndexDiff.index_columnsDiff );
+        p.stmtDone( lIgnoreIfAdditionsOnly );
     }
 
     @Override

@@ -92,7 +92,7 @@ public class DatabaseHandlerPostgres extends DatabaseHandler {
 
     @Override
     public boolean isRenameUniqueKey() {
-        return true;
+        return false;
     }
 
     @Override

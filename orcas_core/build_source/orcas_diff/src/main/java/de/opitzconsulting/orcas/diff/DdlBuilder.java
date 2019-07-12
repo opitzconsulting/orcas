@@ -1175,7 +1175,7 @@ public abstract class DdlBuilder
     .isPresent();
   }
 
-  private boolean isAllColumnsOnlyNew( TableDiff pTableDiff, List<ColumnRefDiff> pColumnsDiff )
+  protected boolean isAllColumnsOnlyNew( TableDiff pTableDiff, List<ColumnRefDiff> pColumnsDiff )
   {
     return !pColumnsDiff//
     .stream()//
