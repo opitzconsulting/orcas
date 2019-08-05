@@ -74,10 +74,10 @@ public abstract class DdlBuilder
   public boolean isAllColumnsNew( List<ColumnRefDiff> pColumns, TableDiff pTableDiff )
   {
     return !pColumns.stream()//
-    .filter( p -> !p.isNew )//
-    .filter( p -> !isColumnNew( pTableDiff, p.column_nameOld ) )//
-    .findAny()//
-    .isPresent();
+                    .filter( p -> !p.isNew )//
+                    .filter( p -> !isColumnNew( pTableDiff, p.column_nameOld ) )//
+                    .findAny()//
+                    .isPresent();
   }
 
   private String createRangeValuelist( List<RangePartitionValueDiff> pRangePartitionValueDiffList )
@@ -177,15 +177,15 @@ public abstract class DdlBuilder
     Runnable lAdditionsOnlyAlternativeHandler = () ->
     {
       pColumnDiffList.stream()//
-      .filter( pColumnDiff -> pColumnDiff.notnullOld && pColumnDiff.default_valueOld == null )//
-      .forEach( pColumnDiff ->
-      {
-        p.stmtStartAlterTable( pTableDiff );
-        p.stmtAppend( "modify ( " + pColumnDiff.nameOld );
-        p.stmtAppend( "null" );
-        p.stmtAppend( ")" );
-        p.stmtDone( StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT );
-      } );
+                     .filter( pColumnDiff -> pColumnDiff.notnullOld && pColumnDiff.default_valueOld == null )//
+                     .forEach( pColumnDiff ->
+                               {
+                                 p.stmtStartAlterTable( pTableDiff );
+                                 p.stmtAppend( "modify ( " + pColumnDiff.nameOld );
+                                 p.stmtAppend( "null" );
+                                 p.stmtAppend( ")" );
+                                 p.stmtDone( StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT );
+                               } );
     };
 
     return () ->
@@ -274,46 +274,46 @@ public abstract class DdlBuilder
       p1.failIfAdditionsOnly( !pSequenceDiff.increment_byIsEqual, "cant't change increment by" );
 
       p1.handleAlterBuilder()//
-      .forceDifferent( SEQUENCE__MAX_VALUE_SELECT )//
-      .handle( p ->
-      {
-        p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lMaxValueSelectValue.longValue() - lIstValue.longValue()) );
-        p.addStmt( "declare\n v_dummy number;\n begin\n select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual;\n end;" );
-        p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
-      } );
+        .forceDifferent( SEQUENCE__MAX_VALUE_SELECT )//
+        .handle( p ->
+                 {
+                   p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lMaxValueSelectValue.longValue() - lIstValue.longValue()) );
+                   p.addStmt( "declare\n v_dummy number;\n begin\n select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual;\n end;" );
+                   p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
+                 } );
     }
     else
     {
       p1.handleAlterBuilder()//
-      .ifDifferent( SEQUENCE__INCREMENT_BY )//
-      .failIfAdditionsOnly()//
-      .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) ) );
+        .ifDifferent( SEQUENCE__INCREMENT_BY )//
+        .failIfAdditionsOnly()//
+        .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) ) );
     }
 
     p1.handleAlterBuilder()//
-    .ifDifferent( SEQUENCE__MAXVALUE )//
-    .failIfAdditionsOnly()//
-    .handle(p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + nvl( pSequenceDiff.maxvalueNew, "9999999999999999999999999999" )));
+      .ifDifferent( SEQUENCE__MAXVALUE )//
+      .failIfAdditionsOnly()//
+      .handle(p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + nvl( pSequenceDiff.maxvalueNew, "9999999999999999999999999999" )));
 
     p1.handleAlterBuilder()//
-    .ifDifferent( SEQUENCE__MINVALUE )//
-    .failIfAdditionsOnly()//
-    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " minvalue " + nvl( pSequenceDiff.minvalueNew, 1 ) ) );
+      .ifDifferent( SEQUENCE__MINVALUE )//
+      .failIfAdditionsOnly()//
+      .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " minvalue " + nvl( pSequenceDiff.minvalueNew, 1 ) ) );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( SEQUENCE__CYCLE )//
-    .failIfAdditionsOnly()//
-    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() ) );
-    
-    p1.handleAlterBuilder()//
-    .ifDifferent( SEQUENCE__CACHE )//
-    .ignoreIfAdditionsOnly()//
-    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + (( ((BigInteger) nvl( pSequenceDiff.cacheNew, 20 )).compareTo(BigInteger.ONE) <= 0  ) ? " nocache " : (" cache " + nvl( pSequenceDiff.cacheNew, 20 ))) ) );
+      .ifDifferent( SEQUENCE__CYCLE )//
+      .failIfAdditionsOnly()//
+      .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() ) );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( SEQUENCE__ORDER )//
-    .failIfAdditionsOnly()//
-    .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.orderNew.getLiteral() ) );
+      .ifDifferent( SEQUENCE__CACHE )//
+      .ignoreIfAdditionsOnly()//
+      .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + (( ((BigInteger) nvl( pSequenceDiff.cacheNew, 20 )).compareTo(BigInteger.ONE) <= 0  ) ? " nocache " : (" cache " + nvl( pSequenceDiff.cacheNew, 20 ))) ) );
+
+    p1.handleAlterBuilder()//
+      .ifDifferent( SEQUENCE__ORDER )//
+      .failIfAdditionsOnly()//
+      .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.orderNew.getLiteral() ) );
   }
 
   public void createSequnece( StatementBuilder p, SequenceDiff pSequenceDiff, DataHandler pDataHandler )
@@ -351,17 +351,25 @@ public abstract class DdlBuilder
 
     if( pSequenceDiff.cycleNew != null )
     {
+      if ( ( pSequenceDiff.increment_byNew == null || pSequenceDiff.increment_byNew.compareTo( BigInteger.ZERO ) > 0 ) && pSequenceDiff.maxvalueNew == null )
+      {
+        p.stmtAppend( "maxvalue 9999999999999999999999999999" );
+      }
+      else if ( ( pSequenceDiff.increment_byNew != null && pSequenceDiff.increment_byNew.compareTo( BigInteger.ZERO ) < 0 ) && pSequenceDiff.minvalueNew == null)
+      {
+        p.stmtAppend( "minvalue 9999999999999999999999999999" );
+      }
       p.stmtAppend( pSequenceDiff.cycleNew.getLiteral() );
     }
 
     if( pSequenceDiff.cacheNew != null )
     {
       if ( pSequenceDiff.cacheNew.compareTo(BigInteger.ONE) > 0  ) {
-    	  p.stmtAppend( "cache " + pSequenceDiff.cacheNew );  
+        p.stmtAppend( "cache " + pSequenceDiff.cacheNew );
       } else {
-    	  p.stmtAppend( "nocache ");
+        p.stmtAppend( "nocache ");
       }
-      
+
     }
 
     if( pSequenceDiff.orderNew != null )
@@ -417,81 +425,81 @@ public abstract class DdlBuilder
   public void alterColumnIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, ColumnDiff pColumnDiff )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( COLUMN__BYTEORCHAR )//
-    .ifDifferent( COLUMN__PRECISION )//
-    .ifDifferent( COLUMN__SCALE )//
-    .handle( p ->
-    {
-      p.stmtStartAlterTable( pTableDiff.nameNew );
-      p.stmtAppend( "modify ( " + pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff ) + ")" );
-      p.stmtDone();
-    } );
+      .ifDifferent( COLUMN__BYTEORCHAR )//
+      .ifDifferent( COLUMN__PRECISION )//
+      .ifDifferent( COLUMN__SCALE )//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTable( pTableDiff.nameNew );
+                 p.stmtAppend( "modify ( " + pColumnDiff.nameNew + " " + getColumnDatatype( pColumnDiff ) + ")" );
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( COLUMN__VIRTUAL)
-    .failIfAdditionsOnly("virtual".equals(pColumnDiff.virtualNew), "can't make existing column virtual")
-    .failIfAdditionsOnly(!"virtual".equals(pColumnDiff.virtualNew), "can't materialize virtual column")
-    .handle(p ->
-    {
+      .ifDifferent( COLUMN__VIRTUAL)
+      .failIfAdditionsOnly("virtual".equals(pColumnDiff.virtualNew), "can't make existing column virtual")
+      .failIfAdditionsOnly(!"virtual".equals(pColumnDiff.virtualNew), "can't materialize virtual column")
+      .handle(p ->
+              {
 
-    });
+              });
 
     if (pColumnDiff.virtualIsEqual) {
       p1.handleAlterBuilder()//
-      .ifDifferent(COLUMN__DEFAULT_VALUE)//
-      .ignoreIfAdditionsOnly(pColumnDiff.default_valueNew == null)//
-      .failIfAdditionsOnly(pColumnDiff.default_valueOld != null, "can't change default")//
-      .handle(p ->
-      {
-        p.stmtStartAlterTable(pTableDiff);
-        p.stmtAppend("modify ( " + pColumnDiff.nameNew);
+        .ifDifferent(COLUMN__DEFAULT_VALUE)//
+        .ignoreIfAdditionsOnly(pColumnDiff.default_valueNew == null)//
+        .failIfAdditionsOnly(pColumnDiff.default_valueOld != null, "can't change default")//
+        .handle(p ->
+                {
+                  p.stmtStartAlterTable(pTableDiff);
+                  p.stmtAppend("modify ( " + pColumnDiff.nameNew);
 
-        if ("virtual".equals(pColumnDiff.virtualNew))
-        {
-          p.stmtAppend("as (");
-        }
-        else
-        {
-          p.stmtAppend("default");
-        }
+                  if ("virtual".equals(pColumnDiff.virtualNew))
+                  {
+                    p.stmtAppend("as (");
+                  }
+                  else
+                  {
+                    p.stmtAppend("default");
+                  }
 
-        if (pColumnDiff.default_valueNew == null)
-        {
-          p.stmtAppend("null");
-        }
-        else
-        {
-          p.stmtAppend(pColumnDiff.default_valueNew);
-        }
+                  if (pColumnDiff.default_valueNew == null)
+                  {
+                    p.stmtAppend("null");
+                  }
+                  else
+                  {
+                    p.stmtAppend(pColumnDiff.default_valueNew);
+                  }
 
-        if ("virtual".equals(pColumnDiff.virtualNew))
-        {
-          p.stmtAppend(") virtual");
-        }
+                  if ("virtual".equals(pColumnDiff.virtualNew))
+                  {
+                    p.stmtAppend(") virtual");
+                  }
 
-        p.stmtAppend(")");
-        p.stmtDone();
-      });
+                  p.stmtAppend(")");
+                  p.stmtDone();
+                });
     }
 
     p1.handleAlterBuilder()//
-    .ifDifferent( COLUMN__NOTNULL )//
-    .ignoreIfAdditionsOnly( pColumnDiff.notnullNew )//
-    .handle( p ->
-    {
-      p.stmtStartAlterTable( pTableDiff );
-      p.stmtAppend( "modify ( " + pColumnDiff.nameNew );
-      if( pColumnDiff.notnullNew == false )
-      {
-        p.stmtAppend( "null" );
-      }
-      else
-      {
-        p.stmtAppend( "not null" );
-      }
-      p.stmtAppend( ")" );
-      p.stmtDone();
-    } );
+      .ifDifferent( COLUMN__NOTNULL )//
+      .ignoreIfAdditionsOnly( pColumnDiff.notnullNew )//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTable( pTableDiff );
+                 p.stmtAppend( "modify ( " + pColumnDiff.nameNew );
+                 if( pColumnDiff.notnullNew == false )
+                 {
+                   p.stmtAppend( "null" );
+                 }
+                 else
+                 {
+                   p.stmtAppend( "not null" );
+                 }
+                 p.stmtAppend( ")" );
+                 p.stmtDone();
+               } );
   }
 
   public void createPrimarykey( StatementBuilder p, TableDiff pTableDiff )
@@ -521,10 +529,10 @@ public abstract class DdlBuilder
       {
         p.stmtAppend( pTableDiff.primary_keyDiff.indexnameNew );
       } else {
-          if( pTableDiff.primary_keyDiff.tablespaceNew != null )
-          {
-            p.stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
-          }    	  
+        if( pTableDiff.primary_keyDiff.tablespaceNew != null )
+        {
+          p.stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
+        }
       }
 
       if( pTableDiff.primary_keyDiff.reverseNew != null )
@@ -558,10 +566,10 @@ public abstract class DdlBuilder
     List<String> lRuleParts = splitRuleParts( pRule );
 
     return !pTableDiff.columnsDiff.stream()//
-    .filter( p -> p.isNew )//
-    .filter( p -> lRuleParts.contains( p.nameNew ) )//
-    .findAny()//
-    .isPresent();
+                                  .filter( p -> p.isNew )//
+                                  .filter( p -> lRuleParts.contains( p.nameNew ) )//
+                                  .findAny()//
+                                  .isPresent();
   }
 
   private List<String> splitRuleParts( String pRule )
@@ -584,11 +592,11 @@ public abstract class DdlBuilder
   private boolean constraintContainsOldColumns( List<String> pRuleParts, List<ColumnDiff> pColumnsDiff )
   {
     return pColumnsDiff//
-    .stream()//
-    .filter( p -> p.isOld )//
-    .filter( p -> pRuleParts.contains( p.nameOld ) )//
-    .findAny()//
-    .isPresent();
+                       .stream()//
+                       .filter( p -> p.isOld )//
+                       .filter( p -> pRuleParts.contains( p.nameOld ) )//
+                       .findAny()//
+                       .isPresent();
   }
 
   private boolean containsNotNull( List<String> pRuleParts )
@@ -1089,120 +1097,120 @@ public abstract class DdlBuilder
   public void alterIndexIfNeeded( StatementBuilderAlter p1, IndexDiff pIndexDiff, boolean pIsIndexmovetablespace, String pDefaultTablespace )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( INDEX_OR_UNIQUE_KEY__CONS_NAME )//
-    .handle( p ->
-    {
-      p.stmtStart( "alter index" );
-      p.stmtAppend( pIndexDiff.consNameOld );
-      p.stmtAppend( "rename to" );
-      p.stmtAppend( pIndexDiff.consNameNew );
-      p.stmtDone();
-    } );
+      .ifDifferent( INDEX_OR_UNIQUE_KEY__CONS_NAME )//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter index" );
+                 p.stmtAppend( pIndexDiff.consNameOld );
+                 p.stmtAppend( "rename to" );
+                 p.stmtAppend( pIndexDiff.consNameNew );
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( INDEX__PARALLEL )//
-    .ifDifferent( INDEX__PARALLEL_DEGREE )//
-    .ignoreIfAdditionsOnly()//
-    .handle( p ->
-    {
-      p.stmtStart( "alter index" );
-      p.stmtAppend( pIndexDiff.consNameNew );
-      if( pIndexDiff.parallelNew == ParallelType.PARALLEL )
-      {
-        p.stmtAppend( "parallel" );
-        if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
-        {
-          p.stmtAppend( " " + pIndexDiff.parallel_degreeNew );
-        }
-      }
-      else
-      {
-        p.stmtAppend( "noparallel" );
-      }
+      .ifDifferent( INDEX__PARALLEL )//
+      .ifDifferent( INDEX__PARALLEL_DEGREE )//
+      .ignoreIfAdditionsOnly()//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter index" );
+                 p.stmtAppend( pIndexDiff.consNameNew );
+                 if( pIndexDiff.parallelNew == ParallelType.PARALLEL )
+                 {
+                   p.stmtAppend( "parallel" );
+                   if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
+                   {
+                     p.stmtAppend( " " + pIndexDiff.parallel_degreeNew );
+                   }
+                 }
+                 else
+                 {
+                   p.stmtAppend( "noparallel" );
+                 }
 
-      p.stmtDone();
-    } );
-
-    p1.handleAlterBuilder()//
-    .ifDifferent( INDEX__LOGGING )//
-    .ignoreIfAdditionsOnly()//
-    .handle( p ->
-    {
-      p.stmtStart( "alter index" );
-      p.stmtAppend( pIndexDiff.consNameNew );
-      if( pIndexDiff.loggingNew == LoggingType.NOLOGGING )
-      {
-        p.stmtAppend( "nologging" );
-      }
-      else
-      {
-        p.stmtAppend( "logging" );
-      }
-
-      p.stmtDone();
-    } );
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( INDEX_OR_UNIQUE_KEY__TABLESPACE, pIsIndexmovetablespace )//
-    .ignoreIfAdditionsOnly()//
-    .handle( p ->
-    {
-      p.stmtStart( "alter index" );
-      p.stmtAppend( pIndexDiff.consNameNew );
-      p.stmtAppend( "rebuild tablespace" );
-      p.stmtAppend( nvl( pIndexDiff.tablespaceNew, pDefaultTablespace ) );
-      p.stmtDone();
-    } );
+      .ifDifferent( INDEX__LOGGING )//
+      .ignoreIfAdditionsOnly()//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter index" );
+                 p.stmtAppend( pIndexDiff.consNameNew );
+                 if( pIndexDiff.loggingNew == LoggingType.NOLOGGING )
+                 {
+                   p.stmtAppend( "nologging" );
+                 }
+                 else
+                 {
+                   p.stmtAppend( "logging" );
+                 }
+
+                 p.stmtDone();
+               } );
+
+    p1.handleAlterBuilder()//
+      .ifDifferent( INDEX_OR_UNIQUE_KEY__TABLESPACE, pIsIndexmovetablespace )//
+      .ignoreIfAdditionsOnly()//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter index" );
+                 p.stmtAppend( pIndexDiff.consNameNew );
+                 p.stmtAppend( "rebuild tablespace" );
+                 p.stmtAppend( nvl( pIndexDiff.tablespaceNew, pDefaultTablespace ) );
+                 p.stmtDone();
+               } );
   }
 
   public boolean isColumnNew( TableDiff pTableDiff, String pColumnName )
   {
     return pTableDiff.columnsDiff//
-    .stream()//
-    .filter( p -> p.isNew )//
-    .filter( p -> p.nameNew.equals( pColumnName ) )//
-    .findAny()//
-    .isPresent();
+                                 .stream()//
+                                 .filter( p -> p.isNew )//
+                                 .filter( p -> p.nameNew.equals( pColumnName ) )//
+                                 .findAny()//
+                                 .isPresent();
   }
 
   private boolean isColumnOnlyNew( TableDiff pTableDiff, String pColumnName )
   {
     return pTableDiff.columnsDiff//
-    .stream()//
-    .filter( p -> !p.isOld && p.isNew )//
-    .filter( p -> p.nameNew.equals( pColumnName ) )//
-    .findAny()//
-    .isPresent();
+                                 .stream()//
+                                 .filter( p -> !p.isOld && p.isNew )//
+                                 .filter( p -> p.nameNew.equals( pColumnName ) )//
+                                 .findAny()//
+                                 .isPresent();
   }
 
   protected boolean isAllColumnsOnlyNew( TableDiff pTableDiff, List<ColumnRefDiff> pColumnsDiff )
   {
     return !pColumnsDiff//
-    .stream()//
-    .filter( p -> p.isNew )//
-    .filter( p -> !isColumnOnlyNew( pTableDiff, p.column_nameNew ) )//
-    .findAny()//
-    .isPresent();
+                        .stream()//
+                        .filter( p -> p.isNew )//
+                        .filter( p -> !isColumnOnlyNew( pTableDiff, p.column_nameNew ) )//
+                        .findAny()//
+                        .isPresent();
   }
 
   public boolean isColumnOnlyOld( TableDiff pTableDiff, String pColumnName )
   {
     return pTableDiff.columnsDiff//
-    .stream()//
-    .filter( p -> p.isOld && !p.isNew )//
-    .filter( p -> p.nameOld.equals( pColumnName ) )//
-    .findAny()//
-    .isPresent();
+                                 .stream()//
+                                 .filter( p -> p.isOld && !p.isNew )//
+                                 .filter( p -> p.nameOld.equals( pColumnName ) )//
+                                 .findAny()//
+                                 .isPresent();
   }
 
   public boolean isAllColumnsOnlyOld( TableDiff pTableDiff, List<ColumnRefDiff> pColumnsDiff )
   {
     return !pColumnsDiff//
-    .stream()//
-    .filter( p -> p.isOld )//
-    .filter( p -> !isColumnOnlyOld( pTableDiff, p.column_nameOld ) )//
-    .findAny()//
-    .isPresent();
+                        .stream()//
+                        .filter( p -> p.isOld )//
+                        .filter( p -> !isColumnOnlyOld( pTableDiff, p.column_nameOld ) )//
+                        .findAny()//
+                        .isPresent();
   }
 
   public void createUniqueKey( StatementBuilder p, TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
@@ -1257,148 +1265,148 @@ public abstract class DdlBuilder
   public void alterMviewIfNeeded( StatementBuilderAlter p1, MviewDiff pMviewDiff )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( MVIEW__QUERY_REWRITE )//
-    .handle( p ->
-    {
-      EnableType lQueryRewriteNew = pMviewDiff.queryRewriteNew;
+      .ifDifferent( MVIEW__QUERY_REWRITE )//
+      .handle( p ->
+               {
+                 EnableType lQueryRewriteNew = pMviewDiff.queryRewriteNew;
 
-      if( lQueryRewriteNew == null )
-      {
-        lQueryRewriteNew = EnableType.DISABLE;
-      }
+                 if( lQueryRewriteNew == null )
+                 {
+                   lQueryRewriteNew = EnableType.DISABLE;
+                 }
 
-      p.addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + lQueryRewriteNew.getLiteral() + " query rewrite" );
-    } );
+                 p.addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + lQueryRewriteNew.getLiteral() + " query rewrite" );
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( MVIEW__REFRESH_MODE )//
-    .ifDifferent( MVIEW__REFRESH_METHOD )//
-    .handle( p ->
-    {
-      RefreshModeType lRefreshModeType = pMviewDiff.refreshModeNew;
-      String lRefreshmode;
-      if( lRefreshModeType == null )
-      {
-        lRefreshmode = "";
-      }
-      else
-      {
-        lRefreshmode = " on " + lRefreshModeType.getLiteral();
-      }
-      p.addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) + lRefreshmode );
-    } );
+      .ifDifferent( MVIEW__REFRESH_MODE )//
+      .ifDifferent( MVIEW__REFRESH_METHOD )//
+      .handle( p ->
+               {
+                 RefreshModeType lRefreshModeType = pMviewDiff.refreshModeNew;
+                 String lRefreshmode;
+                 if( lRefreshModeType == null )
+                 {
+                   lRefreshmode = "";
+                 }
+                 else
+                 {
+                   lRefreshmode = " on " + lRefreshModeType.getLiteral();
+                 }
+                 p.addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) + lRefreshmode );
+               } );
 
     // Physical parameters nur, wenn nicht prebuilt
     boolean lNotPrebuild = pMviewDiff.buildModeNew != BuildModeType.PREBUILT;
 
     p1.handleAlterBuilder()//
-    .ifDifferent( MVIEW__PARALLEL, lNotPrebuild )//
-    .ifDifferent( MVIEW__PARALLEL_DEGREE, lNotPrebuild )//
-    .handle( p ->
-    {
-      p.stmtStart( "alter materialized view" );
-      p.stmtAppend( pMviewDiff.mview_nameNew );
+      .ifDifferent( MVIEW__PARALLEL, lNotPrebuild )//
+      .ifDifferent( MVIEW__PARALLEL_DEGREE, lNotPrebuild )//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter materialized view" );
+                 p.stmtAppend( pMviewDiff.mview_nameNew );
 
-      handleParallel( p, pMviewDiff.parallelNew, pMviewDiff.parallel_degreeNew, true );
+                 handleParallel( p, pMviewDiff.parallelNew, pMviewDiff.parallel_degreeNew, true );
 
-      p.stmtDone();
-    } );
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( MVIEW__COMPRESSION, lNotPrebuild )//
-    .handle( p ->
-    {
-      p.stmtStart( "alter materialized view" );
-      p.stmtAppend( pMviewDiff.mview_nameNew );
+      .ifDifferent( MVIEW__COMPRESSION, lNotPrebuild )//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter materialized view" );
+                 p.stmtAppend( pMviewDiff.mview_nameNew );
 
-      handleCompression( p, pMviewDiff.compressionNew, pMviewDiff.compressionForNew, true );
+                 handleCompression( p, pMviewDiff.compressionNew, pMviewDiff.compressionForNew, true );
 
-      p.stmtDone();
-    } );
+                 p.stmtDone();
+               } );
   }
 
   public void alterMviewlogIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, String pDateformat )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( MVIEW_LOG__PARALLEL )//
-    .ifDifferent( MVIEW_LOG__PARALLEL_DEGREE )//
-    .handle( p ->
-    {
-      p.stmtStart( "alter materialized view log on" );
-      p.stmtAppend( pTableDiff.nameNew );
-      handleParallel( p, pTableDiff.mviewLogDiff.parallelNew, pTableDiff.mviewLogDiff.parallel_degreeNew, true );
+      .ifDifferent( MVIEW_LOG__PARALLEL )//
+      .ifDifferent( MVIEW_LOG__PARALLEL_DEGREE )//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter materialized view log on" );
+                 p.stmtAppend( pTableDiff.nameNew );
+                 handleParallel( p, pTableDiff.mviewLogDiff.parallelNew, pTableDiff.mviewLogDiff.parallel_degreeNew, true );
 
-      p.stmtDone();
-    } );
-
-    p1.handleAlterBuilder()//
-    .ifDifferent( MVIEW_LOG__NEW_VALUES )//
-    .handle( p ->
-    {
-      p.stmtStart( "alter materialized view log on" );
-      p.stmtAppend( pTableDiff.nameNew );
-
-      if( pTableDiff.mviewLogDiff.newValuesNew == NewValuesType.INCLUDING )
-      {
-        p.stmtAppend( "including" );
-      }
-      else
-      {
-        p.stmtAppend( "excluding" );
-      }
-      p.stmtAppend( "new values" );
-
-      p.stmtDone();
-    } );
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( MVIEW_LOG__START_WITH )//
-    .ifDifferent( MVIEW_LOG__NEXT )//
-    .ifDifferent( MVIEW_LOG__REPEAT_INTERVAL )//
-    .handle( p ->
-    {
-      p.stmtStart( "alter materialized view log on" );
-      p.stmtAppend( pTableDiff.nameNew );
-      p.stmtAppend( "purge" );
-      if( pTableDiff.mviewLogDiff.startWithIsEqual == false )
-      {
-        p.stmtAppend( "start with" );
-        p.stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.startWithNew + "','" + pDateformat + "')" );
-      }
-      if( pTableDiff.mviewLogDiff.nextIsEqual == false )
-      {
-        p.stmtAppend( "next" );
-        p.stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.nextNew + "','" + pDateformat + "')" );
-      }
-      else
-      {
-        if( pTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
-        {
-          p.stmtAppend( "repeat interval" );
-          p.stmtAppend( pTableDiff.mviewLogDiff.repeatIntervalNew + "" );
-        }
-      }
+      .ifDifferent( MVIEW_LOG__NEW_VALUES )//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter materialized view log on" );
+                 p.stmtAppend( pTableDiff.nameNew );
 
-      p.stmtDone();
-    } );
+                 if( pTableDiff.mviewLogDiff.newValuesNew == NewValuesType.INCLUDING )
+                 {
+                   p.stmtAppend( "including" );
+                 }
+                 else
+                 {
+                   p.stmtAppend( "excluding" );
+                 }
+                 p.stmtAppend( "new values" );
+
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( MVIEW_LOG__SYNCHRONOUS )//
-    .handle( p ->
-    {
-      p.stmtAppend( "alter materialized view log on" );
-      p.stmtAppend( pTableDiff.nameNew );
-      if( pTableDiff.mviewLogDiff.synchronousNew == SynchronousType.ASYNCHRONOUS )
-      {
-        p.stmtAppend( "purge immediate asynchronous" );
-      }
-      else
-      {
-        p.stmtAppend( "purge immediate synchronous" );
-      }
+      .ifDifferent( MVIEW_LOG__START_WITH )//
+      .ifDifferent( MVIEW_LOG__NEXT )//
+      .ifDifferent( MVIEW_LOG__REPEAT_INTERVAL )//
+      .handle( p ->
+               {
+                 p.stmtStart( "alter materialized view log on" );
+                 p.stmtAppend( pTableDiff.nameNew );
+                 p.stmtAppend( "purge" );
+                 if( pTableDiff.mviewLogDiff.startWithIsEqual == false )
+                 {
+                   p.stmtAppend( "start with" );
+                   p.stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.startWithNew + "','" + pDateformat + "')" );
+                 }
+                 if( pTableDiff.mviewLogDiff.nextIsEqual == false )
+                 {
+                   p.stmtAppend( "next" );
+                   p.stmtAppend( "to_date('" + pTableDiff.mviewLogDiff.nextNew + "','" + pDateformat + "')" );
+                 }
+                 else
+                 {
+                   if( pTableDiff.mviewLogDiff.repeatIntervalIsEqual == false )
+                   {
+                     p.stmtAppend( "repeat interval" );
+                     p.stmtAppend( pTableDiff.mviewLogDiff.repeatIntervalNew + "" );
+                   }
+                 }
 
-      p.stmtDone();
-    } );
+                 p.stmtDone();
+               } );
+
+    p1.handleAlterBuilder()//
+      .ifDifferent( MVIEW_LOG__SYNCHRONOUS )//
+      .handle( p ->
+               {
+                 p.stmtAppend( "alter materialized view log on" );
+                 p.stmtAppend( pTableDiff.nameNew );
+                 if( pTableDiff.mviewLogDiff.synchronousNew == SynchronousType.ASYNCHRONOUS )
+                 {
+                   p.stmtAppend( "purge immediate asynchronous" );
+                 }
+                 else
+                 {
+                   p.stmtAppend( "purge immediate synchronous" );
+                 }
+
+                 p.stmtDone();
+               } );
   }
 
   public void createMviewlog( StatementBuilder p, TableDiff pTableDiff, String pDateformat )
@@ -1610,58 +1618,58 @@ public abstract class DdlBuilder
   public void alterTableIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, boolean pTablemovetablespace, String pDefaultTablespace )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( TABLE__TABLESPACE, pTablemovetablespace )//
-    .ignoreIfAdditionsOnly()//
-    .handle( p ->
-    {
-      p.stmtStartAlterTable( pTableDiff );
-      p.stmtAppend( "move tablespace" );
-      p.stmtAppend( nvl( pTableDiff.tablespaceNew, pDefaultTablespace ) );
-      p.stmtDone();
-    } );
+      .ifDifferent( TABLE__TABLESPACE, pTablemovetablespace )//
+      .ignoreIfAdditionsOnly()//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTable( pTableDiff );
+                 p.stmtAppend( "move tablespace" );
+                 p.stmtAppend( nvl( pTableDiff.tablespaceNew, pDefaultTablespace ) );
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( TABLE__LOGGING, pTableDiff.transactionControlNew == null )//
-    .ignoreIfAdditionsOnly()//
-    .handle( p ->
-    {
-      p.stmtStartAlterTable( pTableDiff );
-      if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
-      {
-        p.stmtAppend( "nologging" );
-      }
-      else
-      {
-        p.stmtAppend( "logging" );
-      }
-      p.stmtDone();
-    } );
+      .ifDifferent( TABLE__LOGGING, pTableDiff.transactionControlNew == null )//
+      .ignoreIfAdditionsOnly()//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTable( pTableDiff );
+                 if( pTableDiff.loggingNew == LoggingType.NOLOGGING )
+                 {
+                   p.stmtAppend( "nologging" );
+                 }
+                 else
+                 {
+                   p.stmtAppend( "logging" );
+                 }
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( TABLE__PARALLEL )//
-    .ifDifferent( TABLE__PARALLEL_DEGREE )//
-    .ignoreIfAdditionsOnly()//
-    .handle( p ->
-    {
-      p.stmtStartAlterTable( pTableDiff );
+      .ifDifferent( TABLE__PARALLEL )//
+      .ifDifferent( TABLE__PARALLEL_DEGREE )//
+      .ignoreIfAdditionsOnly()//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTable( pTableDiff );
 
-      handleParallel( p, pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, true );
+                 handleParallel( p, pTableDiff.parallelNew, pTableDiff.parallel_degreeNew, true );
 
-      p.stmtDone();
-    } );
+                 p.stmtDone();
+               } );
 
     p1.handleAlterBuilder()//
-    .ifDifferent( TABLE__COMPRESSION, pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )//
-    .ifDifferent( TABLE__COMPRESSION_FOR, pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )//
-    .ignoreIfAdditionsOnly()//
-    .handle( p ->
-    {
-      p.stmtStartAlterTable( pTableDiff );
+      .ifDifferent( TABLE__COMPRESSION, pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )//
+      .ifDifferent( TABLE__COMPRESSION_FOR, pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )//
+      .ignoreIfAdditionsOnly()//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTable( pTableDiff );
 
-      handleCompression( p, pTableDiff.compressionNew, pTableDiff.compressionForNew, true );
+                 handleCompression( p, pTableDiff.compressionNew, pTableDiff.compressionForNew, true );
 
-      p.stmtDone();
-    } );
+                 p.stmtDone();
+               } );
   }
 
   private void handleParallel( AbstractStatementBuilder p, ParallelType pParallelType, Integer pParallelDegree, boolean pWithDefault )
@@ -1922,17 +1930,17 @@ public abstract class DdlBuilder
     prepareCreateColumn( p, pTableDiff, pColumnDiffList, false );
 
     boolean lIsAnyOnOldTableWothNotNullAndNoDefault = pColumnDiffList.stream()//
-    .filter( pColumnDiff -> isOnOldTableWothNotNullAndNoDefault( pTableDiff, pColumnDiff ) )//
-    .findAny()//
-    .isPresent();
+                                                                     .filter( pColumnDiff -> isOnOldTableWothNotNullAndNoDefault( pTableDiff, pColumnDiff ) )//
+                                                                     .findAny()//
+                                                                     .isPresent();
 
     if( lIsAnyOnOldTableWothNotNullAndNoDefault )
     {
       p.stmtDone( () ->
-      {
-        prepareCreateColumn( p, pTableDiff, pColumnDiffList, true );
-        p.stmtDone( StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT );
-      } );
+                  {
+                    prepareCreateColumn( p, pTableDiff, pColumnDiffList, true );
+                    p.stmtDone( StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT );
+                  } );
     }
     else
     {
@@ -1952,30 +1960,30 @@ public abstract class DdlBuilder
     boolean[] lIsFirst = new boolean[] { true };
 
     pColumnDiffList.forEach( pColumnDiff ->
-    {
-      if( lIsFirst[0] )
-      {
-        lIsFirst[0] = false;
-      }
-      else
-      {
-        p.stmtAppend( "," );
-      }
+                             {
+                               if( lIsFirst[0] )
+                               {
+                                 lIsFirst[0] = false;
+                               }
+                               else
+                               {
+                                 p.stmtAppend( "," );
+                               }
 
-      p.stmtAppend( createColumnCreatePart( pColumnDiff, pForAdditionsOnlyMode ? isOnOldTableWothNotNullAndNoDefault( pTableDiff, pColumnDiff ) : false ) );
+                               p.stmtAppend( createColumnCreatePart( pColumnDiff, pForAdditionsOnlyMode ? isOnOldTableWothNotNullAndNoDefault( pTableDiff, pColumnDiff ) : false ) );
 
-      LobStorageDiff lLobstorage = findLobstorage( pTableDiff, pColumnDiff.nameNew );
-      if( lLobstorage != null )
-      {
-        addLobStorage( p, lLobstorage );
-      }
+                               LobStorageDiff lLobstorage = findLobstorage( pTableDiff, pColumnDiff.nameNew );
+                               if( lLobstorage != null )
+                               {
+                                 addLobStorage( p, lLobstorage );
+                               }
 
-      VarrayStorageDiff lVarraystorage = findVarraystorage( pTableDiff, pColumnDiff.nameNew );
-      if( lVarraystorage != null )
-      {
-        addVarrayStorage( p, lVarraystorage );
-      }
-    } );
+                               VarrayStorageDiff lVarraystorage = findVarraystorage( pTableDiff, pColumnDiff.nameNew );
+                               if( lVarraystorage != null )
+                               {
+                                 addVarrayStorage( p, lVarraystorage );
+                               }
+                             } );
 
     if( pColumnDiffList.size() > 1 )
     {
@@ -2139,64 +2147,64 @@ public abstract class DdlBuilder
     List<String> lRuleParts = splitRuleParts( pRuleOld );
 
     return !pTableDiff.columnsDiff.stream()//
-    .filter( p -> !p.isNew )//
-    .filter( p -> lRuleParts.contains( p.nameOld ) )//
-    .findAny()//
-    .isPresent();
+                                  .filter( p -> !p.isNew )//
+                                  .filter( p -> lRuleParts.contains( p.nameOld ) )//
+                                  .findAny()//
+                                  .isPresent();
   }
 
   public void alterUniqueKeyIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( INDEX_OR_UNIQUE_KEY__CONS_NAME )//
-    .handle( p ->
-    {
-      p.stmtStartAlterTableNoCombine( pTableDiff );
-      p.stmtAppend( "rename constraint" );
-      p.stmtAppend( pUniqueKeyDiff.consNameOld );
-      p.stmtAppend( "to" );
-      p.stmtAppend( pUniqueKeyDiff.consNameNew );
-      p.stmtDone();
+      .ifDifferent( INDEX_OR_UNIQUE_KEY__CONS_NAME )//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTableNoCombine( pTableDiff );
+                 p.stmtAppend( "rename constraint" );
+                 p.stmtAppend( pUniqueKeyDiff.consNameOld );
+                 p.stmtAppend( "to" );
+                 p.stmtAppend( pUniqueKeyDiff.consNameNew );
+                 p.stmtDone();
 
-      // different name matching only allowed with implicit index names, the
-      // index needs to be renamed as well
-      renameUnderlyingIndex( p, pTableDiff, pUniqueKeyDiff.consNameOld, pUniqueKeyDiff.consNameNew );
-    } );
+                 // different name matching only allowed with implicit index names, the
+                 // index needs to be renamed as well
+                 renameUnderlyingIndex( p, pTableDiff, pUniqueKeyDiff.consNameOld, pUniqueKeyDiff.consNameNew );
+               } );
   }
 
   public void alterForeignKeyIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff, DataHandler pDataHandler )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( FOREIGN_KEY__CONS_NAME )//
-    .handle( p ->
-    {
-      p.stmtStartAlterTableNoCombine( pTableDiff );
-      p.stmtAppend( "rename constraint" );
-      p.stmtAppend( pForeignKeyDiff.consNameOld );
-      p.stmtAppend( "to" );
-      p.stmtAppend( pForeignKeyDiff.consNameNew );
-      p.stmtDone();
-    } );
+      .ifDifferent( FOREIGN_KEY__CONS_NAME )//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTableNoCombine( pTableDiff );
+                 p.stmtAppend( "rename constraint" );
+                 p.stmtAppend( pForeignKeyDiff.consNameOld );
+                 p.stmtAppend( "to" );
+                 p.stmtAppend( pForeignKeyDiff.consNameNew );
+                 p.stmtDone();
+               } );
   }
 
   public void alterPrimarykeyIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( PRIMARY_KEY__CONS_NAME )//
-    .handle( p ->
-    {
-      p.stmtStartAlterTableNoCombine( pTableDiff );
-      p.stmtAppend( "rename constraint" );
-      p.stmtAppend( pTableDiff.primary_keyDiff.consNameOld );
-      p.stmtAppend( "to" );
-      p.stmtAppend( pTableDiff.primary_keyDiff.consNameNew );
-      p.stmtDone();
+      .ifDifferent( PRIMARY_KEY__CONS_NAME )//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTableNoCombine( pTableDiff );
+                 p.stmtAppend( "rename constraint" );
+                 p.stmtAppend( pTableDiff.primary_keyDiff.consNameOld );
+                 p.stmtAppend( "to" );
+                 p.stmtAppend( pTableDiff.primary_keyDiff.consNameNew );
+                 p.stmtDone();
 
-      if ( pTableDiff.primary_keyDiff.indexnameOld == null && pTableDiff.primary_keyDiff.indexnameNew == null )
-      {
-        renameUnderlyingIndex(p, pTableDiff, pTableDiff.primary_keyDiff.consNameOld, pTableDiff.primary_keyDiff.consNameNew);
-      }
-    } );
+                 if ( pTableDiff.primary_keyDiff.indexnameOld == null && pTableDiff.primary_keyDiff.indexnameNew == null )
+                 {
+                   renameUnderlyingIndex(p, pTableDiff, pTableDiff.primary_keyDiff.consNameOld, pTableDiff.primary_keyDiff.consNameNew);
+                 }
+               } );
   }
 
   private void renameUnderlyingIndex( StatementBuilder p, TableDiff pTableDiff, String pIndexNameOld, String pIndexNameNew )
@@ -2219,16 +2227,16 @@ public abstract class DdlBuilder
   public void updateConstraintIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, ConstraintDiff pConstraintDiff )
   {
     p1.handleAlterBuilder()//
-    .ifDifferent( CONSTRAINT__CONS_NAME )//
-    .handle( p ->
-    {
-      p.stmtStartAlterTableNoCombine( pTableDiff );
-      p.stmtAppend( "rename constraint" );
-      p.stmtAppend( pConstraintDiff.consNameOld );
-      p.stmtAppend( "to" );
-      p.stmtAppend( pConstraintDiff.consNameNew );
-      p.stmtDone();
-    } );
+      .ifDifferent( CONSTRAINT__CONS_NAME )//
+      .handle( p ->
+               {
+                 p.stmtStartAlterTableNoCombine( pTableDiff );
+                 p.stmtAppend( "rename constraint" );
+                 p.stmtAppend( pConstraintDiff.consNameOld );
+                 p.stmtAppend( "to" );
+                 p.stmtAppend( pConstraintDiff.consNameNew );
+                 p.stmtDone();
+               } );
   }
 
   public void dropColumnIdentity( StatementBuilder pP, TableDiff pTableDiff, ColumnDiff pColumnDiff, ColumnIdentityDiff pIdentityDiff )
