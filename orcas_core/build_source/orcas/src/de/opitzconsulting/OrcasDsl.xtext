@@ -93,89 +93,89 @@ enum LobDeduplicateType :
   deduplicate="deduplicate"|keep_duplicates="keep_duplicates";  
   
 Column :
-  name=DBNAME data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (unsigned?="unsigned")? (with_time_zone="with_time_zone")? ("type" object_type=STRING)? ("default" default_value=STRING | "as" "(" default_value=STRING ")" virtual="virtual")? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
-  
+  (name=DBNAME | name=STRING) data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (unsigned?="unsigned")? (with_time_zone="with_time_zone")? ("type" object_type=STRING)? ("default" default_value=STRING | "as" "(" default_value=STRING ")" virtual="virtual")? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
+
 enum DataType :
-  number="number"|blob="blob"|clob="clob"|nclob="nclob"|varchar2="varchar2"|nvarchar2="nvarchar2"|char="char"|date="date"|xmltype="xmltype"|timestamp="timestamp"|rowid="rowid"|raw="raw"|long_raw="long_raw"|float="float"|long="long"|object="object"|tinyint="tinyint"|smallint="smallint"|mediumint="mediumint"|int="int"|bigint="bigint"|bit="bit"|urowid="urowid";  
-  
-Constraint :  
+  number="number"|blob="blob"|clob="clob"|nclob="nclob"|varchar2="varchar2"|nvarchar2="nvarchar2"|char="char"|date="date"|xmltype="xmltype"|timestamp="timestamp"|rowid="rowid"|raw="raw"|long_raw="long_raw"|float="float"|long="long"|object="object"|tinyint="tinyint"|smallint="smallint"|mediumint="mediumint"|int="int"|bigint="bigint"|bit="bit"|urowid="urowid";
+
+Constraint :
   "constraint" consName=DBNAME "check" "(" rule=STRING ")" ("deferrable" "initially" deferrtype=DeferrType)? (status=EnableType)? (",")?;
-  
+
 IndexOrUniqueKey :
-  Index | UniqueKey;  
+  Index | UniqueKey;
 
 ForeignKey :
   "constraint" consName=DBNAME "foreign" "key" ("("(srcColumns+=ColumnRef)*")")? "references" destTable=DBNAME_WITH_SCHEMA ("("(destColumns+=ColumnRef)+")")? ("on" "delete" (delete_rule=FkDeleteRuleType))? ("deferrable" "initially" deferrtype=DeferrType)? (status=EnableType)? (",")?;
-   
+
 PrimaryKey :
   ("constraint" consName=DBNAME)? "primary" "key" "(" (pk_columns+=ColumnRef)+ ")" (status=EnableType)? ("using" "index" (reverse="reverse")? ("tablespace" tablespace=DBNAME)? (indexname=DBNAME_WITH_SCHEMA)?)? (",")?;
 
 UniqueKey :
   "constraint" consName=DBNAME "unique" "(" (uk_columns+=ColumnRef)+ ")" ("using" "index" ("tablespace" tablespace=DBNAME)? (indexname=DBNAME_WITH_SCHEMA)?)? (status=EnableType)? (",")?;
-  
+
 Index :
-  "index" consName=DBNAME_WITH_SCHEMA ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? (",")?;  
-  
+  "index" consName=DBNAME_WITH_SCHEMA ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? (",")?;
+
 IndexExTable:
  "create" (uniqueness="unique"|uniqueness="nonunique")? (bitmap="bitmap")? "index" index_name=DBNAME_WITH_SCHEMA ("on")? table_name=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? ";";
 
 enum FkDeleteRuleType :
-  cascade="cascade"|no_action="no_action"|set_null="set_null";  
+  cascade="cascade"|no_action="no_action"|set_null="set_null";
 
 enum DeferrType :
-  immediate="immediate"|deferred="deferred"; 
+  immediate="immediate"|deferred="deferred";
 
 enum CharType :
-  byte="BYTE"|char="CHAR";  
+  byte="BYTE"|char="CHAR";
 
 enum LoggingType :
-  logging="logging"|nologging="nologging";  
+  logging="logging"|nologging="nologging";
 
 enum EnableType :
-  enable="enable"|disable="disable";    
-  
+  enable="enable"|disable="disable";
+
 enum ParallelType :
-  parallel="parallel"|noparallel="noparallel";  
-  
+  parallel="parallel"|noparallel="noparallel";
+
 enum IndexGlobalType :
-  local="local"|global="global";  
+  local="local"|global="global";
 
 enum CommentObjectType :
-  table="table"|column="column"; 
-  
+  table="table"|column="column";
+
 enum PermanentnessType :
-  global_temporary="temporary"|permanent="permanent"; 
-  
+  global_temporary="temporary"|permanent="permanent";
+
 enum PermanentnessTransactionType :
-  on_commit_delete="delete"|on_commit_preserve="preserve"; 
+  on_commit_delete="delete"|on_commit_preserve="preserve";
 
 enum CycleType :
-  cycle="cycle"|nocycle="nocycle";  
+  cycle="cycle"|nocycle="nocycle";
 
 enum OrderType :
-  order="order"|noorder="noorder";   
-  
+  order="order"|noorder="noorder";
+
 enum CompressForType :
-  all="all_operations"|direct_load="direct_load_operations"|query_low="query_low"|query_high="query_high" | archive_low = "archive_low" | archive_high = "archive_high";    
-  
+  all="all_operations"|direct_load="direct_load_operations"|query_low="query_low"|query_high="query_high" | archive_low = "archive_low" | archive_high = "archive_high";
+
 enum LobCompressForType :
   high="high"|medium="medium"|low="low";
-  
+
 enum CompressType :
-  nocompress="nocompress"|compress="compress";     
-  
+  nocompress="nocompress"|compress="compress";
+
 enum BuildModeType :
-  immediate="immediate"|deferred="deferred"|prebuilt="prebuilt";  
-  
+  immediate="immediate"|deferred="deferred"|prebuilt="prebuilt";
+
 enum RefreshModeType :
-  demand="demand"|commit="commit";  
-  
+  demand="demand"|commit="commit";
+
 enum RefreshMethodType :
-  complete="refresh_complete"|force="refresh_force"|fast="refresh_fast"|never="never_refresh";      
+  complete="refresh_complete"|force="refresh_force"|fast="refresh_fast"|never="never_refresh";
 
 ColumnRef :
-  column_name=DBNAME (",")?;  
-  
+  (column_name=DBNAME | column_name=STRING) (",")?;
+
 Sequence:
  "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("start" "with" startwith=BIGINT)? ("increment" "by" increment_by=BIGINT)? ("maxvalue" maxvalue=BIGINT)? ("minvalue" minvalue=BIGINT)? (cycle=CycleType)? ("cache" cache=BIGINT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
 
@@ -187,7 +187,7 @@ Mview:
 
 enum NewValuesType :
   including="including"|excluding="excluding";
-  
+
 enum SynchronousType :
   asynchronous="asynchronous"|synchronous="synchronous";
 

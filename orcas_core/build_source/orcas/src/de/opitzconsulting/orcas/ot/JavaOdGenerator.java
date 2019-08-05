@@ -353,7 +353,7 @@ public class JavaOdGenerator extends JavaGenerator
         }
         if( lFieldData.getJavaType() == String.class )
         {
-          pOut.println( " if( pValue != null && " + lFieldData.getUpperCaseJavaFieldFlagName() + " )" );
+          pOut.println( " if( pValue != null && " + lFieldData.getUpperCaseJavaFieldFlagName() + " && !( pValue.startsWith( \"'\" ) || pValue.startsWith( \"\\\"\" ) ) )" );
           pOut.println( " {" );
           pOut.println( " return pValue.toUpperCase();" );
           pOut.println( " }" );
