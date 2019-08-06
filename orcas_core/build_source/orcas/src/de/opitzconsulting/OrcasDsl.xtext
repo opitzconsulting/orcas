@@ -177,7 +177,7 @@ ColumnRef :
   column_name=DBNAME (",")?;  
   
 Sequence:
- "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("start" "with" startwith=BIGINT)? ("increment" "by" increment_by=BIGINT)? ("maxvalue" maxvalue=BIGINT)? ("minvalue" minvalue=BIGINT)? (cycle=CycleType)? ("cache" cache=BIGINT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
+ "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("start" "with" startwith=SIGNED_BIGINT)? ("increment" "by" increment_by=SIGNED_BIGINT)? ("maxvalue" maxvalue=SIGNED_BIGINT)? ("minvalue" minvalue=SIGNED_BIGINT)? (cycle=CycleType)? ("cache" cache=BIGINT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
 
 ColumnIdentity:
  "generated" ( always="always"|"by" by_default="default" ("on" on_null="null")? ) "as" "identity" ( "(" ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ")" )?;
@@ -205,6 +205,9 @@ DBNAME_WITH_SCHEMA:
 
 NULLABLE_INT returns ecore::EIntegerObject:
   INT;
+
+SIGNED_BIGINT returns ecore::EBigInteger:
+  '-'? INT;
 
 BIGINT returns ecore::EBigInteger:
   INT;
