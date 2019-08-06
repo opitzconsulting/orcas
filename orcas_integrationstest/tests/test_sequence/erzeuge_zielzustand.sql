@@ -38,3 +38,5 @@ create sequence seq_test_cache cache 100;
 create sequence seq_test_update_cache cache 50;
 
 create sequence seq_test_cache_nocache nocache;
+
+create sequence seq_test_negative start with -1 increment by -1 maxvalue -1 minvalue -999;
