@@ -31,7 +31,7 @@ Angaben in den eckigen Klammern sind optional. Bei Werten innerhalb von Anführu
 
 {% highlight sql %}
 create {permanent|global temporary} table table_name [alias table_alias](
-  column_name { [n]varchar2(char_length {BYTE|CHAR} ) | number[(precision[,scale])] | [n]clob | blob | xmltype | date | timestamp[(scale)][ with_time_zone] | rowid | raw(data_length) | long_raw | float[(scale)] | long | object } [default "default_value"] [not null]
+  column_name | "column_names" { [n]varchar2(char_length {BYTE|CHAR} ) | number[(precision[,scale])] | [n]clob | blob | xmltype | date | timestamp[(scale)][ with_time_zone] | rowid | raw(data_length) | long_raw | float[(scale)] | long | object } [default "default_value"] [not null]
   constraint constraint_name primary key ( primary_key_columns ) { enable | disable }
   constraint constraint_name check ( "check_statement" ) { enable | disable }
   constraint constraint_name { index | unique key } ( colums ) { enable | disable }
@@ -91,6 +91,8 @@ Bei Spalten werden folgende Datentypen unterstützt:
 - float
 
 Bei Defaultwerten müssen doppelte Anführungszeichen um den Ausdruck gesetzt werden.
+
+Der Spaltenname kann als Freitext angegeben werden, wenn um ihn doppelte Anführungszeichen gesetzt werden.
 
 ## Primary Key
 

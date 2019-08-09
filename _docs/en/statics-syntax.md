@@ -32,7 +32,7 @@ Declarations in square brackets are optional details. Values enclosed in quotati
 
 {% highlight sql %}
 create {permanent|global temporary} table table_name [alias table_alias](
-  column_name { [n]varchar2(char_length {BYTE|CHAR} ) | number[(precision[,scale])] | [n]clob | blob | xmltype | date | timestamp[(scale)][ with_time_zone] | rowid | raw(data_length) | long_raw | float[(scale)] | long | object } [default "default_value"] [not null]
+  column_name | "column_name" { [n]varchar2(char_length {BYTE|CHAR} ) | number[(precision[,scale])] | [n]clob | blob | xmltype | date | timestamp[(scale)][ with_time_zone] | rowid | raw(data_length) | long_raw | float[(scale)] | long | object } [default "default_value"] [not null]
   constraint constraint_name primary key ( primary_key_columns ) { enable | disable }
   constraint constraint_name check ( "check_statement" ) { enable | disable }
   constraint constraint_name { index | unique key } ( colums ) { enable | disable }
@@ -92,6 +92,8 @@ The following data types are supported in columns:
 - float
 
 You have to enclose default values in double quotation marks.
+
+You can put free text as column names by enclosing it in double quotation marks.
 
 ## Primary Key
 
