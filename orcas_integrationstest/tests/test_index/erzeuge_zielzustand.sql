@@ -2,6 +2,7 @@ create table tab_index
 (
   col_add_ix_1 number(15) not null,
   col_add_ix_2 number(15) not null,
+  "col add ix 3" number(15) not null,
   col_mod_ix_1 number(15) not null,
   col_mod_ix_2 number(15) not null,
   col_mod_ix_3 number(15) not null,
@@ -20,6 +21,7 @@ create table tab_index
 
 create index add_2col_ix on tab_index (col_add_ix_1,col_add_ix_2);
 create index add_1col_ix on tab_index (col_add_ix_2);
+create index add_1col_ix_string on tab_index ("col add ix 3");
 create index mod_order_ix on tab_index (col_mod_ix_2,col_mod_ix_1);
 create index mod_parallel_ix on tab_index (col_mod_ix_3) parallel;
 create index mod_parallel_4_ix on tab_index (col_mod_ix_4) parallel 4;

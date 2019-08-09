@@ -11,16 +11,23 @@ create table tab_b
 create table tab_c 
 (
  	tab_c_id					number(9) constraint pk_tab_c primary key not null
-);	
-	
+);
+
+create table tab_d
+(
+    "tab d id"	                number(9) constraint pk_tab_d primary key not null
+);
+
 create table tab_del_cas
 (
 	tab_a_id					number(8),
 	tab_b_id					number(8),
 	tab_c_id					number(8),
+	tab_d_id					number(8),
 	constraint fk_tab_del_cas_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id) on delete cascade,
 	constraint fk_tab_del_cas_tab_b_id foreign key (tab_b_id) references tab_b (tab_b_id) on delete cascade,
-	constraint fk_tab_del_cas_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete cascade
+	constraint fk_tab_del_cas_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete cascade,
+	constraint fk_tab_del_cas_tab_d_id foreign key (tab_d_id) references tab_d ("tab d id") on delete cascade
 );
 	
 create table tab_no_action
@@ -28,9 +35,11 @@ create table tab_no_action
 	tab_a_id					number(8),
 	tab_b_id					number(8),
 	tab_c_id					number(8),
+    tab_d_id					number(8),
 	constraint fk_tab_no_action_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id),
 	constraint fk_tab_no_action_tab_b_id foreign key (tab_b_id) references tab_b (tab_b_id),
-	constraint fk_tab_no_action_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id)
+	constraint fk_tab_no_action_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id),
+	constraint fk_tab_no_action_tab_d_id foreign key (tab_d_id) references tab_d ("tab d id")
 );
 	
 create table tab_set_null
@@ -38,9 +47,11 @@ create table tab_set_null
 	tab_a_id					number(8),
 	tab_b_id					number(8),
 	tab_c_id					number(8),
+	tab_d_id					number(8),
 	constraint fk_tab_set_null_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id) on delete set null,
 	constraint fk_tab_set_null_tab_b_id foreign key (tab_b_id) references tab_b (tab_b_id) on delete set null,
-	constraint fk_tab_set_null_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete set null
+	constraint fk_tab_set_null_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete set null,
+	constraint fk_tab_set_null_tab_d_id foreign key (tab_d_id) references tab_d ("tab d id") on delete set null
 );
 
 create table tab_2_column_pk
@@ -107,12 +118,15 @@ create table tab_index_test_ref
 create index FK_TAB_DEL_CAS_TAB_A_ID_GEN_IX on tab_del_cas(tab_a_id);
 create index FK_TAB_DEL_CAS_TAB_B_ID_GEN_IX on tab_del_cas(tab_b_id);
 create index FK_TAB_DEL_CAS_TAB_C_ID_GEN_IX on tab_del_cas(tab_c_id);
+create index FK_TAB_DEL_CAS_TAB_D_ID_GEN_IX on tab_del_cas(tab_d_id);
 create index FK_TAB_NO_ACTION_TAB_A__GEN_IX on tab_no_action(tab_a_id);
 create index FK_TAB_NO_ACTION_TAB_B__GEN_IX on tab_no_action(tab_b_id);
 create index FK_TAB_NO_ACTION_TAB_C__GEN_IX on tab_no_action(tab_c_id);
+create index FK_TAB_NO_ACTION_TAB_D__GEN_IX on tab_no_action(tab_d_id);
 create index FK_TAB_SET_NULL_TAB_A_I_GEN_IX on tab_set_null(tab_a_id);
 create index FK_TAB_SET_NULL_TAB_B_I_GEN_IX on tab_set_null(tab_b_id);
 create index FK_TAB_SET_NULL_TAB_C_I_GEN_IX on tab_set_null(tab_c_id);
+create index FK_TAB_SET_NULL_TAB_D_I_GEN_IX on tab_set_null(tab_d_id);
 
 create index FK_TAB_WRONG_FK_COLUMN_GEN_IX  on TAB_WRONG_FK_COLUMN(id);
 create index FK_TAB_WRONG_FK_COLUMN__GEN_IX on TAB_WRONG_FK_COLUMN_ORDER(id1,id2);

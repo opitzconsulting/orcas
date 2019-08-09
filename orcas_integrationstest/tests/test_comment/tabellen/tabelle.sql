@@ -31,3 +31,8 @@ create table tab_drop_col_and_comment
     col1		number(5)
 );
 
+create table tab_col_string_comment
+(
+    "col1 string"	number(5),
+    comment on column "col1 string" is 'columncomment \'';
+);
