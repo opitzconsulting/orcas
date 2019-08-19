@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.common.util.EList;
@@ -1383,7 +1384,7 @@ public class LoadIstOracle extends LoadIst
             if( !lUniqueKey.getConsName().equals( pResultSet.getString( "index_name" ) ) )
             {
             	if (pResultSet.getString( "index_name" ) != null) {
-            		lUniqueKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );	
+            		lUniqueKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );
             	}
             }
 
@@ -2236,17 +2237,18 @@ public class LoadIstOracle extends LoadIst
 
             setPartitioningForTable( pModel, lTablename, lOwner, lHashPartitions );
 
-            lHashPartitions.setColumn( loadPartitionColumns( lTablename ).get( 0 ) );
+            lHashPartitions.setColumn( loadPartitionColumns( lTablename, lOwner ).get( 0 ) );
 
             String lSql = "" + //
             " select partition_name," + //
             "        tablespace_name" + //
             "   from " + getDataDictionaryView( "tab_partitions" ) + //
             "  where table_name = ?" + //
+            "    and owner = ?" + //
             "  order by partition_position" + //
             "";
 
-            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( lTablename ) )
+            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), ImmutableList.of( lTablename, lOwner ) )
             {
               @Override
               protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -2269,7 +2271,7 @@ public class LoadIstOracle extends LoadIst
 
             lListPartitions.setTableSubPart( load_tablesubpart( pResultSet.getString( "table_name" ), pResultSet.getString( "subpartitioning_type" ) ) );
 
-            lListPartitions.setColumn( loadPartitionColumns( lTablename ).get( 0 ) );
+            lListPartitions.setColumn( loadPartitionColumns( lTablename, lOwner ).get( 0 ) );
 
             String lSql = "" + //
             " select partition_name," + //
@@ -2277,10 +2279,11 @@ public class LoadIstOracle extends LoadIst
             "        high_value" + //
             "   from " + getDataDictionaryView( "tab_partitions" ) + //
             "  where table_name = ?" + //
+            "    and owner = ?" + //
             "  order by partition_position" + //
             "";
 
-            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( lTablename ) )
+            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), ImmutableList.of( lTablename, lOwner ) )
             {
               @Override
               protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -2324,7 +2327,7 @@ public class LoadIstOracle extends LoadIst
 
             lRangePartitions.setTableSubPart( load_tablesubpart( pResultSet.getString( "table_name" ), pResultSet.getString( "subpartitioning_type" ) ) );
 
-            lRangePartitions.getColumns().addAll( loadPartitionColumns( lTablename ) );
+            lRangePartitions.getColumns().addAll( loadPartitionColumns( lTablename, lOwner ) );
 
             String lSql = "" + //
             " select partition_name," + //
@@ -2332,10 +2335,11 @@ public class LoadIstOracle extends LoadIst
             "        high_value" + //
             "   from " + getDataDictionaryView( "tab_partitions" ) + //
             "  where table_name = ?" + //
+            "    and owner = ?" + //
             "  order by partition_position" + //
             "";
 
-            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( lTablename ) )
+            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), ImmutableList.of( lTablename, lOwner ) )
             {
               @Override
               protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -2383,10 +2387,11 @@ public class LoadIstOracle extends LoadIst
             "        tablespace_name" + //
             "   from " + getDataDictionaryView( "tab_partitions" ) + //
             "  where table_name = ?" + //
+            "    and owner = ?" + //
             "  order by partition_position" + //
             "";
 
-            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( lTablename ) )
+            new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), ImmutableList.of( lTablename, lOwner ) )
             {
               @Override
               protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
@@ -2433,7 +2438,7 @@ public class LoadIstOracle extends LoadIst
     return lReturn;
   }
 
-  private List<ColumnRef> loadPartitionColumns( final String pTablename )
+  private List<ColumnRef> loadPartitionColumns( final String pTablename, final String pOwner )
   {
     final List<ColumnRef> lColumnRefList = new ArrayList<ColumnRef>();
 
@@ -2441,11 +2446,12 @@ public class LoadIstOracle extends LoadIst
                   "  select column_name" + //
                   "    from " + getDataDictionaryView( "part_key_columns" ) + //
                   "   where name = ?" + //
+                  "     and owner = ?" + //
                   "     and object_type = 'TABLE'" + //
                   "   order by column_position" + //
                   "";
 
-    new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) )
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider(), ImmutableList.of( pTablename, pOwner ) )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
