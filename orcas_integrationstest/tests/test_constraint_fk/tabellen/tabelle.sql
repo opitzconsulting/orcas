@@ -16,15 +16,22 @@ create table tab_c
 	constraint pk_tab_c primary key (tab_c_id),
 );
 
+create table tab_d
+(
+    "tab d id"	number(9)	not null,
+    constraint pk_tab_d primary key ("tab d id"),
+);
+
 create table tab_del_cas
 (
 	tab_a_id				number(8),
 	tab_b_id				number(8),
 	tab_c_id				number(8),
-	
+	tab_d_id                number(8),
 	constraint fk_tab_del_cas_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id) on delete cascade enable,
 	constraint fk_tab_del_cas_tab_b_id foreign key (tab_b_id) references tab_b (tab_b_id) on delete cascade enable,
 	constraint fk_tab_del_cas_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete cascade enable,
+    constraint fk_tab_del_cas_tab_d_id foreign key (tab_d_id) references tab_d ("tab d id") on delete cascade enable,
 );
 	
 create table tab_no_action
@@ -32,10 +39,12 @@ create table tab_no_action
 	tab_a_id				number(8),
 	tab_b_id				number(8),
 	tab_c_id				number(8),
+    tab_d_id                number(8),
 	
 	constraint fk_tab_no_action_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id) on delete no_action enable,
 	constraint fk_tab_no_action_tab_b_id foreign key (tab_b_id) references tab_b (tab_b_id) on delete no_action enable,
 	constraint fk_tab_no_action_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete no_action enable,
+    constraint fk_tab_no_action_tab_d_id foreign key (tab_d_id) references tab_d ("tab d id") on delete no_action enable,
 );
 
 create table tab_set_null
@@ -43,10 +52,12 @@ create table tab_set_null
 	tab_a_id				number(8),
 	tab_b_id				number(8),
 	tab_c_id				number(8),
+    tab_d_id                number(8),
 	
 	constraint fk_tab_set_null_tab_a_id foreign key (tab_a_id) references tab_a (tab_a_id) on delete set_null,
 	constraint fk_tab_set_null_tab_b_id foreign key (tab_b_id) references tab_b (tab_b_id) on delete set_null,
 	constraint fk_tab_set_null_tab_c_id foreign key (tab_c_id) references tab_c (tab_c_id) on delete set_null,
+	constraint fk_tab_set_null_tab_d_id foreign key (tab_d_id) references tab_d ("tab d id") on delete set_null,
 );
 
 create table tab_2_column_pk

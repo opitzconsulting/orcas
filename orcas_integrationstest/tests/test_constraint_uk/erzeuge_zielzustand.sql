@@ -26,4 +26,8 @@ create table tab_wrong_uk_column_order
   constraint tab_wrong_uk_column_order unique (id1,id2)
 );
 
-
+create table tab_new_uk_string
+(
+    "id1 as string" number(15) not null,
+    constraint tab_new_uk_string unique ("id1 as string")
+);

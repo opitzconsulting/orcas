@@ -736,7 +736,7 @@ public class LoadIstOracle extends LoadIst
   {
     for( Column lColumn : findTable( pModel, pTablename, pOwner ).getColumns() )
     {
-      if( lColumn.getName().equals( pColumnName ) )
+      if( lColumn.getName_string().equals( pColumnName ) )
       {
         return lColumn;
       }
@@ -815,9 +815,9 @@ public class LoadIstOracle extends LoadIst
         {
           Column lColumn = new ColumnImpl();
 
-          lColumn.setName( pResultSet.getString( "column_name" ) );
+          lColumn.setName_string( pResultSet.getString( "column_name" ) );
 
-          logLoading( "column", pResultSet.getString( "table_name" ), lColumn.getName() );
+          logLoading( "column", pResultSet.getString( "table_name" ), lColumn.getName_string() );
 
           lColumn.setNotnull( "N".equals( pResultSet.getString( "nullable" ) ) );
 
@@ -967,7 +967,7 @@ public class LoadIstOracle extends LoadIst
         {
           Column lColumn = findColumn( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ), pResultSet.getString( "column_name" ) );
 
-          logLoading( "column-default", pResultSet.getString( "table_name" ), lColumn.getName() );
+          logLoading( "column-default", pResultSet.getString( "table_name" ), lColumn.getName_string() );
 
           lColumn.setDefault_value( pResultSet.getString( "data_default" ) );
           if( lColumn.getDefault_value() != null )
@@ -1216,9 +1216,9 @@ public class LoadIstOracle extends LoadIst
         {
           ColumnRef lColumnRef = new ColumnRefImpl();
 
-          lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
+          lColumnRef.setColumn_name_string( pResultSet.getString( "column_name" ) );
 
-          logLoading( "index-column", pResultSet.getString( "table_name" ), lColumnRef.getColumn_name() );
+          logLoading( "index-column", pResultSet.getString( "table_name" ), lColumnRef.getColumn_name_string() );
 
           findIndex( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ).getIndex_columns().add( lColumnRef );
         }
@@ -1231,7 +1231,7 @@ public class LoadIstOracle extends LoadIst
     Index lIndex = findIndex( pModel, pTablename, pTableOwner, pIndexName, pIndexOwner );
 
     // TODO ltrim(p_expression,',')
-    lIndex.getIndex_columns().get( pColumnPosition - 1 ).setColumn_name( pExpression.replace( "\"", "" ).replace( " ", "" ) );
+    lIndex.getIndex_columns().get( pColumnPosition - 1 ).setColumn_name_string( pExpression.replace( "\"", "" ).replace( " ", "" ) );
 
     if( pColumnPosition == pMaxColumnPositionForInd )
     {
@@ -1248,7 +1248,7 @@ public class LoadIstOracle extends LoadIst
           lString += ",";
         }
 
-        lString += lColumnRef.getColumn_name();
+        lString += lColumnRef.getColumn_name_string();
       }
 
       lIndex.setFunction_based_expression( lString );
@@ -1542,9 +1542,9 @@ public class LoadIstOracle extends LoadIst
 
           ColumnRef lColumnRef = new ColumnRefImpl();
 
-          lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
+          lColumnRef.setColumn_name_string( pResultSet.getString( "column_name" ) );
 
-          logLoading( "constraint-column-" + lString, pResultSet.getString( "table_name" ), lColumnRef.getColumn_name() );
+          logLoading( "constraint-column-" + lString, pResultSet.getString( "table_name" ), lColumnRef.getColumn_name_string() );
 
           if( "P".equals( lString ) )
           {
@@ -1619,7 +1619,7 @@ public class LoadIstOracle extends LoadIst
 
           lInlineComment.setComment( pResultSet.getString( "comments" ) );
 
-          lInlineComment.setColumn_name( pResultSet.getString( "column_name" ) );
+          lInlineComment.setColumn_name_string( pResultSet.getString( "column_name" ) );
 
           lInlineComment.setComment_object( CommentObjectType.COLUMN );
 
@@ -1712,7 +1712,7 @@ public class LoadIstOracle extends LoadIst
       {
         for( Column lColumn : pTable.getColumns() )
         {
-          if( lColumn.getName().equals( pColumnName ) )
+          if( lColumn.getName_string().equals( pColumnName ) )
           {
             return lColumn;
           }
@@ -1753,7 +1753,7 @@ public class LoadIstOracle extends LoadIst
           {
             ColumnRef lNewColumnRef = new ColumnRefImpl();
 
-            lNewColumnRef.setColumn_name( lColumnRef.getColumn_name() );
+            lNewColumnRef.setColumn_name_string( lColumnRef.getColumn_name_string() );
 
             lForeignKey.getDestColumns().add( lNewColumnRef );
           }
@@ -1909,7 +1909,7 @@ public class LoadIstOracle extends LoadIst
         if( !isIgnoredTable( lTablename, lOwner ) )
         {
           ColumnRef lColumnRef = new ColumnRefImpl();
-          lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
+          lColumnRef.setColumn_name_string( pResultSet.getString( "column_name" ) );
 
           findTable( pModel, lTablename, lOwner ).getMviewLog().getColumns().add( lColumnRef );
         }
@@ -2047,7 +2047,7 @@ public class LoadIstOracle extends LoadIst
       ColumnRef lColumnRefImpl = new ColumnRefImpl();
       lHashSubParts.setColumn( lColumnRefImpl );
 
-      lColumnRefImpl.setColumn_name( (String) new WrapperReturnFirstValue( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) ).executeForValue() );
+      lColumnRefImpl.setColumn_name_string( (String) new WrapperReturnFirstValue( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) ).executeForValue() );
 
       return lHashSubParts;
     }
@@ -2058,7 +2058,7 @@ public class LoadIstOracle extends LoadIst
       ColumnRefImpl lColumnRefImpl = new ColumnRefImpl();
       lListSubParts.setColumn( lColumnRefImpl );
 
-      lColumnRefImpl.setColumn_name( (String) new WrapperReturnFirstValue( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) ).executeForValue() );
+      lColumnRefImpl.setColumn_name_string( (String) new WrapperReturnFirstValue( lSql, getCallableStatementProvider(), Collections.singletonList( pTablename ) ).executeForValue() );
 
       return lListSubParts;
     }
@@ -2072,7 +2072,7 @@ public class LoadIstOracle extends LoadIst
         protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
         {
           ColumnRefImpl lColumnRefImpl = new ColumnRefImpl();
-          lColumnRefImpl.setColumn_name( pResultSet.getString( "column_name" ) );
+          lColumnRefImpl.setColumn_name_string( pResultSet.getString( "column_name" ) );
 
           lRangeSubParts.getColumns().add( lColumnRefImpl );
         }
@@ -2458,7 +2458,7 @@ public class LoadIstOracle extends LoadIst
       {
         ColumnRef lColumnRef = new ColumnRefImpl();
 
-        lColumnRef.setColumn_name( pResultSet.getString( "column_name" ) );
+        lColumnRef.setColumn_name_string( pResultSet.getString( "column_name" ) );
         lColumnRefList.add( lColumnRef );
       }
     }.execute();

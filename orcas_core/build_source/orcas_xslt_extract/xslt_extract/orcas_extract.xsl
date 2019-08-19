@@ -31,7 +31,14 @@
   <func:function name="myfunc:format-dbname">
     <param name="string_param" />
     <func:result>
-      <value-of select="java_string:toUpperCase(java_string:new($string_param))" />
+      <choose>
+        <when test="starts-with($string_param, '&quot;')">
+          <value-of select="java_string:new($string_param)" />
+        </when>
+        <otherwise>
+          <value-of select="java_string:toUpperCase(java_string:new($string_param))" />
+        </otherwise>
+      </choose>
     </func:result>
   </func:function>
 

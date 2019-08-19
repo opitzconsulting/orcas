@@ -6,72 +6,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
+import de.opitzconsulting.orcas.orig.diff.*;
+import de.opitzconsulting.origOrcasDsl.*;
 import org.eclipse.emf.common.util.EList;
 
-import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
-import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
-import de.opitzconsulting.orcas.orig.diff.ColumnMerge;
-import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
-import de.opitzconsulting.orcas.orig.diff.ConstraintDiff;
-import de.opitzconsulting.orcas.orig.diff.ConstraintMerge;
-import de.opitzconsulting.orcas.orig.diff.DiffRepository;
-import de.opitzconsulting.orcas.orig.diff.ForeignKeyDiff;
-import de.opitzconsulting.orcas.orig.diff.ForeignKeyMerge;
-import de.opitzconsulting.orcas.orig.diff.IndexDiff;
-import de.opitzconsulting.orcas.orig.diff.IndexMerge;
-import de.opitzconsulting.orcas.orig.diff.IndexOrUniqueKeyMerge;
-import de.opitzconsulting.orcas.orig.diff.InlineCommentDiff;
-import de.opitzconsulting.orcas.orig.diff.InlineCommentMerge;
-import de.opitzconsulting.orcas.orig.diff.LobStorageDiff;
-import de.opitzconsulting.orcas.orig.diff.LobStorageMerge;
-import de.opitzconsulting.orcas.orig.diff.LobStorageParametersMerge;
-import de.opitzconsulting.orcas.orig.diff.MviewDiff;
-import de.opitzconsulting.orcas.orig.diff.MviewLogMerge;
-import de.opitzconsulting.orcas.orig.diff.MviewMerge;
-import de.opitzconsulting.orcas.orig.diff.PrimaryKeyMerge;
-import de.opitzconsulting.orcas.orig.diff.SequenceDiff;
-import de.opitzconsulting.orcas.orig.diff.SequenceMerge;
-import de.opitzconsulting.orcas.orig.diff.TableDiff;
-import de.opitzconsulting.orcas.orig.diff.TableMerge;
-import de.opitzconsulting.orcas.orig.diff.UniqueKeyDiff;
-import de.opitzconsulting.orcas.orig.diff.UniqueKeyMerge;
-import de.opitzconsulting.orcas.orig.diff.VarrayStorageDiff;
-import de.opitzconsulting.orcas.orig.diff.VarrayStorageMerge;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
-import de.opitzconsulting.origOrcasDsl.BuildModeType;
-import de.opitzconsulting.origOrcasDsl.CharType;
-import de.opitzconsulting.origOrcasDsl.Column;
-import de.opitzconsulting.origOrcasDsl.ColumnRef;
-import de.opitzconsulting.origOrcasDsl.CompressForType;
-import de.opitzconsulting.origOrcasDsl.CompressType;
-import de.opitzconsulting.origOrcasDsl.Constraint;
-import de.opitzconsulting.origOrcasDsl.CycleType;
-import de.opitzconsulting.origOrcasDsl.DataType;
-import de.opitzconsulting.origOrcasDsl.DeferrType;
-import de.opitzconsulting.origOrcasDsl.EnableType;
-import de.opitzconsulting.origOrcasDsl.FkDeleteRuleType;
-import de.opitzconsulting.origOrcasDsl.ForeignKey;
-import de.opitzconsulting.origOrcasDsl.Index;
-import de.opitzconsulting.origOrcasDsl.IndexGlobalType;
-import de.opitzconsulting.origOrcasDsl.InlineComment;
-import de.opitzconsulting.origOrcasDsl.LobCompressForType;
-import de.opitzconsulting.origOrcasDsl.LobDeduplicateType;
-import de.opitzconsulting.origOrcasDsl.LobStorage;
-import de.opitzconsulting.origOrcasDsl.LobStorageType;
-import de.opitzconsulting.origOrcasDsl.LoggingType;
-import de.opitzconsulting.origOrcasDsl.Mview;
-import de.opitzconsulting.origOrcasDsl.NewValuesType;
-import de.opitzconsulting.origOrcasDsl.OrderType;
-import de.opitzconsulting.origOrcasDsl.ParallelType;
-import de.opitzconsulting.origOrcasDsl.PermanentnessTransactionType;
-import de.opitzconsulting.origOrcasDsl.PermanentnessType;
-import de.opitzconsulting.origOrcasDsl.RefreshMethodType;
-import de.opitzconsulting.origOrcasDsl.RefreshModeType;
-import de.opitzconsulting.origOrcasDsl.Sequence;
-import de.opitzconsulting.origOrcasDsl.SynchronousType;
-import de.opitzconsulting.origOrcasDsl.Table;
-import de.opitzconsulting.origOrcasDsl.UniqueKey;
-import de.opitzconsulting.origOrcasDsl.VarrayStorage;
 
 public class InitDiffRepository
 {
@@ -286,9 +225,50 @@ public class InitDiffRepository
 
         return lReturn;
       }
+
+      @Override
+      public void cleanupValues( InlineComment pValue )
+      {
+        super.cleanupValues( pValue );
+
+        if ( pValue.getColumn_name_string() != null )
+        {
+          if ( pValue.getColumn_name_string().matches( "^[A-Z]([A-Z]|[0-9]|[_#$])*$" ) )
+          {
+            pValue.setColumn_name( pValue.getColumn_name_string() );
+          }
+          else
+          {
+            pValue.setColumn_name( '"' + pValue.getColumn_name_string() + '"' );
+          }
+          pValue.setColumn_name_string( null );
+        }
+      }
     } );
     DiffRepository.getInlineCommentMerge().column_nameIsConvertToUpperCase = true;
 
+    DiffRepository.setColumnRefMerge( new ColumnRefMerge()
+    {
+      @Override
+      public void cleanupValues( ColumnRef pValue )
+      {
+        super.cleanupValues( pValue );
+
+        if ( pValue.getColumn_name_string() != null )
+        {
+          if ( pValue.getColumn_name_string().matches( "^[A-Z]([A-Z]|[0-9]|[_#$])*$" ) )
+          {
+            pValue.setColumn_name( pValue.getColumn_name_string() );
+          }
+          else
+          {
+            pValue.setColumn_name( '"' + pValue.getColumn_name_string() + '"' );
+          }
+          pValue.setColumn_name_string( null );
+        }
+      }
+
+    } );
     DiffRepository.getColumnRefMerge().column_nameIsConvertToUpperCase = true;
 
     DiffRepository.setPrimaryKeyMerge( new PrimaryKeyMerge()
@@ -555,7 +535,6 @@ public class InitDiffRepository
     DiffRepository.getIndexMerge().globalDefaultValue = IndexGlobalType.GLOBAL;
     DiffRepository.getIndexMerge().loggingDefaultValue = LoggingType.LOGGING;
     DiffRepository.getIndexMerge().parallelDefaultValue = ParallelType.NOPARALLEL;
-    DiffRepository.getIndexMerge().parallelDefaultValue = ParallelType.NOPARALLEL;
 
     DiffRepository.setColumnMerge( new ColumnMerge()
     {
@@ -600,6 +579,19 @@ public class InitDiffRepository
       public void cleanupValues( Column pValue )
       {
         super.cleanupValues( pValue );
+
+        if ( pValue.getName_string() != null )
+        {
+          if ( pValue.getName_string().matches( "^[A-Z]([A-Z]|[0-9]|[_#$])*$" ) )
+          {
+            pValue.setName( pValue.getName_string() );
+          }
+          else
+          {
+            pValue.setName( '"' + pValue.getName_string() + '"' );
+          }
+          pValue.setName_string( null );
+        }
 
         if( pValue.getPrecision() == DiffRepository.getNullIntValue() )
         {

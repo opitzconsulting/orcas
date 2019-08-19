@@ -42,3 +42,8 @@ create table tab_create_tab_named_pk
   constraint pk_name primary key (id1)
 );
 
+create table tab_new_pk_string
+(
+    "id string" number(15) not null,
+    constraint tab_new_pk_string primary key ("id string")
+);

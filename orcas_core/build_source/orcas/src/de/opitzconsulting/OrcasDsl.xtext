@@ -93,7 +93,7 @@ enum LobDeduplicateType :
   deduplicate="deduplicate"|keep_duplicates="keep_duplicates";  
   
 Column :
-  name=DBNAME data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (unsigned?="unsigned")? (with_time_zone="with_time_zone")? ("type" object_type=STRING)? ("default" default_value=STRING | "as" "(" default_value=STRING ")" virtual="virtual")? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
+  (name=DBNAME | name_string=STRING) data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (unsigned?="unsigned")? (with_time_zone="with_time_zone")? ("type" object_type=STRING)? ("default" default_value=STRING | "as" "(" default_value=STRING ")" virtual="virtual")? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
   
 enum DataType :
   number="number"|blob="blob"|clob="clob"|nclob="nclob"|varchar2="varchar2"|nvarchar2="nvarchar2"|char="char"|date="date"|xmltype="xmltype"|timestamp="timestamp"|rowid="rowid"|raw="raw"|long_raw="long_raw"|float="float"|long="long"|object="object"|tinyint="tinyint"|smallint="smallint"|mediumint="mediumint"|int="int"|bigint="bigint"|bit="bit"|urowid="urowid";  
@@ -174,7 +174,7 @@ enum RefreshMethodType :
   complete="refresh_complete"|force="refresh_force"|fast="refresh_fast"|never="never_refresh";      
 
 ColumnRef :
-  column_name=DBNAME (",")?;  
+  (column_name=DBNAME | column_name_string=STRING) (",")?;
   
 Sequence:
  "create" "sequence" sequence_name=DBNAME_WITH_SCHEMA ("start" "with" startwith=SIGNED_BIGINT)? ("increment" "by" increment_by=SIGNED_BIGINT)? ("maxvalue" maxvalue=SIGNED_BIGINT)? ("minvalue" minvalue=SIGNED_BIGINT)? (cycle=CycleType)? ("cache" cache=BIGINT)? (order=OrderType)? ("orcas_ext_max_value_select" max_value_select=STRING)?";";
@@ -198,7 +198,7 @@ Comment:
  "comment" "on" comment_object=CommentObjectType (table_name=DBNAME) ("." column_name=DBNAME)? "is" comment=STRING ";";
 
 InlineComment:
- "comment" "on" comment_object=CommentObjectType (column_name=DBNAME)? "is" comment=STRING ";";
+ "comment" "on" comment_object=CommentObjectType (column_name=DBNAME | column_name_string=STRING)? "is" comment=STRING ";";
 
 DBNAME_WITH_SCHEMA:
   DBNAME ( '.' DBNAME )?;
