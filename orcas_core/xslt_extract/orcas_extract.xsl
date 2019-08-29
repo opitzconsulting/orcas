@@ -110,11 +110,8 @@
   </template>
 
   <template match="maxvalue[parent::Sequence]">
-    <!-- der 999... Wert ist der Default, macht ausserdem bei xtext Probleme, da er zu lang ist -->
-    <if test=". != '9999999999999999999999999999'">
-      <text> maxvalue </text>
-      <value-of select="." />
-    </if>
+    <text> maxvalue </text>
+    <value-of select="." />
   </template>
 
   <template match="minvalue">

@@ -359,6 +359,18 @@ public class InitDiffRepository
         return lReturn;
       }
 
+      @Override
+      public void cleanupValues( Sequence pValue ) {
+        BigInteger tmpMaxvalue = pValue.getMaxvalue();
+
+        super.cleanupValues( pValue );
+
+        if ( pValue.getCycle() == CycleType.CYCLE && pValue.getMaxvalue() == null )
+        {
+          pValue.setMaxvalue( tmpMaxvalue );
+        }
+      }
+
       public BigInteger cacheCleanValueIfNeeded( BigInteger pValue )
       {
         if (Objects.equals(pValue, BigInteger.valueOf(20))) {
