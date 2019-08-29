@@ -640,7 +640,7 @@ public class LoadIstPostgres extends LoadIst {
                         lConstraint.setConsName(pResultSet.getString("constraint_name"));
 
                         String lConsrc = pResultSet.getString("consrc");
-                        lConstraint.setRule(lConsrc.substring(1, lConsrc.length() - 1).toUpperCase());
+                        lConstraint.setRule(lConsrc.substring(1, lConsrc.length() - 1));
 
                         if(pResultSet.getBoolean("condeferred")){
                             lConstraint.setDeferrtype(DeferrType.DEFERRED);
