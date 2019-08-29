@@ -86,6 +86,12 @@ public class OrcasMain extends Orcas
     {
       pSyexModel = new MultiSchemaPrefixIndexExtension().transformModel( pSyexModel );
     }
+
+    if ( !getParameters().getMultiSchema() )
+    {
+      pSyexModel = new RemoveMultiSchemaPrefixExtension().transformModel( pSyexModel );
+    }
+
     return pSyexModel;
   }
 
