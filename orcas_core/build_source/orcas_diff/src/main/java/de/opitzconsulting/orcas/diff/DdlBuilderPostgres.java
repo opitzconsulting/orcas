@@ -88,9 +88,8 @@ public class DdlBuilderPostgres extends DdlBuilder {
         p.addStmt("alter table " + pTableDiff.nameNew + " drop column " + lTmpOldColumnameNew);
 
         if (pColumnDiff.default_valueNew != null && !"virtual".equals(pColumnDiff.virtualNew)) {
-            p.stmtStart("alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew + " default");
+            p.stmtStart("alter table " + pTableDiff.nameNew + " alter " + pColumnDiff.nameNew + " set default");
             p.stmtAppend(pColumnDiff.default_valueNew);
-            p.stmtAppend(")");
             p.stmtDone();
         }
 

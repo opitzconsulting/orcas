@@ -38,6 +38,7 @@ create table tab_dataype_conversion
   col_clob_to_varchar2      clob           not null,
   col_varchar2_to_clob      varchar2(15)   not null,
   col_clob_to_xml           xmltype        not null,
-  col_xml_to_clob           clob           not null
+  col_xml_to_clob           clob           not null,
+  col_varchar2_to_char_with_default      varchar2(10)    default "5"  not null
 );
 

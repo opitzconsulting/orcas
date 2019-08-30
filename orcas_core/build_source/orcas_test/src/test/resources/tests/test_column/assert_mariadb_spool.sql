@@ -21,3 +21,4 @@ alter table TAB_DATAYPE_CONVERSION modify column COL_CHAR_TO_VARCHAR2 VARCHAR(1)
 alter table TAB_DATAYPE_CONVERSION modify column COL_VARCHAR2_TO_CHAR CHAR(1) not null;
 alter table TAB_DATAYPE_CONVERSION modify column COL_CLOB_TO_VARCHAR2 VARCHAR(15) not null;
 alter table TAB_DATAYPE_CONVERSION modify column COL_VARCHAR2_TO_CLOB CLOB not null;
+alter table TAB_DATAYPE_CONVERSION modify column COL_VARCHAR2_TO_CHAR_WITH_DEFAULT CHAR(3) default 5 not null;
