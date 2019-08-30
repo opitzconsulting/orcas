@@ -46,6 +46,7 @@ public class OrcasUnitTests {
 
                                              lParametersCall.setAdditionsOnly(p.getName().contains("additions_only"));
                                              lParametersCall.setMinimizeStatementCount(p.getName().contains("minimize_statement_count"));
+                                             lParametersCall.setCreateIndexOnline(p.getName().contains("test_index_online"));
                                              lParametersCall.setModelFile("");
                                              lParametersCall.setXmlLogFile(lActualXmlLogFile.toString());
                                              lParametersCall.setLogname(p.getName());
