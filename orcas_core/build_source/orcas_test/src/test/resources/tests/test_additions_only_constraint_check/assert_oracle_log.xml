@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff-actions>
+  <diff-action type="drop" object-type="table" object-name="TAB_OLD">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_OLD" />
+    <statement ignore="true" comment="additionsonly">drop table TAB_OLD</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" object-name="TAB_NEW">
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_NEW" />
+    <statement>create table TAB_NEW (  ID NUMBER(5)   )</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="constraint" object-name="TAB_NEW" subobject-name="TAB_NEW_CHECK_SIZE">
+    <diff-action-reason type="missing" object-type="table" subobject-type="constraint" object-name="TAB_NEW" subobject-name="TAB_NEW_CHECK_SIZE" />
+    <statement>alter table TAB_NEW add constraint TAB_NEW_CHECK_SIZE check (ID BETWEEN 1 AND 10000)</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_CHG">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_CHG" />
+    <statement>alter table TAB_CHG drop constraint TAB_CHG_CHECK_SIZE_CHG</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_OLD">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_OLD" />
+    <statement>alter table TAB_CHG drop constraint TAB_CHG_CHECK_SIZE_OLD</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="column" object-name="TAB_CHG" subobject-name="ID_ADD">
+    <diff-action-reason type="missing" object-type="table" subobject-type="column" object-name="TAB_CHG" subobject-name="ID_ADD" />
+    <statement>alter table TAB_CHG add ID_ADD NUMBER(5)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE">
+    <diff-action-reason type="missing" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_CHG add constraint TAB_CHG_CHECK_SIZE check (ID BETWEEN 1 AND 900)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_NEW">
+    <diff-action-reason type="missing" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_NEW" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_CHG add constraint TAB_CHG_CHECK_SIZE_NEW check (ID BETWEEN 1 AND 99)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_NEW_COL">
+    <diff-action-reason type="missing" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_NEW_COL" />
+    <statement>alter table TAB_CHG add constraint TAB_CHG_CHECK_SIZE_NEW_COL check (id_add BETWEEN 1 AND 99)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_NEW_COL_NOT_NULL">
+    <diff-action-reason type="missing" object-type="table" subobject-type="constraint" object-name="TAB_CHG" subobject-name="TAB_CHG_CHECK_SIZE_NEW_COL_NOT_NULL" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_CHG add constraint TAB_CHG_CHECK_SIZE_NEW_COL_NOT_NULL check (id_add not null)</statement>
+  </diff-action>
+</diff-actions>

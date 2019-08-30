@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff-actions>
+  <diff-action type="drop" object-type="table" object-name="TAB_DEL">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL" />
+    <statement ignore="true" comment="additionsonly">drop table TAB_DEL</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" object-name="TAB_NEW">
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_NEW" />
+    <statement>create table TAB_NEW (  ID NUMBER(15) not null, COL_DEFAULT NUMBER(15) default 66, COL_NOT_NULL NUMBER(15) not null, COL_NOT_NULL_DEFAULT NUMBER(15) default 66 not null   )</statement>
+  </diff-action>
+  <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_NOT_NULL">
+    <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_NOT_NULL">
+      <reason-detail>notnull</reason-detail>
+    </diff-action-reason>
+    <statement ignore="true" comment="additionsonly">alter table TAB_INS_COL modify ( CHG_COL_ADD_NOT_NULL not null )</statement>
+  </diff-action>
+  <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_DEFAULT">
+    <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_DEFAULT">
+      <reason-detail>default_value</reason-detail>
+    </diff-action-reason>
+    <statement>alter table TAB_INS_COL modify ( CHG_COL_ADD_DEFAULT default 33 )</statement>
+  </diff-action>
+  <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_DEFAULT_NOT_NULL">
+    <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_DEFAULT_NOT_NULL">
+      <reason-detail>default_value</reason-detail>
+      <reason-detail>notnull</reason-detail>
+    </diff-action-reason>
+    <statement>alter table TAB_INS_COL modify ( CHG_COL_ADD_DEFAULT_NOT_NULL default 44 )</statement>
+    <statement ignore="true" comment="additionsonly">alter table TAB_INS_COL modify ( CHG_COL_ADD_DEFAULT_NOT_NULL not null )</statement>
+  </diff-action>
+  <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_DEL_DEFAULT">
+    <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_DEL_DEFAULT">
+      <reason-detail>default_value</reason-detail>
+    </diff-action-reason>
+    <statement ignore="true" comment="additionsonly">alter table TAB_INS_COL modify ( CHG_COL_DEL_DEFAULT default null )</statement>
+  </diff-action>
+  <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_DEL_NOT_NULL">
+    <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_DEL_NOT_NULL">
+      <reason-detail>notnull</reason-detail>
+    </diff-action-reason>
+    <statement>alter table TAB_INS_COL modify ( CHG_COL_DEL_NOT_NULL null )</statement>
+  </diff-action>
+  <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_INC_PRECISION">
+    <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_INC_PRECISION">
+      <reason-detail>precision</reason-detail>
+    </diff-action-reason>
+    <statement>alter table TAB_INS_COL modify ( CHG_COL_INC_PRECISION NUMBER(15))</statement>
+  </diff-action>
+  <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_INC_SCALE">
+    <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_INC_SCALE">
+      <reason-detail>scale</reason-detail>
+    </diff-action-reason>
+    <statement>alter table TAB_INS_COL modify ( CHG_COL_INC_SCALE NUMBER(15,10))</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="NEW_COL_DEFAULT">
+    <diff-action-reason type="missing" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="NEW_COL_DEFAULT" />
+    <statement>alter table TAB_INS_COL add NEW_COL_DEFAULT NUMBER(15) default 11</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="NEW_COL_NOT_NULL">
+    <diff-action-reason type="missing" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="NEW_COL_NOT_NULL" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_INS_COL add NEW_COL_NOT_NULL NUMBER(15) not null</statement>
+    <statement comment="additionsonly-alternative">alter table TAB_INS_COL add NEW_COL_NOT_NULL NUMBER(15)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="NEW_COL_NOT_NULL_DEFAULT">
+    <diff-action-reason type="missing" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="NEW_COL_NOT_NULL_DEFAULT" />
+    <statement>alter table TAB_INS_COL add NEW_COL_NOT_NULL_DEFAULT NUMBER(15) default 22 not null</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="column" object-name="TAB_DEL_COL" subobject-name="COL_DEFAULT">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="column" object-name="TAB_DEL_COL" subobject-name="COL_DEFAULT" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_DEL_COL drop (COL_DEFAULT)</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="column" object-name="TAB_DEL_COL" subobject-name="COL_NOT_NULL">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="column" object-name="TAB_DEL_COL" subobject-name="COL_NOT_NULL" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_DEL_COL drop (COL_NOT_NULL)</statement>
+    <statement comment="additionsonly-alternative">alter table TAB_DEL_COL modify ( COL_NOT_NULL null )</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="column" object-name="TAB_DEL_COL" subobject-name="COL_NOT_NULL_DEFAULT">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="column" object-name="TAB_DEL_COL" subobject-name="COL_NOT_NULL_DEFAULT" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_DEL_COL drop (COL_NOT_NULL_DEFAULT)</statement>
+  </diff-action>
+</diff-actions>

@@ -44,6 +44,8 @@ public class OrcasUnitTests {
                                              File lActualSpoolFile = new File(lSpoolFolder, p.getName() + "/" + p.getName() + ".sql");
                                              File lActualXmlLogFile = new File(lSpoolFolder, p.getName() + "/xml.log");
 
+                                             lParametersCall.setAdditionsOnly(p.getName().contains("additions_only"));
+                                             lParametersCall.setMinimizeStatementCount(p.getName().contains("minimize_statement_count"));
                                              lParametersCall.setModelFile("");
                                              lParametersCall.setXmlLogFile(lActualXmlLogFile.toString());
                                              lParametersCall.setLogname(p.getName());
@@ -63,15 +65,15 @@ public class OrcasUnitTests {
 
                                              new OrcasMain().mainRun(lParametersCall);
 
+                                             //Files.copy(lActualSpoolFile.toPath(), lExpectedSpoolFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                             //Files.copy(lActualXmlLogFile.toPath(), lExpectedXmlLogFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
                                              if (lExpectedSpoolFile.exists()) {
                                                  assertThat(lActualSpoolFile).hasSameContentAs(lExpectedSpoolFile);
                                              }
                                              if (lExpectedXmlLogFile.exists()) {
                                                  assertThat(lActualXmlLogFile).hasSameContentAs(lExpectedXmlLogFile);
                                              }
-
-                                             Files.copy(lActualSpoolFile.toPath(), lExpectedSpoolFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                                             Files.copy(lActualXmlLogFile.toPath(), lExpectedXmlLogFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                                          } catch (Exception e) {
                                              logger.error(e, e::getMessage);
                                              Assertions.assertFalse(true, e.getMessage());

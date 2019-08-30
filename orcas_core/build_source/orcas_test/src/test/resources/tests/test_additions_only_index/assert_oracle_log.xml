@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff-actions>
+  <diff-action type="drop" object-type="table" object-name="TAB_OLD">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_OLD" />
+    <statement ignore="true" comment="additionsonly">drop table TAB_OLD</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" object-name="TAB_NEW">
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_NEW" />
+    <statement>create table TAB_NEW (  COL_1 NUMBER(15) not null   )</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="index" object-name="TAB_NEW" subobject-name="TAB_NEW_IX">
+    <diff-action-reason type="missing" object-type="table" subobject-type="index" object-name="TAB_NEW" subobject-name="TAB_NEW_IX" />
+    <statement>create index TAB_NEW_IX on TAB_NEW ( COL_1 ) parallel</statement>
+    <statement>alter index TAB_NEW_IX noparallel</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="column" object-name="TAB_MOD" subobject-name="OLD_COL">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="column" object-name="TAB_MOD" subobject-name="OLD_COL" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_MOD drop (OLD_COL)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="column" object-name="TAB_MOD" subobject-name="NEW_COL">
+    <diff-action-reason type="missing" object-type="table" subobject-type="column" object-name="TAB_MOD" subobject-name="NEW_COL" />
+    <statement>alter table TAB_MOD add NEW_COL NUMBER(15)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="index" object-name="TAB_MOD" subobject-name="TAB_MOD_IX_ADD">
+    <diff-action-reason type="missing" object-type="table" subobject-type="index" object-name="TAB_MOD" subobject-name="TAB_MOD_IX_ADD" />
+    <statement>create index TAB_MOD_IX_ADD on TAB_MOD ( COL_1 ) parallel</statement>
+    <statement>alter index TAB_MOD_IX_ADD noparallel</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="index" object-name="TAB_MOD" subobject-name="TAB_MOD_IX_ADD_UNIQUE">
+    <diff-action-reason type="missing" object-type="table" subobject-type="index" object-name="TAB_MOD" subobject-name="TAB_MOD_IX_ADD_UNIQUE" />
+    <statement ignore="true" comment="additionsonly">create unique index TAB_MOD_IX_ADD_UNIQUE on TAB_MOD ( COL_2 ) parallel</statement>
+    <statement ignore="true" comment="additionsonly">alter index TAB_MOD_IX_ADD_UNIQUE noparallel</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="index" object-name="TAB_MOD" subobject-name="TAB_MOD_IX_NEW_COL_UNIQUE">
+    <diff-action-reason type="missing" object-type="table" subobject-type="index" object-name="TAB_MOD" subobject-name="TAB_MOD_IX_NEW_COL_UNIQUE" />
+    <statement>create unique index TAB_MOD_IX_NEW_COL_UNIQUE on TAB_MOD ( NEW_COL ) parallel</statement>
+    <statement>alter index TAB_MOD_IX_NEW_COL_UNIQUE noparallel</statement>
+  </diff-action>
+</diff-actions>

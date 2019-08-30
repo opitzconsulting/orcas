@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff-actions>
+  <diff-action type="drop" object-type="table" object-name="TAB_OLD">
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_OLD" />
+    <statement ignore="true" comment="additionsonly">drop table TAB_OLD</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" object-name="TAB_NEW">
+    <diff-action-reason type="missing" object-type="table" object-name="TAB_NEW" />
+    <statement>create table TAB_NEW (  ID1 NUMBER(15) not null, ID2 NUMBER(20) not null   )</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="unique_key" object-name="TAB_NEW" subobject-name="TAB_NEW_UK">
+    <diff-action-reason type="missing" object-type="table" subobject-type="unique_key" object-name="TAB_NEW" subobject-name="TAB_NEW_UK" />
+    <statement>alter table TAB_NEW add constraint TAB_NEW_UK unique (ID1,ID2)</statement>
+  </diff-action>
+  <diff-action type="drop" recreate="true" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK">
+    <diff-action-reason type="different" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK">
+      <reason-detail>uk_columns</reason-detail>
+    </diff-action-reason>
+    <statement>alter table TAB_MOD drop constraint TAB_MOD_UK</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK_OLD_COL">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK_OLD_COL" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_MOD drop constraint TAB_MOD_UK_OLD_COL</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK_OLD_COMB">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK_OLD_COMB" />
+    <statement>alter table TAB_MOD drop constraint TAB_MOD_UK_OLD_COMB</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="table" subobject-type="column" object-name="TAB_MOD" subobject-name="DEL_COL">
+    <diff-action-reason type="surplus" object-type="table" subobject-type="column" object-name="TAB_MOD" subobject-name="DEL_COL" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_MOD drop (DEL_COL)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="column" object-name="TAB_MOD" subobject-name="NEW_COL">
+    <diff-action-reason type="missing" object-type="table" subobject-type="column" object-name="TAB_MOD" subobject-name="NEW_COL" />
+    <statement>alter table TAB_MOD add NEW_COL NUMBER(15)</statement>
+  </diff-action>
+  <diff-action type="create" recreate="true" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK">
+    <diff-action-reason type="different" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK">
+      <reason-detail>uk_columns</reason-detail>
+    </diff-action-reason>
+    <statement ignore="true" comment="additionsonly">alter table TAB_MOD add constraint TAB_MOD_UK unique (ID1,ID2)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_ADD_UK">
+    <diff-action-reason type="missing" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_ADD_UK" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_MOD add constraint TAB_MOD_ADD_UK unique (ID3)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK_NEW_COL">
+    <diff-action-reason type="missing" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK_NEW_COL" />
+    <statement>alter table TAB_MOD add constraint TAB_MOD_UK_NEW_COL unique (NEW_COL)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK_NEW_COMB">
+    <diff-action-reason type="missing" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK_NEW_COMB" />
+    <statement ignore="true" comment="additionsonly">alter table TAB_MOD add constraint TAB_MOD_UK_NEW_COMB unique (NEW_COL,ID3)</statement>
+  </diff-action>
+</diff-actions>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff-actions>
+  <diff-action type="create" object-type="sequence" object-name="SEQ_TEST_CREATE">
+    <diff-action-reason type="missing" object-type="sequence" object-name="SEQ_TEST_CREATE" />
+    <statement>create sequence SEQ_TEST_CREATE</statement>
+  </diff-action>
+  <diff-action type="drop" object-type="sequence" object-name="SEQ_DELETE">
+    <diff-action-reason type="surplus" object-type="sequence" object-name="SEQ_DELETE" />
+    <statement ignore="true" comment="additionsonly">drop sequence SEQ_DELETE</statement>
+  </diff-action>
+</diff-actions>

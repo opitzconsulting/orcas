@@ -1,2 +1,2 @@
 create sequence SEQ_TEST_CREATE;
-drop sequence SEQ_DELETE;
+-- ignore-additionsonly: drop sequence SEQ_DELETE;
