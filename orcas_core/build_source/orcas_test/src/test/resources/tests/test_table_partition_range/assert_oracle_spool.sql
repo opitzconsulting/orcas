@@ -1,0 +1,2 @@
+create table TAB_PARTITION_RANGE (  COL1 NUMBER(15) not null, COL2 NUMBER(15) not null   ) compress  partition by range (COL1,COL2)(partition part_10 values less than (10,5),partition part_20 values less than (maxvalue,maxvalue));
+create table TAB_PARTITION_RANGE_TABSPACE (  COL1 NUMBER(15) not null, COL2 NUMBER(15) not null   ) tablespace SYSTEM  partition by range (COL1,COL2)(partition part_10 values less than (10,5),partition part_20 values less than (maxvalue,maxvalue));

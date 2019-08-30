@@ -1,0 +1,15 @@
+apply plugin: 'java'
+
+dependencies 
+{
+  testCompile group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler', version: version
+  testCompile('org.junit.jupiter:junit-jupiter:5.5.1')
+  testCompile group: 'org.assertj', name: 'assertj-core', version: '3.13.2'
+}
+
+test {
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
+}
+

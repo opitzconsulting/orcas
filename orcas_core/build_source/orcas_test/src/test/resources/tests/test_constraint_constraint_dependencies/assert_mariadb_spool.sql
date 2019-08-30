@@ -1,0 +1,13 @@
+alter table TAB_FK_REF_UK drop foreign key FK_TAB_UK_ID;
+alter table TAB_UK drop primary key;
+alter table TAB_UK  drop TAB_B_DATEN;
+alter table TAB_UK modify column TAB_A_ID NUMERIC(9) not null;
+alter table TAB_UK add TAB_A_DATEN VARCHAR(20);
+alter table TAB_UK add constraint TAB_WRONG_PK_REVERSE primary key (TAB_A_ID) using index reverse;
+create index FK_TAB_UK_ID_GEN_IX on TAB_FK_REF_UK ( TAB_B_ID );
+create index FK_TAB_REF_UK_GEN_IX on TAB_FK_REF_UK ( TAB_B_ID,TAB_B_BEZEICHNER );
+create table TAB_FK_REF_UK_UK (  TAB_B_ID NUMERIC(9), TAB_B_BEZEICHNER VARCHAR(10), TAB_B_DATEN VARCHAR(20)   )  ;
+alter table TAB_FK_REF_UK_UK add constraint UK_TAB_REF_UK_UK unique (TAB_B_ID,TAB_B_BEZEICHNER);
+alter table TAB_COMMENT modify column TAB_COMMENT NUMERIC(9);
+alter table TAB_FK_REF_UK add constraint FK_TAB_UK_ID foreign key (TAB_B_ID) references TAB_UK(TAB_A_ID);
+alter table TAB_FK_REF_UK_UK add constraint FK_TAB_REF_UK_UK foreign key (TAB_B_ID,TAB_B_BEZEICHNER) references TAB_UK(TAB_A_ID,TAB_A_BEZEICHNER);

@@ -100,6 +100,7 @@ public abstract class Parameters
   protected String _initializeChecksumExtension;
   protected boolean _keepDriverClassLoadMessages = true;
   protected List<File> _modelFiles;
+  protected List<File> _schemaFiles = null;
   protected URL _scriptUrl;
   protected String _scriptUrlFilename;
   protected Charset _scriptUrlCharset;
@@ -491,5 +492,9 @@ public abstract class Parameters
   public boolean getDbdocPlantuml()
   {
     return _dbdocPlantuml;
+  }
+
+  public List<File> getSchemaFiles() {
+    return _schemaFiles;
   }
 }

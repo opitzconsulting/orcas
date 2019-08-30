@@ -308,4 +308,8 @@ public class ParametersCall extends Parameters
 
     return lReturn;
   }
+
+  public void setSchemaFiles( List<File> pSchemaFiles ) {
+    _schemaFiles = pSchemaFiles;
+  }
 }

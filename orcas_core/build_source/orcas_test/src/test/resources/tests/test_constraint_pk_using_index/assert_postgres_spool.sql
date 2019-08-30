@@ -1,0 +1,11 @@
+alter table TAB_NEW_PK drop constraint TAB_NEW_PK;
+create unique index TAB_NEW_IX on TAB_NEW_PK ( ID1 );
+alter table TAB_NEW_PK add constraint TAB_NEW_PK primary key (ID1) using index TAB_NEW_IX;
+alter table TAB_MOD_PK drop constraint TAB_MOD_PK;
+drop index TAB_MOD_IX;
+create unique index TAB_MOD_IX on TAB_MOD_PK ( ID1,ID2 );
+alter table TAB_MOD_PK add constraint TAB_MOD_PK primary key (ID1,ID2) using index TAB_MOD_IX;
+alter table TAB_WRONG_IX drop constraint TAB_WRONG_IX_PK;
+alter index TAB_WRONG_IX_IX rename to TAB_RIGHT_IX_IX;
+alter table TAB_WRONG_IX add constraint TAB_WRONG_IX_PK primary key (ID1) using index TAB_RIGHT_IX_IX;
+alter table TAB_WRONG_PK rename constraint TAB_WRONG_PK_PK to TAB_RIGHT_PK_PK;

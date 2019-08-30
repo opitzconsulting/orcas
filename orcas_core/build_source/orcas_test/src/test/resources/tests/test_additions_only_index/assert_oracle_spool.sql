@@ -1,0 +1,12 @@
+drop table TAB_OLD;
+create table TAB_NEW (  COL_1 NUMBER(15) not null   )  ;
+create index TAB_NEW_IX on TAB_NEW ( COL_1 ) parallel;
+alter index TAB_NEW_IX noparallel;
+alter table TAB_MOD drop (OLD_COL);
+alter table TAB_MOD add NEW_COL NUMBER(15);
+create index TAB_MOD_IX_ADD on TAB_MOD ( COL_1 ) parallel;
+alter index TAB_MOD_IX_ADD noparallel;
+create unique index TAB_MOD_IX_ADD_UNIQUE on TAB_MOD ( COL_2 ) parallel;
+alter index TAB_MOD_IX_ADD_UNIQUE noparallel;
+create unique index TAB_MOD_IX_NEW_COL_UNIQUE on TAB_MOD ( NEW_COL ) parallel;
+alter index TAB_MOD_IX_NEW_COL_UNIQUE noparallel;

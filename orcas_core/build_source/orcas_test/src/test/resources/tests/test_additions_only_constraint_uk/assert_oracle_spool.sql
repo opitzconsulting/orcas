@@ -1,0 +1,12 @@
+drop table TAB_OLD;
+create table TAB_NEW (  ID1 NUMBER(15) not null, ID2 NUMBER(20) not null   )  ;
+alter table TAB_NEW add constraint TAB_NEW_UK unique (ID1,ID2);
+alter table TAB_MOD drop constraint TAB_MOD_UK;
+alter table TAB_MOD drop constraint TAB_MOD_UK_OLD_COL;
+alter table TAB_MOD drop constraint TAB_MOD_UK_OLD_COMB;
+alter table TAB_MOD drop (DEL_COL);
+alter table TAB_MOD add NEW_COL NUMBER(15);
+alter table TAB_MOD add constraint TAB_MOD_UK unique (ID1,ID2);
+alter table TAB_MOD add constraint TAB_MOD_ADD_UK unique (ID3);
+alter table TAB_MOD add constraint TAB_MOD_UK_NEW_COL unique (NEW_COL);
+alter table TAB_MOD add constraint TAB_MOD_UK_NEW_COMB unique (NEW_COL,ID3);

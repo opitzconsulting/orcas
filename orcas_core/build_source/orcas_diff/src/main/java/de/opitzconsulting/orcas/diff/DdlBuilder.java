@@ -268,7 +268,7 @@ public abstract class DdlBuilder
   {
     BigDecimal lMaxValueSelectValue = pDataHandler.getSequenceMaxValueSelectValue( pSequenceDiff );
 
-    BigDecimal lIstValue = BigDecimal.valueOf( Long.valueOf( pSequenceDiff.max_value_selectOld ) );
+    BigDecimal lIstValue = pSequenceDiff.max_value_selectOld == null ? null : BigDecimal.valueOf( Long.valueOf( pSequenceDiff.max_value_selectOld ) );
     if( lMaxValueSelectValue != null && lIstValue != null && lMaxValueSelectValue.compareTo( lIstValue ) > 0 )
     {
       p1.failIfAdditionsOnly( !pSequenceDiff.increment_byIsEqual, "cant't change increment by" );

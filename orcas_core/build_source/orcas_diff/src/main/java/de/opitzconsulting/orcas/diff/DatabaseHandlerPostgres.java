@@ -157,12 +157,4 @@ public class DatabaseHandlerPostgres extends DatabaseHandler {
     protected boolean isExpressionDifferentNotNull(String pExpression1, String pExpression2) {
         return super.isExpressionDifferentNotNull(cleanupExpression(pExpression1), cleanupExpression(pExpression2));
     }
-
-    public static void main(String[] args) {
-        System.out.println(new DatabaseHandlerPostgres().cleanupExpression(
-            "((status)::text = ANY ((ARRAY['GENEHMIGT'::characteR varying, 'WARTEN_AUF_GENEHMIGUNG'::character varying])::text[]))"));
-        System.out.println(new DatabaseHandlerPostgres().cleanupExpression(
-            "STATUS in ('GENEHMIGT','WARTEN_AUF_GENEHMIGUNG')"));
-
-    }
 }

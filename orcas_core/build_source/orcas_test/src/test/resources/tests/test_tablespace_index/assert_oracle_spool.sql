@@ -1,0 +1,18 @@
+alter table TAB_INDEX drop constraint ID_NUMMER_PK_PK;
+alter table TAB_INDEX drop constraint ID_NUMMER_MOD_UK_UK;
+alter table TAB_INDEX drop constraint ID_NUMMER_MOD_UK_UK_DEF;
+alter table TAB_INDEX add ID_NUMMER_INT NUMBER(15) not null;
+alter table TAB_INDEX add ID_NUMMER_EXT NUMBER(15) not null;
+alter table TAB_INDEX add ID_NUMMER_UK NUMBER(15) not null;
+alter table TAB_INDEX add constraint ID_NUMMER_PK_PK primary key (ID_NUMMER_PK) using index tablespace TABLESPACE1;
+create index ID_NUMMER_INT_IX on TAB_INDEX ( ID_NUMMER_INT ) tablespace TABLESPACE1 parallel;
+alter index ID_NUMMER_INT_IX noparallel;
+alter index MOD_TABSPACE_IX rebuild tablespace TABLESPACE2;
+alter index MOD_TABSPACE_REVERSE_IX rebuild tablespace TABLESPACE1;
+alter index MOD_TABSPACE_DEF_IX rebuild tablespace TABLESPACE1;
+alter index MOD_TABSPACE_REVERSE_DEF_IX rebuild tablespace null;
+create index ID_NUMMER_EXT_IX on TAB_INDEX ( ID_NUMMER_EXT ) tablespace TABLESPACE1 parallel;
+alter index ID_NUMMER_EXT_IX noparallel;
+alter table TAB_INDEX add constraint ID_NUMMER_MOD_UK_UK unique (ID_NUMMER_MOD_UK) using index tablespace TABLESPACE2;
+alter table TAB_INDEX add constraint ID_NUMMER_UK_UK unique (ID_NUMMER_UK) using index tablespace TABLESPACE1;
+alter table TAB_INDEX add constraint ID_NUMMER_MOD_UK_UK_DEF unique (ID_NUMMER_MOD_UK_DEF);

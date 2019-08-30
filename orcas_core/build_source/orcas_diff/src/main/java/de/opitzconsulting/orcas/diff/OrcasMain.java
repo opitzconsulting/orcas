@@ -1,8 +1,8 @@
 package de.opitzconsulting.orcas.diff;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import de.opitzconsulting.orcas.diff.DiffAction.Statement;
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
@@ -10,7 +10,6 @@ import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
 import de.opitzconsulting.orcas.orig.diff.DiffRepository;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
-import de.opitzconsulting.orcas.sql.WrapperExecuteStatement;
 
 public class OrcasMain extends Orcas
 {
@@ -34,40 +33,58 @@ public class OrcasMain extends Orcas
     }
     else
     {
-      JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), new RunWithCallableStatementProvider()
-      {
-        public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
+      Consumer<CallableStatementProvider> lStaticsHandler = (CallableStatementProvider pCallableStatementProvider) -> {
+        InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler() );
+
+        logInfo( "starting orcas statics" );
+
+        if( getParameters().getTargetplsql().equals( "" ) )
         {
-          InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler() );
-
-          logInfo( "starting orcas statics" );
-
-          if( getParameters().getTargetplsql().equals( "" ) )
-          {
-            logInfo( "loading database" );
-            de.opitzconsulting.origOrcasDsl.Model lDatabaseModel = getDatabaseHandler().createLoadIst( pCallableStatementProvider, getParameters() ).loadModel( true );
-
-            DiffRepository.getModelMerge().cleanupValues( lDatabaseModel );
-            de.opitzconsulting.origOrcasDsl.Model lSollModel = getParameters().getExtensionHandler().loadModel();
-
-            logInfo( "building diff" );
-            lSollModel = modifyModel( lSollModel );
-
-            _log.debug( "cleanupValues" );
-            DiffRepository.getModelMerge().cleanupValues( lSollModel );
-
-            DiffResult lDiffResult = new OrcasDiff( pCallableStatementProvider, getParameters(), getDatabaseHandler() ).compare( lSollModel, lDatabaseModel );
-
-            handleDiffResult( getParameters(), pCallableStatementProvider, lDiffResult );
-          }
-          else
-          {
-            getParameters().getExtensionHandler().handleTargetplsql( pCallableStatementProvider );
+          de.opitzconsulting.origOrcasDsl.Model lDatabaseModel;
+          if( getParameters().getSchemaFiles() == null ) {
+            logInfo("loading database");
+            lDatabaseModel = getDatabaseHandler().createLoadIst(pCallableStatementProvider, getParameters()).loadModel(true);
+          } else {
+            logInfo("loading schema-files");
+            ParametersCall lParametersCall = ParametersCall.createWithDefaults();
+            lParametersCall.setModelFiles(getParameters().getSchemaFiles());
+            lParametersCall.setModelFile("");
+            getParameters().getExtensionHandler().setParameters(lParametersCall);
+            lDatabaseModel = getParameters().getExtensionHandler().loadModel();
+            getParameters().getExtensionHandler().setParameters(getParameters());
           }
 
-          logInfo( "done orcas statics" );
+          DiffRepository.getModelMerge().cleanupValues( lDatabaseModel );
+          de.opitzconsulting.origOrcasDsl.Model lSollModel = getParameters().getExtensionHandler().loadModel();
+
+          logInfo( "building diff" );
+          lSollModel = modifyModel( lSollModel );
+
+          _log.debug( "cleanupValues" );
+          DiffRepository.getModelMerge().cleanupValues( lSollModel );
+
+          DiffResult lDiffResult = new OrcasDiff( pCallableStatementProvider, getParameters(), getDatabaseHandler() ).compare( lSollModel, lDatabaseModel );
+
+          handleDiffResult( getParameters(), pCallableStatementProvider, lDiffResult );
         }
-      } );
+        else
+        {
+          getParameters().getExtensionHandler().handleTargetplsql( pCallableStatementProvider );
+        }
+
+        logInfo( "done orcas statics" );
+      };
+
+      if( getParameters().getSchemaFiles() == null ) {
+        JdbcConnectionHandler.runWithCallableStatementProvider(getParameters(), new RunWithCallableStatementProvider() {
+          public void run(CallableStatementProvider pCallableStatementProvider) {
+            lStaticsHandler.accept(pCallableStatementProvider);
+          }
+        });
+      }
+      else {
+        lStaticsHandler.accept(null);
+      }
     }
   }
 
@@ -95,7 +112,7 @@ public class OrcasMain extends Orcas
     return pSyexModel;
   }
 
-  private void handleDiffResult( Parameters pParameters, CallableStatementProvider pCallableStatementProvider, DiffResult pOriginalDiffResult ) throws FileNotFoundException
+  private void handleDiffResult( Parameters pParameters, CallableStatementProvider pCallableStatementProvider, DiffResult pOriginalDiffResult )
   {
     DiffResult lDiffResult = pOriginalDiffResult;
 

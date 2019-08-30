@@ -1,0 +1,1 @@
+create table TAB_PARTITION_INTERVAL (  COL1 DATE not null   )  partition by range (COL1)interval (numtoyminterval(1, 'month'))(partition part_10 values less than (to_date('01.01.2010','DD.MM.YYYY')));

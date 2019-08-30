@@ -1,0 +1,1 @@
+create table TAB_PARTITION_LIST_HASH (  COL1 NUMBER(15) not null, COL2 NUMBER(15) not null   )  partition by list (COL1) subpartition by hash (COL2)(partition part_10_5 values (10,5)(subpartition part_10_5__1,subpartition part_10_5__2,subpartition part_10_5__3),partition part_d values (default)(subpartition part_d__1,subpartition part_d__2,subpartition part_d__3));

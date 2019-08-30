@@ -59,7 +59,7 @@ public class DatabaseHandlerOracle extends DatabaseHandler
   @Override
   public CharType getDefaultCharType( CallableStatementProvider pCallableStatementProvider )
   {
-    if( new WrapperReturnFirstValue( "select value from nls_instance_parameters where parameter = 'NLS_LENGTH_SEMANTICS'", pCallableStatementProvider ).executeForValue().equals( "BYTE" ) )
+    if( pCallableStatementProvider != null && new WrapperReturnFirstValue( "select value from nls_instance_parameters where parameter = 'NLS_LENGTH_SEMANTICS'", pCallableStatementProvider ).executeForValue().equals( "BYTE" ) )
     {
       return CharType.BYTE;
     }
@@ -72,7 +72,11 @@ public class DatabaseHandlerOracle extends DatabaseHandler
   @Override
   public String getDefaultTablespace( CallableStatementProvider pCallableStatementProvider )
   {
-    return (String) new WrapperReturnFirstValue( "select default_tablespace from user_users", pCallableStatementProvider ).executeForValue();
+    if( pCallableStatementProvider != null ) {
+      return (String) new WrapperReturnFirstValue("select default_tablespace from user_users", pCallableStatementProvider).executeForValue();
+    } else {
+      return null;
+    }
   }
 
   @Override
