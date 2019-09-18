@@ -7,7 +7,10 @@
       <version>1.0.0</version>
       <packaging>orcas-database-deployment</packaging>
      
-      <name>Orcas Maven Example with domain extensions</name>
+      <name>Orcas Maven Example</name>
+
+	
+
   <build>
     <plugins>
       <plugin>
@@ -17,12 +20,6 @@
         <extensions>true</extensions>
 
         <dependencies>
-          <dependency>
-            <groupId>com.opitzconsulting.orcas</groupId>
-            <artifactId>orcas-domainextension-main-extensionhandler</artifactId>
-            <version>5.8.3</version>
-          </dependency>
-
 		<dependency>
 			<groupId>com.oracle.ojdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
@@ -34,11 +31,7 @@
           <jdbcurl>jdbc:oracle:thin:@localhost:1521:XE</jdbcurl>
           <username>orcas_orderentry</username>
           <password>orcas_orderentry</password>
-          <orcasjdbcurl>jdbc:oracle:thin:@localhost:1521:XE</orcasjdbcurl>
-          <orcasusername>orcas_orderentry_orcas</orcasusername>
-          <orcaspassword>orcas_orderentry</orcaspassword>
           <loglevel>info</loglevel>
-	  <extractmodelinputfolder>src/main/sql/statics/domains</extractmodelinputfolder>
         </configuration>        
       </plugin>
     </plugins>
