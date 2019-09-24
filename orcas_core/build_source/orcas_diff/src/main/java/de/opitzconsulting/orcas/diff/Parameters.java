@@ -100,6 +100,9 @@ public abstract class Parameters
   protected String _initializeChecksumExtension;
   protected boolean _keepDriverClassLoadMessages = true;
   protected List<File> _modelFiles;
+  protected List<File> _relevantModelFiles;
+  protected List<String> _relevantTables;
+  protected List<String> _relevantSequences;
   protected List<File> _schemaFiles = null;
   protected URL _scriptUrl;
   protected String _scriptUrlFilename;
@@ -496,5 +499,25 @@ public abstract class Parameters
 
   public List<File> getSchemaFiles() {
     return _schemaFiles;
+  }
+
+  public List<File> getRelevantModelFiles() {
+    return _relevantModelFiles;
+  }
+
+  public List<String> getRelevantTables() {
+    return _relevantTables;
+  }
+
+  public List<String> getRelevantSequences() {
+    return _relevantSequences;
+  }
+
+  public void setRelevantTables(List<String> pRelevantTables) {
+    _relevantTables = pRelevantTables;
+  }
+
+  public void setRelevantSequences(List<String> pRelevantSequences) {
+    _relevantSequences = pRelevantSequences;
   }
 }

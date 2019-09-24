@@ -166,5 +166,10 @@ public class DiffAction
       isFailure = pIsFailure;
       comment = pComment;
     }
+
+    public void setIgnore( String pIgnoreReason ){
+      isIgnore = true;
+      comment = pIgnoreReason;
+    }
   }
 }

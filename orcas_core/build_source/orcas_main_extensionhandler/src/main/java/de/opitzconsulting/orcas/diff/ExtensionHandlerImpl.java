@@ -6,6 +6,7 @@ import java.sql.Struct;
 import java.util.List;
 import java.net.URL;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import com.opitzconsulting.orcas.xslt.XsltExtractDirAccessClass;
 
@@ -22,6 +23,8 @@ import de.opitzconsulting.orcas.syex.trans.TransformOrigSyex;
 import de.opitzconsulting.orcas.syex.trans.TransformSyexOrig;
 import de.opitzconsulting.orcas.syex.xml.XmlExport;
 import de.opitzconsulting.orcasDsl.OrcasDslPackage;
+import de.opitzconsulting.orcasDsl.Sequence;
+import de.opitzconsulting.orcasDsl.Table;
 import de.opitzconsulting.orcasDsl.impl.ModelImpl;
 import de.opitzconsulting.origOrcasDsl.Model;
 
@@ -135,6 +138,26 @@ public class ExtensionHandlerImpl extends BaseExtensionHandlerImpl<de.opitzconsu
   {
     return new XtextFileLoader<de.opitzconsulting.orcasDsl.Model>()
     {
+
+      @Override
+      protected List<String> getTableNames(de.opitzconsulting.orcasDsl.Model pModel) {
+        return pModel.getModel_elements()
+              .stream()
+              .filter(p->p instanceof Table)
+              .map(p->(Table)p)
+              .map(Table::getName)
+              .collect(Collectors.toList());
+      }
+
+      @Override
+      protected List<String> getSequenceNames(de.opitzconsulting.orcasDsl.Model pModel) {
+        return pModel.getModel_elements()
+                     .stream()
+                     .filter(p->p instanceof Sequence)
+                     .map(p->(Sequence)p)
+                     .map(Sequence::getSequence_name)
+                     .collect(Collectors.toList());
+      }
 
       @Override
       protected void combinModelResults( de.opitzconsulting.orcasDsl.Model pCombinedModel, de.opitzconsulting.orcasDsl.Model pModelPartFromSingleFile )

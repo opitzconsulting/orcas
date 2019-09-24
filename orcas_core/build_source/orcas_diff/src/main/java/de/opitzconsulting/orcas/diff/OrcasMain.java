@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import de.opitzconsulting.orcas.diff.DiffAction.Statement;
+import de.opitzconsulting.orcas.diff.DiffReasonKey.DiffReasonEntity;
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
@@ -65,6 +66,8 @@ public class OrcasMain extends Orcas
 
           DiffResult lDiffResult = new OrcasDiff( pCallableStatementProvider, getParameters(), getDatabaseHandler() ).compare( lSollModel, lDatabaseModel );
 
+          handleRelevanceCheck( lDiffResult, getParameters() );
+
           handleDiffResult( getParameters(), pCallableStatementProvider, lDiffResult );
         }
         else
@@ -85,6 +88,33 @@ public class OrcasMain extends Orcas
       else {
         lStaticsHandler.accept(null);
       }
+    }
+  }
+
+  private void handleRelevanceCheck(DiffResult pDiffResult, Parameters pParameters) {
+    if (pParameters.getRelevantTables() != null || pParameters.getRelevantSequences() != null) {
+      pDiffResult.getDiffActions().forEach(p -> {
+            boolean lIsTable = p.getDiffReasonKey().getTextObjectType().equals(DiffReasonEntity.TABLE.name().toLowerCase());
+            boolean lIsSequence = p.getDiffReasonKey().getTextObjectType().equals(DiffReasonEntity.SEQUENCE.name().toLowerCase());
+
+            boolean lIgnore = false;
+
+            if (lIsTable && pParameters.getRelevantTables() != null) {
+              if (!pParameters.getRelevantTables().contains(p.getDiffReasonKey().getTextObjectName())) {
+                lIgnore = true;
+              }
+            }
+            if (lIsSequence && pParameters.getRelevantSequences() != null) {
+              if (!pParameters.getRelevantSequences().contains(p.getDiffReasonKey().getTextObjectName())) {
+                lIgnore = true;
+              }
+            }
+
+            if( lIgnore ) {
+              p.getStatements().forEach(pStatement -> pStatement.setIgnore("change on object not marked as relevant"));
+            }
+          }
+      );
     }
   }
 

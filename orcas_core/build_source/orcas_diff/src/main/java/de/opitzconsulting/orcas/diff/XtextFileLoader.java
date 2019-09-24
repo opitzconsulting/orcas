@@ -3,6 +3,8 @@ package de.opitzconsulting.orcas.diff;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,17 +64,31 @@ public abstract class XtextFileLoader<T extends EObject>
 
     int lCounter = 0;
 
+    boolean checkForRelevance = pParameters.getRelevantModelFiles() != null;
+    pParameters.setRelevantTables(new ArrayList<>());
+    pParameters.setRelevantSequences(new ArrayList<>());
+
     for( File lFile : pModelFiles )
     {
       T lLoadModelDslFile = loadModelDslFile( lFile, pParameters, lResourceSet, lLoadOptions, lCounter++ );
       if( lLoadModelDslFile != null )
       {
+        if( checkForRelevance ){
+          if( pParameters.getRelevantModelFiles().contains(lFile) ) {
+            pParameters.getRelevantTables().addAll(getTableNames(lLoadModelDslFile));
+            pParameters.getRelevantSequences().addAll(getSequenceNames(lLoadModelDslFile));
+          }
+        }
         combinModelResults( lReturn, lLoadModelDslFile );
       }
     }
 
     return lReturn;
   }
+
+  protected abstract List<String> getTableNames(T pModel);
+
+  protected abstract List<String> getSequenceNames(T pModel);
 
   protected abstract void combinModelResults( T pCombinedModel, T pModelPartFromSingleFile );
 

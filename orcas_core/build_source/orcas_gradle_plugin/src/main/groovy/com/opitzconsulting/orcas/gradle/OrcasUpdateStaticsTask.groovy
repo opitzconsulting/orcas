@@ -10,6 +10,10 @@ public class OrcasUpdateStaticsTask extends BaseOrcasTask
 
   FileCollection scriptFiles;
 
+  FileCollection relevantScriptFiles;
+
+  FileCollection schemaFiles;
+
   @Override
   protected String getLogname()
   {
@@ -27,6 +31,16 @@ public class OrcasUpdateStaticsTask extends BaseOrcasTask
     {
       pParameters.setModelFile( "" );
       pParameters.setModelFiles( scriptFiles as List );
+    }
+
+    if( relevantScriptFiles != null )
+    {
+      pParameters.setRelevantModelFiles( relevantScriptFiles as List  );
+    }
+
+    if( relevantScriptFiles != null )
+    {
+      pParameters.setSchemaFiles( schemaFiles as List  );
     }
 
     if( project.file(project.orcasconfiguration.staticsfolder).exists() || scriptFiles != null )

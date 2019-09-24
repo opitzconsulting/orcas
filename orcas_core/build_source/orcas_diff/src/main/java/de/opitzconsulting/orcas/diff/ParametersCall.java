@@ -312,4 +312,8 @@ public class ParametersCall extends Parameters
   public void setSchemaFiles( List<File> pSchemaFiles ) {
     _schemaFiles = pSchemaFiles;
   }
+
+  public void setRelevantModelFiles( List<File> pRelevantModelFiles ) {
+    _relevantModelFiles = pRelevantModelFiles;
+  }
 }
