@@ -65,8 +65,10 @@ public abstract class XtextFileLoader<T extends EObject>
     int lCounter = 0;
 
     boolean checkForRelevance = pParameters.getRelevantModelFiles() != null;
-    pParameters.setRelevantTables(new ArrayList<>());
-    pParameters.setRelevantSequences(new ArrayList<>());
+    if( checkForRelevance ) {
+      pParameters.setRelevantTables(new ArrayList<>());
+      pParameters.setRelevantSequences(new ArrayList<>());
+    }
 
     for( File lFile : pModelFiles )
     {
