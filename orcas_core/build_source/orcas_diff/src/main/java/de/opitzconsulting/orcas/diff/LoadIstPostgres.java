@@ -89,10 +89,9 @@ public class LoadIstPostgres extends LoadIst {
         loadTableConstraintsIntoModel(pModel);
         loadTableConstraintColumnsIntoModel(pModel);
         loadTableForeignKeyConstraintColumnsIntoModel(pModel);
+        loadTableCommentsIntoModel(pModel);
+        loadTableColumnCommentsIntoModel(pModel);
         /*
-         * loadTableCommentsIntoModel( pModel ); loadTableColumnCommentsIntoModel(
-         * pModel );
-         *
          * updateForeignkeyDestdata( pModel );
          */
 
@@ -316,7 +315,13 @@ public class LoadIstPostgres extends LoadIst {
                     if (pResultSet.getString("data_type").startsWith("blob")) {
                         lColumn.setData_type(DataType.BLOB);
                     }
+                    if (pResultSet.getString("data_type").equals("bytea")) {
+                        lColumn.setData_type(DataType.BLOB);
+                    }
                     if (pResultSet.getString("data_type").startsWith("clob")) {
+                        lColumn.setData_type(DataType.CLOB);
+                    }
+                    if (pResultSet.getString("data_type").equals("text")) {
                         lColumn.setData_type(DataType.CLOB);
                     }
                     if (pResultSet.getString("data_type").startsWith("varchar")) {
@@ -328,6 +333,9 @@ public class LoadIstPostgres extends LoadIst {
                         lColumn.setPrecision(pResultSet.getInt("scale"));
                     }
                     if (pResultSet.getString("data_type").startsWith("datetime")) {
+                        lColumn.setData_type(DataType.DATE);
+                    }
+                    if (pResultSet.getString("data_type").equals("date")) {
                         lColumn.setData_type(DataType.DATE);
                     }
                     if (pResultSet.getString("data_type").startsWith("timestamp")) {
@@ -345,6 +353,11 @@ public class LoadIstPostgres extends LoadIst {
                         if (null != pResultSet.getString("column_default")) {
                             lColumn.setDefault_value(pResultSet.getString("column_default"));
                         }
+                    }
+
+                    if (lColumn.getData_type() == null) {
+                        throw new IllegalStateException("datatype unknown: " + pResultSet.getString("data_type") + " of " + pResultSet.getString(
+                            "table_name") + "." + lColumn.getName());
                     }
 
                     findTable(pModel, pResultSet.getString("table_name"), null).getColumns().add(lColumn);
@@ -399,8 +412,8 @@ public class LoadIstPostgres extends LoadIst {
                     final Index lIndex = new IndexImpl();
 
                     lIndex.setConsName(getNameWithOwner(pResultSet.getString("index_name"), null));
-                    if(pResultSet.getBoolean("indisunique")) {
-                      lIndex.setUnique( "unique" );
+                    if (pResultSet.getBoolean("indisunique")) {
+                        lIndex.setUnique("unique");
                     }
 
                     findTable(pModel, pResultSet.getString("table_name"), null).getInd_uks().add(lIndex);
@@ -627,7 +640,7 @@ public class LoadIstPostgres extends LoadIst {
                             lForeignKey.setDelete_rule(FkDeleteRuleType.CASCADE);
                         }
 
-                        if(pResultSet.getBoolean("condeferred")){
+                        if (pResultSet.getBoolean("condeferred")) {
                             lForeignKey.setDeferrtype(DeferrType.DEFERRED);
                         }
 
@@ -642,7 +655,7 @@ public class LoadIstPostgres extends LoadIst {
                         String lConsrc = pResultSet.getString("consrc");
                         lConstraint.setRule(lConsrc.substring(1, lConsrc.length() - 1));
 
-                        if(pResultSet.getBoolean("condeferred")){
+                        if (pResultSet.getBoolean("condeferred")) {
                             lConstraint.setDeferrtype(DeferrType.DEFERRED);
                         }
 
@@ -747,12 +760,11 @@ public class LoadIstPostgres extends LoadIst {
 
     private void loadTableCommentsIntoModel(final Model pModel) {
         String lSql = "" + //
-            " select table_name," + //
-            "        owner," + //
-            "        comments" + //
-            "   from " + getDataDictionaryView("tab_comments") + //
-            "  where comments is not null" + //
-            "  order by table_name" + //
+            " select c.relname table_name," + //
+            "        c.owner," + //
+            "        pg_catalog.obj_description(c.oid) as comments" + //
+            "   from " + getDataDictionaryView("pg_class", "c") + //
+            "  where c.relkind = 'r'" +//
             "";
 
         new WrapperIteratorResultSet(lSql, getCallableStatementProvider()) {
@@ -761,11 +773,15 @@ public class LoadIstPostgres extends LoadIst {
                 if (!isIgnoredTable(pResultSet.getString("table_name"), pResultSet.getString("owner"))) {
                     InlineComment lInlineComment = new InlineCommentImpl();
 
-                    lInlineComment.setComment(pResultSet.getString("comments"));
+                    String lComments = pResultSet.getString("comments");
 
-                    lInlineComment.setComment_object(CommentObjectType.TABLE);
+                    if (lComments != null && lComments.trim().length() > 0) {
+                        lInlineComment.setComment(lComments);
 
-                    findTable(pModel, pResultSet.getString("table_name"), pResultSet.getString("owner")).getComments().add(lInlineComment);
+                        lInlineComment.setComment_object(CommentObjectType.TABLE);
+
+                        findTable(pModel, pResultSet.getString("table_name"), pResultSet.getString("owner")).getComments().add(lInlineComment);
+                    }
                 }
             }
         }.execute();
@@ -773,15 +789,15 @@ public class LoadIstPostgres extends LoadIst {
 
     private void loadTableColumnCommentsIntoModel(final Model pModel) {
         String lSql = "" + //
-            " select table_name," + //
-            "        column_name," + //
-            "        owner," + //
-            "        comments" + //
-            "   from " + getDataDictionaryView("col_comments") + //
-            "  where comments is not null" + //
-            "  order by table_name," + //
-            "           column_name" + //
-            "";
+            " select c.relname as table_name," + //
+            "        a.attname  as column_name," + //
+            "        c.owner," + //
+            "        pg_catalog.col_description(c.oid,a.attnum) as comments" + //
+            "   from " + getDataDictionaryView("pg_class", "c") + "," + //
+            "        pg_attribute a" + //
+            "  where c.relkind = 'r'" + //
+            "    and a.attnum > 0" + //
+            "    and a.attrelid = c.oid";
 
         new WrapperIteratorResultSet(lSql, getCallableStatementProvider()) {
             @Override
@@ -789,13 +805,17 @@ public class LoadIstPostgres extends LoadIst {
                 if (!isIgnoredTable(pResultSet.getString("table_name"), pResultSet.getString("owner"))) {
                     InlineComment lInlineComment = new InlineCommentImpl();
 
-                    lInlineComment.setComment(pResultSet.getString("comments"));
+                    String lComments = pResultSet.getString("comments");
 
-                    lInlineComment.setColumn_name(pResultSet.getString("column_name"));
+                    if (lComments != null && lComments.trim().length() > 0) {
+                        lInlineComment.setComment(lComments);
 
-                    lInlineComment.setComment_object(CommentObjectType.COLUMN);
+                        lInlineComment.setColumn_name(pResultSet.getString("column_name"));
 
-                    findTable(pModel, pResultSet.getString("table_name"), pResultSet.getString("owner")).getComments().add(lInlineComment);
+                        lInlineComment.setComment_object(CommentObjectType.COLUMN);
+
+                        findTable(pModel, pResultSet.getString("table_name"), pResultSet.getString("owner")).getComments().add(lInlineComment);
+                    }
                 }
             }
         }.execute();

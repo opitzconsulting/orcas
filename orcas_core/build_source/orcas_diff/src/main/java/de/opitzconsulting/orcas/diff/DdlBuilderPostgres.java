@@ -25,6 +25,12 @@ public class DdlBuilderPostgres extends DdlBuilder {
         if (pData_typeNew == DataType.NUMBER) {
             return "NUMERIC";
         }
+        if (pData_typeNew == DataType.CLOB) {
+            return "TEXT";
+        }
+        if (pData_typeNew == DataType.BLOB) {
+            return "BYTEA";
+        }
 
         return super.getDatatypeName(pData_typeNew);
     }
