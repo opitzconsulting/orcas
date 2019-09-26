@@ -834,6 +834,7 @@ public class OrcasDiff
     if ( pTableDiff.primary_keyDiff.indexnameNew != null )
     {
       pTableDiff.ind_uksIndexDiff.stream()
+                                 .filter( p -> p.isNew )
                                  .filter( p -> p.consNameNew.toLowerCase().equals( pTableDiff.primary_keyDiff.indexnameNew.toLowerCase() ) )
                                  .forEach( p -> handleIndex( pTableDiff, p ) );
     }
@@ -842,7 +843,7 @@ public class OrcasDiff
 
     pTableDiff.constraintsDiff.forEach( p -> handleConstraint( pTableDiff, p ) );
 
-    pTableDiff.ind_uksIndexDiff.stream().filter( p -> pTableDiff.primary_keyDiff.indexnameNew == null || !p.consNameNew.toLowerCase().equals( pTableDiff.primary_keyDiff.indexnameNew.toLowerCase() ) ).forEach( p -> handleIndex( pTableDiff, p ) );
+    pTableDiff.ind_uksIndexDiff.stream().filter( p -> pTableDiff.primary_keyDiff.indexnameNew == null || !p.isNew || !p.consNameNew.toLowerCase().equals( pTableDiff.primary_keyDiff.indexnameNew.toLowerCase() ) ).forEach( p -> handleIndex( pTableDiff, p ) );
 
     pTableDiff.ind_uksUniqueKeyDiff.forEach( p -> handleUniquekey( pTableDiff, p ) );
 
