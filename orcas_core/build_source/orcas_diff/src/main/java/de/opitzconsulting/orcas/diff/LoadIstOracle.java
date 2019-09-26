@@ -994,6 +994,7 @@ public class LoadIstOracle extends LoadIst
             if ( pResultSet.getString( "virtual_column" ).equals( "YES" ) )
             {
               lColumn.setVirtual( "virtual" );
+              lColumn.setDefault_value(lColumn.getDefault_value().replace("\"",""));
             }
           }
         }
