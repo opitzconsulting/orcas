@@ -1,0 +1,25 @@
+buildscript {
+    repositories {
+       mavenLocal()
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
+                  version: '5.8.5'
+
+        classpath group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
+    }
+}
+
+apply plugin: 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+               
+orcasconfiguration {
+          jdbcurl = "jdbc:oracle:thin:@localhost:1521:XE"
+          username = "orcas_dba"
+          password = "orcas_dba"
+          loglevel = "info"
+          multischema = true
+          multischemadbaviews = true
+          multischemaexcludewhereowner = "owner not in ('ORCAS_ORDERENTRY_META','ORCAS_ORDERENTRY_DATA')"
+}
+

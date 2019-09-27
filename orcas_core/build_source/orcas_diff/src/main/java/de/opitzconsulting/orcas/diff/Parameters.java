@@ -10,6 +10,8 @@ import java.util.function.UnaryOperator;
 
 import org.eclipse.emf.ecore.EObject;
 
+import de.opitzconsulting.orcas.sql.CallableStatementProvider;
+
 public abstract class Parameters
 {
   public static class JdbcConnectParameters
@@ -65,6 +67,14 @@ public abstract class Parameters
     NEVER, ALWAYS, IGNORE_DROP
   }
 
+  public void setMultiSchemaConnectionManager(MultiSchemaConnectionManager pMultiSchemaConnectionManager) {
+    _multiSchemaConnectionManager = pMultiSchemaConnectionManager;
+    if(_multiSchemaConnectionManager instanceof BaseMultiSchemaConnectionManager){
+      ((BaseMultiSchemaConnectionManager)_multiSchemaConnectionManager).setParameters(this);
+    }
+  }
+
+  private MultiSchemaConnectionManager _multiSchemaConnectionManager = new MultiSchemaConnectionManagerSimple();
   protected JdbcConnectParameters _jdbcConnectParameters = new JdbcConnectParameters();
   protected JdbcConnectParameters _srcJdbcConnectParameters;
   protected JdbcConnectParameters _orcasJdbcConnectParameters;
@@ -284,6 +294,11 @@ public abstract class Parameters
   public JdbcConnectParameters getJdbcConnectParameters()
   {
     return _jdbcConnectParameters;
+  }
+
+  public MultiSchemaConnectionManager getMultiSchemaConnectionManager()
+  {
+    return _multiSchemaConnectionManager;
   }
 
   public boolean isLogonly()

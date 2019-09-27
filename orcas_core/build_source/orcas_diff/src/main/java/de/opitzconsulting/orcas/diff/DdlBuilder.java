@@ -1754,7 +1754,14 @@ public abstract class DdlBuilder
     return lReturn;
   }
 
-  public void createForeignKey( StatementBuilder p, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff, boolean pIsMultiSchema, DataHandler pDataHandler )
+  public void createForeignKeyGrantIfNeeded( StatementBuilder p, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff ){
+      if( !getSchemaName( pTableDiff.nameNew ).equals( getSchemaName( pForeignKeyDiff.destTableNew ) ) )
+      {
+        p.addStmt( "grant references on " + pForeignKeyDiff.destTableNew + " to " + getSchemaName( pTableDiff.nameNew ) );
+      }
+  }
+
+  public void createForeignKey( StatementBuilder p, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff, DataHandler pDataHandler )
   {
     String lFkFalseDataSelect;
     String lFkFalseDataWherePart;
@@ -1797,14 +1804,6 @@ public abstract class DdlBuilder
             throw new RuntimeException( "error FK rebuild " + pForeignKeyDiff.consNameNew + " on table " + pTableDiff.nameNew + " data-cleaning not possible , missing delete rule. " + lFkFalseDataSelect );
           }
         }
-      }
-    }
-
-    if( pIsMultiSchema )
-    {
-      if( !getSchemaName( pTableDiff.nameNew ).equals( getSchemaName( pForeignKeyDiff.destTableNew ) ) )
-      {
-        p.addStmt( "grant references on " + pForeignKeyDiff.destTableNew + " to " + getSchemaName( pTableDiff.nameNew ) );
       }
     }
 

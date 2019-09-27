@@ -1,5 +1,6 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import de.opitzconsulting.orcas.orig.diff.UniqueKeyDiff;
 
 public class DiffReasonKey
 {
+  private String schemaName;
   private DiffReasonEntity diffReasonEntity;
   private String name;
   private DiffReasonSubEntity diffReasonSubEntity;
@@ -44,11 +46,21 @@ public class DiffReasonKey
   {
     diffReasonEntity = pDiffReasonEntity;
     name = pName;
+
+    int lIndexOfDot = name.indexOf('.');
+    if(lIndexOfDot>0){
+      schemaName = name.substring(0,lIndexOfDot);
+      name = name.substring(lIndexOfDot+1);
+    }
   }
 
   private DiffReasonKey( DiffReasonKey pDiffReasonKey, DiffReasonSubEntity pDiffReasonSubEntity, String pSubName )
   {
     this( pDiffReasonKey.diffReasonEntity, pDiffReasonKey.name );
+
+    if( pDiffReasonKey.schemaName != null ){
+      schemaName = pDiffReasonKey.schemaName;
+    }
 
     diffReasonSubEntity = pDiffReasonSubEntity;
     subName = pSubName;
@@ -62,6 +74,11 @@ public class DiffReasonKey
   private DiffReasonKey( TableDiff pTableDiff )
   {
     this( DiffReasonEntity.TABLE, pTableDiff.isNew ? pTableDiff.nameNew : pTableDiff.nameOld );
+  }
+
+  public DiffReasonKey( String pTableName )
+  {
+    this( DiffReasonEntity.TABLE, pTableName );
   }
 
   private DiffReasonKey( MviewDiff pMviewDiff )
@@ -129,6 +146,11 @@ public class DiffReasonKey
   public String getTextObjectName()
   {
     return name;
+  }
+
+  public String getTextSchemaName()
+  {
+    return schemaName;
   }
 
   public String getTextSubobjectName()

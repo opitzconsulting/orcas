@@ -146,6 +146,7 @@ public class ExtensionHandlerImpl extends BaseExtensionHandlerImpl<de.opitzconsu
               .filter(p->p instanceof Table)
               .map(p->(Table)p)
               .map(Table::getName)
+              .map(String::toUpperCase)
               .collect(Collectors.toList());
       }
 
@@ -156,6 +157,7 @@ public class ExtensionHandlerImpl extends BaseExtensionHandlerImpl<de.opitzconsu
                      .filter(p->p instanceof Sequence)
                      .map(p->(Sequence)p)
                      .map(Sequence::getSequence_name)
+                     .map(String::toUpperCase)
                      .collect(Collectors.toList());
       }
 

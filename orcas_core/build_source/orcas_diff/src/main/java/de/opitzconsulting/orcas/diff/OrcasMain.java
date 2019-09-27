@@ -99,13 +99,21 @@ public class OrcasMain extends Orcas
 
             boolean lIgnore = false;
 
-            if (lIsTable && pParameters.getRelevantTables() != null) {
-              if (!pParameters.getRelevantTables().contains(p.getDiffReasonKey().getTextObjectName())) {
+        String lTextObjectName = p.getDiffReasonKey().getTextObjectName();
+
+        if( p.getDiffReasonKey().getTextSchemaName() != null ){
+          lTextObjectName = p.getDiffReasonKey().getTextSchemaName() + "." + lTextObjectName;
+        }
+
+        lTextObjectName = lTextObjectName.toUpperCase();
+
+        if (lIsTable && pParameters.getRelevantTables() != null) {
+              if (!pParameters.getRelevantTables().contains(lTextObjectName)) {
                 lIgnore = true;
               }
             }
             if (lIsSequence && pParameters.getRelevantSequences() != null) {
-              if (!pParameters.getRelevantSequences().contains(p.getDiffReasonKey().getTextObjectName())) {
+              if (!pParameters.getRelevantSequences().contains(lTextObjectName)) {
                 lIgnore = true;
               }
             }
@@ -144,83 +152,69 @@ public class OrcasMain extends Orcas
 
   private void handleDiffResult( Parameters pParameters, CallableStatementProvider pCallableStatementProvider, DiffResult pOriginalDiffResult )
   {
-    DiffResult lDiffResult = pOriginalDiffResult;
+    try {
+        DiffResult lDiffResult = pOriginalDiffResult;
 
-    if( pParameters.getXmlInputFile() != null )
-    {
-      logInfo( "applying xml input file: " + pParameters.getXmlInputFile() );
-      lDiffResult = getXmlLogFileHandler().handleXmlInputFile( lDiffResult, pParameters.getXmlInputFile(), getParameters().getXmlLogFile() );
-    }
-    else
-    {
-      if( getParameters().getXmlLogFile() != null )
-      {
-        getXmlLogFileHandler().logXml( lDiffResult, getParameters().getXmlLogFile() );
-      }
-    }
-
-    List<String> lScriptLines = new ArrayList<String>();
-
-    for( DiffAction lDiffAction : lDiffResult.getDiffActions() )
-    {
-      for( Statement lStatementClass : lDiffAction.getStatements() )
-      {
-        if( lStatementClass.isFailure() )
-        {
-          throw new RuntimeException( lStatementClass.getComment() + ":" + lStatementClass.getStatement() );
-        }
-      }
-    }
-
-    for( DiffAction lDiffAction : lDiffResult.getDiffActions() )
-    {
-      for( Statement lStatementClass : lDiffAction.getStatements() )
-      {
-        String lStatement = lStatementClass.getStatement();
-
-        int lMaxLineLength = 2000;
-
-        lStatement = addLineBreaksIfNeeded( lStatement, lMaxLineLength );
-        String lStatementToExecute = lStatement;
-
-        if( !lStatementClass.isIgnore() || getParameters().isLogIgnoredStatements() )
-        {
-          if( lStatementClass.isIgnore() )
-          {
-            lStatement = "-- ignore-" + lStatementClass.getComment() + ": " + lStatement;
-          }
-          else
-          {
-            if( lStatementClass.getComment() != null )
-            {
-              lStatement = lStatement + " -- " + lStatementClass.getComment();
+        if (pParameters.getXmlInputFile() != null) {
+            logInfo("applying xml input file: " + pParameters.getXmlInputFile());
+            lDiffResult = getXmlLogFileHandler().handleXmlInputFile(lDiffResult, pParameters.getXmlInputFile(), getParameters().getXmlLogFile());
+        } else {
+            if (getParameters().getXmlLogFile() != null) {
+                getXmlLogFileHandler().logXml(lDiffResult, getParameters().getXmlLogFile());
             }
-          }
-
-          if( lStatement.endsWith( ";" ) )
-          {
-            lScriptLines.add( lStatement );
-            lScriptLines.add( "/" );
-            logInfo( lStatement );
-            logInfo( "/" );
-          }
-          else
-          {
-            lScriptLines.add( lStatement + ";" );
-            logInfo( lStatement + ";" );
-          }
         }
 
-        if( !pParameters.isLogonly() && !lStatementClass.isIgnore() )
-        {
-          getDatabaseHandler().executeDiffResultStatement( lStatementToExecute, pCallableStatementProvider );         
+        List<String> lScriptLines = new ArrayList<String>();
+
+        for (DiffAction lDiffAction : lDiffResult.getDiffActions()) {
+            for (Statement lStatementClass : lDiffAction.getStatements()) {
+                if (lStatementClass.isFailure()) {
+                    throw new RuntimeException(lStatementClass.getComment() + ":" + lStatementClass.getStatement());
+                }
+            }
         }
-      }
+
+        for (DiffAction lDiffAction : lDiffResult.getDiffActions()) {
+            for (Statement lStatementClass : lDiffAction.getStatements()) {
+                String lStatement = lStatementClass.getStatement();
+
+                int lMaxLineLength = 2000;
+
+                lStatement = addLineBreaksIfNeeded(lStatement, lMaxLineLength);
+                String lStatementToExecute = lStatement;
+
+                if (!lStatementClass.isIgnore() || getParameters().isLogIgnoredStatements()) {
+                    if (lStatementClass.isIgnore()) {
+                        lStatement = "-- ignore-" + lStatementClass.getComment() + ": " + lStatement;
+                    } else {
+                        if (lStatementClass.getComment() != null) {
+                            lStatement = lStatement + " -- " + lStatementClass.getComment();
+                        }
+                    }
+
+                    if (lStatement.endsWith(";")) {
+                        lScriptLines.add(lStatement);
+                        lScriptLines.add("/");
+                        logInfo(lStatement);
+                        logInfo("/");
+                    } else {
+                        lScriptLines.add(lStatement + ";");
+                        logInfo(lStatement + ";");
+                    }
+                }
+
+                if (!pParameters.isLogonly() && !lStatementClass.isIgnore()) {
+                    getDatabaseHandler().executeDiffResultStatement(lStatementToExecute, getParameters().getMultiSchemaConnectionManager().getCallableStatementProviderForSchema(pCallableStatementProvider, lDiffAction.getDiffReasonKey().getTextSchemaName(), getParameters()) );
+                }
+            }
+        }
+
+        if (!lScriptLines.isEmpty()) {
+            addSpoolfolderScriptIfNeeded(lScriptLines, pParameters.getLogname() + ".sql");
+        }
     }
-
-    if( !lScriptLines.isEmpty() )
-    {
-      addSpoolfolderScriptIfNeeded( lScriptLines, pParameters.getLogname() + ".sql" );
+    finally {
+        getParameters().getMultiSchemaConnectionManager().releaseAllConnections();
     }
   }
 

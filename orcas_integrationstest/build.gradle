@@ -11,7 +11,7 @@ dependencies
   compile group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler',
                   version: '5.8.5'
 
-  classpath group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
+  compile group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
 }
 
 
@@ -37,7 +37,7 @@ test {
     systemProperty "orcas.integrationtest.execute_tests",                execute_tests
 
     systemProperty "orcas.integrationtest.available_feature_list",       available_feature_list
-    systemProperty "orcas.integrationtest.jdbc_url",                     "jdbc:oracle:thin:@${jdbc_host}:${jdbc_port}:${jdbc_sid}"
+    systemProperty "orcas.integrationtest.jdbc_url",                     default_jdbcurl
     systemProperty "orcas.integrationtest.jdbc_user",                    username_dba
     systemProperty "orcas.integrationtest.jdbc_password",                password_dba
     systemProperty "orcas.integrationtest.alternate_tablespace_1",       alternate_tablespace_1

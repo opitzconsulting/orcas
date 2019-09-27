@@ -34,6 +34,7 @@ public class XmlLogFileHandler
   private static final String TAG_DIFF_ACTION_ATTRIBUTE_RECREATE = "recreate";
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_TYPE = "object-type";
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME = "object-name";
+  private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SCHEMA_NAME = "schema-name";
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE = "subobject-type";
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME = "subobject-name";
 
@@ -125,6 +126,9 @@ public class XmlLogFileHandler
       pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE, pDiffReasonKey.getTextSubobjectType() );
     }
     pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME, pDiffReasonKey.getTextObjectName() );
+    if(pDiffReasonKey.getTextSchemaName()!=null){
+      pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SCHEMA_NAME, pDiffReasonKey.getTextSchemaName() );
+    }
     if( pDiffReasonKey.getTextSubobjectName() != null )
     {
       pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME, pDiffReasonKey.getTextSubobjectName() );

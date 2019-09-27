@@ -780,7 +780,21 @@ public class OrcasDiff
           }
           else
           {
-            createIfNeededOrAlter( lForeignKeyDiff, p -> ddlBuilder.createForeignKey( p, lTableDiff, lForeignKeyDiff, _parameters.getMultiSchema(), dataHandler ), p -> ddlBuilder.alterForeignKeyIfNeeded( p, lTableDiff, lForeignKeyDiff, dataHandler ) );
+            if( _parameters.getMultiSchema() ) {
+              if( lForeignKeyDiff.isNew )
+              {
+                if( lForeignKeyDiff.isOld == false  )
+                {
+                  DiffAction lDiffAction = new DiffAction( new DiffReasonKey(lForeignKeyDiff.destTableNew), DiffReasonType.CREATE );
+
+                  doInDiffAction( lDiffAction, Collections.singletonList( new DiffActionReasonMissing( diffReasonKeyRegistry.getDiffReasonKey(
+                      lForeignKeyDiff) ) ),
+                      (DiffActionRunnable) p -> ddlBuilder.createForeignKeyGrantIfNeeded(p, lTableDiff, lForeignKeyDiff), createStatementBuilder() );
+                }
+              }
+            }
+
+            createIfNeededOrAlter( lForeignKeyDiff, p -> ddlBuilder.createForeignKey( p, lTableDiff, lForeignKeyDiff, dataHandler ), p -> ddlBuilder.alterForeignKeyIfNeeded( p, lTableDiff, lForeignKeyDiff, dataHandler ) );
           }
         }
       } );
