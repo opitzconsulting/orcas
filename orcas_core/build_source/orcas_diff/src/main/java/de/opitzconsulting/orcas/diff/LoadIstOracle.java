@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.logging.Log;
@@ -63,6 +64,7 @@ import de.opitzconsulting.origOrcasDsl.Model;
 import de.opitzconsulting.origOrcasDsl.ModelElement;
 import de.opitzconsulting.origOrcasDsl.Mview;
 import de.opitzconsulting.origOrcasDsl.MviewLog;
+import de.opitzconsulting.origOrcasDsl.NestedTableStorage;
 import de.opitzconsulting.origOrcasDsl.NewValuesType;
 import de.opitzconsulting.origOrcasDsl.OrderType;
 import de.opitzconsulting.origOrcasDsl.ParallelType;
@@ -109,6 +111,7 @@ import de.opitzconsulting.origOrcasDsl.impl.LobStorageParametersImpl;
 import de.opitzconsulting.origOrcasDsl.impl.ModelImpl;
 import de.opitzconsulting.origOrcasDsl.impl.MviewImpl;
 import de.opitzconsulting.origOrcasDsl.impl.MviewLogImpl;
+import de.opitzconsulting.origOrcasDsl.impl.NestedTableStorageImpl;
 import de.opitzconsulting.origOrcasDsl.impl.PrimaryKeyImpl;
 import de.opitzconsulting.origOrcasDsl.impl.RangePartitionImpl;
 import de.opitzconsulting.origOrcasDsl.impl.RangePartitionValueImpl;
@@ -180,6 +183,7 @@ public class LoadIstOracle extends LoadIst
     loadMViewsLogColumnsIntoModel( pModel );
 
     loadLobstorageIntoModel( pModel );
+    loadNestedTableStorageIntoModel( pModel );
 
     loadIndexesIntoModel( pModel );
     loadIndexColumnsIntoModel( pModel );
@@ -187,6 +191,7 @@ public class LoadIstOracle extends LoadIst
 
     loadTableConstraintsIntoModel( pModel );
     loadTableConstraintColumnsIntoModel( pModel );
+    removeNestedTableConstraintsFromModel( pModel );
 
     loadTableCommentsIntoModel( pModel );
     loadTableColumnCommentsIntoModel( pModel );
@@ -196,6 +201,36 @@ public class LoadIstOracle extends LoadIst
     removeNonePrebuildMviewTables( pModel );
 
     return pModel;
+  }
+
+  private void removeNestedTableConstraintsFromModel(Model pModel) {
+    pModel.getModel_elements()
+          .stream()
+          .filter(p->p instanceof Table)
+          .map(p->(Table)p)
+          .forEach(pTable->{
+            List<String> lObjectTypecolumns = pTable.getColumns()
+                                          .stream()
+                                          .filter(p -> p.getObject_type() != null)
+                                          .map(p -> p.getName_string())
+                                          .collect(Collectors.toList());
+
+            if(!lObjectTypecolumns.isEmpty()) {
+              pTable.getInd_uks().removeAll(
+                  pTable.getInd_uks()
+                        .stream()
+                        .filter(p -> p instanceof UniqueKey)
+                        .map(p -> (UniqueKey) p)
+                        .filter(p -> p.getConsName().startsWith("SYS_"))
+                        .filter(p -> p.getUk_columns()
+                                      .stream()
+                                      .map(ColumnRef::getColumn_name_string)
+                                      .allMatch(o -> o.startsWith("SYS_"))
+                        )
+                        .collect(Collectors.toList())
+              );
+            }
+          });
   }
 
   private int loadOracleMajorVersion()
@@ -295,6 +330,19 @@ public class LoadIstOracle extends LoadIst
           }
         }
       }.execute();
+
+      if( pType.equals("TABLE") ){
+        String lSqlNestedTable = "select table_name, owner from " + getDataDictionaryView( "nested_tables" );
+
+        new WrapperIteratorResultSet( lSqlNestedTable, getCallableStatementProvider() )
+        {
+          @Override
+          protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+          {
+            includeMap.get( pType ).remove( getNameWithOwner( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) );
+          }
+        }.execute();
+      }
     }
   }
 
@@ -1720,6 +1768,37 @@ public class LoadIstOracle extends LoadIst
         }
 
         return null;
+      }
+    }.execute();
+  }
+
+  private void loadNestedTableStorageIntoModel( final Model pModel )
+  {
+    String lSql = "" + //
+        " select table_name," + //
+        "        owner," + //
+        "        parent_table_name," + //
+        "        parent_table_column" + //
+        "   from " + getDataDictionaryView( "nested_tables" ) + //
+        "  order by table_name," + //
+        "           parent_table_column" + //
+        "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        if( !isIgnoredTable( pResultSet.getString( "parent_table_name" ), pResultSet.getString( "owner" ) ) )
+        {
+          NestedTableStorage lNestedTableStorage = new NestedTableStorageImpl();
+
+          lNestedTableStorage.setColumn_name(pResultSet.getString( "parent_table_column" ));
+          lNestedTableStorage.setStorage_clause_string(pResultSet.getString( "table_name" ));
+
+          Table lTable = findTable( pModel, pResultSet.getString( "parent_table_name" ), pResultSet.getString( "owner" ) );
+          lTable.getNestedTableStorages().add( lNestedTableStorage );
+        }
       }
     }.execute();
   }

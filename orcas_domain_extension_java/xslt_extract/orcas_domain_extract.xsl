@@ -34,6 +34,7 @@
       <apply-templates select="transactionControl" />
       <apply-templates select="lobStorages" />
       <apply-templates select="varrayStorages" />
+      <apply-templates select="nestedTableStorages" />
       <apply-templates select="tablePartitioning" />
       <apply-templates select="tablespace" />
       <apply-templates select="pctfree" />

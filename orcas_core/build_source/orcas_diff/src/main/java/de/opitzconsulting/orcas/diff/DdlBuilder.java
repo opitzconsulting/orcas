@@ -30,6 +30,7 @@ import de.opitzconsulting.orcas.orig.diff.ListSubSubPartDiff;
 import de.opitzconsulting.orcas.orig.diff.LobStorageDiff;
 import de.opitzconsulting.orcas.orig.diff.LobStorageParametersDiff;
 import de.opitzconsulting.orcas.orig.diff.MviewDiff;
+import de.opitzconsulting.orcas.orig.diff.NestedTableStorageDiff;
 import de.opitzconsulting.orcas.orig.diff.PrimaryKeyDiff;
 import de.opitzconsulting.orcas.orig.diff.RangePartitionDiff;
 import de.opitzconsulting.orcas.orig.diff.RangePartitionValueDiff;
@@ -946,6 +947,19 @@ public abstract class DdlBuilder
     return null;
   }
 
+  private NestedTableStorageDiff findNestedTableStorage( TableDiff pTableDiff, String pColumnName )
+  {
+    for( NestedTableStorageDiff lNestedTableStorageDiff : pTableDiff.nestedTableStoragesDiff )
+    {
+      if( lNestedTableStorageDiff.column_nameNew.equals( pColumnName ) )
+      {
+        return lNestedTableStorageDiff;
+      }
+    }
+
+    return null;
+  }
+
   public void createIndex( StatementBuilder p, TableDiff pTableDiff, IndexDiff pIndexDiff, boolean pIsIndexParallelCreate )
   {
     p.stmtStart( "create" );
@@ -1513,6 +1527,7 @@ public abstract class DdlBuilder
     {
       pTableDiff.lobStoragesDiff.stream().filter( lLobstorage -> lLobstorage.isNew ).forEach( lLobstorage -> addLobStorage( p, lLobstorage ) );
       pTableDiff.varrayStoragesDiff.stream().filter( lVarraystorage -> lVarraystorage.isNew ).forEach( lVarraystorage -> addVarrayStorage( p, lVarraystorage ) );
+      pTableDiff.nestedTableStoragesDiff.stream().filter( lNestedTableStorage -> lNestedTableStorage.isNew ).forEach( lNestedTableStorage -> addNestedTableStorage( p, lNestedTableStorage ) );
 
       if( pTableDiff.tablespaceNew != null )
       {
@@ -1974,6 +1989,12 @@ public abstract class DdlBuilder
       {
         addVarrayStorage( p, lVarraystorage );
       }
+
+      NestedTableStorageDiff lNestedTableStorage = findNestedTableStorage( pTableDiff, pColumnDiff.nameNew );
+      if( lNestedTableStorage != null )
+      {
+        addNestedTableStorage( p, lNestedTableStorage );
+      }
     } );
 
     if( pColumnDiffList.size() > 1 )
@@ -1993,6 +2014,22 @@ public abstract class DdlBuilder
       }
       p.stmtAppend( "lob" );
       addLobStorageParameters( p, pVarraystorage.lobStorageParametersDiff );
+    }
+  }
+
+
+  private void addNestedTableStorage( StatementBuilder p, NestedTableStorageDiff pNestedTableStorage )
+  {
+    if( pNestedTableStorage.storage_clauseNew != null )
+    {
+      p.stmtAppend( "nested table " + pNestedTableStorage.column_nameNew + " store as" );
+      if( pNestedTableStorage.storage_clauseNew.startsWith("\"") )
+      {
+        p.stmtAppend( pNestedTableStorage.storage_clauseNew.substring(1,pNestedTableStorage.storage_clauseNew.length()-1) );
+      }
+      else {
+        p.stmtAppend(pNestedTableStorage.storage_clauseNew);
+      }
     }
   }
 

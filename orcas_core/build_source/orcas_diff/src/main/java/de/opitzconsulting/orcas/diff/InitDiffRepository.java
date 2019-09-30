@@ -1,10 +1,13 @@
 package de.opitzconsulting.orcas.diff;
 
+import javax.crypto.interfaces.PBEKey;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import de.opitzconsulting.orcas.orig.diff.*;
 import de.opitzconsulting.origOrcasDsl.*;
@@ -176,6 +179,58 @@ public class InitDiffRepository
     } );
     DiffRepository.getVarrayStorageMerge().column_nameIsConvertToUpperCase = true;
 
+    DiffRepository.setNestedTableStorageMerge( new NestedTableStorageMerge()
+    {
+      @Override
+      public boolean isChildOrderRelevant()
+      {
+        return false;
+      }
+
+      @Override
+      public List<Integer> getMergeResult( List<NestedTableStorageDiff> pNewDiffValues, List<NestedTableStorage> pOldValues )
+      {
+        List<Integer> lReturn = new ArrayList<Integer>();
+
+        for( NestedTableStorage lOldValue : pOldValues )
+        {
+          boolean lFound = false;
+
+          int i = 0;
+          for( NestedTableStorageDiff pNewDiffValue : pNewDiffValues )
+          {
+            if( pNewDiffValue.column_nameNew.equals( lOldValue.getColumn_name() ) )
+            {
+              lReturn.add( i );
+              lFound = true;
+              break;
+            }
+
+            i++;
+          }
+
+          if( !lFound )
+          {
+            lReturn.add( null );
+          }
+        }
+
+        return lReturn;
+      }
+
+      @Override
+      public void cleanupValues( NestedTableStorage pValue )
+      {
+        super.cleanupValues( pValue );
+
+        handleStringName(pValue,
+            NestedTableStorage::getStorage_clause_string,
+            NestedTableStorage::setStorage_clause_string,
+            NestedTableStorage::setStorage_clause);
+      }
+    } );
+    DiffRepository.getNestedTableStorageMerge().column_nameIsConvertToUpperCase = true;
+
     DiffRepository.setInlineCommentMerge( new InlineCommentMerge()
     {
       @Override
@@ -231,18 +286,10 @@ public class InitDiffRepository
       {
         super.cleanupValues( pValue );
 
-        if ( pValue.getColumn_name_string() != null )
-        {
-          if ( pValue.getColumn_name_string().matches( "^[A-Z]([A-Z]|[0-9]|[_#$])*$" ) )
-          {
-            pValue.setColumn_name( pValue.getColumn_name_string() );
-          }
-          else
-          {
-            pValue.setColumn_name( '"' + pValue.getColumn_name_string() + '"' );
-          }
-          pValue.setColumn_name_string( null );
-        }
+        handleStringName(pValue,
+            InlineComment::getColumn_name_string,
+            InlineComment::setColumn_name_string,
+            InlineComment::setColumn_name);
       }
     } );
     DiffRepository.getInlineCommentMerge().column_nameIsConvertToUpperCase = true;
@@ -254,18 +301,10 @@ public class InitDiffRepository
       {
         super.cleanupValues( pValue );
 
-        if ( pValue.getColumn_name_string() != null )
-        {
-          if ( pValue.getColumn_name_string().matches( "^[A-Z]([A-Z]|[0-9]|[_#$])*$" ) )
-          {
-            pValue.setColumn_name( pValue.getColumn_name_string() );
-          }
-          else
-          {
-            pValue.setColumn_name( '"' + pValue.getColumn_name_string() + '"' );
-          }
-          pValue.setColumn_name_string( null );
-        }
+        handleStringName(pValue,
+            ColumnRef::getColumn_name_string,
+            ColumnRef::setColumn_name_string,
+            ColumnRef::setColumn_name);
       }
 
     } );
@@ -592,18 +631,10 @@ public class InitDiffRepository
       {
         super.cleanupValues( pValue );
 
-        if ( pValue.getName_string() != null )
-        {
-          if ( pValue.getName_string().matches( "^[A-Z]([A-Z]|[0-9]|[_#$])*$" ) )
-          {
-            pValue.setName( pValue.getName_string() );
-          }
-          else
-          {
-            pValue.setName( '"' + pValue.getName_string() + '"' );
-          }
-          pValue.setName_string( null );
-        }
+        handleStringName(pValue,
+            Column::getName_string,
+            Column::setName_string,
+            Column::setName);
 
         if( pValue.getPrecision() == DiffRepository.getNullIntValue() )
         {
@@ -788,5 +819,20 @@ public class InitDiffRepository
     }
 
     return lReturn;
+  }
+
+  private static <T> void handleStringName(
+      T pValue,
+      Function<T, String> pStringGetter,
+      BiConsumer<T, String> pStringSetter,
+      BiConsumer<T, String> pNormalSetter) {
+    if (pStringGetter.apply(pValue) != null) {
+      if (pStringGetter.apply(pValue).matches("^[A-Z]([A-Z]|[0-9]|[_#$])*$")) {
+        pNormalSetter.accept(pValue, pStringGetter.apply(pValue));
+      } else {
+        pNormalSetter.accept(pValue, '"' + pStringGetter.apply(pValue) + '"');
+      }
+      pStringSetter.accept(pValue,null);
+    }
   }
 }

@@ -152,6 +152,7 @@
       <apply-templates select="transactionControl" />
       <apply-templates select="lobStorages" />
       <apply-templates select="varrayStorages" />
+      <apply-templates select="nestedTableStorages" />
       <apply-templates select="tablePartitioning" />
       <apply-templates select="tablespace" />
       <apply-templates select="pctfree" />
@@ -563,6 +564,15 @@
     <apply-templates select="compressType" />
     <apply-templates select="lobCompressForType" />
     <text>)</text>
+  </template>
+
+  <template match="NestedTableStorage">
+    <text>
+</text>
+    <text>nested table </text>
+    <apply-templates select="column_name" />
+    <text> store as </text>
+    <apply-templates select="storage_clause" />
   </template>
 
   <template match="value[parent::ListPartitionValue] | value[parent::RangePartitionValue] ">

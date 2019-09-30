@@ -11,7 +11,7 @@ ModelElement:
   Table | Sequence | IndexExTable | Comment | Mview;
 
 Table :
-  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (varrayStorages+=VarrayStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ("pctfree" pctfree=NULLABLE_INT)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
+  "create" (("global")? permanentness=PermanentnessType)? "table" name=DBNAME_WITH_SCHEMA "(" (columns+=Column)+ (primary_key=PrimaryKey)? (constraints+=Constraint)* (ind_uks+=IndexOrUniqueKey)* (foreign_keys+=ForeignKey)* (comments+=InlineComment)* ")" ( "on" "commit" (transactionControl=PermanentnessTransactionType) "rows" )? (lobStorages+=LobStorage)* (varrayStorages+=VarrayStorage)* (nestedTableStorages+=NestedTableStorage)* (tablePartitioning=TablePartitioning)? ("tablespace" tablespace=DBNAME)? ("pctfree" pctfree=NULLABLE_INT)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (logging=LoggingType)? (parallel=ParallelType (parallel_degree=INT)? )? (mviewLog=MviewLog)? ";";
 
 
 TablePartitioning :
@@ -82,6 +82,9 @@ LobStorage :
   
 VarrayStorage :
   "varray" column_name=DBNAME "store" "as" lobStorageType=LobStorageType "lob" ("(" lobStorageParameters=LobStorageParameters ")")?; 
+
+NestedTableStorage :
+  "nested" "table" column_name=DBNAME "store" "as" (storage_clause=DBNAME | storage_clause_string=STRING); 
 
 LobStorageParameters :
   ("tablespace" tablespace=DBNAME)? (lobDeduplicateType=LobDeduplicateType)? (compressType=CompressType (lobCompressForType=LobCompressForType)?)?; 
