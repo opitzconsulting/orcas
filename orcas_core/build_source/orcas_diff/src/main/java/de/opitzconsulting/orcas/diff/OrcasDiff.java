@@ -332,7 +332,7 @@ public class OrcasDiff
           .ifDifferent( FOREIGN_KEY__DEST_COLUMNS )//
           .ifDifferent( FOREIGN_KEY__DEST_TABLE )//
           .ifDifferent( FOREIGN_KEY__SRC_COLUMNS )//
-          .ifDifferent( FOREIGN_KEY__STATUS )//
+          //.ifDifferent( FOREIGN_KEY__STATUS )//
           .ifColumnDependentRecreate( lRecreateColumnNames, lForeignKeyDiff.srcColumnsDiff )//
           .calculate();
         }
