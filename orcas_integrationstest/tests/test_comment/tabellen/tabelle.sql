@@ -36,3 +36,11 @@ create table tab_col_string_comment
     "col1 string"	number(5),
     comment on column "col1 string" is 'columncomment \'';
 );
+
+create table tab_col_newline
+(
+    col1	number(5)
+    comment on column col1 is 'column\r\ncomment';
+);
+
+

@@ -446,6 +446,7 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setXmlLogFile( orcasCoreIntegrationConfig.getWorkfolder() + testName + "/xmllog_" + pSpoolName + ".xml" );
     lParametersCall.setTablemovetablespace( _testSetup._tablemovetablespace );
     lParametersCall.setIndexmovetablespace( _testSetup._indexmovetablespace );
+    lParametersCall.setMviewlogmovetablespace( true );
     lParametersCall.setIndexparallelcreate( _testSetup._indexparallelcreate );
     lParametersCall.setDateformat( _testSetup._dateformat );
     lParametersCall.setAdditionsOnly( _testSetup._additionsOnly );
