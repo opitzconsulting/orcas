@@ -772,7 +772,7 @@
   </template>  
   
   <template match="primaryKey[parent::MviewLog]">
-    <if test=". = 'primary key'">
+    <if test=". = 'primary'">
       <text> primary key</text>
     </if>
     <if test="position() != last()">
