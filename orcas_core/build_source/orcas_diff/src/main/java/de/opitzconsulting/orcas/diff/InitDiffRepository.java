@@ -282,6 +282,11 @@ public class InitDiffRepository
       }
 
       @Override
+      public String commentCleanValueIfNeeded(String pValue) {
+        return cleanupLineBreaks( super.commentCleanValueIfNeeded(pValue) );
+      }
+
+      @Override
       public void cleanupValues( InlineComment pValue )
       {
         super.cleanupValues( pValue );
@@ -461,6 +466,11 @@ public class InitDiffRepository
       public boolean isChildOrderRelevant()
       {
         return false;
+      }
+
+      @Override
+      public String ruleCleanValueIfNeeded(String pValue) {
+        return cleanupLineBreaks( super.ruleCleanValueIfNeeded(pValue) );
       }
 
       @Override
@@ -750,6 +760,14 @@ public class InitDiffRepository
     DiffRepository.getTableMerge().tablespaceIsConvertToUpperCase = true;
     DiffRepository.getTableMerge().permanentnessDefaultValue = PermanentnessType.PERMANENT;
     DiffRepository.getTableMerge().transactionControlDefaultValue = PermanentnessTransactionType.ON_COMMIT_DELETE;
+  }
+
+  private static String cleanupLineBreaks(String pString) {
+    if(pString == null){
+      return pString;
+    }
+
+    return pString.replace("\r\n","\n");
   }
 
   public static String getDefaultTablespace()
