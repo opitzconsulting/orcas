@@ -23,6 +23,9 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 
 import de.opitzconsulting.orcas.diff.DiffAction.DiffReasonType;
 import de.opitzconsulting.orcas.diff.DiffReasonKey.DiffReasonKeyRegistry;
+import de.opitzconsulting.orcas.diff.RecreateNeededBuilder.Difference;
+import de.opitzconsulting.orcas.diff.RecreateNeededBuilder.DifferenceImpl;
+import de.opitzconsulting.orcas.diff.RecreateNeededBuilder.DifferenceImplAttributeOnly;
 import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
@@ -90,41 +93,41 @@ public class OrcasDiff
     throw new RuntimeException( "index not found: " + pIndexname + " " + pTableDiff.nameNew );
   }
 
-  private List<EStructuralFeature> isRecreateColumn( ColumnDiff pColumnDiff )
+  private List<Difference> isRecreateColumn( ColumnDiff pColumnDiff )
   {
-    List<EStructuralFeature> lReturn = new ArrayList<>();
+    List<Difference> lReturn = new ArrayList<>();
 
     if( pColumnDiff.data_typeNew != null && pColumnDiff.data_typeOld != null )
     {
       if( !pColumnDiff.data_typeIsEqual )
       {
-        lReturn.add( COLUMN__DATA_TYPE );
+        lReturn.add(new DifferenceImpl(COLUMN__DATA_TYPE, pColumnDiff));
       }
 
       if( isLessTahnOrNull( pColumnDiff.precisionNew, pColumnDiff.precisionOld ) )
       {
-        lReturn.add( COLUMN__PRECISION );
+        lReturn.add(new DifferenceImpl(COLUMN__PRECISION, pColumnDiff));
       }
 
       if( isLessTahnOrNull( pColumnDiff.scaleNew, pColumnDiff.scaleOld ) )
       {
-        lReturn.add( COLUMN__SCALE );
+        lReturn.add(new DifferenceImpl(COLUMN__SCALE, pColumnDiff));
       }
     }
 
     if( !pColumnDiff.object_typeIsEqual )
     {
-      lReturn.add( COLUMN__OBJECT_TYPE );
+      lReturn.add(new DifferenceImpl(COLUMN__OBJECT_TYPE, pColumnDiff));
     }
 
     if( !pColumnDiff.unsignedIsEqual )
     {
-      lReturn.add( COLUMN__UNSIGNED );
+      lReturn.add(new DifferenceImpl(COLUMN__UNSIGNED, pColumnDiff));
     }
 
     if( !pColumnDiff.virtualIsEqual )
     {
-      lReturn.add( COLUMN__VIRTUAL );
+      lReturn.add(new DifferenceImpl(COLUMN__VIRTUAL, pColumnDiff));
     }
 
     return lReturn;
@@ -252,7 +255,7 @@ public class OrcasDiff
           setRecreateNeededFor( lColumnDiff )//
           .ifX( p ->
           {
-            List<EStructuralFeature> lRecreateColumn = isRecreateColumn( p.getDiff() );
+            List<Difference> lRecreateColumn = isRecreateColumn( p.getDiff() );
             if( !lRecreateColumn.isEmpty() )
             {
               p.setRecreateNeededDifferent( lRecreateColumn );
@@ -341,13 +344,13 @@ public class OrcasDiff
         {
           if( lTableDiff.mviewLogDiff.rowidNew == null && !"primary".equalsIgnoreCase( lTableDiff.mviewLogDiff.primaryKeyOld ) )
           {
-            p.setRecreateNeededDifferent( Collections.singletonList( MVIEW_LOG__PRIMARY_KEY ) );
+            p.setRecreateNeededDifferentAttributes( Collections.singletonList( MVIEW_LOG__PRIMARY_KEY ) );
           }
         } )//
         .ifDifferent( MVIEW_LOG__ROWID )//
         .ifDifferent( MVIEW_LOG__WITH_SEQUENCE )//
         .ifDifferent( MVIEW_LOG__COMMIT_SCN )//
-        .ifDifferent( MVIEW_LOG__TABLESPACE )//
+        //.ifDifferent( MVIEW_LOG__TABLESPACE )//
         // these changes should by applied with alter statements, but it results
         // in ORA-27476
         .ifDifferent( MVIEW_LOG__START_WITH )//
@@ -377,7 +380,7 @@ public class OrcasDiff
       {
         if( !replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBNew ).equals( replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBOld ) ) )
         {
-          p.setRecreateNeededDifferent( Collections.singletonList( MVIEW__VIEW_SELECT_CLOB ) );
+          p.setRecreateNeededDifferentAttributes( Collections.singletonList( MVIEW__VIEW_SELECT_CLOB ) );
         }
       } )//
       .calculate();
@@ -964,7 +967,7 @@ public class OrcasDiff
           {
             lDiffReasonType = DiffReasonType.ALTER;
             DiffActionReasonDifferent lDiffActionReasonDifferent = new DiffActionReasonDifferent( diffReasonKeyRegistry.getDiffReasonKey( pInlineCommentDiff ) );
-            lDiffActionReasonDifferent.addDiffReasonDetail( INLINE_COMMENT__COMMENT );
+            lDiffActionReasonDifferent.addDiffReasonDetail( new DifferenceImplAttributeOnly(INLINE_COMMENT__COMMENT) );
             lDiffActionReasonList = Collections.singletonList( lDiffActionReasonDifferent );
           }
           else

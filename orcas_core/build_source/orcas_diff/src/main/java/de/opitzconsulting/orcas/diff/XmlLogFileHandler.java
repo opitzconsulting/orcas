@@ -16,11 +16,15 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import de.opitzconsulting.orcas.diff.DiffAction.Statement;
+import de.opitzconsulting.orcas.diff.DiffActionReasonDifferent.DiffDifference;
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
+import de.opitzconsulting.orcas.diff.RecreateNeededBuilder.Difference;
 
 public class XmlLogFileHandler
 {
   private static final String TAG_REASON_DETAIL = "reason-detail";
+  private static final String TAG_REASON_DETAIL_ATTRIBUTE_OLD_VALUE = "old-value";
+  private static final String TAG_REASON_DETAIL_ATTRIBUTE_NEW_VALUE  = "new-value";
 
   private static final String TAG_DIFF_ACTION_REASON = "diff-action-reason";
 
@@ -149,11 +153,17 @@ public class XmlLogFileHandler
     {
       DiffActionReasonDifferent lDiffActionReasonDifferent = (DiffActionReasonDifferent) pDiffActionReason;
 
-      for( String lDiffReasonDetail : lDiffActionReasonDifferent.getDiffReasonDetails() )
+      for( DiffDifference lDiffReasonDetail : lDiffActionReasonDifferent.getDiffReasonDetails() )
       {
         Element lStatementElement = new Element( TAG_REASON_DETAIL );
         lReturn.addContent( lStatementElement );
-        lStatementElement.addContent( lDiffReasonDetail );
+        lStatementElement.addContent( lDiffReasonDetail.getDifference() );
+        if(lDiffReasonDetail.getOldValue()!=null) {
+          lStatementElement.setAttribute(TAG_REASON_DETAIL_ATTRIBUTE_OLD_VALUE, lDiffReasonDetail.getOldValue());
+        }
+        if(lDiffReasonDetail.getNewValue()!=null) {
+          lStatementElement.setAttribute(TAG_REASON_DETAIL_ATTRIBUTE_NEW_VALUE, lDiffReasonDetail.getNewValue());
+        }
       }
     }
 
@@ -178,11 +188,11 @@ public class XmlLogFileHandler
     .collect( Collectors.toList() );
   }
 
-  private List<String> parseDiffReasonDetails( Element pDiffActionReasonElement )
+  private List<DiffDifference> parseDiffReasonDetails( Element pDiffActionReasonElement )
   {
     return pDiffActionReasonElement.getChildren( TAG_REASON_DETAIL )//
     .stream()//
-    .map( this::getContentsAsString )//
+    .map( p-> new DiffDifference(getContentsAsString(p),p.getAttributeValue(TAG_REASON_DETAIL_ATTRIBUTE_OLD_VALUE),p.getAttributeValue(TAG_REASON_DETAIL_ATTRIBUTE_NEW_VALUE)) )//
     .collect( Collectors.toList() );
   }
 

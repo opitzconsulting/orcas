@@ -51,11 +51,11 @@
   </diff-action>
   <diff-action type="alter" object-type="table" object-name="TAB_MAX_COMBINE">
     <diff-action-reason type="different" object-type="table" object-name="TAB_MAX_COMBINE">
-      <reason-detail>logging</reason-detail>
-      <reason-detail>parallel_degree</reason-detail>
+      <reason-detail old-value="nologging">logging</reason-detail>
+      <reason-detail old-value="5" new-value="2">parallel_degree</reason-detail>
     </diff-action-reason>
     <diff-action-reason type="different" object-type="table" subobject-type="constraint" object-name="TAB_MAX_COMBINE" subobject-name="MOD_CHECK">
-      <reason-detail>deferrtype</reason-detail>
+      <reason-detail new-value="deferred">deferrtype</reason-detail>
     </diff-action-reason>
     <diff-action-reason type="surplus" object-type="table" subobject-type="constraint" object-name="TAB_MAX_COMBINE" subobject-name="DEL_CHECK" />
     <diff-action-reason type="surplus" object-type="table" subobject-type="unique_key" object-name="TAB_MAX_COMBINE" subobject-name="DEL_UK" />
@@ -70,7 +70,7 @@
     <diff-action-reason type="missing" object-type="table" subobject-type="column" object-name="TAB_MAX_COMBINE" subobject-name="COL_ADD" />
     <diff-action-reason type="missing" object-type="table" subobject-type="constraint" object-name="TAB_MAX_COMBINE" subobject-name="ADD_CHECK" />
     <diff-action-reason type="different" object-type="table" subobject-type="constraint" object-name="TAB_MAX_COMBINE" subobject-name="MOD_CHECK">
-      <reason-detail>deferrtype</reason-detail>
+      <reason-detail new-value="deferred">deferrtype</reason-detail>
     </diff-action-reason>
     <diff-action-reason type="missing" object-type="table" subobject-type="unique_key" object-name="TAB_MAX_COMBINE" subobject-name="ADD_UK" />
     <statement>alter table TAB_MAX_COMBINE

@@ -443,6 +443,7 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setLogonly( false );
     lParametersCall.setLogname( pSpoolName );
     lParametersCall.setSpoolfolder( getSpoolFolder( pSpoolName ) );
+    lParametersCall.setXmlLogFile( orcasCoreIntegrationConfig.getWorkfolder() + testName + "/xmllog_" + pSpoolName + ".xml" );
     lParametersCall.setTablemovetablespace( _testSetup._tablemovetablespace );
     lParametersCall.setIndexmovetablespace( _testSetup._indexmovetablespace );
     lParametersCall.setIndexparallelcreate( _testSetup._indexparallelcreate );

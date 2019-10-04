@@ -5,11 +5,13 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
 
+import de.opitzconsulting.orcas.diff.RecreateNeededBuilder.Difference;
+
 public class DiffActionReasonDifferent extends DiffActionReason
 {
-  private List<String> diffReasonDetails = new ArrayList<>();
+  private List<DiffDifference> diffReasonDetails = new ArrayList<>();
 
-  public List<String> getDiffReasonDetails()
+  public List<DiffDifference> getDiffReasonDetails()
   {
     return diffReasonDetails;
   }
@@ -19,16 +21,18 @@ public class DiffActionReasonDifferent extends DiffActionReason
     super( pDiffReasonKey );
   }
 
-  public DiffActionReasonDifferent( DiffReasonKey pDiffReasonKey, List<String> pDiffReasonDetails )
+  public DiffActionReasonDifferent( DiffReasonKey pDiffReasonKey, List<DiffDifference> pDiffReasonDetails )
   {
     super( pDiffReasonKey );
 
     diffReasonDetails = pDiffReasonDetails;
   }
 
-  public void addDiffReasonDetail( EStructuralFeature pDiffReasonDetail )
+  public void addDiffReasonDetail( Difference pDifference )
   {
-    diffReasonDetails.add( pDiffReasonDetail.getName() );
+    if(pDifference.getEAttribute()!=null) {
+      diffReasonDetails.add(new DiffDifference(pDifference.getEAttribute().getName(),pDifference.getOldValue(), pDifference.getNewValue()));
+    }
   }
 
   @Override
@@ -48,5 +52,29 @@ public class DiffActionReasonDifferent extends DiffActionReason
     DiffActionReasonDifferent lOther = (DiffActionReasonDifferent) pOther;
 
     return diffReasonDetails.equals( lOther.diffReasonDetails );
+  }
+
+  public static class DiffDifference{
+    private String difference;
+    private String oldValue;
+    private String newValue;
+
+    public DiffDifference(String pDifference, Object pOldValue, Object pNewValue) {
+      difference = pDifference;
+      oldValue = pOldValue == null ? null : pOldValue.toString();
+      newValue = pNewValue == null ? null : pNewValue.toString();
+    }
+
+    public String getDifference() {
+      return difference;
+    }
+
+    public String getOldValue() {
+      return oldValue;
+    }
+
+    public String getNewValue() {
+      return newValue;
+    }
   }
 }

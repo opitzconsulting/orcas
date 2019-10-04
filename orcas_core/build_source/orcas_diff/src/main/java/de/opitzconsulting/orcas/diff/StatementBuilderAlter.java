@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
 
+import de.opitzconsulting.orcas.diff.RecreateNeededBuilder.Difference;
+import de.opitzconsulting.orcas.diff.RecreateNeededBuilder.DifferenceImplAttributeOnly;
 import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
 
 public class StatementBuilderAlter
@@ -98,14 +101,14 @@ public class StatementBuilderAlter
 
     public void handle( Consumer<StatementBuilder> pHanlder )
     {
-      List<EStructuralFeature> lDifferentEAttributes = RecreateNeededBuilder.getDifferentEAttributes( diff, checkDifferentEStructuralFeatureList );
-      lDifferentEAttributes.addAll( forceDifferentEStructuralFeatureList );
+      List<Difference> lDifferentEAttributes = RecreateNeededBuilder.getDifferentEAttributes( diff, checkDifferentEStructuralFeatureList );
+      lDifferentEAttributes.addAll( forceDifferentEStructuralFeatureList.stream().map(p->new DifferenceImplAttributeOnly(p)).collect(Collectors.toList()) );
 
       if( !lDifferentEAttributes.isEmpty() )
       {
-        for( EStructuralFeature lEStructuralFeature : lDifferentEAttributes )
+        for( Difference lDifference : lDifferentEAttributes )
         {
-          diffActionReasonDifferent.addDiffReasonDetail( lEStructuralFeature );
+          diffActionReasonDifferent.addDiffReasonDetail( lDifference );
         }
 
         StatementBuilder lStatementBuilder = new StatementBuilder( diffActionSupplier, isAdditionsOnlyMode, alterTableCombiner );
