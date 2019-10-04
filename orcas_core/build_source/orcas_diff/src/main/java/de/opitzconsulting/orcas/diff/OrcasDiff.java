@@ -350,7 +350,7 @@ public class OrcasDiff
         .ifDifferent( MVIEW_LOG__ROWID )//
         .ifDifferent( MVIEW_LOG__WITH_SEQUENCE )//
         .ifDifferent( MVIEW_LOG__COMMIT_SCN )//
-        //.ifDifferent( MVIEW_LOG__TABLESPACE )//
+        .ifDifferent( MVIEW_LOG__TABLESPACE, _parameters.isMviewlogmovetablespace() )//
         // these changes should by applied with alter statements, but it results
         // in ORA-27476
         .ifDifferent( MVIEW_LOG__START_WITH )//

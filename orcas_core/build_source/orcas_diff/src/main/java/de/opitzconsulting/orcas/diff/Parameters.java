@@ -83,6 +83,16 @@ public abstract class Parameters
   protected Boolean _indexparallelcreate;
   protected Boolean _indexmovetablespace;
   protected Boolean _tablemovetablespace;
+
+  public boolean isMviewlogmovetablespace() {
+    return _mviewlogmovetablespace;
+  }
+
+  public void setMviewlogmovetablespace(boolean pMviewlogmovetablespace) {
+    _mviewlogmovetablespace = pMviewlogmovetablespace;
+  }
+
+  protected boolean _mviewlogmovetablespace = false;
   protected Boolean _createmissingfkindexes;
   protected Boolean _isOneTimeScriptMode;
   protected Boolean _isOneTimeScriptLogonlyMode;
