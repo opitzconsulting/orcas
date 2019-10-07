@@ -6,7 +6,10 @@ import de.opitzconsulting.orcas.diff.Parameters;
 import java.nio.charset.StandardCharsets;
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
-import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
+import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects
+
+import java.util.stream.Collectors
+import java.util.stream.Stream;
 
 public class OrcasCompileAllInvalidTask extends BaseOrcasTask
 {
@@ -30,8 +33,9 @@ public class OrcasCompileAllInvalidTask extends BaseOrcasTask
       {
         pParameters.setScriptUrl( SqlplusDirAccessDbobjects.getURL_compile_all_invalid(), "compile_all_invalid.sql", StandardCharsets.UTF_8 );
         pParameters.setIsOneTimeScriptMode( false );
-        pParameters.setAdditionalParameters( null );
-        if(dontFailOnErrors ){
+        pParameters.setAdditionalParameters(null);
+
+        if (dontFailOnErrors) {
           pParameters.setFailOnErrorMode(Parameters.FailOnErrorMode.NEVER)
         }
 

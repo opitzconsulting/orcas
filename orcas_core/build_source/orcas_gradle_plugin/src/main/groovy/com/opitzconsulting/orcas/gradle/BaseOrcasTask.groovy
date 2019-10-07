@@ -37,11 +37,14 @@ public abstract class BaseOrcasTask extends DefaultTask
 
     lParametersCall.setFailOnErrorMode( project.orcasconfiguration.failOnErrorMode );
 
+    lParametersCall.setLogCompileErrors( project.orcasconfiguration.logCompileErrors );
+
     lParametersCall.setLogonly( project.orcasconfiguration.logonly );
     lParametersCall.setDropmode( project.orcasconfiguration.dropmode );
     lParametersCall.setIndexparallelcreate( project.orcasconfiguration.indexparallelcreate );
     lParametersCall.setIndexmovetablespace( project.orcasconfiguration.indexmovetablespace );
     lParametersCall.setTablemovetablespace( project.orcasconfiguration.tablemovetablespace );
+    lParametersCall.setMviewlogmovetablespace( project.orcasconfiguration.mviewlogmovetablespace );
     lParametersCall.setCreatemissingfkindexes( project.orcasconfiguration.createmissingfkindexes );
     lParametersCall.setExcludewheretable( project.orcasconfiguration.excludewheretable );
     lParametersCall.setExcludewheresequence( project.orcasconfiguration.excludewheresequence );

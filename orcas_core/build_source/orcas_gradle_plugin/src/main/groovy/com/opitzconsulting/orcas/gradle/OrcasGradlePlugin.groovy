@@ -61,6 +61,7 @@ class OrcasGradlePluginExtension {
   def boolean indexparallelcreate = ParameterDefaults.indexparallelcreate;
   def boolean indexmovetablespace = ParameterDefaults.indexmovetablespace;
   def boolean tablemovetablespace = ParameterDefaults.tablemovetablespace;
+  def boolean mviewlogmovetablespace = ParameterDefaults.mviewlogmovetablespace;
   def boolean createmissingfkindexes = ParameterDefaults.createmissingfkindexes;
   def String excludewheretable = ParameterDefaults.excludewheretable;
   def String excludewheresequence = ParameterDefaults.excludewheresequence;
@@ -78,6 +79,7 @@ class OrcasGradlePluginExtension {
   def boolean minimizestatementcount = ParameterDefaults.minimizestatementcount;
   def String charsetname = ParameterDefaults.charsetname;
   def String charsetnamesqllog = ParameterDefaults.charsetnamesqllog;
+  def boolean logCompileErrors = ParameterDefaults.logCompileErrors;
 
   def String orcasjdbcdriver = ParameterDefaults.jdbcdriver;
   def String orcasjdbcurl;

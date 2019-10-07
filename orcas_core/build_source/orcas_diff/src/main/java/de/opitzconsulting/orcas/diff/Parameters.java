@@ -1,6 +1,7 @@
 package de.opitzconsulting.orcas.diff;
 
 import java.io.File;
+import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -84,6 +85,18 @@ public abstract class Parameters
   protected Boolean _indexmovetablespace;
   protected Boolean _tablemovetablespace;
 
+  public boolean isLogCompileErrors() {
+    return logCompileErrors;
+  }
+
+  public void setLogCompileErrors(boolean pLogCompileErrors) {
+    logCompileErrors = pLogCompileErrors;
+  }
+
+  private  boolean logCompileErrors = ParameterDefaults.logCompileErrors;
+
+
+
   public boolean isMviewlogmovetablespace() {
     return _mviewlogmovetablespace;
   }
@@ -92,7 +105,7 @@ public abstract class Parameters
     _mviewlogmovetablespace = pMviewlogmovetablespace;
   }
 
-  protected boolean _mviewlogmovetablespace = false;
+  protected boolean _mviewlogmovetablespace = ParameterDefaults.mviewlogmovetablespace;
   protected Boolean _createmissingfkindexes;
   protected Boolean _isOneTimeScriptMode;
   protected Boolean _isOneTimeScriptLogonlyMode;

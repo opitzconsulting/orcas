@@ -1,5 +1,6 @@
 set serveroutput on
 set verify off
+
 declare
   v_java_src varchar2(200);
   TYPE t_cur IS REF CURSOR;
@@ -48,35 +49,29 @@ begin
     ) loop
       begin
         execute immediate cur_sql.text;
-        if('&1' != 'false') 
-        then
-          execute immediate 'begin &1..pa_orcas_exec_log.log_exec_stmt(''' || cur_sql.text || '''); end;';
-        end if;
       exception
         when others then
-          dbms_output.put_line( 'Error : ' || cur_sql.text || ' Message: ' || sqlerrm );
+          null;
       end;
     end loop;
-  
-    open v_cur for 
-      select 'alter java source "' || long_name || '" compile' text
-        from sys.ku$_java_source_view jsv, 
-             user_objects uo
-       where jsv.obj_num = uo.object_id
-         and status = 'INVALID' 
-         and object_type in ('JAVA SOURCE');
 
-    fetch v_cur into v_java_src;
+    if('&1' = 'compile_java') then
+      open v_cur for
+        select 'alter java source "' || long_name || '" compile' text
+          from sys.ku$_java_source_view jsv,
+               user_objects uo
+         where jsv.obj_num = uo.object_id
+           and status = 'INVALID'
+           and object_type in ('JAVA SOURCE');
 
-    while v_cur%found 
-    loop
-      execute immediate v_java_src;
-      if('&1' != 'false') 
-      then
-        execute immediate 'begin &1..pa_orcas_exec_log.log_exec_stmt(''' || v_java_src || '''); end;';
-      end if;
       fetch v_cur into v_java_src;
-    end loop;
+
+      while v_cur%found
+      loop
+        execute immediate v_java_src;
+        fetch v_cur into v_java_src;
+      end loop;
+    end if;
     
     select count(1)
       into v_invalid_count_new
@@ -91,46 +86,3 @@ begin
   end loop;
 end;
 /
-
-set pagesize 0
-set linesize 2000
-
-select name,
-       type,
-       line,
-       position,
-       text,
-       (
-       select trim(text)
-         from user_source
-        where user_source.name = user_errors.name
-          and user_source.type = user_errors.type
-          and user_source.line = user_errors.line
-       ) as line_text
-  from user_errors
- where name in 
-       ( 
-         select object_name
-           from user_objects 
-       )
- order by 1, 3, 4;
-
-
-select substr(object_name,1,30) object_name, 
-       object_type 
-  from user_objects 
- where status = 'INVALID';
-
-begin
-  for cur_dummy in
-  (
-    select 1
-      from user_objects 
-     where status = 'INVALID'    
-  )
-  loop
-    raise_application_error( -20000, 'compile errors' );
-  end loop;
-end;
-/
-

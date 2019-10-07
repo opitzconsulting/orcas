@@ -43,8 +43,11 @@ public class ParameterDefaults {
 
   public static final boolean extractremovedefaultvaluesfrommodel = true;
   public static final String viewextractmode = "text";
-  public static boolean sqlplustable = false;
-  public static boolean orderColumnsByName = false;
+  public static final boolean sqlplustable = false;
+  public static final boolean orderColumnsByName = false;
 
-  public static boolean dbdocPlantuml = false;
+  public static final boolean dbdocPlantuml = false;
+
+  public static final boolean logCompileErrors = true;
+  public static final boolean mviewlogmovetablespace = false;
 }
