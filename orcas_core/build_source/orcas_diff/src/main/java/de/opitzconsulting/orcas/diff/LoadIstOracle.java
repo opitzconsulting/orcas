@@ -700,7 +700,7 @@ public class LoadIstOracle extends LoadIst
 
   private String getNameWithOwner( String pObjectName, String pOwner )
   {
-    if( _parameters.getMultiSchema() )
+    if( _parameters.getMultiSchema() && pOwner != null )
     {
       return pOwner.toString() + "." + pObjectName;
     }
@@ -1404,10 +1404,12 @@ public class LoadIstOracle extends LoadIst
 
             lPrimaryKey.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
-            if( "N".equals(pResultSet.getString("index_generated")) && !Objects.equals(lPrimaryKey.getConsName(), pResultSet.getString("index_name")))
-            {
-              lPrimaryKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );
-              lPrimaryKey.setTablespace( null );
+            if ("N".equals(pResultSet.getString("index_generated"))
+                && !Objects.equals(
+                getNameWithOwner(lPrimaryKey.getConsName(), pResultSet.getString("owner")),
+                getNameWithOwner(pResultSet.getString("index_name"), pResultSet.getString("index_owner")))) {
+              lPrimaryKey.setIndexname(getNameWithOwner(pResultSet.getString("index_name"), pResultSet.getString("index_owner")));
+              lPrimaryKey.setTablespace(null);
             }
 
             if( "NORMAL/REV".equals( pResultSet.getString( "index_type" ) ) )
@@ -1430,11 +1432,12 @@ public class LoadIstOracle extends LoadIst
 
             lUniqueKey.setTablespace( pResultSet.getString( "tablespace_name" ) );
 
-            if( !lUniqueKey.getConsName().equals( pResultSet.getString( "index_name" ) ) )
-            {
-            	if (pResultSet.getString( "index_name" ) != null) {
-            		lUniqueKey.setIndexname( getNameWithOwner( pResultSet.getString( "index_name" ), pResultSet.getString( "index_owner" ) ) );
-            	}
+            if (!Objects.equals(
+                getNameWithOwner(lUniqueKey.getConsName(), pResultSet.getString("owner")),
+                getNameWithOwner(pResultSet.getString("index_name"), pResultSet.getString("index_owner")))) {
+              if (pResultSet.getString("index_name") != null) {
+                lUniqueKey.setIndexname(getNameWithOwner(pResultSet.getString("index_name"), pResultSet.getString("index_owner")));
+              }
             }
 
             lTable.getInd_uks().add( lUniqueKey );
