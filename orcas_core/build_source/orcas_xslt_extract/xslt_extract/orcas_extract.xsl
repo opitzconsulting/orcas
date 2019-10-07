@@ -293,10 +293,10 @@
 
   <template match="byteorchar">
     <if test=". = 'byte'">
-      <text> BYTE</text>
+      <text> byte</text>
     </if>
     <if test=". = 'char'">
-      <text> CHAR</text>
+      <text> char</text>
     </if>
   </template>
 

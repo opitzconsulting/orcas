@@ -663,6 +663,20 @@ public class InitDiffRepository
         }
       }
 
+      @Override
+      public CharType byteorcharCleanValueIfNeeded(CharType pValue) {
+        CharType lCharType = pValue;
+
+        if (lCharType == CharType.BYTE_UPPER) {
+          lCharType = CharType.BYTE;
+        }
+
+        if (lCharType == CharType.CHAR_UPPER) {
+          lCharType = CharType.CHAR;
+        }
+
+        return super.byteorcharCleanValueIfNeeded(lCharType);
+      }
     } );
     DiffRepository.getColumnMerge().byteorcharDefaultValue = lDefaultCharType;
     DiffRepository.getColumnMerge().nameIsConvertToUpperCase = true;

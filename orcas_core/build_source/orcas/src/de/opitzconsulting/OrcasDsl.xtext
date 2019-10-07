@@ -129,7 +129,7 @@ enum DeferrType :
   immediate="immediate"|deferred="deferred"; 
 
 enum CharType :
-  byte="BYTE"|char="CHAR";  
+  byte_upper="BYTE"|char_upper="CHAR"|byte="byte"|char="char";
 
 enum LoggingType :
   logging="logging"|nologging="nologging";  
