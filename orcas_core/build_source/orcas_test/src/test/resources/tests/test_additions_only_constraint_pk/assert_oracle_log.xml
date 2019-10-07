@@ -14,13 +14,13 @@
   </diff-action>
   <diff-action type="drop" recreate="true" object-type="table" subobject-type="primary_key" object-name="TAB_MOD">
     <diff-action-reason type="different" object-type="table" subobject-type="primary_key" object-name="TAB_MOD">
-      <reason-detail>pk_columns</reason-detail>
+      <reason-detail old-value="object" new-value="object">pk_columns</reason-detail>
     </diff-action-reason>
     <statement>alter table TAB_MOD drop constraint TAB_MOD_PK</statement>
   </diff-action>
   <diff-action type="create" recreate="true" object-type="table" subobject-type="primary_key" object-name="TAB_MOD">
     <diff-action-reason type="different" object-type="table" subobject-type="primary_key" object-name="TAB_MOD">
-      <reason-detail>pk_columns</reason-detail>
+      <reason-detail old-value="object" new-value="object">pk_columns</reason-detail>
     </diff-action-reason>
     <statement ignore="true" comment="additionsonly">alter table TAB_MOD add constraint TAB_MOD_PK primary key (ID2)</statement>
   </diff-action>

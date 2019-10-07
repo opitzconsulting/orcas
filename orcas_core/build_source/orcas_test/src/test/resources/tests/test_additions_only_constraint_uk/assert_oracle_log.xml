@@ -14,7 +14,7 @@
   </diff-action>
   <diff-action type="drop" recreate="true" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK">
     <diff-action-reason type="different" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK">
-      <reason-detail>uk_columns</reason-detail>
+      <reason-detail old-value="object" new-value="object">uk_columns</reason-detail>
     </diff-action-reason>
     <statement>alter table TAB_MOD drop constraint TAB_MOD_UK</statement>
   </diff-action>
@@ -36,7 +36,7 @@
   </diff-action>
   <diff-action type="create" recreate="true" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK">
     <diff-action-reason type="different" object-type="table" subobject-type="unique_key" object-name="TAB_MOD" subobject-name="TAB_MOD_UK">
-      <reason-detail>uk_columns</reason-detail>
+      <reason-detail old-value="object" new-value="object">uk_columns</reason-detail>
     </diff-action-reason>
     <statement ignore="true" comment="additionsonly">alter table TAB_MOD add constraint TAB_MOD_UK unique (ID1,ID2)</statement>
   </diff-action>

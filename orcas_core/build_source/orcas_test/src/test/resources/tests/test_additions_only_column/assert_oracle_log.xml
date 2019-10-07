@@ -10,45 +10,45 @@
   </diff-action>
   <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_NOT_NULL">
     <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_NOT_NULL">
-      <reason-detail>notnull</reason-detail>
+      <reason-detail old-value="false" new-value="true">notnull</reason-detail>
     </diff-action-reason>
     <statement ignore="true" comment="additionsonly">alter table TAB_INS_COL modify ( CHG_COL_ADD_NOT_NULL not null )</statement>
   </diff-action>
   <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_DEFAULT">
     <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_DEFAULT">
-      <reason-detail>default_value</reason-detail>
+      <reason-detail new-value="33">default_value</reason-detail>
     </diff-action-reason>
     <statement>alter table TAB_INS_COL modify ( CHG_COL_ADD_DEFAULT default 33 )</statement>
   </diff-action>
   <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_DEFAULT_NOT_NULL">
     <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_ADD_DEFAULT_NOT_NULL">
-      <reason-detail>default_value</reason-detail>
-      <reason-detail>notnull</reason-detail>
+      <reason-detail new-value="44">default_value</reason-detail>
+      <reason-detail old-value="false" new-value="true">notnull</reason-detail>
     </diff-action-reason>
     <statement>alter table TAB_INS_COL modify ( CHG_COL_ADD_DEFAULT_NOT_NULL default 44 )</statement>
     <statement ignore="true" comment="additionsonly">alter table TAB_INS_COL modify ( CHG_COL_ADD_DEFAULT_NOT_NULL not null )</statement>
   </diff-action>
   <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_DEL_DEFAULT">
     <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_DEL_DEFAULT">
-      <reason-detail>default_value</reason-detail>
+      <reason-detail old-value="55">default_value</reason-detail>
     </diff-action-reason>
     <statement ignore="true" comment="additionsonly">alter table TAB_INS_COL modify ( CHG_COL_DEL_DEFAULT default null )</statement>
   </diff-action>
   <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_DEL_NOT_NULL">
     <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_DEL_NOT_NULL">
-      <reason-detail>notnull</reason-detail>
+      <reason-detail old-value="true" new-value="false">notnull</reason-detail>
     </diff-action-reason>
     <statement>alter table TAB_INS_COL modify ( CHG_COL_DEL_NOT_NULL null )</statement>
   </diff-action>
   <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_INC_PRECISION">
     <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_INC_PRECISION">
-      <reason-detail>precision</reason-detail>
+      <reason-detail old-value="10" new-value="15">precision</reason-detail>
     </diff-action-reason>
     <statement>alter table TAB_INS_COL modify ( CHG_COL_INC_PRECISION NUMBER(15))</statement>
   </diff-action>
   <diff-action type="alter" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_INC_SCALE">
     <diff-action-reason type="different" object-type="table" subobject-type="column" object-name="TAB_INS_COL" subobject-name="CHG_COL_INC_SCALE">
-      <reason-detail>scale</reason-detail>
+      <reason-detail old-value="5" new-value="10">scale</reason-detail>
     </diff-action-reason>
     <statement>alter table TAB_INS_COL modify ( CHG_COL_INC_SCALE NUMBER(15,10))</statement>
   </diff-action>
