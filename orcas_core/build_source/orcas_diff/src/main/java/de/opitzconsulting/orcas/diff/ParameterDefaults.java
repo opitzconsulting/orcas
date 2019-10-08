@@ -50,4 +50,5 @@ public class ParameterDefaults {
 
   public static final boolean logCompileErrors = true;
   public static final boolean mviewlogmovetablespace = false;
+  public static String excludewheregrant = "grantee not like '%'";
 }

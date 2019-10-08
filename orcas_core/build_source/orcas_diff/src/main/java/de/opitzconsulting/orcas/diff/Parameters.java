@@ -113,6 +113,7 @@ public abstract class Parameters
   protected String _spoolfile;
   protected String _excludewheretable;
   protected String _excludewheresequence;
+  private String excludewheregrant = ParameterDefaults.excludewheregrant;
   protected String _dateformat;
   protected String _orcasDbUser;
   protected Boolean _scriptfolderrecursive;
@@ -178,6 +179,15 @@ public abstract class Parameters
   {
     extensionhandlerClass = pExtensionhandlerClass;
   }
+
+  public String getExcludewheregrant() {
+    return excludewheregrant;
+  }
+
+  public void setExcludewheregrant(String pExcludewheregrant) {
+    excludewheregrant = pExcludewheregrant;
+  }
+
 
   public boolean isMinimizeStatementCount()
   {

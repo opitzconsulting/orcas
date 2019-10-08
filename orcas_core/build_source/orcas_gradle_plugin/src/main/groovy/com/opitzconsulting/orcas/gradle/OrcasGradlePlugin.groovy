@@ -92,7 +92,9 @@ class OrcasGradlePluginExtension {
   def String excludewheretrigger = ParameterDefaults.excludewheretrigger;
   def String excludewherefunction = ParameterDefaults.excludewherefunction;
   def String excludewhereprocedure = ParameterDefaults.excludewhereprocedure;
+  def String excludewheregrant = ParameterDefaults.excludewheregrant;
 
+  def String extractgrantsfile;
   def String extractstaticsoutfolder;
   def String extractmodelinputfolder;
   def boolean extractremovedefaultvaluesfrommodel = ParameterDefaults.extractremovedefaultvaluesfrommodel;
