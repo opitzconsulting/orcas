@@ -39,7 +39,7 @@ public class OrcasExtractGrants extends Orcas {
                     @Override
                     protected void useResultSetRow(ResultSet pResultSet) throws SQLException {
                         try {
-                            lWriter.append(pResultSet.getString("grant_statement"));
+                            lWriter.append(pResultSet.getString("grant_statement") + "\n");
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
