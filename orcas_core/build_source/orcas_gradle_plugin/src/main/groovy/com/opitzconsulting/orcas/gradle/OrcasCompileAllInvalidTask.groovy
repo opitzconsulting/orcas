@@ -4,17 +4,14 @@ import de.opitzconsulting.orcas.diff.OrcasCompileAllInvalid
 import de.opitzconsulting.orcas.diff.Parameters;
 
 import java.nio.charset.StandardCharsets;
-import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects
-
-import java.util.stream.Collectors
-import java.util.stream.Stream;
 
 public class OrcasCompileAllInvalidTask extends BaseOrcasTask
 {
   def logname = "compile-all-invalid";
   def dontFailOnErrors = false;
+  @Deprecated
   def boolean getCompileInfos = false;
   def List<OrcasCompileAllInvalid.CompileInfo> compileInfos;
 
@@ -40,13 +37,8 @@ public class OrcasCompileAllInvalidTask extends BaseOrcasTask
         }
 
         def orcasCompileAllInvalid = new OrcasCompileAllInvalid()
-        if(getCompileInfos) {
-          orcasCompileAllInvalid.setGetCompileInfos()
-        }
         orcasCompileAllInvalid.mainRun( modifyParameters( pParameters ) );
-        if(getCompileInfos) {
-          compileInfos = orcasCompileAllInvalid.getCompileInfos()
-        }
+        compileInfos = orcasCompileAllInvalid.getCompileInfos()
       }
       else
       {
