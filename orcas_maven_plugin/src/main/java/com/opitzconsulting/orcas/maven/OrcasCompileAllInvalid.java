@@ -7,7 +7,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects;
 
-import de.opitzconsulting.orcas.diff.OrcasCompileAllInvalid;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 
 /**
@@ -37,7 +36,7 @@ public class OrcasCompileAllInvalid extends BaseOrcasMojo
       pParameters.setIsOneTimeScriptMode( false );
       pParameters.setAdditionalParameters( null );
 
-      new OrcasCompileAllInvalid().mainRun( modifyParameters( pParameters ) );
+      new de.opitzconsulting.orcas.diff.OrcasCompileAllInvalid().mainRun( pParameters );
     }
     else
     {
