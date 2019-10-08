@@ -114,6 +114,7 @@ public abstract class Parameters
   protected String _excludewheretable;
   protected String _excludewheresequence;
   private String excludewheregrant = ParameterDefaults.excludewheregrant;
+  private String excludewheresynonym = ParameterDefaults.excludewheresynonym;
   protected String _dateformat;
   protected String _orcasDbUser;
   protected Boolean _scriptfolderrecursive;
@@ -212,6 +213,14 @@ public abstract class Parameters
   public Boolean getSqlplustable()
   {
     return checkNull( _sqlplustable );
+  }
+
+  public String getExcludewheresynonym() {
+    return excludewheresynonym;
+  }
+
+  public void setExcludewheresynonym(String pExcludewheresynonym) {
+    excludewheresynonym = pExcludewheresynonym;
   }
 
   public JdbcConnectParameters getSrcJdbcConnectParameters()
