@@ -43,6 +43,13 @@ public abstract class BaseOrcasTask extends DefaultTask
 
     lParametersCall.setLogCompileErrors( project.orcasconfiguration.logCompileErrors );
 
+    lParametersCall.setExcludewhereview( project.orcasconfiguration.excludewhereview );
+    lParametersCall.setExcludewhereobjecttype( project.orcasconfiguration.excludewhereobjecttype );
+    lParametersCall.setExcludewherepackage( project.orcasconfiguration.excludewherepackage );
+    lParametersCall.setExcludewheretrigger( project.orcasconfiguration.excludewheretrigger );
+    lParametersCall.setExcludewherefunction( project.orcasconfiguration.excludewherefunction );
+    lParametersCall.setExcludewhereprocedure( project.orcasconfiguration.excludewhereprocedure );
+
     lParametersCall.setLogonly( project.orcasconfiguration.logonly );
     lParametersCall.setDropmode( project.orcasconfiguration.dropmode );
     lParametersCall.setIndexparallelcreate( project.orcasconfiguration.indexparallelcreate );

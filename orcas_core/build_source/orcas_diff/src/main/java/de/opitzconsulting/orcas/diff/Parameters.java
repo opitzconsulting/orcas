@@ -141,6 +141,62 @@ public abstract class Parameters {
     protected boolean _minimizeStatementCount = false;
     protected boolean _cleanupFkValuesOnDropmode = false;
 
+    private String excludewhereview = ParameterDefaults.excludewhereview;
+
+    public String getExcludewhereview() {
+        return excludewhereview;
+    }
+
+    public void setExcludewhereview(String pExcludewhereview) {
+        excludewhereview = pExcludewhereview;
+    }
+
+    public String getExcludewhereobjecttype() {
+        return excludewhereobjecttype;
+    }
+
+    public void setExcludewhereobjecttype(String pExcludewhereobjecttype) {
+        excludewhereobjecttype = pExcludewhereobjecttype;
+    }
+
+    public String getExcludewherepackage() {
+        return excludewherepackage;
+    }
+
+    public void setExcludewherepackage(String pExcludewherepackage) {
+        excludewherepackage = pExcludewherepackage;
+    }
+
+    public String getExcludewheretrigger() {
+        return excludewheretrigger;
+    }
+
+    public void setExcludewheretrigger(String pExcludewheretrigger) {
+        excludewheretrigger = pExcludewheretrigger;
+    }
+
+    public String getExcludewherefunction() {
+        return excludewherefunction;
+    }
+
+    public void setExcludewherefunction(String pExcludewherefunction) {
+        excludewherefunction = pExcludewherefunction;
+    }
+
+    public String getExcludewhereprocedure() {
+        return excludewhereprocedure;
+    }
+
+    public void setExcludewhereprocedure(String pExcludewhereprocedure) {
+        excludewhereprocedure = pExcludewhereprocedure;
+    }
+
+    private String excludewhereobjecttype = ParameterDefaults.excludewhereobjecttype;
+    private String excludewherepackage = ParameterDefaults.excludewherepackage;
+    private String excludewheretrigger = ParameterDefaults.excludewheretrigger;
+    private String excludewherefunction = ParameterDefaults.excludewherefunction;
+    private String excludewhereprocedure = ParameterDefaults.excludewhereprocedure;
+
     public ExecuteSqlErrorHandler getExecuteSqlErrorHandler() {
         return executeSqlErrorHandler;
     }

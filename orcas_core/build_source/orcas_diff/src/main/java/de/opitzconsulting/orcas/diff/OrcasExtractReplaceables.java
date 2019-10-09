@@ -68,13 +68,13 @@ public class OrcasExtractReplaceables extends Orcas
       {
         getParameters().setRemovePromptPrefix( "LINE_BEGIN" );
 
-        extract( pCallableStatementProvider, "triggers", null, "TRIGGER" );
-        extract( pCallableStatementProvider, "types", "spec_", "TYPE" );
-        extract( pCallableStatementProvider, "types", "body_", "TYPE_BODY" );
-        extract( pCallableStatementProvider, "packages", "spec_", "PACKAGE" );
-        extract( pCallableStatementProvider, "packages", "body_", "PACKAGE_BODY" );
-        extract( pCallableStatementProvider, "functions", null, "FUNCTION" );
-        extract( pCallableStatementProvider, "procedures", null, "PROCEDURE" );
+        extract( pCallableStatementProvider, "triggers", null, "TRIGGER", getParameters().getExcludewheretrigger() );
+        extract( pCallableStatementProvider, "types", "spec_", "TYPE", getParameters().getExcludewhereobjecttype() );
+        extract( pCallableStatementProvider, "types", "body_", "TYPE_BODY", getParameters().getExcludewhereobjecttype() );
+        extract( pCallableStatementProvider, "packages", "spec_", "PACKAGE", getParameters().getExcludewherepackage() );
+        extract( pCallableStatementProvider, "packages", "body_", "PACKAGE_BODY", getParameters().getExcludewherepackage() );
+        extract( pCallableStatementProvider, "functions", null, "FUNCTION", getParameters().getExcludewherefunction() );
+        extract( pCallableStatementProvider, "procedures", null, "PROCEDURE", getParameters().getExcludewhereprocedure() );
 
         String lSql;
         if( lFullMode )
@@ -85,6 +85,8 @@ public class OrcasExtractReplaceables extends Orcas
         {
           lSql = "select lower(view_name), text from user_views";
         }
+
+        lSql += " where view_name in (select object_name from user_objects where object_type = 'VIEW' and not(" + getParameters().getExcludewhereview() + "))";
 
         final String lExistingFolderString = getExistingFolderString( "views" );
         if( !isCollectDataOnly() )
@@ -154,7 +156,7 @@ public class OrcasExtractReplaceables extends Orcas
         }
       }
 
-      private void extract( CallableStatementProvider pCallableStatementProvider, String pFolderPostfix, String pFilePrefix, String pType ) throws Exception
+      private void extract( CallableStatementProvider pCallableStatementProvider, String pFolderPostfix, String pFilePrefix, String pType, String pExcludeWhere ) throws Exception
       {
         String lExistingFolderString = getExistingFolderString( pFolderPostfix );
 
@@ -247,7 +249,7 @@ public class OrcasExtractReplaceables extends Orcas
               }
             };
           }
-        }.runURL( SqlplusDirAccessDbobjects.getURL_extract_replaceables_sources(), pCallableStatementProvider, getParameters(), StandardCharsets.UTF_8, lDummyFileName, lExistingFolderString + "/" + lFilePrefix, pType, "%" );
+        }.runURL( SqlplusDirAccessDbobjects.getURL_extract_replaceables_sources(), pCallableStatementProvider, getParameters(), StandardCharsets.UTF_8, lDummyFileName, lExistingFolderString + "/" + lFilePrefix, pType, pExcludeWhere );
 
         getParameters().setInfoLogHandler( lOriginalInfoLogHandler );
       }
