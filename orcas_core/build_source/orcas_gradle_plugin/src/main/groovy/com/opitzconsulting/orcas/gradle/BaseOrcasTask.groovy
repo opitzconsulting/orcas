@@ -5,12 +5,15 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
 
 import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
+import de.opitzconsulting.orcas.diff.ExecuteSqlErrorHandler;
 import de.opitzconsulting.orcas.diff.ParametersCall;
 import de.opitzconsulting.orcas.diff.Parameters.InfoLogHandler;
 import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 
 public abstract class BaseOrcasTask extends DefaultTask 
 {
+  FailOnErrorMode failOnErrorMode
+  ExecuteSqlErrorHandler executeSqlErrorHandler
   private def parameterModifier;
   def boolean nologging;
 
@@ -35,7 +38,8 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setLogname( getLogname() );
     lParametersCall.setLoglevel( project.orcasconfiguration.loglevel );
 
-    lParametersCall.setFailOnErrorMode( project.orcasconfiguration.failOnErrorMode );
+    lParametersCall.setFailOnErrorMode( failOnErrorMode != null ? failOnErrorMode : project.orcasconfiguration.failOnErrorMode );
+    lParametersCall.setExecuteSqlErrorHandler( executeSqlErrorHandler != null ? executeSqlErrorHandler : project.orcasconfiguration.executeSqlErrorHandler );
 
     lParametersCall.setLogCompileErrors( project.orcasconfiguration.logCompileErrors );
 

@@ -487,20 +487,24 @@ public class OrcasScriptRunner extends Orcas {
         try {
             new WrapperExecuteUpdate(pSql, pCallableStatementProvider).execute();
         } catch (RuntimeException e) {
-            switch (pParameters.getFailOnErrorMode()) {
-            case NEVER:
-                _log.warn(e, e);
-                return;
-            case ALWAYS:
-                throw e;
-            case IGNORE_DROP:
-                if (pSql.toLowerCase().trim().startsWith("drop ")) {
-                    logInfo("ignoring: " + e.getMessage().trim() + " [" + pSql.trim() + "]");
-                    return;
-                } else {
-                    throw e;
-                }
-            }
+            pParameters
+                .getExecuteSqlErrorHandler()
+                .handleExecutionError(e, pSql, pCallableStatementProvider, pParameters, new ExecuteSqlErrorHandler.ExecuteSqlErrorHandlerCallback() {
+                    @Override
+                    public void rethrow() {
+                        throw new RuntimeException(e);
+                    }
+
+                    @Override
+                    public void logError() {
+                        _log.warn(e, e);
+                    }
+
+                    @Override
+                    public void logInfo(String pMessage) {
+                        OrcasScriptRunner.this.logInfo(pMessage);
+                    }
+                });
         }
     }
 

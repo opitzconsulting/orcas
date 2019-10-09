@@ -1,5 +1,6 @@
 package com.opitzconsulting.orcas.gradle
 
+import de.opitzconsulting.orcas.diff.ExecuteSqlErrorHandler
 import de.opitzconsulting.orcas.diff.ParameterDefaults
 import org.gradle.api.Project
 import org.gradle.api.Plugin
@@ -55,6 +56,7 @@ class OrcasGradlePluginExtension {
   def String spoolfolder = ParameterDefaults.spoolfolder;
   def String loglevel = ParameterDefaults.loglevel;
   def FailOnErrorMode failOnErrorMode = ParameterDefaults.failOnErrorMode;
+  def ExecuteSqlErrorHandler executeSqlErrorHandler = ParameterDefaults.executeSqlErrorHandler;
   def String usernameorcas = ParameterDefaults.usernameorcas;
   def boolean logonly = ParameterDefaults.logonly;
   def boolean dropmode = ParameterDefaults.dropmode;

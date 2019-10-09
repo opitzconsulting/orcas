@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 import de.opitzconsulting.orcas.diff.DiffAction.Statement;
 import de.opitzconsulting.orcas.diff.DiffReasonKey.DiffReasonEntity;
+import de.opitzconsulting.orcas.diff.ExecuteSqlErrorHandler.ExecuteSqlErrorHandlerCallback;
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
@@ -204,7 +205,39 @@ public class OrcasMain extends Orcas
                 }
 
                 if (!pParameters.isLogonly() && !lStatementClass.isIgnore()) {
-                    getDatabaseHandler().executeDiffResultStatement(lStatementToExecute, getParameters().getMultiSchemaConnectionManager().getCallableStatementProviderForSchema(pCallableStatementProvider, lDiffAction.getDiffReasonKey().getTextSchemaName(), getParameters()) );
+                    CallableStatementProvider lCallableStatementProviderForSchema = getParameters()
+                            .getMultiSchemaConnectionManager()
+                            .getCallableStatementProviderForSchema(
+                                pCallableStatementProvider,
+                                lDiffAction.getDiffReasonKey().getTextSchemaName(),
+                                getParameters());
+                    try {
+                        getDatabaseHandler().executeDiffResultStatement(
+                            lStatementToExecute,
+                            lCallableStatementProviderForSchema);
+                    } catch (RuntimeException e) {
+                        getParameters().getExecuteSqlErrorHandler().handleExecutionError(
+                            e,
+                            lStatementToExecute,
+                            lCallableStatementProviderForSchema,
+                            getParameters(),
+                            new ExecuteSqlErrorHandlerCallback() {
+                                @Override
+                                public void rethrow() {
+                                    throw new RuntimeException(e);
+                                }
+
+                                @Override
+                                public void logError() {
+                                    _log.warn(e, e);
+                                }
+
+                                @Override
+                                public void logInfo(String pMessage) {
+                                    OrcasMain.this.logInfo(pMessage);
+                                }
+                            });
+                    }
                 }
             }
         }

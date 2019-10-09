@@ -10,8 +10,6 @@ import de.opitzconsulting.orcas.diff.ParametersCall;
 
 public class ExecuteOrcasScriptTask extends BaseOrcasTask
 {
-  def Parameters.FailOnErrorMode failOnErrorMode = null;
-
   def scriptfile;
 
   def logname;
@@ -30,9 +28,6 @@ public class ExecuteOrcasScriptTask extends BaseOrcasTask
     pParameters.setIsOneTimeScriptMode( false );
 
     pParameters.setAdditionalParameters( scriptParameters );
-    if( failOnErrorMode != null ) {
-      pParameters.setFailOnErrorMode(failOnErrorMode);
-    }
 
     new OrcasScriptRunner().mainRun( modifyParameters( pParameters ) );
   }
