@@ -31,7 +31,7 @@ public class OrcasExtractSynonyms extends Orcas {
             JdbcConnectionHandler.runWithCallableStatementProvider(getParameters(), pCallableStatementProvider -> {
                 String
                     lSql =
-                    "select 'create or replace' || case when owner = 'PUBLIC' then ' public' end || ' synonym ' || synonym_name || ' for ' || table_owner || '.' || table_name || case when db_link is not null then '@' || db_link end || ';' as sysnonym_statement from all_synonyms where (owner = user or (owner = 'PUBLIC' and table_owner = user)) and not("
+                    "select 'create or replace' || case when owner = 'PUBLIC' then ' public' end || ' synonym ' || synonym_name || ' for ' || case when table_owner is not null then table_owner || '.' end || table_name || case when db_link is not null then '@' || db_link end || ';' as sysnonym_statement from all_synonyms where not("
                         + getParameters().getExcludewheresynonym()
                         + ") order by synonym_name";
 

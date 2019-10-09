@@ -51,5 +51,5 @@ public class ParameterDefaults {
   public static final boolean logCompileErrors = true;
   public static final boolean mviewlogmovetablespace = false;
   public static String excludewheregrant = "grantee not like '%'";
-  public static String excludewheresynonym = "synonym_name not like '%'";
+  public static String excludewheresynonym = "not((owner = user) or (owner = 'PUBLIC' and table_owner = user and db_link is null)))";
 }
