@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -135,6 +136,28 @@ public abstract class Orcas
     void fileCopy( File pSpoolLognamefolder ) throws IOException;
   }
 
+  protected void addSpoolfolderScriptIfNeededWithParameterReplace(final File pScriptFile, Parameters pParameters) {
+    if (pParameters.getAdditionalParameters() == null || pParameters.getAdditionalParameters().isEmpty()) {
+      addSpoolfolderScriptIfNeeded(pScriptFile);
+    } else {
+      try {
+        List<String>
+            lLines =
+            OrcasScriptRunner.parseReaderToLines(new InputStreamReader(new FileInputStream(pScriptFile), pParameters.getEncoding()));
+
+        List<String> lLinesWithReplace = lLines.stream().map(p -> OrcasScriptRunner.doReplace(p, pParameters)).collect(Collectors.toList());
+
+        if (lLines.equals(lLinesWithReplace)) {
+          addSpoolfolderScriptIfNeeded(pScriptFile);
+        } else {
+          addSpoolfolderScriptIfNeeded(lLinesWithReplace, getSppolFilenameWithParameterReplaced(pScriptFile.getName(), lLinesWithReplace));
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
   protected void addSpoolfolderScriptIfNeeded( final File pScriptFile )
   {
     addSpoolfolderScriptIfNeeded( new FileHandlerForLog()
@@ -208,6 +231,39 @@ public abstract class Orcas
     catch( IOException e )
     {
       throw new RuntimeException( e );
+    }
+  }
+
+  protected void addSpoolfolderScriptIfNeededWithParameterReplace( final URL pScriptURL, final String pFilename, Charset pCharset, Parameters pParameters ){
+    if (pParameters.getAdditionalParameters() == null || pParameters.getAdditionalParameters().isEmpty()) {
+      addSpoolfolderScriptIfNeeded(pScriptURL, pFilename, pCharset );
+    } else {
+      try {
+        List<String>
+            lLines =
+            OrcasScriptRunner.parseReaderToLines(new InputStreamReader(pScriptURL.openStream(), pCharset));
+
+        List<String> lLinesWithReplace = lLines.stream().map(p -> OrcasScriptRunner.doReplace(p, pParameters)).collect(Collectors.toList());
+
+        if (lLines.equals(lLinesWithReplace)) {
+          addSpoolfolderScriptIfNeeded(pScriptURL, pFilename, pCharset );
+        } else {
+          addSpoolfolderScriptIfNeeded(lLinesWithReplace, getSppolFilenameWithParameterReplaced(pFilename, lLinesWithReplace));
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  private String getSppolFilenameWithParameterReplaced(String pFilename, List<String> pLinesWithReplace) {
+    int lIndex = pFilename.lastIndexOf('.');
+
+    if(lIndex>0){
+      return pFilename.substring(0,lIndex) + "_" + pLinesWithReplace.hashCode()+ pFilename.substring(lIndex);
+    }
+    else {
+      return pFilename + "_" + pLinesWithReplace.hashCode();
     }
   }
 

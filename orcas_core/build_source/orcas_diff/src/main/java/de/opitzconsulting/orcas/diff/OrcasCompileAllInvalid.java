@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
@@ -27,11 +28,35 @@ public class OrcasCompileAllInvalid extends OrcasScriptRunner {
     public void runURL(
         URL pURL, CallableStatementProvider pCallableStatementProvider, Parameters pParameters, Charset pCharset) throws Exception {
 
+        ((ParametersCall) pParameters).setAdditionalParameters(Stream
+            .of("nojava"
+                , pParameters.getExcludewherepackage()
+                , pParameters.getExcludewhereobjecttype()
+                , pParameters.getExcludewhereprocedure()
+                , pParameters.getExcludewherefunction()
+                , pParameters.getExcludewhereview()
+                , pParameters.getExcludewheretrigger()
+                , pParameters.getExcludewheresynonym())
+            .collect(Collectors.toList()));
+
+        String lFromAndWherePart =
+            "        from user_objects where status = 'INVALID' and"
+                + " ("
+                + "    (object_type = 'PACKAGE'      and not (" + pParameters.getExcludewherepackage() + "))"
+                + " or (object_type = 'PACKAGE BODY' and not (" + pParameters.getExcludewherepackage() + "))"
+                + " or (object_type = 'TYPE'         and not (" + pParameters.getExcludewhereobjecttype() + "))"
+                + " or (object_type = 'TYPE BODY'    and not (" + pParameters.getExcludewhereobjecttype() + "))"
+                + " or (object_type = 'PROCEDURE'    and not (" + pParameters.getExcludewhereprocedure() + "))"
+                + " or (object_type = 'FUNCTION'     and not (" + pParameters.getExcludewherefunction() + "))"
+                + " or (object_type = 'VIEW'         and not (" + pParameters.getExcludewhereview() + "))"
+                + " or (object_type = 'TRIGGER'      and not (" + pParameters.getExcludewheretrigger() + "))"
+                + " or (object_type = 'SYNONYM'      and object_name in (select synonym_name from all_synonyms where not(" + pParameters.getExcludewheresynonym() + ")))"
+                + " )";
+
         String lInavlidObjectsSql =
             "    select object_name, " +
                 "       object_type " +
-                "  from user_objects " +
-                " where status = 'INVALID'";
+                lFromAndWherePart;
 
         String lCompileErrorsSql =
             "             select name,\n"
@@ -50,7 +75,7 @@ public class OrcasCompileAllInvalid extends OrcasScriptRunner {
                 + " where name in \n"
                 + "       ( \n"
                 + "         select object_name\n"
-                + "           from user_objects \n"
+                + lFromAndWherePart
                 + "       )\n"
                 + " order by 1, 3, 4";
 

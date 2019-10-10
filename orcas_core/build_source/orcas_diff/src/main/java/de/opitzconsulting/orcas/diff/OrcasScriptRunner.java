@@ -92,10 +92,11 @@ public class OrcasScriptRunner extends Orcas {
                                     pCallableStatementProvider,
                                     getParameters(),
                                     getParameters().getScriptUrlCharset());
-                                addSpoolfolderScriptIfNeeded(
+                                addSpoolfolderScriptIfNeededWithParameterReplace(
                                     getParameters().getScriptUrl(),
                                     getParameters().getScriptUrlFilename(),
-                                    getParameters().getScriptUrlCharset());
+                                    getParameters().getScriptUrlCharset(),
+                                    getParameters());
                             } else {
 
                                 for (File lFile : FolderHandler.getModelFiles(getParameters())) {
@@ -124,7 +125,7 @@ public class OrcasScriptRunner extends Orcas {
                                         }
                                     } else {
                                         runFile(lFile, pCallableStatementProvider, getParameters(), null);
-                                        addSpoolfolderScriptIfNeeded(lFile);
+                                        addSpoolfolderScriptIfNeededWithParameterReplace(lFile, getParameters());
                                     }
                                 }
                             }
@@ -181,7 +182,7 @@ public class OrcasScriptRunner extends Orcas {
         }
     }
 
-    private String doReplace(String pValue, Parameters pParameters) {
+    static String doReplace(String pValue, Parameters pParameters) {
         String lOrig = null;
 
         for (int i = 0; i < pParameters.getAdditionalParameters().size(); i++) {
