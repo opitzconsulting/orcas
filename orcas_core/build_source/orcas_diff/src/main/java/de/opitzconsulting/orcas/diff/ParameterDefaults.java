@@ -34,12 +34,12 @@ public class ParameterDefaults {
     public static final String charsetname = "UTF-8";
     public static final String charsetnamesqllog = null;
 
-    public static final String excludewhereview = "1 != 0";
-    public static final String excludewhereobjecttype = "1 != 0";
-    public static final String excludewherepackage = "1 != 0";
-    public static final String excludewheretrigger = "1 != 0";
-    public static final String excludewherefunction = "1 != 0";
-    public static final String excludewhereprocedure = "1 != 0";
+    public static final String excludewhereview = "1 = 0";
+    public static final String excludewhereobjecttype = "1 = 0";
+    public static final String excludewherepackage = "1 = 0";
+    public static final String excludewheretrigger = "1 = 0";
+    public static final String excludewherefunction = "1 = 0";
+    public static final String excludewhereprocedure = "1 = 0";
 
     public static final boolean extractremovedefaultvaluesfrommodel = true;
     public static final String viewextractmode = "text";
