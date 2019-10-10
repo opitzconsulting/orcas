@@ -7,6 +7,7 @@ create table orcas_orderentry_meta.categories
 
   constraint ctgr_pk primary key (ctgr_id),
   constraint ctgr_uc unique (name),
+  index orcas_orderentry_data.ctgr_description_ix (description),
 
   comment on column version is 'default ist null';
   comment on table is 'categories tabelle';

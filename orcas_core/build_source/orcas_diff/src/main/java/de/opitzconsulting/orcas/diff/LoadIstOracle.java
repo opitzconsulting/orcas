@@ -164,7 +164,7 @@ public class LoadIstOracle extends LoadIst
     isIgnoredSequence( "TEST", "TEST" );
     isIgnoredMView( "TEST", "TEST" );
     isIgnoredTable( "TEST", "TEST" );
-    isIgnoredIndex( "TEST", "TEST", "TEST" );
+    isIgnoredIndex( "TEST", "TEST", "TEST", "TEST" );
 
     _oracleMajorVersion = loadOracleMajorVersion();
 
@@ -378,7 +378,7 @@ public class LoadIstOracle extends LoadIst
     return getNameWithOwner( pTableName + "." + pIndexName, pOwner );
   }
 
-  private boolean isIgnoredIndex( String pTableName, String pIndexName, String pOwner )
+  private boolean isIgnoredIndex( String pTableName, String pIndexName, String pTableOwner, String pIndexOwner )
   {
     if( excludeIndexList == null )
     {
@@ -400,12 +400,12 @@ public class LoadIstOracle extends LoadIst
       }.execute();
     }
 
-    if( excludeIndexList.contains( getIndexNameWithOwner( pTableName, pIndexName, pOwner ) ) )
+    if( excludeIndexList.contains( getIndexNameWithOwner( pTableName, pIndexName, pTableOwner ) ) )
     {
       return true;
     }
 
-    return isIgnoredTable( pTableName, pOwner );
+    return isIgnoredTable( pTableName, pTableOwner );
   }
 
   private BigInteger toBigInt( BigDecimal pBigDecimal )
@@ -1171,7 +1171,7 @@ public class LoadIstOracle extends LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "table_owner" ) ) )
+        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "owner" ) ) )
         {
           final Index lIndex = new IndexImpl();
 
@@ -1261,7 +1261,7 @@ public class LoadIstOracle extends LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ) )
+        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "owner" ) ) )
         {
           ColumnRef lColumnRef = new ColumnRefImpl();
 
@@ -1337,7 +1337,7 @@ public class LoadIstOracle extends LoadIst
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ) ) )
+        if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "owner" ) ) )
         {
           setIndexColumnExpression( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ), pResultSet.getInt( "column_position" ), pResultSet.getString( "column_expression" ), pResultSet.getInt( "max_column_position_for_index" ) );
         }
