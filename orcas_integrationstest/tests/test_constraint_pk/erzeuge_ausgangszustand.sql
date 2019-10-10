@@ -30,5 +30,15 @@ create table tab_wrong_pk_column_order
   constraint tab_wrong_pk_column_order primary key (id2,id1)
 );
 
+create table tab_old_disable
+(
+	id				number(9) not null,
+	constraint tab_old_disable_cc primary key (id) enable
+);
 
+create table tab_old_enable
+(
+	id				number(9) not null,
+	constraint tab_old_enable_cc primary key (id) disable
+);
 

@@ -97,6 +97,8 @@ class OrcasGradlePluginExtension {
   def String excludewheregrant = ParameterDefaults.excludewheregrant;
   def String excludewheresynonym = ParameterDefaults.excludewheresynonym;
 
+  def boolean updateEnabledStatus = ParameterDefaults.updateEnabledStatus;
+
   def String extractgrantsfile;
   def String extractsynonymsfile;
   def String extractstaticsoutfolder;

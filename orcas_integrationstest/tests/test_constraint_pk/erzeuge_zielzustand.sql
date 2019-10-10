@@ -47,3 +47,22 @@ create table tab_new_pk_string
     "id string" number(15) not null,
     constraint tab_new_pk_string primary key ("id string")
 );
+
+create table tab_new_disable
+(
+	id				number(9) not null,
+	constraint tab_new_disable_cc primary key (id) disable
+);
+
+create table tab_old_disable
+(
+	id				number(9) not null,
+	constraint tab_old_disable_cc primary key (id) disable
+);
+
+create table tab_old_enable
+(
+	id				number(9) not null,
+	constraint tab_old_enable_cc primary key (id) enable
+);
+

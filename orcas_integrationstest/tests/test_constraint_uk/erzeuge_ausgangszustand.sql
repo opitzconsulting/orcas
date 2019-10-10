@@ -25,3 +25,17 @@ create table tab_wrong_uk_column_order
   id2 number(15) not null,
   constraint tab_wrong_uk_column_order unique (id2,id1)
 );
+
+create table tab_old_disable
+(
+	id				number(9) not null,
+	constraint tab_old_disable_cc unique (id) enable
+);
+
+create table tab_old_enable
+(
+	id				number(9) not null,
+	constraint tab_old_enable_cc unique (id) disable
+);
+
+

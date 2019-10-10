@@ -448,6 +448,7 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setIndexmovetablespace( _testSetup._indexmovetablespace );
     lParametersCall.setMviewlogmovetablespace( true );
     lParametersCall.setIndexparallelcreate( _testSetup._indexparallelcreate );
+    lParametersCall.setUpdateEnabledStatus( true );
     lParametersCall.setDateformat( _testSetup._dateformat );
     lParametersCall.setAdditionsOnly( _testSetup._additionsOnly );
     lParametersCall.setLogIgnoredStatements( pLogIgnoredStatements );

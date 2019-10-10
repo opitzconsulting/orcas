@@ -140,6 +140,7 @@ public abstract class Parameters {
     protected boolean _createIndexOnline = false;
     protected boolean _minimizeStatementCount = false;
     protected boolean _cleanupFkValuesOnDropmode = false;
+    private boolean updateEnabledStatus = ParameterDefaults.updateEnabledStatus;
 
     private String excludewhereview = ParameterDefaults.excludewhereview;
 
@@ -213,6 +214,14 @@ public abstract class Parameters {
     protected String _charsetNameSqlLog = null;
 
     protected boolean _dbdocPlantuml = false;
+
+    public boolean isUpdateEnabledStatus() {
+        return updateEnabledStatus;
+    }
+
+    public void setUpdateEnabledStatus(boolean pUpdateEnabledStatus) {
+        updateEnabledStatus = pUpdateEnabledStatus;
+    }
 
     private AdditionalExtensionFactory _additionalExtensionFactory = new AdditionalExtensionFactory() {
         @SuppressWarnings("unchecked")

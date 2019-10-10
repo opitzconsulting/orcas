@@ -31,3 +31,22 @@ create table tab_new_uk_string
     "id1 as string" number(15) not null,
     constraint tab_new_uk_string unique ("id1 as string")
 );
+
+create table tab_new_disable
+(
+	id				number(9) not null,
+	constraint tab_new_disable_cc unique (id) disable
+);
+
+create table tab_old_disable
+(
+	id				number(9) not null,
+	constraint tab_old_disable_cc unique (id) disable
+);
+
+create table tab_old_enable
+(
+	id				number(9) not null,
+	constraint tab_old_enable_cc unique (id) enable
+);
+

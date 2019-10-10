@@ -195,6 +195,7 @@
     </if>
     <text>primary key</text>
     <apply-templates select="pk_columns" />
+    <apply-templates select="status" />
     <if test="tablespace != '' or reverse != '' or indexname != ''">
       <text> using index</text>
       <apply-templates select="reverse" />
@@ -264,6 +265,11 @@
     <text> on null</text>
   </template>
 
+  <template match="status">
+    <text> </text>
+    <value-of select="." />
+  </template>
+
   <template match="ColumnIdentity">
     <text> generated </text>
     <apply-templates select="always" />
@@ -322,6 +328,7 @@
     <text> check</text>
     <apply-templates select="rule" />
     <apply-templates select="deferrtype" />
+    <apply-templates select="status" />
     <if test="position() != last()">
       <text>,</text>
     </if>
@@ -346,6 +353,7 @@
       <apply-templates select="tablespace" />
       <apply-templates select="indexname" />
     </if>
+    <apply-templates select="status" />
     <if test="position() != last()">
       <text>,</text>
     </if>
@@ -382,6 +390,7 @@
     <apply-templates select="destColumns" />
     <apply-templates select="delete_rule" />
     <apply-templates select="deferrtype" />
+    <apply-templates select="status" />
     <if test="position() != last()">
       <text>,</text>
     </if>

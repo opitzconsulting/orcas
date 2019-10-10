@@ -535,6 +535,10 @@ public abstract class DdlBuilder
 
     }
 
+    if(pTableDiff.primary_keyDiff.statusNew != null){
+      p.stmtAppend( " " + pTableDiff.primary_keyDiff.statusNew.getName() );
+    }
+
     p.stmtDone( pTableDiff.isOld );
   }
 
@@ -1766,6 +1770,11 @@ public abstract class DdlBuilder
       lReturn = lReturn + " deferrable initially  " + pForeignKeyDiff.deferrtypeNew.getName();
     }
 
+    if( pForeignKeyDiff.statusNew != null )
+    {
+      lReturn = lReturn + " " + pForeignKeyDiff.statusNew.getName();
+    }
+
     return lReturn;
   }
 
@@ -2198,6 +2207,18 @@ public abstract class DdlBuilder
       // index needs to be renamed as well
       renameUnderlyingIndex( p, pTableDiff, pUniqueKeyDiff.consNameOld, pUniqueKeyDiff.consNameNew );
     } );
+
+
+    p1.handleAlterBuilder()//
+      .ifDifferent( UNIQUE_KEY__STATUS, parameters.isUpdateEnabledStatus() )//
+      .handle( p ->
+      {
+        p.stmtStartAlterTableNoCombine( pTableDiff );
+        p.stmtAppend( pUniqueKeyDiff.statusNew == EnableType.DISABLE ? "disable" : "enable" );
+        p.stmtAppend( "constraint" );
+        p.stmtAppend( pUniqueKeyDiff.consNameNew );
+        p.stmtDone();
+      } );
   }
 
   public void alterForeignKeyIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff, DataHandler pDataHandler )
@@ -2213,6 +2234,17 @@ public abstract class DdlBuilder
       p.stmtAppend( pForeignKeyDiff.consNameNew );
       p.stmtDone();
     } );
+
+    p1.handleAlterBuilder()//
+      .ifDifferent( FOREIGN_KEY__STATUS, parameters.isUpdateEnabledStatus() )//
+      .handle( p ->
+      {
+        p.stmtStartAlterTableNoCombine( pTableDiff );
+        p.stmtAppend( pForeignKeyDiff.statusNew == EnableType.DISABLE ? "disable" : "enable" );
+        p.stmtAppend( "constraint" );
+        p.stmtAppend( pForeignKeyDiff.consNameNew );
+        p.stmtDone();
+      } );
   }
 
   public void alterPrimarykeyIfNeeded( StatementBuilderAlter p1, TableDiff pTableDiff )
@@ -2233,6 +2265,17 @@ public abstract class DdlBuilder
         renameUnderlyingIndex(p, pTableDiff, pTableDiff.primary_keyDiff.consNameOld, pTableDiff.primary_keyDiff.consNameNew);
       }
     } );
+
+    p1.handleAlterBuilder()//
+      .ifDifferent( PRIMARY_KEY__STATUS, parameters.isUpdateEnabledStatus() )//
+      .handle( p ->
+      {
+        p.stmtStartAlterTableNoCombine( pTableDiff );
+        p.stmtAppend( pTableDiff.primary_keyDiff.statusNew == EnableType.DISABLE ? "disable" : "enable" );
+        p.stmtAppend( "constraint" );
+        p.stmtAppend( pTableDiff.primary_keyDiff.consNameNew );
+        p.stmtDone();
+      } );
   }
 
   private void renameUnderlyingIndex( StatementBuilder p, TableDiff pTableDiff, String pIndexNameOld, String pIndexNameNew )
@@ -2265,6 +2308,17 @@ public abstract class DdlBuilder
       p.stmtAppend( pConstraintDiff.consNameNew );
       p.stmtDone();
     } );
+
+    p1.handleAlterBuilder()//
+      .ifDifferent( CONSTRAINT__STATUS, parameters.isUpdateEnabledStatus() )//
+      .handle( p ->
+      {
+        p.stmtStartAlterTableNoCombine( pTableDiff );
+        p.stmtAppend( pConstraintDiff.statusNew == EnableType.DISABLE ? "disable" : "enable" );
+        p.stmtAppend( "constraint" );
+        p.stmtAppend( pConstraintDiff.consNameNew );
+        p.stmtDone();
+      } );
   }
 
   public void dropColumnIdentity( StatementBuilder pP, TableDiff pTableDiff, ColumnDiff pColumnDiff, ColumnIdentityDiff pIdentityDiff )

@@ -11,6 +11,19 @@ create table tab_ref
 );
 	
 
+create table tab_old_disable
+(
+	id				number(9) not null,
+	constraint tab_old_disable_cc foreign key (id) references tab_a (tab_a_id) enable
+);
+
+create table tab_old_enable
+(
+	id				number(9) not null,
+	constraint tab_old_enable_cc foreign key (id) references tab_a (tab_a_id) disable
+);
+	
+
 
 
 

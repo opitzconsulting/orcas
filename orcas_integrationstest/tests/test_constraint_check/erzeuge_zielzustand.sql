@@ -57,3 +57,23 @@ create table tab_mixed_name_2
 );
 
 
+create table tab_new_disable
+(
+	id				number(9),
+	constraint tab_new_disable_cc check(ID BETWEEN 1 AND 500) disable
+);
+
+create table tab_old_disable
+(
+	id				number(9),
+	constraint tab_old_disable_cc check(ID BETWEEN 1 AND 500) disable
+);
+
+create table tab_old_enable
+(
+	id				number(9),
+	constraint tab_old_enable_cc check(ID BETWEEN 1 AND 500) enable
+);
+
+
+

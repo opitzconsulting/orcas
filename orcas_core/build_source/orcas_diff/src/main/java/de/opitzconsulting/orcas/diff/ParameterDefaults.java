@@ -72,4 +72,5 @@ public class ParameterDefaults {
                 }
             }
         };
+    public static boolean updateEnabledStatus = false;
 }
