@@ -179,7 +179,7 @@ public class OrcasMain extends Orcas
             for (Statement lStatementClass : lDiffAction.getStatements()) {
                 String lStatement = lStatementClass.getStatement();
 
-                int lMaxLineLength = 2000;
+                int lMaxLineLength = getParameters().getStaticsSpoolMaxLineLength();
 
                 lStatement = addLineBreaksIfNeeded(lStatement, lMaxLineLength);
                 String lStatementToExecute = lStatement;
@@ -317,7 +317,7 @@ public class OrcasMain extends Orcas
 
       for( String lLine : lSubstrings )
       {
-        if( !lLine.contains( "\n" ) )
+        if( !lLine.contains( "\n" ) && lLine.indexOf( " " ) > 0)
         {
           int lSpaceIndex = lLine.indexOf( " " );
 

@@ -73,6 +73,16 @@ public abstract class Parameters {
     protected Boolean _indexmovetablespace;
     protected Boolean _tablemovetablespace;
 
+    public int getStaticsSpoolMaxLineLength() {
+        return staticsSpoolMaxLineLength;
+    }
+
+    public void setStaticsSpoolMaxLineLength(int pStaticsSpoolMaxLineLength) {
+        staticsSpoolMaxLineLength = pStaticsSpoolMaxLineLength;
+    }
+
+    private int staticsSpoolMaxLineLength = ParameterDefaults.staticsSpoolMaxLineLength;
+
     public boolean isLogCompileErrors() {
         return logCompileErrors;
     }

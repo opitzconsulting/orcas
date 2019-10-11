@@ -73,4 +73,5 @@ public class ParameterDefaults {
             }
         };
     public static boolean updateEnabledStatus = false;
+    public static int staticsSpoolMaxLineLength = 2000;
 }
