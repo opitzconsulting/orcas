@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
-                  version: '6.3.0'
+                  version: '6.4.2'
 
         classpath group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
     }
@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'com.opitzconsulting.orcas.orcas-gradle-plugin'
                
 orcasconfiguration {
-          jdbcurl = "jdbc:oracle:thin:@localhost:1521:XE"
+          jdbcurl = "jdbc:oracle:thin:@10.106.4.2:8521/XEPDB1"
           username = "orcas_dba"
           password = "orcas_dba"
           loglevel = "info"
