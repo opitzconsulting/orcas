@@ -31,7 +31,7 @@ public class OrcasExtractGrants extends Orcas {
             JdbcConnectionHandler.runWithCallableStatementProvider(getParameters(), pCallableStatementProvider -> {
                 String
                     lSql =
-                    "select 'grant ' || privilege || ' on ' || grantor || '.' || table_name || ' to ' || grantee || case when grantable = 'YES' then ' with grant option' end || case when hierarchy = 'YES' then ' with hierarchy option' end || ';' as grant_statement from user_tab_privs_made where not("
+                    "select 'grant ' || privilege || ' on ' || user || '.' || table_name || ' to ' || grantee || case when grantable = 'YES' then ' with grant option' end || case when hierarchy = 'YES' then ' with hierarchy option' end || ';' as grant_statement from user_tab_privs_made where not("
                         + getParameters().getExcludewheregrant()
                         + ") order by table_name, grantee, privilege";
 
