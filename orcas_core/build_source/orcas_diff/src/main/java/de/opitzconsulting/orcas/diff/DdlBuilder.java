@@ -964,6 +964,14 @@ public abstract class DdlBuilder
     return null;
   }
 
+  public String getIndexExpression(IndexDiff pIndexDiff, boolean pUseNew ) {
+    if (pUseNew ? (pIndexDiff.function_based_expressionNew != null) : (pIndexDiff.function_based_expressionOld != null)) {
+      return pUseNew ? pIndexDiff.function_based_expressionNew : pIndexDiff.function_based_expressionOld;
+    } else {
+      return getColumnList(pIndexDiff.index_columnsDiff,pUseNew);
+    }
+  }
+
   public void createIndex( StatementBuilder p, TableDiff pTableDiff, IndexDiff pIndexDiff, boolean pIsIndexParallelCreate )
   {
     p.stmtStart( "create" );
@@ -980,14 +988,7 @@ public abstract class DdlBuilder
     p.stmtAppend( "on" );
     p.stmtAppend( pTableDiff.nameNew );
     p.stmtAppend( "(" );
-    if( pIndexDiff.function_based_expressionNew != null )
-    {
-      p.stmtAppend( pIndexDiff.function_based_expressionNew );
-    }
-    else
-    {
-      p.stmtAppend( getColumnList( pIndexDiff.index_columnsDiff ) );
-    }
+    p.stmtAppend( getIndexExpression( pIndexDiff, true ) );
     p.stmtAppend( ")" );
     if( pIndexDiff.domain_index_expressionNew != null )
     {
@@ -1847,12 +1848,16 @@ public abstract class DdlBuilder
     return pName.substring( 0, pName.indexOf( '.' ) );
   }
 
-  protected String getColumnList( List<ColumnRefDiff> pColumnRefDiffList )
+  protected String getColumnList(List<ColumnRefDiff> pColumnRefDiffList) {
+    return getColumnList(pColumnRefDiffList, true);
+  }
+
+  protected String getColumnList( List<ColumnRefDiff> pColumnRefDiffList, boolean pUseNew )
   {
     String lReturn = null;
     for( ColumnRefDiff lColumnRefDiff : pColumnRefDiffList )
     {
-      if( lColumnRefDiff.isNew )
+      if( pUseNew ? lColumnRefDiff.isNew : lColumnRefDiff.isOld )
       {
         if( lReturn != null )
         {
@@ -1863,7 +1868,7 @@ public abstract class DdlBuilder
           lReturn = "";
         }
 
-        lReturn = lReturn + lColumnRefDiff.column_nameNew;
+        lReturn = lReturn + (pUseNew ? lColumnRefDiff.column_nameNew : lColumnRefDiff.column_nameOld);
       }
     }
 

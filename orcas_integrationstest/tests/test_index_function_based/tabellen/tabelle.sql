@@ -9,6 +9,7 @@ create index add_2_ix on tab_index "COL_1,COL_2,NVL(COL_1,1)";
 create index add_3_ix on tab_index "NVL(COL_1,1),COL_2";
 create index add_4_ix on tab_index "NVL(TO_CHAR(COL_1),'test')";
 create index mod_1_ix on tab_index "NVL(TO_CHAR(COL_2),'klein')";
+create index add_column_expression_ix on tab_index "COL_1";
 
 create table tab_index_inline
 (

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -279,10 +280,13 @@ public class OrcasDiff
           // domain index cant be compared
           boolean lNoDomainIndex = lIndexDiff.domain_index_expressionNew == null;
 
+          // prevent recreate if column-list equals function based expression
+          boolean lExpressionDifferent = !Objects.equals(ddlBuilder.getIndexExpression(lIndexDiff,true),ddlBuilder.getIndexExpression(lIndexDiff,false));
+
           setRecreateNeededFor( lIndexDiff )//
           .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldObjectNames, lIndexDiff.consNameNew, lIndexDiff.consNameOld, databaseHandler.isRenameIndex() )//
-          .ifDifferent( INDEX__INDEX_COLUMNS, lNoDomainIndex )//
-          .ifDifferent( INDEX__FUNCTION_BASED_EXPRESSION, lNoDomainIndex )//
+          .ifDifferent( INDEX__INDEX_COLUMNS, lNoDomainIndex && lExpressionDifferent )//
+          .ifDifferent( INDEX__FUNCTION_BASED_EXPRESSION, lNoDomainIndex && lExpressionDifferent )//
           .ifDifferent( INDEX__DOMAIN_INDEX_EXPRESSION, lNoDomainIndex )//
           .ifDifferent( INDEX__UNIQUE )//
           .ifDifferent( INDEX__BITMAP )//
