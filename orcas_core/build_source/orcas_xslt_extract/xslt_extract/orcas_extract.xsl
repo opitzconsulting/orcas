@@ -199,7 +199,7 @@
     <if test="tablespace != '' or reverse != '' or indexname != ''">
       <text> using index</text>
       <apply-templates select="reverse" />
-      <if test="indexname = ''">
+      <if test="not(indexname) or indexname = ''">
         <apply-templates select="tablespace" />
       </if>
       <apply-templates select="indexname" />
