@@ -25,9 +25,16 @@ public class DiffReasonKey
   private String name;
   private DiffReasonSubEntity diffReasonSubEntity;
   private String subName;
+  private String subSchemaName;
 
-  static DiffReasonKey parseFromXml( String pObjectType, String pObjectName, String pSubobjectType, String pSubobjectName )
+  static DiffReasonKey parseFromXml( String pObjectType, String pObjectName, String pSubobjectType, String pSubobjectName, String pSchemaName, String pSubSchemaName )
   {
+    if (pSchemaName != null && pSchemaName.length() > 0) {
+      pObjectName = pSchemaName + "." + pObjectName;
+    }
+    if (pSubSchemaName != null && pSubSchemaName.length() > 0) {
+      pSubobjectName = pSubSchemaName + "." + pSubobjectName;
+    }
     DiffReasonKey lDiffReasonKey = new DiffReasonKey( DiffReasonEntity.valueOf( pObjectType.toUpperCase() ), pObjectName );
 
     if( pSubobjectType != null )
@@ -64,6 +71,14 @@ public class DiffReasonKey
 
     diffReasonSubEntity = pDiffReasonSubEntity;
     subName = pSubName;
+
+    if (subName != null) {
+      int lIndexOfDot = subName.indexOf('.');
+      if (lIndexOfDot > 0) {
+        subSchemaName = subName.substring(0, lIndexOfDot);
+        subName = subName.substring(lIndexOfDot + 1);
+      }
+    }
   }
 
   private DiffReasonKey( SequenceDiff pSequenceDiff )
@@ -151,6 +166,11 @@ public class DiffReasonKey
   public String getTextSchemaName()
   {
     return schemaName;
+  }
+
+  public String getTextSubSchemaName()
+  {
+    return subSchemaName;
   }
 
   public String getTextSubobjectName()

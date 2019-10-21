@@ -39,6 +39,7 @@ public class XmlLogFileHandler
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_TYPE = "object-type";
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME = "object-name";
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SCHEMA_NAME = "schema-name";
+  private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBSCHEMA_NAME = "subschema-name";
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE = "subobject-type";
   private static final String TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME = "subobject-name";
 
@@ -136,6 +137,10 @@ public class XmlLogFileHandler
     if( pDiffReasonKey.getTextSubobjectName() != null )
     {
       pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME, pDiffReasonKey.getTextSubobjectName() );
+    }
+    if( pDiffReasonKey.getTextSubSchemaName() !=null )
+    {
+      pElement.setAttribute( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBSCHEMA_NAME, pDiffReasonKey.getTextSubSchemaName() );
     }
   }
 
@@ -282,10 +287,12 @@ public class XmlLogFileHandler
   private DiffReasonKey parseDiffReasonKey( Element pElement )
   {
     DiffReasonKey lDiffReasonKey = DiffReasonKey.parseFromXml( //
-    pElement.getAttributeValue( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_TYPE )//
-    , pElement.getAttributeValue( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME )//
-    , pElement.getAttributeValue( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE )//
-    , pElement.getAttributeValue( TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME ) );
+        pElement.getAttributeValue(TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_TYPE)
+        , pElement.getAttributeValue(TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_OBJECT_NAME)
+        , pElement.getAttributeValue(TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_TYPE)
+        , pElement.getAttributeValue(TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBOBJECT_NAME)
+        , pElement.getAttributeValue(TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SCHEMA_NAME)
+        , pElement.getAttributeValue(TAG_DIFF_ACTION_AND_REASON__ATTRIBUTE_SUBSCHEMA_NAME));
     return lDiffReasonKey;
   }
 

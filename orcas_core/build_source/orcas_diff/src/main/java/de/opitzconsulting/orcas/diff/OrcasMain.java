@@ -205,11 +205,17 @@ public class OrcasMain extends Orcas
                 }
 
                 if (!pParameters.isLogonly() && !lStatementClass.isIgnore()) {
+                    String lSchemaName = lDiffAction.getDiffReasonKey().getTextSchemaName();
+
+                    if (lDiffAction.getDiffReasonKey().getTextSubSchemaName() != null) {
+                        lSchemaName = lDiffAction.getDiffReasonKey().getTextSubSchemaName();
+                    }
+
                     CallableStatementProvider lCallableStatementProviderForSchema = getParameters()
                             .getMultiSchemaConnectionManager()
                             .getCallableStatementProviderForSchema(
                                 pCallableStatementProvider,
-                                lDiffAction.getDiffReasonKey().getTextSchemaName(),
+                                lSchemaName,
                                 getParameters());
                     try {
                         getDatabaseHandler().executeDiffResultStatement(
