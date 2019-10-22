@@ -204,7 +204,11 @@ class RecreateNeededBuilder<T extends AbstractDiff> implements RecreateNeededBui
             try {
                 return abstractDiff.getValue(eattribute, false);
             } catch (Exception e) {
-                return "object";
+                try {
+                    return ((List<ColumnRefDiff>)abstractDiff.getDiff(eattribute)).stream().filter(p->p.isOld).map(p->p.column_nameOld).collect(Collectors.joining(","));
+                } catch (Exception e1) {
+                    return "object";
+                }
             }
         }
 
@@ -213,7 +217,11 @@ class RecreateNeededBuilder<T extends AbstractDiff> implements RecreateNeededBui
             try {
                 return abstractDiff.getValue(eattribute, true);
             } catch (Exception e) {
-                return "object";
+                try {
+                    return ((List<ColumnRefDiff>)abstractDiff.getDiff(eattribute)).stream().filter(p->p.isNew).map(p->p.column_nameNew).collect(Collectors.joining(","));
+                } catch (Exception e1) {
+                    return "object";
+                }
             }
         }
     }

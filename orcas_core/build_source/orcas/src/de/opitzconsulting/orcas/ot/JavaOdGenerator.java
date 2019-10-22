@@ -206,7 +206,20 @@ public class JavaOdGenerator extends JavaGenerator
     pOut.println( "   { " );
     pOut.println( "     throw new RuntimeException( e ); " );
     pOut.println( "   } " );
-    pOut.println( " } " );    
+    pOut.println( " } " );
+
+    pOut.println( " public Object getDiff( EStructuralFeature pEStructuralFeature ) " );
+    pOut.println( " { " );
+    pOut.println( "   try " );
+    pOut.println( "   { " );
+    pOut.println( "     Field lField = getClass().getField( pEStructuralFeature.getName() + \"Diff\" ); " );
+    pOut.println( "     return lField.get( this ); " );
+    pOut.println( "   } " );
+    pOut.println( "   catch( Exception e ) " );
+    pOut.println( "   { " );
+    pOut.println( "     throw new RuntimeException( e ); " );
+    pOut.println( "   } " );
+    pOut.println( " } " );
 
     pOut.println( "}" );
     pOut.println();
