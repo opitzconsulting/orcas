@@ -1456,7 +1456,7 @@ public abstract class DdlBuilder
       p.stmtAppend( "sequence" );
     }
 
-    if( pTableDiff.mviewLogDiff.columnsDiff.size() > 0 )
+    if( getColumnList( pTableDiff.mviewLogDiff.columnsDiff ) != null )
     {
       p.stmtAppend( "(" );
       p.stmtAppend( getColumnList( pTableDiff.mviewLogDiff.columnsDiff ) );
