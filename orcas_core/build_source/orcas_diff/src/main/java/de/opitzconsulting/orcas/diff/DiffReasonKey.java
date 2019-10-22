@@ -6,6 +6,7 @@ import java.util.Map;
 
 import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
+import de.opitzconsulting.orcas.orig.diff.ColumnIdentityDiff;
 import de.opitzconsulting.orcas.orig.diff.ConstraintDiff;
 import de.opitzconsulting.orcas.orig.diff.ForeignKeyDiff;
 import de.opitzconsulting.orcas.orig.diff.IndexDiff;
@@ -17,6 +18,7 @@ import de.opitzconsulting.orcas.orig.diff.PrimaryKeyDiff;
 import de.opitzconsulting.orcas.orig.diff.SequenceDiff;
 import de.opitzconsulting.orcas.orig.diff.TableDiff;
 import de.opitzconsulting.orcas.orig.diff.UniqueKeyDiff;
+import de.opitzconsulting.origOrcasDsl.ColumnIdentity;
 
 public class DiffReasonKey
 {
@@ -133,6 +135,11 @@ public class DiffReasonKey
     this( new DiffReasonKey( pTableDiff ), DiffReasonSubEntity.PRIMARY_KEY, null );
   }
 
+  private DiffReasonKey( TableDiff pTableDiff, ColumnDiff pColumnDiff, ColumnIdentityDiff pColumnIdentityDiff )
+  {
+    this( new DiffReasonKey( pTableDiff ), DiffReasonSubEntity.COLUMN, pColumnDiff.isNew ? pColumnDiff.nameNew+".identity" : pColumnDiff.nameOld+".identity" );
+  }
+
   private DiffReasonKey( TableDiff pTableDiff, ColumnDiff pColumnDiff )
   {
     this( new DiffReasonKey( pTableDiff ), DiffReasonSubEntity.COLUMN, pColumnDiff.isNew ? pColumnDiff.nameNew : pColumnDiff.nameOld );
@@ -213,6 +220,7 @@ public class DiffReasonKey
         for( ColumnDiff lColumnDiff : lTableDiff.columnsDiff )
         {
           diffReasonKeyMap.put( lColumnDiff, new DiffReasonKey( lTableDiff, lColumnDiff ) );
+          diffReasonKeyMap.put( lColumnDiff.identityDiff, new DiffReasonKey( lTableDiff, lColumnDiff, lColumnDiff.identityDiff ) );
         }
 
         diffReasonKeyMap.put( lTableDiff.primary_keyDiff, new DiffReasonKey( lTableDiff, lTableDiff.primary_keyDiff ) );
