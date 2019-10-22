@@ -51,7 +51,7 @@ public class OrcasExtractStatics extends Orcas
 
         if( getParameters().isRemoveDefaultValuesFromModel() )
         {
-          InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler() );
+          InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler(), getParameters() );
           logInfo( "removing default values" );
           DiffRepository.getModelMerge().cleanupValues( lOrigModel );
         }

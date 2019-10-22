@@ -1,9 +1,10 @@
 package de.opitzconsulting.orcas.diff;
 
-import javax.crypto.interfaces.PBEKey;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -17,25 +18,65 @@ import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 
 public class InitDiffRepository
 {
-  private static String defaultTablespace;
+  private static ThreadLocal<Function<String,String>> defaultTablespaceProviderForSchema = new ThreadLocal<>();
+  private static ThreadLocal<Map<String,String>> defaultTablespaceCache = new ThreadLocal<>();
 
-  private static String handleDefaultTablespace( String pDefaultTablespace, String pValue )
-  {
-    return pValue == null || pValue.equals( pDefaultTablespace ) ? null : pValue;
+  private static String handleDefaultTablespace(Function<String, String> pDefaultTablespaceProviderForSchema, String pTablespaceValue, Mview pMview) {
+    return handleDefaultTablespace(pDefaultTablespaceProviderForSchema, pTablespaceValue, pMview.getMview_name(), null, null);
   }
 
-  public static void init( CallableStatementProvider pCallableStatementProvider, DatabaseHandler pDatabaseHandler )
+  private static String handleDefaultTablespace(Function<String, String> pDefaultTablespaceProviderForSchema, String pTablespaceValue, Table pTable) {
+    return handleDefaultTablespace(pDefaultTablespaceProviderForSchema, pTablespaceValue, null, pTable.getName(), null);
+  }
+
+  private static String handleDefaultTablespace(
+      Function<String, String> pDefaultTablespaceProviderForSchema,
+      String pTablespaceValue,
+      Table pTable,
+      Index pIndex) {
+    return handleDefaultTablespace(pDefaultTablespaceProviderForSchema, pTablespaceValue, null, pTable.getName(), pIndex.getConsName());
+  }
+
+  private static String handleDefaultTablespace( Function<String,String> pDefaultTablespaceProviderForSchema, String pTablespaceValue, String pMviewName, String pTableName, String pIndexName )
+  {
+    String lSchemaName = null;
+    String lDefaultTablespace = pDefaultTablespaceProviderForSchema.apply(lSchemaName);
+
+    return pTablespaceValue == null || pTablespaceValue.equals( lDefaultTablespace ) ? null : pTablespaceValue;
+  }
+
+  public static void init( CallableStatementProvider pCallableStatementProvider, DatabaseHandler pDatabaseHandler, Parameters pParameters )
   {
     CharType lDefaultCharType = pDatabaseHandler.getDefaultCharType( pCallableStatementProvider );
 
-    defaultTablespace = pDatabaseHandler.getDefaultTablespace( pCallableStatementProvider );
+    defaultTablespaceCache.set(new HashMap<>());
+    defaultTablespaceProviderForSchema.set(p -> {
+      if (!defaultTablespaceCache.get().containsKey(p)) {
+        if (p != null) {
+          CallableStatementProvider
+              lCallableStatementProviderForSchema =
+              pParameters.getMultiSchemaConnectionManager().getCallableStatementProviderForSchema(pCallableStatementProvider, p, pParameters);
+
+          defaultTablespaceCache.get().put(p, pDatabaseHandler.getDefaultTablespace(lCallableStatementProviderForSchema));
+        } else {
+          defaultTablespaceCache.get().put(null, pDatabaseHandler.getDefaultTablespace(pCallableStatementProvider));
+        }
+      }
+
+      return defaultTablespaceCache.get().get(p);
+    });
 
     DiffRepository.setIndexOrUniqueKeyMerge( new IndexOrUniqueKeyMerge()
     {
       @Override
-      public String tablespaceCleanValueIfNeeded( String pValue )
+      public String tablespaceCleanValueIfNeeded( String pValue, IndexOrUniqueKey pObject )
       {
-        return handleDefaultTablespace( defaultTablespace, super.tablespaceCleanValueIfNeeded( pValue ) );
+        if( pObject instanceof Index ){
+          return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded(pValue, pObject), (Table) pObject.eContainer(), (Index)pObject);
+        }
+        else {
+          return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded(pValue, pObject), (Table) pObject.eContainer());
+        }
       }
     } );
     DiffRepository.getIndexOrUniqueKeyMerge().consNameIsConvertToUpperCase = true;
@@ -128,9 +169,9 @@ public class InitDiffRepository
     DiffRepository.setLobStorageParametersMerge( new LobStorageParametersMerge()
     {
       @Override
-      public String tablespaceCleanValueIfNeeded( String pValue )
+      public String tablespaceCleanValueIfNeeded( String pValue, LobStorageParameters pObject )
       {
-        return handleDefaultTablespace( defaultTablespace, super.tablespaceCleanValueIfNeeded( pValue ) );
+        return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded( pValue, pObject ), (Table)pObject.eContainer().eContainer() );
       }
     } );
     DiffRepository.getLobStorageParametersMerge().tablespaceIsConvertToUpperCase = true;
@@ -318,9 +359,9 @@ public class InitDiffRepository
     DiffRepository.setPrimaryKeyMerge( new PrimaryKeyMerge()
     {
       @Override
-      public String tablespaceCleanValueIfNeeded( String pValue )
+      public String tablespaceCleanValueIfNeeded( String pValue, PrimaryKey pObject )
       {
-        return handleDefaultTablespace( defaultTablespace, super.tablespaceCleanValueIfNeeded( pValue ) );
+        return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded( pValue, pObject ), (Table)pObject.eContainer() );
       }
     } );
     DiffRepository.getPrimaryKeyMerge().consNameIsConvertToUpperCase = true;
@@ -330,9 +371,9 @@ public class InitDiffRepository
     DiffRepository.setMviewLogMerge( new MviewLogMerge()
     {
       @Override
-      public String tablespaceCleanValueIfNeeded( String pValue )
+      public String tablespaceCleanValueIfNeeded( String pValue, MviewLog pObject )
       {
-        return handleDefaultTablespace( defaultTablespace, super.tablespaceCleanValueIfNeeded( pValue ) );
+        return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded( pValue, pObject ), (Table)pObject.eContainer() );
       }
     } );
     DiffRepository.getMviewLogMerge().newValuesDefaultValue = NewValuesType.EXCLUDING;
@@ -548,9 +589,9 @@ public class InitDiffRepository
       }
 
       @Override
-      public String tablespaceCleanValueIfNeeded( String pValue )
+      public String tablespaceCleanValueIfNeeded( String pValue, Mview pObject )
       {
-        return handleDefaultTablespace( defaultTablespace, super.tablespaceCleanValueIfNeeded( pValue ) );
+        return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded( pValue, pObject ), pObject );
       }
 
       @Override
@@ -722,9 +763,9 @@ public class InitDiffRepository
       }
 
       @Override
-      public String tablespaceCleanValueIfNeeded( String pValue )
+      public String tablespaceCleanValueIfNeeded( String pValue, Table pObject )
       {
-        return handleDefaultTablespace( defaultTablespace, super.tablespaceCleanValueIfNeeded( pValue ) );
+        return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded( pValue, pObject ), pObject );
       }
 
       @Override
@@ -784,9 +825,38 @@ public class InitDiffRepository
     return pString.replace("\r\n","\n");
   }
 
-  public static String getDefaultTablespace()
-  {
-    return defaultTablespace;
+  private static String getSchemaPrefix(String pNameWithPrefix) {
+    if (pNameWithPrefix != null && pNameWithPrefix.indexOf('.') > 0) {
+      return pNameWithPrefix.substring(0, pNameWithPrefix.indexOf('.'));
+    }
+    return null;
+  }
+
+  private static String getDefaultTablespace(
+      Function<String, String> pDefaultTablespaceProviderForSchema,
+      String pMviewName,
+      String pTableName,
+      String pIndexName) {
+    String lSchemaName;
+    if (getSchemaPrefix(pIndexName) != null) {
+      lSchemaName = getSchemaPrefix(pIndexName);
+    } else {
+      if (getSchemaPrefix(pTableName) != null) {
+        lSchemaName = getSchemaPrefix(pTableName);
+      } else {
+        if (getSchemaPrefix(pMviewName) != null) {
+          lSchemaName = getSchemaPrefix(pMviewName);
+        } else {
+          lSchemaName = null;
+        }
+      }
+    }
+
+    return pDefaultTablespaceProviderForSchema.apply(lSchemaName);
+  }
+
+  public static String getDefaultTablespace(String pMviewName, String pTableName, String pIndexName) {
+    return getDefaultTablespace(defaultTablespaceProviderForSchema.get(), pMviewName, pTableName, pIndexName);
   }
 
   private static boolean isColumnsEqual( List<ColumnRefDiff> pNewColumnsDiff, EList<ColumnRef> pOldColumns )

@@ -36,7 +36,7 @@ public class OrcasMain extends Orcas
     else
     {
       Consumer<CallableStatementProvider> lStaticsHandler = (CallableStatementProvider pCallableStatementProvider) -> {
-        InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler() );
+        InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler(), getParameters() );
 
         logInfo( "starting orcas statics" );
 
@@ -273,7 +273,7 @@ public class OrcasMain extends Orcas
       public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
         CallableStatementProvider lSrcCallableStatementProvider = pCallableStatementProvider;
-        InitDiffRepository.init( lSrcCallableStatementProvider, getDatabaseHandler() );
+        InitDiffRepository.init( lSrcCallableStatementProvider, getDatabaseHandler(), getParameters() );
         lSrcModel[0] = getDatabaseHandler().createLoadIst( lSrcCallableStatementProvider, getParameters() ).loadModel( false );
         DiffRepository.getModelMerge().cleanupValues( lSrcModel[0] );
       }
@@ -285,7 +285,7 @@ public class OrcasMain extends Orcas
       public void run( CallableStatementProvider pCallableStatementProvider ) throws Exception
       {
         CallableStatementProvider lDestCallableStatementProvider = pCallableStatementProvider;
-        InitDiffRepository.init( lDestCallableStatementProvider, getDatabaseHandler() );
+        InitDiffRepository.init( lDestCallableStatementProvider, getDatabaseHandler(), getParameters() );
         de.opitzconsulting.origOrcasDsl.Model lDstModel = getDatabaseHandler().createLoadIst( lDestCallableStatementProvider, getParameters() ).loadModel( true );
         DiffRepository.getModelMerge().cleanupValues( lDstModel );
 

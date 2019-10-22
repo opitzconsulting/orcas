@@ -756,7 +756,7 @@ public class OrcasDiff
       {
         runInAlterTableCombiner( () ->
         {
-          doInDiffActionAlter( pTableDiff, p -> ddlBuilder.alterTableIfNeeded( p, pTableDiff, _parameters.isTablemovetablespace(), getDefaultTablespace() ) );
+          doInDiffActionAlter( pTableDiff, p -> ddlBuilder.alterTableIfNeeded( p, pTableDiff, _parameters.isTablemovetablespace(), getDefaultTablespace(null,pTableDiff.nameNew,null) ) );
 
           handleTableCleanupTableDetails( pTableDiff, false );
         } );
@@ -1013,12 +1013,12 @@ public class OrcasDiff
   {
     createIfNeededOrAlter( pIndexDiff, //
     p -> ddlBuilder.createIndex( p, pTableDiff, pIndexDiff, _parameters.isIndexparallelcreate() ), //
-    p -> ddlBuilder.alterIndexIfNeeded( p, pIndexDiff, _parameters.isIndexmovetablespace(), getDefaultTablespace() ) );
+    p -> ddlBuilder.alterIndexIfNeeded( p, pIndexDiff, _parameters.isIndexmovetablespace(), getDefaultTablespace(null,pTableDiff.nameNew,pIndexDiff.consNameNew) ) );
   }
 
-  private String getDefaultTablespace()
+  private String getDefaultTablespace(String pMviewName, String pTableName, String pIndexName)
   {
-    return InitDiffRepository.getDefaultTablespace();
+    return InitDiffRepository.getDefaultTablespace(pMviewName, pTableName, pIndexName);
   }
 
   private void handleConstraint( TableDiff pTableDiff, ConstraintDiff pConstraintDiff )

@@ -224,6 +224,10 @@ public class JavaOdGenerator extends JavaGenerator
     }
   }
 
+  private boolean isValueClenaupMethodWithParentObject(FieldData pFieldData) {
+    return pFieldData.getJavaSetterName().equals("setTablespace");
+  }
+
   private void _writeMergeClass( ClassDataType pClassDataType, TypeDataContainer pTypeDataContainer, JavaPrettyWriter pOut, boolean pHasCollectionHandling )
   {
     writePackage( pOut );
@@ -302,7 +306,7 @@ public class JavaOdGenerator extends JavaGenerator
       ClassData lClassData = pTypeDataContainer.getClassData( lFieldData.getJavaType() );
       if( lClassData.isAtomicValue() )
       {
-        pOut.println( " pValue." + lFieldData.getJavaSetterName() + "( " + lFieldData.getCleanValueJavaMethodName() + "( pValue." + lFieldData.getJavaGetterCall() + " ) );" );
+        pOut.println( " pValue." + lFieldData.getJavaSetterName() + "( " + lFieldData.getCleanValueJavaMethodName() + "( pValue." + lFieldData.getJavaGetterCall() + (isValueClenaupMethodWithParentObject(lFieldData) ? ", pValue" : "" ) + " ) );" );
       }
       else
       {
@@ -342,7 +346,7 @@ public class JavaOdGenerator extends JavaGenerator
       ClassData lClassData = pTypeDataContainer.getClassData( lFieldData.getJavaType() );
       if( lClassData.isAtomicValue() )
       {
-        pOut.println( " public " + lClassData.getJavaName() + " " + lFieldData.getCleanValueJavaMethodName() + "( " + lClassData.getJavaName() + " pValue )" );
+        pOut.println( " public " + lClassData.getJavaName() + " " + lFieldData.getCleanValueJavaMethodName() + "( " + lClassData.getJavaName() + " pValue" + (isValueClenaupMethodWithParentObject(lFieldData) ? ", " + pClassDataType.getJavaName() + " pObject" : "") + " )" );
         pOut.println( " {" );
         if( lFieldData.isInt() )
         {
