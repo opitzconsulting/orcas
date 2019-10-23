@@ -37,6 +37,10 @@
       <apply-templates select="nestedTableStorages" />
       <apply-templates select="tablePartitioning" />
       <apply-templates select="tablespace" />
+      <apply-templates select="indexOrganized" />
+      <apply-templates select="pctthreshold" />
+      <apply-templates select="includingColumn" />
+      <apply-templates select="overflowTablespace" />
       <apply-templates select="pctfree" />
       <apply-templates select="compression" />
       <apply-templates select="compressionFor" />

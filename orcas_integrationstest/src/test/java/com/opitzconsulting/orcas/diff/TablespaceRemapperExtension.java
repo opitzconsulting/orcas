@@ -101,6 +101,7 @@ public class TablespaceRemapperExtension implements OrcasExtension
           }
         }
         ((Table) lModelElement).setTablespace( _replaceTablespace( ((Table) lModelElement).getTablespace() ) );
+        ((Table) lModelElement).setOverflowTablespace( _replaceTablespace( ((Table) lModelElement).getOverflowTablespace() ) );
       }
       if( lModelElement instanceof IndexExTable )
       {

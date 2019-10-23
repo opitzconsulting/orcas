@@ -769,11 +769,21 @@ public class InitDiffRepository
       }
 
       @Override
+      public Integer pctthresholdCleanValueIfNeeded(Integer pValue) {
+        if( pValue != null && pValue.intValue() == 50 )
+        {
+          return null;
+        }
+
+        return super.pctfreeCleanValueIfNeeded(pValue);
+      }
+
+      @Override
       public void cleanupValues( Table pValue )
       {
         super.cleanupValues( pValue );
 
-        if( pValue.getPermanentness() == PermanentnessType.GLOBAL_TEMPORARY )
+        if( pValue.getPermanentness() == PermanentnessType.GLOBAL_TEMPORARY || pValue.isIndexOrganized() )
         {
           if( pValue.getLogging() == LoggingType.NOLOGGING )
           {
@@ -802,9 +812,19 @@ public class InitDiffRepository
         }
         else
         {
-          if( pValue.getPctfree() != null && pValue.getPctfree().intValue() == 10 )
+          if( pValue.isIndexOrganized() )
           {
-            pValue.setPctfree( null );
+            if (pValue.getPctfree() != null && pValue.getPctfree().intValue() == 0)
+            {
+              pValue.setPctfree(null);
+            }
+          }
+          else
+          {
+            if (pValue.getPctfree() != null && pValue.getPctfree().intValue() == 10)
+            {
+              pValue.setPctfree(null);
+            }
           }
         }
       }

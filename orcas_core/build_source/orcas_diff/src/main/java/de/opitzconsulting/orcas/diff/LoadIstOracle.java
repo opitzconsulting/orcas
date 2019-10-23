@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
@@ -197,6 +198,8 @@ public class LoadIstOracle extends LoadIst
     loadTableColumnCommentsIntoModel( pModel );
 
     updateForeignkeyDestdata( pModel );
+
+    loadIotTableStorageIntoModel( pModel );
 
     removeNonePrebuildMviewTables( pModel );
 
@@ -1051,6 +1054,71 @@ public class LoadIstOracle extends LoadIst
 
   }
 
+  private void loadIotTableStorageIntoModel(Model pModel) {
+    pModel
+        .getModel_elements()
+        .stream()
+        .filter(p -> p instanceof Table)
+        .map(p -> (Table) p)
+        .forEach(p -> {
+          if (p.isIndexOrganized() && p.getPrimary_key() != null && p.getPrimary_key().getTablespace() != null) {
+            p.setTablespace(p.getPrimary_key().getTablespace());
+            p.getPrimary_key().setTablespace(null);
+          }
+        });
+
+    String lSql = "" + //
+        " select iot_name," + //
+        "        tablespace_name," + //
+        "        owner" + //
+        "   from " + getDataDictionaryView( "tables" ) + //
+        "  where iot_name is not null" + //
+        "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() ) {
+      @Override
+      protected void useResultSetRow(ResultSet pResultSet) throws SQLException {
+        if (!isIgnoredTable(pResultSet.getString("iot_name"), pResultSet.getString("owner"))) {
+          Table lTable = findTable(pModel, pResultSet.getString("iot_name"), pResultSet.getString("owner"));
+          lTable.setOverflowTablespace(pResultSet.getString("tablespace_name"));
+        }
+      }
+    }.execute();
+
+
+    lSql = "" + //
+        " select pct_threshold," + //
+        "        table_name," + //
+        "        owner," + //
+        "        (select column_name from "+getDataDictionaryView( "tab_cols" )+" where tab_cols.owner = indexes.owner and tab_cols.table_name = indexes.table_name and column_id = include_column ) as include_column_name" + //
+        "   from " + getDataDictionaryView( "indexes" ) + //
+        "  where index_type = 'IOT - TOP'" + //
+        "";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() ) {
+      @Override
+      protected void useResultSetRow(ResultSet pResultSet) throws SQLException {
+        if (!isIgnoredTable(pResultSet.getString("table_name"), pResultSet.getString("owner"))) {
+          Table lTable = findTable(pModel, pResultSet.getString("table_name"), pResultSet.getString("owner"));
+
+          if( pResultSet.getBigDecimal("pct_threshold") != null ) {
+            lTable.setPctthreshold(pResultSet.getInt("pct_threshold"));
+          }
+          String lIncludeColumnName = pResultSet.getString("include_column_name");
+          if (lIncludeColumnName != null) {
+            if (Optional
+                .of(lTable)
+                .map(p -> p.getPrimary_key())
+                .map(p -> !p.getPk_columns().stream().anyMatch(pColumn -> pColumn.getColumn_name_string().equals(lIncludeColumnName)))
+                .orElse(true)) {
+              lTable.setIncludingColumn(lIncludeColumnName);
+            }
+          }
+        }
+      }
+    }.execute();
+  }
+
   private String getDataDictionaryView( String pName )
   {
     if( !_parameters.getMultiSchema() )
@@ -1855,6 +1923,7 @@ public class LoadIstOracle extends LoadIst
                   "        tables.temporary," + //
                   "        tables.duration," + //
                   "        tables.logging," + //
+                  "        tables.iot_type," + //
                   "        trim(degree) degree," + //
                   "        trim(compression) compression," + //
                   "        trim(compress_for) compress_for," + //
@@ -1863,6 +1932,7 @@ public class LoadIstOracle extends LoadIst
                   "   left outer join " + getDataDictionaryView( "part_tables" ) + //
                   "     on tables.table_name = part_tables.table_name " + //
                   "     and tables.owner = part_tables.owner " + //
+                  "  where iot_name is null" + //
                   "  order by table_name" + //
                   "";
 
@@ -1890,6 +1960,10 @@ public class LoadIstOracle extends LoadIst
 
           // set pctfree
           lTable.setPctfree( pResultSet.getInt( "pct_free" ) );
+
+          if( "IOT".equals( pResultSet.getString( "iot_type" ) ) ) {
+            lTable.setIndexOrganized(true);
+          }
 
           if( "YES".equals( pResultSet.getString( "logging" ) ) )
           {

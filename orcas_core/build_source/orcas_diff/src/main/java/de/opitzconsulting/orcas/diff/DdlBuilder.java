@@ -508,13 +508,21 @@ public abstract class DdlBuilder
       p.stmtStartAlterTable( pTableDiff );
     }
     p.stmtAppend( "add" );
+    appendPkClause(p, pTableDiff);
+
+    p.stmtDone( pTableDiff.isOld );
+  }
+
+  private void appendPkClause(StatementBuilder p, TableDiff pTableDiff) {
+    boolean lHasIndexParameters = pTableDiff.primary_keyDiff.indexnameNew != null || pTableDiff.primary_keyDiff.tablespaceNew != null || pTableDiff.primary_keyDiff.reverseNew != null;
+
     if( pTableDiff.primary_keyDiff.consNameNew != null )
     {
       p.stmtAppend( "constraint " + pTableDiff.primary_keyDiff.consNameNew );
     }
     p.stmtAppend( "primary key (" + getColumnList( pTableDiff.primary_keyDiff.pk_columnsDiff ) + ")" );
 
-    if( lHasIndexParameters )
+    if(lHasIndexParameters)
     {
       p.stmtAppend( "using index" );
 
@@ -525,7 +533,7 @@ public abstract class DdlBuilder
           if( pTableDiff.primary_keyDiff.tablespaceNew != null )
           {
             p.stmtAppend( "tablespace " + pTableDiff.primary_keyDiff.tablespaceNew );
-          }    	  
+          }
       }
 
       if( pTableDiff.primary_keyDiff.reverseNew != null )
@@ -538,8 +546,6 @@ public abstract class DdlBuilder
     if(pTableDiff.primary_keyDiff.statusNew != null){
       p.stmtAppend( " " + pTableDiff.primary_keyDiff.statusNew.getName() );
     }
-
-    p.stmtDone( pTableDiff.isOld );
   }
 
   public void createConstraint( StatementBuilder p, TableDiff pTableDiff, ConstraintDiff pConstraintDiff )
@@ -1519,7 +1525,12 @@ public abstract class DdlBuilder
     p.stmtAppend( pTableDiff.nameNew );
     p.stmtAppend( "(" );
     p.stmtAppend( createColumnClause( pTableDiff.columnsDiff ) );
-    p.stmtAppend( createPkCreateWithTableCreate( pTableDiff.primary_keyDiff ) );
+    if( pTableDiff.indexOrganizedNew ) {
+      p.stmtAppend( "," );
+      appendPkClause(p, pTableDiff);
+    } else {
+      p.stmtAppend(createPkCreateWithTableCreate(pTableDiff.primary_keyDiff));
+    }
     p.stmtAppend( createRefFkClause( pTableDiff ) );
     p.stmtAppend( ")" );
     if( pTableDiff.transactionControlNew != null )
@@ -1530,6 +1541,9 @@ public abstract class DdlBuilder
     }
     else
     {
+      if( pTableDiff.indexOrganizedNew ) {
+        p.stmtAppend( "organization index" );
+      }
       pTableDiff.lobStoragesDiff.stream().filter( lLobstorage -> lLobstorage.isNew ).forEach( lLobstorage -> addLobStorage( p, lLobstorage ) );
       pTableDiff.varrayStoragesDiff.stream().filter( lVarraystorage -> lVarraystorage.isNew ).forEach( lVarraystorage -> addVarrayStorage( p, lVarraystorage ) );
       pTableDiff.nestedTableStoragesDiff.stream().filter( lNestedTableStorage -> lNestedTableStorage.isNew ).forEach( lNestedTableStorage -> addNestedTableStorage( p, lNestedTableStorage ) );
@@ -1538,6 +1552,22 @@ public abstract class DdlBuilder
       {
         p.stmtAppend( "tablespace" );
         p.stmtAppend( pTableDiff.tablespaceNew );
+      }
+
+      if( pTableDiff.indexOrganizedNew ) {
+        if( pTableDiff.pctthresholdNew != null ){
+          p.stmtAppend( "pctthreshold" );
+          p.stmtAppend( pTableDiff.pctthresholdNew + "" );
+        }
+        if( pTableDiff.includingColumnNew != null ){
+          p.stmtAppend( "including" );
+          p.stmtAppend( pTableDiff.includingColumnNew );
+        }
+        if( pTableDiff.overflowTablespaceNew != null ){
+          p.stmtAppend( "overflow" );
+          p.stmtAppend( "tablespace" );
+          p.stmtAppend( pTableDiff.overflowTablespaceNew );
+        }
       }
 
       if( pTableDiff.permanentnessNew != PermanentnessType.GLOBAL_TEMPORARY )

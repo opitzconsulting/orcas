@@ -237,10 +237,6 @@ public class JavaOdGenerator extends JavaGenerator
     }
   }
 
-  private boolean isValueClenaupMethodWithParentObject(FieldData pFieldData) {
-    return pFieldData.getJavaSetterName().equals("setTablespace");
-  }
-
   private void _writeMergeClass( ClassDataType pClassDataType, TypeDataContainer pTypeDataContainer, JavaPrettyWriter pOut, boolean pHasCollectionHandling )
   {
     writePackage( pOut );
@@ -319,7 +315,7 @@ public class JavaOdGenerator extends JavaGenerator
       ClassData lClassData = pTypeDataContainer.getClassData( lFieldData.getJavaType() );
       if( lClassData.isAtomicValue() )
       {
-        pOut.println( " pValue." + lFieldData.getJavaSetterName() + "( " + lFieldData.getCleanValueJavaMethodName() + "( pValue." + lFieldData.getJavaGetterCall() + (isValueClenaupMethodWithParentObject(lFieldData) ? ", pValue" : "" ) + " ) );" );
+        pOut.println( " pValue." + lFieldData.getJavaSetterName() + "( " + lFieldData.getCleanValueJavaMethodName() + "( pValue." + lFieldData.getJavaGetterCall() + ", pValue ) );" );
       }
       else
       {
@@ -359,7 +355,12 @@ public class JavaOdGenerator extends JavaGenerator
       ClassData lClassData = pTypeDataContainer.getClassData( lFieldData.getJavaType() );
       if( lClassData.isAtomicValue() )
       {
-        pOut.println( " public " + lClassData.getJavaName() + " " + lFieldData.getCleanValueJavaMethodName() + "( " + lClassData.getJavaName() + " pValue" + (isValueClenaupMethodWithParentObject(lFieldData) ? ", " + pClassDataType.getJavaName() + " pObject" : "") + " )" );
+        pOut.println( " public " + lClassData.getJavaName() + " " + lFieldData.getCleanValueJavaMethodName() + "( " + lClassData.getJavaName() + " pValue, " + pClassDataType.getJavaName() + " pObject )" );
+        pOut.println( " {" );
+        pOut.println( "   return " + lFieldData.getCleanValueJavaMethodName() + "( pValue );" );
+        pOut.println( " }" );
+
+        pOut.println( " public " + lClassData.getJavaName() + " " + lFieldData.getCleanValueJavaMethodName() + "( " + lClassData.getJavaName() + " pValue )" );
         pOut.println( " {" );
         if( lFieldData.isInt() )
         {

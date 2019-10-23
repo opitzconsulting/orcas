@@ -1028,7 +1028,12 @@ public class OrcasDiff
 
   private void handlePrimarykey( TableDiff pTableDiff )
   {
-    createIfNeededOrAlter( pTableDiff.primary_keyDiff, p -> ddlBuilder.createPrimarykey( p, pTableDiff ), p -> ddlBuilder.alterPrimarykeyIfNeeded( p, pTableDiff ) );
+    if( pTableDiff.isOld || !pTableDiff.indexOrganizedNew ) {
+      createIfNeededOrAlter(
+          pTableDiff.primary_keyDiff,
+          p -> ddlBuilder.createPrimarykey(p, pTableDiff),
+          p -> ddlBuilder.alterPrimarykeyIfNeeded(p, pTableDiff));
+    }
   }
 
   static ForeignKeyDiff getFkForRefPartitioning( TableDiff pTableDiff )

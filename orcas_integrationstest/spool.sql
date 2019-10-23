@@ -38,7 +38,7 @@ SPOOL &1
 PROMPT ****************************************************************************************TABELLEN DER DATENBANK******************************************************************************************;
 SELECT TABLE_NAME, logging, cache
 FROM USER_TABLES
-WHERE DROPPED = 'NO' AND TABLE_NAME NOT LIKE '%$%'
+WHERE DROPPED = 'NO' AND TABLE_NAME NOT LIKE '%$%' AND IOT_NAME IS NULL
 ORDER BY TABLE_NAME ASC;
 PROMPT  ;
 

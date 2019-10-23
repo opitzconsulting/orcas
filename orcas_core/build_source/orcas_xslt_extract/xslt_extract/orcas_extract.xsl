@@ -155,6 +155,10 @@
       <apply-templates select="nestedTableStorages" />
       <apply-templates select="tablePartitioning" />
       <apply-templates select="tablespace" />
+      <apply-templates select="indexOrganized" />
+      <apply-templates select="pctthreshold" />
+      <apply-templates select="includingColumn" />
+      <apply-templates select="overflowTablespace" />
       <apply-templates select="pctfree" />
       <apply-templates select="compression" />
       <apply-templates select="compressionFor" />
@@ -175,6 +179,27 @@
 
   <template match="data_type | comment_object | parallel_degree | global ">
     <text> </text>
+    <value-of select="." />
+  </template>
+
+  <template match="indexOrganized">
+    <if test=". = 'true'">
+      <text> organization index</text>
+    </if>
+  </template>
+
+  <template match="overflowTablespace">
+    <text> overflow tablespace </text>
+    <value-of select="." />
+  </template>
+
+  <template match="pctthreshold">
+    <text> pctthreshold </text>
+    <value-of select="." />
+  </template>
+
+  <template match="includingColumn">
+    <text> including </text>
     <value-of select="." />
   </template>
 
