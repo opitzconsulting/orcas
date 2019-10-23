@@ -1434,7 +1434,7 @@ public class LoadIstOracle extends LoadIst
                   "        indexes.owner index_owner" + //
                   "   from " + getDataDictionaryView( "constraints" ) + //
                   "   left outer join " + getDataDictionaryView( "indexes" ) + " on (constraints.index_name = indexes.index_name " + //
-                  " and constraints.owner = indexes.owner)" + //
+                  " and constraints.owner = indexes.table_owner)" + //
                   " where constraint_type != 'C'" + //
                   "  order by table_name," + //
                   "           constraint_name" + //
