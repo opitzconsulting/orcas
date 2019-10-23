@@ -93,9 +93,9 @@ public class DiffReasonKey
     this( DiffReasonEntity.TABLE, pTableDiff.isNew ? pTableDiff.nameNew : pTableDiff.nameOld );
   }
 
-  public DiffReasonKey( String pTableName )
+  public DiffReasonKey( TableDiff pTableDiff, String pGrantName )
   {
-    this( DiffReasonEntity.TABLE, pTableName );
+    this( new DiffReasonKey( pTableDiff ),DiffReasonSubEntity.GRANT, pGrantName );
   }
 
   private DiffReasonKey( MviewDiff pMviewDiff )
@@ -192,7 +192,7 @@ public class DiffReasonKey
 
   public enum DiffReasonSubEntity
   {
-    UNIQUE_KEY, PRIMARY_KEY, FOREIGN_KEY, CONSTRAINT, INDEX, TABLE_COMMENT, COLUMN_COMMENT, COLUMN, MV_LOG
+    UNIQUE_KEY, PRIMARY_KEY, FOREIGN_KEY, CONSTRAINT, INDEX, TABLE_COMMENT, COLUMN_COMMENT, COLUMN, MV_LOG, GRANT
   }
 
   public static class DiffReasonKeyRegistry

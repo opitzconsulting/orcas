@@ -792,7 +792,7 @@ public class OrcasDiff
               {
                 if( lForeignKeyDiff.isOld == false  )
                 {
-                  DiffAction lDiffAction = new DiffAction( new DiffReasonKey(lForeignKeyDiff.destTableNew), DiffReasonType.CREATE );
+                  DiffAction lDiffAction = new DiffAction( new DiffReasonKey(lTableDiff,"references"), DiffReasonType.CREATE );
 
                   doInDiffAction( lDiffAction, Collections.singletonList( new DiffActionReasonMissing( diffReasonKeyRegistry.getDiffReasonKey(
                       lForeignKeyDiff) ) ),
@@ -1016,7 +1016,7 @@ public class OrcasDiff
       {
         if( pIndexDiff.isOld == false  )
         {
-          DiffAction lDiffAction = new DiffAction( new DiffReasonKey(pTableDiff.nameNew), DiffReasonType.CREATE );
+          DiffAction lDiffAction = new DiffAction( new DiffReasonKey(pTableDiff,"index"), DiffReasonType.CREATE );
 
           doInDiffAction( lDiffAction, Collections.singletonList( new DiffActionReasonMissing( diffReasonKeyRegistry.getDiffReasonKey(
               pIndexDiff) ) ),
