@@ -282,6 +282,12 @@ public class OrcasScriptRunner extends Orcas {
                         i++;
                     }
                 }
+
+                if (pLine.charAt(i) == '-') {
+                    if (pLine.charAt(i + 1) == '-') {
+                        break;
+                    }
+                }
             }
         }
 
@@ -302,7 +308,7 @@ public class OrcasScriptRunner extends Orcas {
         for (String lFileLine : pLines) {
             String lTrimedLine = lFileLine.trim().toLowerCase();
             lIsInComment = isInComment(lTrimedLine, lIsInComment);
-            if (lTrimedLine.equals("/") && !lIsInComment) {
+            if (lFileLine.equals("/") && !lIsInComment) {
                 lHasPlSqlModeTerminator = true;
             }
         }
@@ -369,7 +375,7 @@ public class OrcasScriptRunner extends Orcas {
             lIsInComment = isInComment(lTrimedLine, lIsInComment);
 
             if (lPlSqlMode) {
-                if (lTrimedLine.equals("/") && !lIsInComment) {
+                if (lLine.equals("/") && !lIsInComment) {
                     lCurrentEnd = true;
                     lPlSqlMode = false;
                 } else {

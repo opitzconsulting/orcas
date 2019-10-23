@@ -17,5 +17,7 @@ public class TestOrcasScriptRunner {
         Assertions.assertEquals(true, OrcasScriptRunner.isInComment(" */  /*   ", true));
         Assertions.assertEquals(true, OrcasScriptRunner.isInComment("*", true));
         Assertions.assertEquals(false, OrcasScriptRunner.isInComment("/", false));
+        Assertions.assertEquals(false, OrcasScriptRunner.isInComment("--cxc/*", false));
+        Assertions.assertEquals(false, OrcasScriptRunner.isInComment("--*/", true));
     }
 }
