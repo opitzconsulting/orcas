@@ -1820,6 +1820,13 @@ public abstract class DdlBuilder
       }
   }
 
+  public void createIndexGrantIfNeeded( StatementBuilder p, TableDiff pTableDiff, IndexDiff pIndexDiff ){
+    if( !getSchemaName( pTableDiff.nameNew ).equals( getSchemaName( pIndexDiff.consNameNew ) ) )
+    {
+      p.addStmt( "grant index on " + pTableDiff.nameNew + " to " + getSchemaName( pIndexDiff.consNameNew ) );
+    }
+  }
+
   public void createForeignKey( StatementBuilder p, TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff, DataHandler pDataHandler )
   {
     String lFkFalseDataSelect;

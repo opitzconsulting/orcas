@@ -1011,6 +1011,20 @@ public class OrcasDiff
 
   private void handleIndex( TableDiff pTableDiff, IndexDiff pIndexDiff )
   {
+    if( _parameters.getMultiSchema() ) {
+      if( pIndexDiff.isNew )
+      {
+        if( pIndexDiff.isOld == false  )
+        {
+          DiffAction lDiffAction = new DiffAction( new DiffReasonKey(pTableDiff.nameNew), DiffReasonType.CREATE );
+
+          doInDiffAction( lDiffAction, Collections.singletonList( new DiffActionReasonMissing( diffReasonKeyRegistry.getDiffReasonKey(
+              pIndexDiff) ) ),
+              (DiffActionRunnable) p -> ddlBuilder.createIndexGrantIfNeeded(p, pTableDiff, pIndexDiff), createStatementBuilder() );
+        }
+      }
+    }
+
     createIfNeededOrAlter( pIndexDiff, //
     p -> ddlBuilder.createIndex( p, pTableDiff, pIndexDiff, _parameters.isIndexparallelcreate() ), //
     p -> ddlBuilder.alterIndexIfNeeded( p, pIndexDiff, _parameters.isIndexmovetablespace(), getDefaultTablespace(null,pTableDiff.nameNew,pIndexDiff.consNameNew) ) );
