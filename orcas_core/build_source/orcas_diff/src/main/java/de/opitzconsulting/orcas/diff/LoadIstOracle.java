@@ -1805,7 +1805,8 @@ public class LoadIstOracle extends LoadIst
 
             Table lTable = findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) );
 
-            if( findColumn( lTable, lLobStorage.getColumn_name() ) != null )
+            Column lColumn = findColumn(lTable, lLobStorage.getColumn_name());
+            if( lColumn != null && lColumn.getObject_type() == null )
             {
               lTable.getLobStorages().add( lLobStorage );
             }

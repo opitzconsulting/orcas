@@ -30,3 +30,9 @@ create table tab_nested_table_add_column
 nested table col_type store as tab_nested_table_add_column_list
 /
 
+create table tab_anydata
+(
+  col_anydata sys.anydata
+)
+/
+
