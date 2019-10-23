@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'com.opitzconsulting.orcas.orcas-gradle-plugin'
                
 orcasconfiguration {
-          jdbcurl = "jdbc:oracle:thin:@10.107.0.0:8521/XEPDB1"
+          jdbcurl = "jdbc:oracle:thin:@localhost:1521:XE"
           username = "orcas_dba"
           password = "orcas_dba"
           loglevel = "info"
