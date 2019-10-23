@@ -376,9 +376,9 @@ public class LoadIstOracle extends LoadIst
     return isIgnored( pTableName, pOwner, _parameters.getExcludewheretable(), "TABLE" );
   }
 
-  private String getIndexNameWithOwner( String pTableName, String pIndexName, String pOwner )
+  private String getIndexNameWithOwner( String pTableName, String pIndexName, String pTableOwner )
   {
-    return getNameWithOwner( pTableName + "." + pIndexName, pOwner );
+    return getNameWithOwner( pTableName + "." + pIndexName, pTableOwner );
   }
 
   private boolean isIgnoredIndex( String pTableName, String pIndexName, String pTableOwner, String pIndexOwner )
@@ -403,7 +403,7 @@ public class LoadIstOracle extends LoadIst
       }.execute();
     }
 
-    if( excludeIndexList.contains( getIndexNameWithOwner( pTableName, pIndexName, pTableOwner ) ) )
+    if( excludeIndexList.contains( getIndexNameWithOwner( pTableName, pIndexName, pIndexOwner ) ) && pTableOwner.equals(pIndexOwner) )
     {
       return true;
     }
