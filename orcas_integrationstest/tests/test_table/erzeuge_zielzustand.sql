@@ -15,6 +15,14 @@ create table tab_permanent
   id number(15) not null
 );
 
+create global temporary table tab_new_with_index
+(
+  id number(15) not null  
+)
+on commit delete rows;
+
+create index tab_new_with_index_index on tab_new_with_index(id);
+
 create table tab_mod_parallel
 (
   id number(15) not null

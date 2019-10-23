@@ -980,6 +980,10 @@ public abstract class DdlBuilder
 
   public void createIndex( StatementBuilder p, TableDiff pTableDiff, IndexDiff pIndexDiff, boolean pIsIndexParallelCreate )
   {
+    if( pTableDiff.permanentnessNew == PermanentnessType.GLOBAL_TEMPORARY ){
+      pIsIndexParallelCreate = false;
+    }
+
     p.stmtStart( "create" );
     if( pIndexDiff.uniqueNew != null )
     {
