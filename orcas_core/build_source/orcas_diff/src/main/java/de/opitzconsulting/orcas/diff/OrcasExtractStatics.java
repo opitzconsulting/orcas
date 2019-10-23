@@ -54,6 +54,7 @@ public class OrcasExtractStatics extends Orcas
           InitDiffRepository.init( pCallableStatementProvider, getDatabaseHandler(), getParameters() );
           logInfo( "removing default values" );
           DiffRepository.getModelMerge().cleanupValues( lOrigModel );
+          getParameters().getMultiSchemaConnectionManager().releaseAllConnections();
         }
 
         String lModelString = getParameters().getExtensionHandler().convertModelToXMLString( lOrigModel );

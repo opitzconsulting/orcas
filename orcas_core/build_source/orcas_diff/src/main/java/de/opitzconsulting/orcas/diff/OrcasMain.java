@@ -276,6 +276,7 @@ public class OrcasMain extends Orcas
         InitDiffRepository.init( lSrcCallableStatementProvider, getDatabaseHandler(), getParameters() );
         lSrcModel[0] = getDatabaseHandler().createLoadIst( lSrcCallableStatementProvider, getParameters() ).loadModel( false );
         DiffRepository.getModelMerge().cleanupValues( lSrcModel[0] );
+        getParameters().getMultiSchemaConnectionManager().releaseAllConnections();
       }
     } );
 
