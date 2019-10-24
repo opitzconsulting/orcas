@@ -343,7 +343,7 @@ public class OrcasScriptRunner extends Orcas {
 
         Supplier<String>
             lLineReferenceProvider =
-            () -> pFile + "(" + lStartLineIndex[0] + (lStartLineIndex[0] != lCurrentLineIndex[0] ? "-" + lCurrentLineIndex[0] : "") + ")";
+            () -> pFile + "(" + (lStartLineIndex[0] + 1) + (lStartLineIndex[0] != lCurrentLineIndex[0] ? "-" + (lCurrentLineIndex[0] + 1) : "") + ")";
 
         for (String lLine : pLines) {
             boolean lCurrentEnd = false;
@@ -454,8 +454,11 @@ public class OrcasScriptRunner extends Orcas {
             lCurrentLineIndex[0]++;
         }
 
-        if (lCurrent != null && !lCurrent.toString().trim().equals("")) {
-            _log.error(lLineReferenceProvider.get() + ": statemmet not terminated correctly: " + lCurrent.toString());
+        if (lCurrent != null) {
+            String lTrim = lCurrent.toString().replace("\n", "").trim();
+            if (!lTrim.equals("") && !lTrim.equals("/")) {
+                _log.error(lLineReferenceProvider.get() + ": statemmet not terminated correctly: " + lCurrent.toString());
+            }
         }
 
         lSpoolHandler.spoolHandleFileEnd();
@@ -472,7 +475,11 @@ public class OrcasScriptRunner extends Orcas {
         return new SpoolHandler(pParameters);
     }
 
-    private void executeSql(String pSql, CallableStatementProvider pCallableStatementProvider, Parameters pParameters, Supplier<String> pLineReferenceProvider) {
+    private void executeSql(
+        String pSql,
+        CallableStatementProvider pCallableStatementProvider,
+        Parameters pParameters,
+        Supplier<String> pLineReferenceProvider) {
         try {
             new WrapperExecuteUpdate(pSql, pCallableStatementProvider).execute();
         } catch (RuntimeException e) {
