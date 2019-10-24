@@ -308,7 +308,7 @@ public class OrcasScriptRunner extends Orcas {
         for (String lFileLine : pLines) {
             String lTrimedLine = lFileLine.trim().toLowerCase();
             lIsInComment = isInComment(lTrimedLine, lIsInComment);
-            if (lFileLine.equals("/") && !lIsInComment) {
+            if (isPlsqlTerminator(lFileLine) && !lIsInComment) {
                 lHasPlSqlModeTerminator = true;
             }
         }
@@ -375,7 +375,7 @@ public class OrcasScriptRunner extends Orcas {
             lIsInComment = isInComment(lTrimedLine, lIsInComment);
 
             if (lPlSqlMode) {
-                if (lLine.equals("/") && !lIsInComment) {
+                if (isPlsqlTerminator(lLine) && !lIsInComment) {
                     lCurrentEnd = true;
                     lPlSqlMode = false;
                 } else {
@@ -477,6 +477,10 @@ public class OrcasScriptRunner extends Orcas {
         }
 
         lSpoolHandler.spoolHandleFileEnd();
+    }
+
+    private boolean isPlsqlTerminator(String pLine) {
+        return pLine.trim().equals("/") && pLine.startsWith("/");
     }
 
     protected StartHandler createStartHandler(
