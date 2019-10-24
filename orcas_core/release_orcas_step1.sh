@@ -1,6 +1,6 @@
 #!/bin/sh
 
-new_orcas_version=7.0.4
+new_orcas_version=7.1.0
 
 cd ..
 
