@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.emf.ecore.EObject;
@@ -13,6 +14,10 @@ import org.eclipse.emf.ecore.EObject;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 
 public abstract class Parameters {
+    public Consumer<CallableStatementProvider> getConnectionInitializer() {
+        return connectionInitializer;
+    }
+
     public static class JdbcConnectParameters {
         String _jdbcDriver;
         String _jdbcUrl;
@@ -72,6 +77,13 @@ public abstract class Parameters {
     protected Boolean _indexparallelcreate;
     protected Boolean _indexmovetablespace;
     protected Boolean _tablemovetablespace;
+
+    public void setConnectionInitializer(Consumer<CallableStatementProvider> pConnectionInitializer) {
+        connectionInitializer = pConnectionInitializer;
+    }
+
+    private Consumer<CallableStatementProvider> connectionInitializer = p -> {
+    };
 
     public int getStaticsSpoolMaxLineLength() {
         return staticsSpoolMaxLineLength;

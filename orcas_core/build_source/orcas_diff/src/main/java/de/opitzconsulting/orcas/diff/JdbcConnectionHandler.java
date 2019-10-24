@@ -127,6 +127,9 @@ public class JdbcConnectionHandler {
             }
             throw new RuntimeException(e);
         }
+
+        pParameters.getConnectionInitializer().accept(lCallableStatementProvider);
+
         return lCallableStatementProvider;
     }
 
