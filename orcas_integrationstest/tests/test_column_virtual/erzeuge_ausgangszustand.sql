@@ -23,7 +23,7 @@ create table tab_change_make_virtual
 
 create table tab_change_virtual_with_index
 (
-  c_col1 number(10),
-  c_col2 varchar2(41) generated always as (TO_CHAR(C_COL1)||'X') virtual
+  c_col1 number(10) not null,
+  c_col2 varchar2(41) generated always as (TO_CHAR(C_COL1)||'X') virtual not null
 );
 create index tab_change_virtual_with_index_ix on tab_change_virtual_with_index (c_col2);

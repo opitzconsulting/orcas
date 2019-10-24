@@ -428,11 +428,12 @@ public abstract class DdlBuilder
       p.stmtDone();
     } );
 
+    boolean lIsVirtual = "virtual".equals(pColumnDiff.virtualNew);
     p1.handleAlterBuilder()//
-    .ifDifferent( COLUMN__VIRTUAL)
-    .failIfAdditionsOnly("virtual".equals(pColumnDiff.virtualNew), "can't make existing column virtual")
-    .failIfAdditionsOnly(!"virtual".equals(pColumnDiff.virtualNew), "can't materialize virtual column")
-    .handle(p ->
+      .ifDifferent( COLUMN__VIRTUAL)
+      .failIfAdditionsOnly(lIsVirtual, "can't make existing column virtual")
+      .failIfAdditionsOnly(!lIsVirtual, "can't materialize virtual column")
+      .handle(p ->
     {
 
     });
@@ -444,10 +445,25 @@ public abstract class DdlBuilder
       .failIfAdditionsOnly(pColumnDiff.default_valueOld != null, "can't change default")//
       .handle(p ->
       {
-        p.stmtStartAlterTable(pTableDiff);
+        if (lIsVirtual) {
+          if (pColumnDiff.notnullOld) {
+            p.stmtStartAlterTable( pTableDiff );
+            p.stmtAppend( "modify ( " + pColumnDiff.nameNew );
+            p.stmtAppend( "null" );
+            p.stmtAppend( ")" );
+            p.stmtDone();
+          }
+        }
+
+        if (lIsVirtual) {
+          p.stmtStartAlterTableNoCombine(pTableDiff);
+        } else {
+          p.stmtStartAlterTable(pTableDiff);
+        }
+
         p.stmtAppend("modify ( " + pColumnDiff.nameNew);
 
-        if ("virtual".equals(pColumnDiff.virtualNew))
+        if (lIsVirtual)
         {
           p.stmtAppend("as (");
         }
@@ -465,13 +481,23 @@ public abstract class DdlBuilder
           p.stmtAppend(pColumnDiff.default_valueNew);
         }
 
-        if ("virtual".equals(pColumnDiff.virtualNew))
+        if (lIsVirtual)
         {
           p.stmtAppend(") virtual");
         }
 
         p.stmtAppend(")");
         p.stmtDone();
+
+        if (lIsVirtual) {
+          if (pColumnDiff.notnullOld) {
+            p.stmtStartAlterTable( pTableDiff );
+            p.stmtAppend( "modify ( " + pColumnDiff.nameNew );
+            p.stmtAppend( "not null" );
+            p.stmtAppend( ")" );
+            p.stmtDone();
+          }
+        }
       });
     }
 
