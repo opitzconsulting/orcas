@@ -1348,30 +1348,41 @@ public class LoadIstOracle extends LoadIst
     Index lIndex = findIndex( pModel, pTablename, pTableOwner, pIndexName, pIndexOwner );
 
     // TODO ltrim(p_expression,',')
-    lIndex.getIndex_columns().get( pColumnPosition - 1 ).setColumn_name_string( pExpression.replace( "\"", "" ).replace( " ", "" ) );
+    ColumnRef lIndexColumnRef = lIndex.getIndex_columns().get(pColumnPosition - 1);
 
-    if( pColumnPosition == pMaxColumnPositionForInd )
-    {
-      String lString = null;
-
-      for( ColumnRef lColumnRef : lIndex.getIndex_columns() )
-      {
-        if( lString == null )
-        {
-          lString = "";
-        }
-        else
-        {
-          lString += ",";
-        }
-
-        lString += lColumnRef.getColumn_name_string();
-      }
-
-      lIndex.setFunction_based_expression( lString );
-      lIndex.getIndex_columns().clear();
+    Table lTable = findTable(pModel, pTablename, pTableOwner);
+    if (!lTable
+        .getColumns()
+        .stream()
+        .anyMatch(p -> p.getName_string().equals(lIndexColumnRef.getColumn_name_string()))) {
+      lIndexColumnRef.setColumn_name_string(pExpression.replace("\"", "").replace(" ", ""));
     }
 
+    if( pColumnPosition == pMaxColumnPositionForInd ) {
+      if (lIndex
+          .getIndex_columns()
+          .stream()
+          .anyMatch(p -> !lTable
+              .getColumns()
+              .stream()
+              .anyMatch(pColumn -> pColumn.getName_string().equals(p.getColumn_name_string())))) {
+
+        String lString = null;
+
+        for (ColumnRef lColumnRef : lIndex.getIndex_columns()) {
+          if (lString == null) {
+            lString = "";
+          } else {
+            lString += ",";
+          }
+
+          lString += lColumnRef.getColumn_name_string();
+        }
+
+        lIndex.setFunction_based_expression(lString);
+        lIndex.getIndex_columns().clear();
+      }
+    }
   }
 
   private void loadIndexExpressionsIntoModel( final Model pModel )
@@ -1388,7 +1399,9 @@ public class LoadIstOracle extends LoadIst
                   "        (" + //
                   "          partition by" + //
                   "            ind_expressions.table_name," + //
-                  "            ind_expressions.index_name" + //
+                  "            ind_expressions.index_name," + //
+                  "            ind_expressions.owner," + //
+                  "            indexes.owner" + //
                   "        ) as max_column_position_for_index" + //
                   "   from " + getDataDictionaryView( "ind_expressions" ) + "," + //
                   "        " + getDataDictionaryView( "indexes" ) + //

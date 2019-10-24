@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -261,6 +262,21 @@ public class OrcasDiff
             {
               p.setRecreateNeededDifferent( lRecreateColumn );
               lRecreateColumnNames.put( lColumnDiff.nameOld, recreateNeededRegistry.getRecreateNeededReasons( lColumnDiff ) );
+            }
+            else {
+              List<Difference>
+                  lChangeVirtualColumn =
+                  RecreateNeededBuilder.getDifferentEAttributes(lColumnDiff, Stream.of(COLUMN__IDENTITY, COLUMN__DEFAULT_VALUE).collect(
+                      Collectors.toList()));
+              if (lColumnDiff.isOld && (lColumnDiff.virtualOld != null || !lColumnDiff.virtualIsEqual) && !lChangeVirtualColumn.isEmpty()) {
+                DiffActionReasonDifferent
+                    lDiffActionReasonDifferent =
+                    new DiffActionReasonDifferent(diffReasonKeyRegistry.getDiffReasonKey(lColumnDiff));
+                lChangeVirtualColumn.forEach(p1 -> lDiffActionReasonDifferent.addDiffReasonDetail(p1));
+                lRecreateColumnNames.put(
+                    lColumnDiff.nameOld,
+                    Collections.singletonList(lDiffActionReasonDifferent));
+              }
             }
           } )//
           .calculate();

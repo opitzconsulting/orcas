@@ -29,4 +29,9 @@ create table tab_change_make_virtual
   c_col2 varchar2(41) generated always as (TO_CHAR(C_COL1)||'Y') virtual
 );
 
-
+create table tab_change_virtual_with_index
+(
+  c_col1 number(10),
+  c_col2 varchar2(41) generated always as (TO_CHAR(C_COL1)||'y') virtual
+);
+create index tab_change_virtual_with_index_ix on tab_change_virtual_with_index (c_col2);
