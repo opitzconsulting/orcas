@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.function.Supplier;
 
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.diff.ParametersCommandline.ParameterTypeMode;
@@ -264,36 +265,6 @@ public class OrcasScriptRunner extends Orcas {
         runLines(pLines, pCallableStatementProvider, pParameters, pFile, null);
     }
 
-    static boolean isInComment(String pLine, boolean pWasInComment) {
-        boolean lIsInComment = pWasInComment;
-
-        for (int i = 0; i < pLine.length() - 1; i++) {
-            if (lIsInComment) {
-                if (pLine.charAt(i) == '*') {
-                    if (pLine.charAt(i + 1) == '/') {
-                        lIsInComment = false;
-                        i++;
-                    }
-                }
-            } else {
-                if (pLine.charAt(i) == '/') {
-                    if (pLine.charAt(i + 1) == '*') {
-                        lIsInComment = true;
-                        i++;
-                    }
-                }
-
-                if (pLine.charAt(i) == '-') {
-                    if (pLine.charAt(i + 1) == '-') {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return lIsInComment;
-    }
-
     void runLines(
         List<String> pLines,
         final CallableStatementProvider pCallableStatementProvider,
@@ -303,12 +274,13 @@ public class OrcasScriptRunner extends Orcas {
         inMemorySpoolFileMap.clear();
 
         boolean lHasPlSqlModeTerminator = false;
-        boolean lIsInComment = false;
+        CommentHandler lCommentHandler = new CommentHandler();
 
         for (String lFileLine : pLines) {
             String lTrimedLine = lFileLine.trim().toLowerCase();
-            lIsInComment = isInComment(lTrimedLine, lIsInComment);
-            if (isPlsqlTerminator(lFileLine) && !lIsInComment) {
+            lCommentHandler.handleLine(lTrimedLine);
+
+            if (lCommentHandler.isPlsqlTerminator(lFileLine)) {
                 lHasPlSqlModeTerminator = true;
             }
         }
@@ -365,17 +337,24 @@ public class OrcasScriptRunner extends Orcas {
         lCommandHandlerList.add(createStartHandler(pCallableStatementProvider, pParameters, lSpoolHandler));
 
         StringBuffer lCurrent = null;
-        lIsInComment = false;
+        lCommentHandler = new CommentHandler();
+        int[] lStartLineIndex = new int[] { 0 };
+        int[] lCurrentLineIndex = new int[] { 0 };
+
+        Supplier<String>
+            lLineReferenceProvider =
+            () -> pFile + "(" + lStartLineIndex[0] + (lStartLineIndex[0] != lCurrentLineIndex[0] ? "-" + lCurrentLineIndex[0] : "") + ")";
+
         for (String lLine : pLines) {
             boolean lCurrentEnd = false;
             String lAppend = null;
             String lTrimedLine = lLine.trim().toLowerCase();
 
             //check wether we are in a block comment
-            lIsInComment = isInComment(lTrimedLine, lIsInComment);
+            lCommentHandler.handleLine(lTrimedLine);
 
             if (lPlSqlMode) {
-                if (isPlsqlTerminator(lLine) && !lIsInComment) {
+                if (lCommentHandler.isPlsqlTerminator(lLine)) {
                     lCurrentEnd = true;
                     lPlSqlMode = false;
                 } else {
@@ -437,7 +416,7 @@ public class OrcasScriptRunner extends Orcas {
                 if (isSelect(lCurrent.toString())) {
                     executeSelect(lCurrent.toString(), lSpoolHandler, pCallableStatementProvider);
                 } else {
-                    executeSql(lCurrent.toString(), pCallableStatementProvider, pParameters);
+                    executeSql(lCurrent.toString(), pCallableStatementProvider, pParameters, lLineReferenceProvider);
                 }
 
                 if (_serveroutput) {
@@ -469,18 +448,17 @@ public class OrcasScriptRunner extends Orcas {
                 }
 
                 lCurrent = null;
+                lStartLineIndex[0] = lCurrentLineIndex[0] + 1;
             }
+
+            lCurrentLineIndex[0]++;
         }
 
         if (lCurrent != null && !lCurrent.toString().trim().equals("")) {
-            _log.error("statemmet not terminated correctly: " + lCurrent.toString());
+            _log.error(lLineReferenceProvider.get() + ": statemmet not terminated correctly: " + lCurrent.toString());
         }
 
         lSpoolHandler.spoolHandleFileEnd();
-    }
-
-    private boolean isPlsqlTerminator(String pLine) {
-        return pLine.trim().equals("/") && pLine.startsWith("/");
     }
 
     protected StartHandler createStartHandler(
@@ -494,7 +472,7 @@ public class OrcasScriptRunner extends Orcas {
         return new SpoolHandler(pParameters);
     }
 
-    private void executeSql(String pSql, CallableStatementProvider pCallableStatementProvider, Parameters pParameters) {
+    private void executeSql(String pSql, CallableStatementProvider pCallableStatementProvider, Parameters pParameters, Supplier<String> pLineReferenceProvider) {
         try {
             new WrapperExecuteUpdate(pSql, pCallableStatementProvider).execute();
         } catch (RuntimeException e) {
@@ -503,17 +481,22 @@ public class OrcasScriptRunner extends Orcas {
                 .handleExecutionError(e, pSql, pCallableStatementProvider, pParameters, new ExecuteSqlErrorHandler.ExecuteSqlErrorHandlerCallback() {
                     @Override
                     public void rethrow() {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException(getLineReference() + e.getMessage(), e);
                     }
 
                     @Override
                     public void logError() {
-                        _log.warn(e, e);
+                        _log.warn(getLineReference() + e.getMessage(), e);
                     }
 
                     @Override
                     public void logInfo(String pMessage) {
-                        OrcasScriptRunner.this.logInfo(pMessage);
+                        OrcasScriptRunner.this.logInfo(getLineReference() + pMessage);
+                    }
+
+                    @Override
+                    public String getLineReference() {
+                        return pLineReferenceProvider.get() + ": ";
                     }
                 });
         }
@@ -728,6 +711,51 @@ public class OrcasScriptRunner extends Orcas {
             }
 
             runFile(lFile, callableStatementProvider, parameters, spoolHandler);
+        }
+    }
+
+    static class CommentHandler {
+        boolean isPlsqlTerminator(String pLine) {
+            return !isInComment && !isInString && pLine.trim().equals("/") && pLine.startsWith("/");
+        }
+
+        private boolean isInComment;
+        private boolean isInString;
+
+        void handleLine(String pTrimedLine) {
+            for (int i = 0; i < pTrimedLine.length(); i++) {
+                if (isInComment) {
+                    if (pTrimedLine.charAt(i) == '*') {
+                        if (pTrimedLine.length() > i + 1 && pTrimedLine.charAt(i + 1) == '/') {
+                            isInComment = false;
+                            i++;
+                        }
+                    }
+                } else {
+                    if (!isInString) {
+                        if (pTrimedLine.charAt(i) == '/') {
+                            if (pTrimedLine.length() > i + 1 && pTrimedLine.charAt(i + 1) == '*') {
+                                isInComment = true;
+                                i++;
+                            }
+                        }
+
+                        if (pTrimedLine.charAt(i) == '-') {
+                            if (pTrimedLine.length() > i + 1 && pTrimedLine.charAt(i + 1) == '-') {
+                                break;
+                            }
+                        }
+
+                        if (pTrimedLine.charAt(i) == '\'') {
+                            isInString = true;
+                        }
+                    } else {
+                        if (pTrimedLine.charAt(i) == '\'') {
+                            isInString = false;
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -242,6 +242,11 @@ public class OrcasMain extends Orcas
                                 public void logInfo(String pMessage) {
                                     OrcasMain.this.logInfo(pMessage);
                                 }
+
+                                @Override
+                                public String getLineReference() {
+                                    return null;
+                                }
                             });
                     }
                 }
