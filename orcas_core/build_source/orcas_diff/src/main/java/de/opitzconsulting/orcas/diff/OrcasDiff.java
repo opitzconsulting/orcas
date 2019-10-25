@@ -396,7 +396,13 @@ public class OrcasDiff
       .ifDifferentName( MVIEW__MVIEW_NAME, oldObjectNames, lMviewDiff.mview_nameNew, lMviewDiff.mview_nameOld, databaseHandler.isRenameMView() )//
       .ifDifferent( MVIEW__TABLESPACE )//
       .ifDifferent( MVIEW__BUILD_MODE )//
-      .ifDifferent( MVIEW__VIEW_SELECT_CLOB )//
+      .ifX( p ->
+      {
+        if( !replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBNew ).equals( replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBOld ) ) )
+        {
+          p.setRecreateNeededDifferent( Collections.singletonList( new DifferenceImpl( MVIEW__VIEW_SELECT_CLOB, lMviewDiff ) ) );
+        }
+      } )//
       .calculate();
     }
 
@@ -496,7 +502,7 @@ public class OrcasDiff
 
   private String replaceLinefeedBySpace( String pValue )
   {
-    return pValue.replace( Character.toString( (char) 13 ) + Character.toString( (char) 10 ), " " ).replace( Character.toString( (char) 10 ), " " ).replace( Character.toString( (char) 13 ), " " );
+    return pValue.replace( Character.toString( (char) 13 ) + Character.toString( (char) 10 ), "" ).replace( Character.toString( (char) 10 ), "" ).replace( Character.toString( (char) 13 ), "" );
   }
 
   public DiffResult compare( Model pModelSoll, Model pModelIst )
