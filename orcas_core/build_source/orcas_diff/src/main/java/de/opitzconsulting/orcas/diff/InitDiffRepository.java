@@ -607,6 +607,11 @@ public class InitDiffRepository
           }
         }
       }
+
+      @Override
+      public String viewSelectCLOBCleanValueIfNeeded(String pValue) {
+        return cleanupLineBreaks( super.viewSelectCLOBCleanValueIfNeeded(pValue) );
+      }
     } );
     DiffRepository.getMviewMerge().mview_nameIsConvertToUpperCase = true;
     DiffRepository.getMviewMerge().tablespaceIsConvertToUpperCase = true;
