@@ -362,8 +362,8 @@ public class LoadIstOracle extends LoadIst
   }
 
   private boolean isIgnoredMView( String pString, String pOwner )
-  { // TODO @
-    return isIgnored( pString, pOwner, "@", "MATERIALIZED VIEW" );
+  {
+    return isIgnored( pString, pOwner, _parameters.getExcludewheremview(), "MATERIALIZED VIEW" );
   }
 
   private boolean isIgnoredTable( String pTableName, String pOwner )

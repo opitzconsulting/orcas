@@ -59,6 +59,7 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setCreatemissingfkindexes( project.orcasconfiguration.createmissingfkindexes );
     lParametersCall.setExcludewheretable( project.orcasconfiguration.excludewheretable );
     lParametersCall.setExcludewheresequence( project.orcasconfiguration.excludewheresequence );
+    lParametersCall.setExcludewheremview( project.orcasconfiguration.excludewheremview );
     lParametersCall.setDateformat( project.orcasconfiguration.dateformat );
     lParametersCall.setExtensionParameter( project.orcasconfiguration.extensionparameter );
     lParametersCall.setAdditionsOnly( project.orcasconfiguration.additionsonly );

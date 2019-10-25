@@ -67,6 +67,7 @@ class OrcasGradlePluginExtension {
   def boolean createmissingfkindexes = ParameterDefaults.createmissingfkindexes;
   def String excludewheretable = ParameterDefaults.excludewheretable;
   def String excludewheresequence = ParameterDefaults.excludewheresequence;
+  def String excludewheremview = ParameterDefaults.excludewheremview;
   def String dateformat = ParameterDefaults.dateformat;
   def String extensionparameter = ParameterDefaults.extensionparameter;
   def String targetplsql = ParameterDefaults.targetplsql;

@@ -20,6 +20,7 @@ public class ParameterDefaults {
     public static final boolean createmissingfkindexes = true;
     public static final String excludewheretable = "object_name like '%$%'";
     public static final String excludewheresequence = "object_name like '%$%'";
+    public static final String excludewheremview = "object_name like '%$%'";
     public static final String dateformat = "dd.mm.yy";
     public static final String extensionparameter = "";
     public static final String targetplsql = "";

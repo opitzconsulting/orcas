@@ -121,6 +121,16 @@ public abstract class Parameters {
     protected String _spoolfile;
     protected String _excludewheretable;
     protected String _excludewheresequence;
+
+    public String getExcludewheremview() {
+        return _excludewheremview;
+    }
+
+    public void setExcludewheremview(String pExcludewheremview) {
+        _excludewheremview = pExcludewheremview;
+    }
+
+    protected String _excludewheremview = ParameterDefaults.excludewheremview;
     private String excludewheregrant = ParameterDefaults.excludewheregrant;
     private String excludewheresynonym = ParameterDefaults.excludewheresynonym;
     protected String _dateformat;
