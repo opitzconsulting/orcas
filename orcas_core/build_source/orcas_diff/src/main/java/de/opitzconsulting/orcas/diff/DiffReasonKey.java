@@ -100,7 +100,7 @@ public class DiffReasonKey
 
   private DiffReasonKey( MviewDiff pMviewDiff )
   {
-    this( DiffReasonEntity.TABLE, pMviewDiff.isNew ? pMviewDiff.mview_nameNew : pMviewDiff.mview_nameOld );
+    this( DiffReasonEntity.MVIEW, pMviewDiff.isNew ? pMviewDiff.mview_nameNew : pMviewDiff.mview_nameOld );
   }
 
   private DiffReasonKey( TableDiff pTableDiff, ForeignKeyDiff pForeignKeyDiff )
@@ -187,7 +187,7 @@ public class DiffReasonKey
 
   public enum DiffReasonEntity
   {
-    TABLE, SEQUENCE
+    TABLE, SEQUENCE, MVIEW
   }
 
   public enum DiffReasonSubEntity

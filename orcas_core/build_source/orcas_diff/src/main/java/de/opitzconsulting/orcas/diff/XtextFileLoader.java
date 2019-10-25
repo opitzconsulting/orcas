@@ -68,6 +68,7 @@ public abstract class XtextFileLoader<T extends EObject>
     if( checkForRelevance ) {
       pParameters.setRelevantTables(new ArrayList<>());
       pParameters.setRelevantSequences(new ArrayList<>());
+      pParameters.setRelevantMviews(new ArrayList<>());
     }
 
     for( File lFile : pModelFiles )
@@ -79,6 +80,7 @@ public abstract class XtextFileLoader<T extends EObject>
           if( pParameters.getRelevantModelFiles().contains(lFile) ) {
             pParameters.getRelevantTables().addAll(getTableNames(lLoadModelDslFile));
             pParameters.getRelevantSequences().addAll(getSequenceNames(lLoadModelDslFile));
+            pParameters.getRelevantSequences().addAll(getMviewNames(lLoadModelDslFile));
           }
         }
         combinModelResults( lReturn, lLoadModelDslFile );
@@ -91,6 +93,8 @@ public abstract class XtextFileLoader<T extends EObject>
   protected abstract List<String> getTableNames(T pModel);
 
   protected abstract List<String> getSequenceNames(T pModel);
+
+  protected abstract List<String> getMviewNames(T pModel);
 
   protected abstract void combinModelResults( T pCombinedModel, T pModelPartFromSingleFile );
 

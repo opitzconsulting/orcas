@@ -93,10 +93,11 @@ public class OrcasMain extends Orcas
   }
 
   private void handleRelevanceCheck(DiffResult pDiffResult, Parameters pParameters) {
-    if (pParameters.getRelevantTables() != null || pParameters.getRelevantSequences() != null) {
+    if (pParameters.getRelevantTables() != null || pParameters.getRelevantSequences() != null || pParameters.getRelevantMviews() != null) {
       pDiffResult.getDiffActions().forEach(p -> {
             boolean lIsTable = p.getDiffReasonKey().getTextObjectType().equals(DiffReasonEntity.TABLE.name().toLowerCase());
             boolean lIsSequence = p.getDiffReasonKey().getTextObjectType().equals(DiffReasonEntity.SEQUENCE.name().toLowerCase());
+            boolean lIsMview = p.getDiffReasonKey().getTextObjectType().equals(DiffReasonEntity.MVIEW.name().toLowerCase());
 
             boolean lIgnore = false;
 
@@ -106,22 +107,27 @@ public class OrcasMain extends Orcas
           lTextObjectName = p.getDiffReasonKey().getTextSchemaName() + "." + lTextObjectName;
         }
 
-        lTextObjectName = lTextObjectName.toUpperCase();
+              lTextObjectName = lTextObjectName.toUpperCase();
 
-        if (lIsTable && pParameters.getRelevantTables() != null) {
-              if (!pParameters.getRelevantTables().contains(lTextObjectName)) {
-                lIgnore = true;
+              if (lIsTable && pParameters.getRelevantTables() != null) {
+                  if (!pParameters.getRelevantTables().contains(lTextObjectName)) {
+                      lIgnore = true;
+                  }
               }
-            }
-            if (lIsSequence && pParameters.getRelevantSequences() != null) {
-              if (!pParameters.getRelevantSequences().contains(lTextObjectName)) {
-                lIgnore = true;
+              if (lIsSequence && pParameters.getRelevantSequences() != null) {
+                  if (!pParameters.getRelevantSequences().contains(lTextObjectName)) {
+                      lIgnore = true;
+                  }
               }
-            }
+              if (lIsMview && pParameters.getRelevantMviews() != null) {
+                  if (!pParameters.getRelevantMviews().contains(lTextObjectName)) {
+                      lIgnore = true;
+                  }
+              }
 
-            if( lIgnore ) {
-              p.getStatements().forEach(pStatement -> pStatement.setIgnore("change on object not marked as relevant"));
-            }
+              if (lIgnore) {
+                  p.getStatements().forEach(pStatement -> pStatement.setIgnore("change on object not marked as relevant"));
+              }
           }
       );
     }

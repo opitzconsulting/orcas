@@ -156,6 +156,16 @@ public abstract class Parameters {
     protected List<File> _relevantModelFiles;
     protected List<String> _relevantTables;
     protected List<String> _relevantSequences;
+
+    public List<String> getRelevantMviews() {
+        return _relevantMviews;
+    }
+
+    public void setRelevantMviews(List<String> pRelevantMviews) {
+        _relevantMviews = pRelevantMviews;
+    }
+
+    protected List<String> _relevantMviews;
     protected List<File> _schemaFiles = null;
     protected URL _scriptUrl;
     protected String _scriptUrlFilename;
