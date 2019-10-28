@@ -37,8 +37,7 @@ public class OrcasExtractReplaceablesTask extends BaseOrcasTask
       lExtractreplaceablesoutfolder = project.orcasconfiguration.extractreplaceablesoutfolder;
     }
     pParameters.setSpoolfolder( lExtractreplaceablesoutfolder );
-    pParameters.setViewExtractMode( project.orcasconfiguration.viewextractmode );
- 
+
     new OrcasExtractReplaceables().mainRun( modifyParameters( pParameters ) );
   }
 }

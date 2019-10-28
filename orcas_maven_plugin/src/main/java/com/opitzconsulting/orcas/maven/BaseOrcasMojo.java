@@ -256,6 +256,13 @@ public abstract class BaseOrcasMojo extends AbstractMojo
    */
   private String charsetnamesqllog;
 
+  /**
+   * View extract-mode. "full" or "text". "full" includes schema-name and column
+   * definitions.
+   */
+  @Parameter( defaultValue = "text" )
+  private String viewextractmode;
+
   public void execute() throws MojoExecutionException
   {
     ParametersCall lParametersCall = new ParametersCall();
@@ -312,6 +319,7 @@ public abstract class BaseOrcasMojo extends AbstractMojo
     lParametersCall.setMinimizeStatementCount( minimizestatementcount );
     lParametersCall.setCharsetName( charsetname );
     lParametersCall.setCharsetNameSqlLog( charsetnamesqllog );
+    lParametersCall.setViewExtractMode( viewextractmode );
 
     if( extensionhandlerClass != null && !extensionhandlerClass.equals( "" ) )
     {
