@@ -16,6 +16,8 @@ public interface OrcasCoreIntegrationConfig
 
   boolean isWithSecondRunEmptyTest();
 
+  boolean isWithFirstRunTest();
+
   boolean isWithRunWithSpoolTest();
 
   boolean isWithRunWithExtractTest();

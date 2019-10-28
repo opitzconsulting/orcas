@@ -37,6 +37,11 @@ public abstract class OrcasCoreIntegrationConfigDefaults implements OrcasCoreInt
     return true;
   }
 
+  public boolean isWithFirstRunTest()
+  {
+    return true;
+  }
+
   public boolean isWithRunWithExtractTest()
   {
     return true;

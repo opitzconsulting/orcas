@@ -50,6 +50,11 @@ public class OrcasCoreIntegrationConfigSystemProperties extends OrcasCoreIntegra
     return getBooleanSystemProperty( "orcas.integrationtest.with_second_run_empty_test" );
   }
 
+  public boolean isWithFirstRunTest()
+  {
+    return getBooleanSystemProperty( "orcas.integrationtest.with_first_run_test" );
+  }
+
   public boolean isWithRunWithSpoolTest()
   {
     return getBooleanSystemProperty( "orcas.integrationtest.with_run_with_spool_test" );

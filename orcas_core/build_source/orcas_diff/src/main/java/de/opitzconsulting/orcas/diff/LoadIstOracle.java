@@ -179,6 +179,7 @@ public class LoadIstOracle extends LoadIst
     }
 
     loadTablesIntoModel( pModel );
+    loadObjectTablesIntoModel( pModel );
     loadTableColumnsIntoModel( pModel );
 
     loadPartitioningIntoModel( pModel );
@@ -845,6 +846,37 @@ public class LoadIstOracle extends LoadIst
     throw new IllegalStateException( "column not found: " + pTablename + " " + pColumnName );
   }
 
+  private void loadObjectTablesIntoModel( final Model pModel )
+  {
+    String lSql;
+
+      lSql = "" + //
+          " select tab_cols.table_name," + //
+          "        tab_cols.owner," + //
+          "        tab_cols.data_type," + //
+          "        tab_cols.data_type_owner" + //
+          "   from " + getDataDictionaryView( "tab_cols" ) + //
+          "  where hidden_column = 'YES' and column_name = 'SYS_NC_ROWINFO$'" + //
+          " order by table_name";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
+        {
+          Table lTable = new TableImpl();
+
+          lTable.setName(getNameWithOwner(pResultSet.getString( "table_name" ), pResultSet.getString( "owner" )));
+          lTable.setObject_type( getNameWithOwner(pResultSet.getString( "data_type" ), pResultSet.getString( "data_type_owner" )) );
+
+          pModel.getModel_elements().add(lTable);
+        }
+      }
+    }.execute();
+  }
+
   private void loadTableColumnsIntoModel( final Model pModel )
   {
     String lSql;
@@ -1042,7 +1074,10 @@ public class LoadIstOracle extends LoadIst
             }
           }
 
-          findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getColumns().add( lColumn );
+          Table lTable = findTable(pModel, pResultSet.getString("table_name"), pResultSet.getString("owner"));
+          if( lTable.getObject_type() == null ){
+            lTable.getColumns().add( lColumn );
+          }
         }
       }
     }.execute();
@@ -1545,6 +1580,10 @@ public class LoadIstOracle extends LoadIst
         if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
         {
           Table lTable = findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) );
+
+          if( lTable.getObject_type() != null ){
+            return;
+          }
 
           EnableType lEnableType = getEnableType( pResultSet );
 

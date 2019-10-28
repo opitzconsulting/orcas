@@ -31,9 +31,11 @@ test {
 
     systemProperty "orcas.integrationtest.workfolder",                   "" + buildDir + "/gradle_tests/"
 
+// setup reference only command line options: -Pwith_second_run_empty_test=false -Pwith_run_with_spool_test=false -Pwith_run_with_extract_test=false -Pwith_first_run_test=false
     systemProperty "orcas.integrationtest.with_second_run_empty_test",   with_second_run_empty_test
     systemProperty "orcas.integrationtest.with_run_with_spool_test",     with_run_with_spool_test
     systemProperty "orcas.integrationtest.with_run_with_extract_test",   with_run_with_extract_test
+    systemProperty "orcas.integrationtest.with_first_run_test",          with_first_run_test
     systemProperty "orcas.integrationtest.execute_tests",                execute_tests
 
     systemProperty "orcas.integrationtest.available_feature_list",       available_feature_list

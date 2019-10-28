@@ -21,16 +21,21 @@
       <apply-templates select="name" />
       <apply-templates select="alias" />
       <apply-templates select="domain" />
+      <apply-templates select="object_type" />
+      <if test="columns">
       <text>
 (</text>
+      </if>
       <apply-templates select="columns" />
       <apply-templates select="primary_key" />
       <apply-templates select="constraints" />
       <apply-templates select="ind_uks" />
       <apply-templates select="foreign_keys" />
       <apply-templates select="comments" />
+      <if test="columns">
       <text>
 )</text>
+      </if>
       <apply-templates select="transactionControl" />
       <apply-templates select="lobStorages" />
       <apply-templates select="varrayStorages" />

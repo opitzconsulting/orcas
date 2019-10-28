@@ -15,6 +15,7 @@ public class OrcasCoreIntegrationConfigConstantImpl extends OrcasCoreIntegration
   private String _executeTests = ".*column";
 
   private int _parallelThreads = 1;
+  private boolean _withFirstRunTest = true;
 
   public String getWorkfolder()
   {
@@ -29,6 +30,11 @@ public class OrcasCoreIntegrationConfigConstantImpl extends OrcasCoreIntegration
   public boolean isWithSecondRunEmptyTest()
   {
     return _withSecondRunEmptyTest;
+  }
+
+  @Override
+  public boolean isWithFirstRunTest() {
+    return _withFirstRunTest;
   }
 
   public boolean isWithRunWithSpoolTest()

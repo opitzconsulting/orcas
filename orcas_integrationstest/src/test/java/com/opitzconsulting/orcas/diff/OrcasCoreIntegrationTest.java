@@ -566,6 +566,7 @@ public class OrcasCoreIntegrationTest
   @Test
   public void test_01_update_statics()
   {
+    assumeTestNotSkipped( orcasCoreIntegrationConfig.isWithFirstRunTest() );
     resetUser( getConnectParametersTargetUser() );
     executeScript( getConnectParametersTargetUser(), "tests/" + testName + "/" + "erzeuge_ausgangszustand.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
 

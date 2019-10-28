@@ -1563,16 +1563,21 @@ public abstract class DdlBuilder
     }
     p.stmtAppend( "table" );
     p.stmtAppend( pTableDiff.nameNew );
-    p.stmtAppend( "(" );
-    p.stmtAppend( createColumnClause( pTableDiff.columnsDiff ) );
-    if( pTableDiff.indexOrganizedNew ) {
-      p.stmtAppend( "," );
-      appendPkClause(p, pTableDiff);
-    } else {
-      p.stmtAppend(createPkCreateWithTableCreate(pTableDiff.primary_keyDiff));
+    if( pTableDiff.object_typeNew != null ){
+      p.stmtAppend( "of" );
+      p.stmtAppend( pTableDiff.object_typeNew  );
+    }else {
+      p.stmtAppend("(");
+      p.stmtAppend(createColumnClause(pTableDiff.columnsDiff));
+      if (pTableDiff.indexOrganizedNew) {
+        p.stmtAppend(",");
+        appendPkClause(p, pTableDiff);
+      } else {
+        p.stmtAppend(createPkCreateWithTableCreate(pTableDiff.primary_keyDiff));
+      }
+      p.stmtAppend(createRefFkClause(pTableDiff));
+      p.stmtAppend(")");
     }
-    p.stmtAppend( createRefFkClause( pTableDiff ) );
-    p.stmtAppend( ")" );
     if( pTableDiff.transactionControlNew != null )
     {
       p.stmtAppend( "on commit " );
