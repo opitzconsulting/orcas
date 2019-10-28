@@ -365,6 +365,7 @@ public class OrcasScriptRunner extends Orcas {
 
                 if (!lNonPlSqlMultilineMode && lCommandHandler != null) {
                     lCommandHandler.handleCommand(lLine, pFile);
+                    lStartLineIndex[0] = lCurrentLineIndex[0] + 1;
                 } else {
                     if (lTrimedLine.startsWith("--")) {
                         if (lCurrent != null) {
@@ -394,6 +395,8 @@ public class OrcasScriptRunner extends Orcas {
                                     if (!lEmptyLine) {
                                         lNonPlSqlMultilineMode = true;
                                         lAppend = lLine;
+                                    }else{
+                                        lStartLineIndex[0] = lCurrentLineIndex[0] + 1;
                                     }
                                 }
                             }
