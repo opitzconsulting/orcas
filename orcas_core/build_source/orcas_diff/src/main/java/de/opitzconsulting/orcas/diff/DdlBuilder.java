@@ -1328,6 +1328,7 @@ public abstract class DdlBuilder
     p1.handleAlterBuilder()//
     .ifDifferent( MVIEW__REFRESH_MODE )//
     .ifDifferent( MVIEW__REFRESH_METHOD )//
+    .ifDifferent( MVIEW__REFRESH_WITH_PRIMARY_KEY )//
     .handle( p ->
     {
       RefreshModeType lRefreshModeType = pMviewDiff.refreshModeNew;
@@ -1340,7 +1341,16 @@ public abstract class DdlBuilder
       {
         lRefreshmode = " on " + lRefreshModeType.getLiteral();
       }
-      p.addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) + lRefreshmode );
+      String lRefreshPk;
+      if( "rowid".equals(pMviewDiff.refreshWithPrimaryKeyNew) )
+      {
+        lRefreshPk = " with rowid";
+      }
+      else
+      {
+        lRefreshPk = "";
+      }
+      p.addStmt( "alter materialized view " + pMviewDiff.mview_nameNew + " " + adjustRefreshmethodLiteral( pMviewDiff.refreshMethodNew.getLiteral() ) + lRefreshmode + lRefreshPk );
     } );
 
     // Physical parameters nur, wenn nicht prebuilt
@@ -1669,6 +1679,11 @@ public abstract class DdlBuilder
       {
         p.stmtAppend( "on" );
         p.stmtAppend( pMviewDiff.refreshModeNew.getLiteral() );
+      }
+
+      if( "rowid".equals(pMviewDiff.refreshWithPrimaryKeyNew) )
+      {
+        p.stmtAppend( " with rowid" );
       }
     }
 

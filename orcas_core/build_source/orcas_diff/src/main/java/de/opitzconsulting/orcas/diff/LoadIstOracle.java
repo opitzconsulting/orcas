@@ -617,6 +617,33 @@ public class LoadIstOracle extends LoadIst
         }
       }
     }.execute();
+
+    String lNewSql = "" + //
+        " select name," + //
+        "        owner," + //
+        "        refresh_method" + //
+        "   from " + getDataDictionaryView( "registered_mviews" ) + //
+        "";
+
+    new WrapperIteratorResultSet( lNewSql , getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        if( !isIgnoredMView( pResultSet.getString( "name" ), pResultSet.getString( "owner" ) ) )
+        {
+          final Mview lMview = findMview(pModel, pResultSet.getString("name"), pResultSet.getString("owner"));
+
+          if (lMview.getRefreshMethod() == RefreshMethodType.FAST) {
+            if ("ROWID".equals(pResultSet.getString("refresh_method"))) {
+              lMview.setRefreshWithPrimaryKey("rowid");
+            } else {
+              lMview.setRefreshWithPrimaryKey("primary");
+            }
+          }
+        }
+      }
+    }.execute();
   }
 
   private interface DegreeHandler
@@ -736,6 +763,24 @@ public class LoadIstOracle extends LoadIst
     }
 
     throw new IllegalStateException( "Table not found: " + pTablename );
+  }
+
+  private Mview findMview( Model pModel, String pMviewname, String pOwner )
+  {
+    String lMviewNameWithOwner = getNameWithOwner( pMviewname, pOwner );
+
+    for( ModelElement lModelElement : pModel.getModel_elements() )
+    {
+      if( lModelElement instanceof Mview )
+      {
+        if( ((Mview) lModelElement).getMview_name().equals( lMviewNameWithOwner ) )
+        {
+          return (Mview) lModelElement;
+        }
+      }
+    }
+
+    throw new IllegalStateException( "Mview not found: " + pMviewname );
   }
 
   private Index findIndex( Model pModel, String pTablename, String pTableOwner, String pIndexname, String pIndexOwner )
@@ -1128,6 +1173,10 @@ public class LoadIstOracle extends LoadIst
       boolean lHasOwnerColumn = false;
 
       if( pName.equalsIgnoreCase( "mviews" ) )
+      {
+        lHasOwnerColumn = true;
+      }
+      if( pName.equalsIgnoreCase( "registered_mviews" ) )
       {
         lHasOwnerColumn = true;
       }

@@ -902,6 +902,7 @@
     <apply-templates select="buildMode" />
     <apply-templates select="refreshMethod" />
     <apply-templates select="refreshMode" />
+    <apply-templates select="refreshWithPrimaryKey" />
     <apply-templates select="queryRewrite" />
     <apply-templates select="viewSelectCLOB" />
     <text>;
@@ -954,8 +955,17 @@
     <if test=". = 'commit'">
       <text> on commit</text>
     </if>
-  </template>    
-  
+  </template>
+
+  <template match="refreshWithPrimaryKey">
+    <if test=". = 'primary'">
+      <text> with primary key</text>
+    </if>
+    <if test=". = 'rowid'">
+      <text> with rowid</text>
+    </if>
+  </template>
+
   <template match="viewSelectCLOB">
     <text> as </text>
     <text>"</text>  

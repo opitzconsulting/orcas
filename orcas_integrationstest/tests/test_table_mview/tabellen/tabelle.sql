@@ -70,6 +70,24 @@ create materialized view mview_add_default_tabspace tablespace USERS compress re
 
 create materialized view mview_add_domain_tabspace tablespace SYSTEM compress refresh_force as "select col_add_ix_1, col_add_ix_2 from tab_view";
 
+create table tab_add_mview_with_pk
+(
+  col_add_ix_1 number(15) not null,
+  col_add_ix_2 number(15) not null,
+  
+  primary key(col_add_ix_1)
+) materialized view log with primary key;
+
+create table tab_add_mview_without_pk
+(
+  col_add_ix_1 number(15) not null,
+  col_add_ix_2 number(15) not null
+) materialized view log with rowid;
+
+create materialized view tab_add_mview_with_pk_refresh_pk refresh_fast on demand with primary key as "select col_add_ix_1, col_add_ix_2 from tab_add_mview_with_pk";
+
+create materialized view tab_add_mview_without_pk_refresh_rowid refresh_fast on commit with rowid as "select col_add_ix_1, col_add_ix_2 from tab_add_mview_without_pk";
+
 
 
 

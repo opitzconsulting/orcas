@@ -609,6 +609,14 @@ public class InitDiffRepository
       }
 
       @Override
+      public String refreshWithPrimaryKeyCleanValueIfNeeded(String pValue, Mview pObject) {
+        if (pObject.getRefreshMethod() == RefreshMethodType.FAST && "primary".equals(pObject.getRefreshWithPrimaryKey())) {
+          return null;
+        }
+        return super.refreshWithPrimaryKeyCleanValueIfNeeded(pValue, pObject);
+      }
+
+      @Override
       public String viewSelectCLOBCleanValueIfNeeded(String pValue) {
         return cleanupLineBreaks( super.viewSelectCLOBCleanValueIfNeeded(pValue) );
       }
