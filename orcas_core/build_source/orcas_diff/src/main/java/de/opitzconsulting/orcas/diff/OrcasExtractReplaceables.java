@@ -60,7 +60,7 @@ public class OrcasExtractReplaceables extends Orcas
       deleteRecursive( new File( getParameters().getSpoolfolder() ) );
     }
 
-    final boolean lFullMode = getParameters().getViewExtractMode().equals( "full" );
+    final boolean lFullMode = getParameters().isViewExtractModeFull();
 
     JdbcConnectionHandler.runWithCallableStatementProvider( getParameters(), new RunWithCallableStatementProvider()
     {

@@ -32,6 +32,7 @@ import de.opitzconsulting.orcas.diff.OrcasDiff.DiffResult;
 import de.opitzconsulting.orcas.diff.OrcasExtractStatics;
 import de.opitzconsulting.orcas.diff.OrcasMain;
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
+import de.opitzconsulting.orcas.diff.ParameterDefaults;
 import de.opitzconsulting.orcas.diff.Parameters.AdditionalExtensionFactory;
 import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
@@ -151,6 +152,12 @@ public class OrcasCoreIntegrationTest
     private String _expectfailure;
     public boolean _minimizeStatementCount;
 
+    public boolean isMviewsWithColumns() {
+      return _mviewsWithColumns;
+    }
+
+    public boolean _mviewsWithColumns;
+
     private boolean _cleanupfkvaluesondropmode;
 
     public TestSetup( String pTestName )
@@ -186,6 +193,7 @@ public class OrcasCoreIntegrationTest
         _expectfailure = getProperty( "expectfailure", lDefaultProperties, lTestProperties );
         _minimizeStatementCount = getBooleanProperty( "minimizestatementcount", lDefaultProperties, lTestProperties );
         _cleanupfkvaluesondropmode = getBooleanProperty( "cleanupfkvaluesondropmode", lDefaultProperties, lTestProperties );
+        _mviewsWithColumns = getBooleanProperty( "mviewswithcolumns", lDefaultProperties, lTestProperties );
 
         if( _expectfailure != null && _expectfailure.trim().length() == 0 )
         {
@@ -303,12 +311,12 @@ public class OrcasCoreIntegrationTest
 
   private void asserSchemaEqual( String pName, boolean pIncludeData )
   {
-    asserSchemaEqual( REFERENCE_NAME, pName, pIncludeData, testName, _testSetup._excludewheresequence, _testSetup._dateformat, getConnectParametersTargetUser() );
+    asserSchemaEqual( REFERENCE_NAME, pName, pIncludeData, testName, _testSetup._excludewheresequence, _testSetup._dateformat, getConnectParametersTargetUser(), _testSetup.isMviewsWithColumns() );
   }
 
-  static void asserSchemaEqual( String pNameExpected, String pNameActual, boolean pIncludeData, String pTestName, String pExcludeWhereSequence, String pDateformat, JdbcConnectParameters pJdbcConnectParameters )
+  static void asserSchemaEqual( String pNameExpected, String pNameActual, boolean pIncludeData, String pTestName, String pExcludeWhereSequence, String pDateformat, JdbcConnectParameters pJdbcConnectParameters, boolean pIsMviewsWithColumns )
   {
-    extractSchema( pJdbcConnectParameters, pNameActual, pIncludeData, pTestName, pExcludeWhereSequence, pDateformat );
+    extractSchema( pJdbcConnectParameters, pNameActual, pIncludeData, pTestName, pExcludeWhereSequence, pDateformat, pIsMviewsWithColumns );
 
     assertFilesEqual( pNameActual, getSchemaExtarctFileName( pNameExpected, pIncludeData, true, pTestName ), getSchemaExtarctFileName( pNameActual, pIncludeData, true, pTestName ), pIncludeData );
     assertFilesEqual( pNameActual, getSchemaExtarctFileName( pNameExpected, pIncludeData, false, pTestName ), getSchemaExtarctFileName( pNameActual, pIncludeData, false, pTestName ), pIncludeData );
@@ -340,10 +348,10 @@ public class OrcasCoreIntegrationTest
 
   private void extractSchema( JdbcConnectParameters pConnectParametersTargetUser, String pName, boolean pIncludeData )
   {
-    extractSchema( pConnectParametersTargetUser, pName, pIncludeData, testName, _testSetup._excludewheresequence, _testSetup._dateformat );
+    extractSchema( pConnectParametersTargetUser, pName, pIncludeData, testName, _testSetup._excludewheresequence, _testSetup._dateformat, _testSetup.isMviewsWithColumns() );
   }
 
-  static void extractSchema( JdbcConnectParameters pConnectParametersTargetUser, String pName, boolean pIncludeData, String pTestName, String pExcludeWhereSequence, String pDateformat )
+  static void extractSchema( JdbcConnectParameters pConnectParametersTargetUser, String pName, boolean pIncludeData, String pTestName, String pExcludeWhereSequence, String pDateformat, boolean pIsMviewsWithColumns )
   {
     executeScript( pConnectParametersTargetUser, "spool.sql", getSchemaExtarctFileName( pName, pIncludeData, false, pTestName ), orcasCoreIntegrationConfig.getWorkfolder() + pTestName + "/tmp_extrcat_table_data.log", pIncludeData ? "1=1" : "1=2" );
 
@@ -361,6 +369,7 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setScriptpostfix( null );
     lParametersCall.setOrderColumnsByName( true );
     lParametersCall.setRemoveDefaultValuesFromModel( false );
+    lParametersCall.setViewExtractMode( pIsMviewsWithColumns ? "full" : ParameterDefaults.viewextractmode);
 
     new OrcasExtractStatics().mainRun( lParametersCall );
   }
@@ -394,6 +403,7 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setScriptpostfix( null );
     lParametersCall.setOrderColumnsByName( false );
     lParametersCall.setRemoveDefaultValuesFromModel( true );
+    lParametersCall.setViewExtractMode( _testSetup.isMviewsWithColumns() ? "full" : ParameterDefaults.viewextractmode);
 
     new OrcasExtractStatics().mainRun( lParametersCall );
   }
@@ -459,6 +469,7 @@ public class OrcasCoreIntegrationTest
     lParametersCall.setXmlInputFile( pXmlInputFile );
     lParametersCall.setMinimizeStatementCount( _testSetup._minimizeStatementCount );
     lParametersCall.setCleanupFkValuesOnDropmode( _testSetup._cleanupfkvaluesondropmode );
+    lParametersCall.setViewExtractMode( _testSetup.isMviewsWithColumns() ? "full" : ParameterDefaults.viewextractmode);
 
     lParametersCall.setAdditionalOrcasExtensionFactory( new AdditionalExtensionFactory()
     {

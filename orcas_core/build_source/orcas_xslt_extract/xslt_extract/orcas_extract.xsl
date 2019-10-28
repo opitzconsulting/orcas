@@ -498,7 +498,7 @@
     <value-of select="." />
   </template>  
 
-  <template match="index_columns | destColumns | srcColumns | uk_columns | pk_columns | columns[parent::RangePartitions]">
+  <template match="index_columns | destColumns | srcColumns | uk_columns | pk_columns | columns[parent::RangePartitions] | mview_columns">
     <text> (</text>
     <apply-templates />
     <text>)</text>
@@ -895,6 +895,7 @@
     <redirect:write file="{myfunc:format-mview-filename(mview_name)}.sql">
     <text>create materialized view </text>
     <apply-templates select="mview_name" />
+    <apply-templates select="mview_columns" />
     <apply-templates select="tablespace" />
     <apply-templates select="compression" />
     <apply-templates select="compressionFor" />

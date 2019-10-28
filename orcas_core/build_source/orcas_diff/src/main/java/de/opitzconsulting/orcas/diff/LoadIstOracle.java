@@ -174,6 +174,9 @@ public class LoadIstOracle extends LoadIst
     loadSequencesIntoModel( pModel, pWithSequeneceMayValueSelect );
 
     loadMViewsIntoModel( pModel );
+    if (_parameters.isViewExtractModeFull()) {
+        loadMviewColumnsIntoModel(pModel);
+    }
 
     loadTablesIntoModel( pModel );
     loadTableColumnsIntoModel( pModel );
@@ -574,6 +577,7 @@ public class LoadIstOracle extends LoadIst
           if( "FAST".equals( pResultSet.getString( "refresh_method" ) ) )
           {
             lMview.setRefreshMethod( RefreshMethodType.FAST );
+            lMview.setRefreshWithPrimaryKey("primary");
           }
           if( "NEVER".equals( pResultSet.getString( "refresh_method" ) ) )
           {
@@ -1098,6 +1102,37 @@ public class LoadIstOracle extends LoadIst
     }.execute();
 
   }
+
+  private void loadMviewColumnsIntoModel( final Model pModel )
+  {
+    String lSql;
+
+      lSql = "" + //
+          " select tab_cols.table_name," + //
+          "        tab_cols.owner," + //
+          "        tab_cols.column_name," + //
+          "        column_id" + //
+          "   from " + getDataDictionaryView( "tab_cols" ) + //
+          "  where hidden_column = 'NO'" + //
+          "  order by table_name, column_id, column_name";
+
+    new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
+    {
+      @Override
+      protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
+      {
+        if( !isIgnoredMView( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
+        {
+          ColumnRef lColumn = new ColumnRefImpl();
+
+          lColumn.setColumn_name_string( pResultSet.getString( "column_name" ) );
+
+          findMview( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ).getMview_columns().add( lColumn );
+        }
+      }
+    }.execute();
+  }
+
 
   private void loadIotTableStorageIntoModel(Model pModel) {
     pModel

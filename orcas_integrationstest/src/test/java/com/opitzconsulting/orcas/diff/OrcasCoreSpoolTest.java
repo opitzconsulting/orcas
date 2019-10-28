@@ -192,10 +192,10 @@ public class OrcasCoreSpoolTest
 
     resetUser( _connectParametersTargetUser );
     executeScript( _connectParametersTargetUser, "testspool/tests/" + testName + "/" + "a.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
-    OrcasCoreIntegrationTest.extractSchema( _connectParametersTargetUser, "a", true, lTestFolderName, OrcasCoreIntegrationTest.DEFAULT_EXCLUDE, "dd.mm.yyyy" );
+    OrcasCoreIntegrationTest.extractSchema( _connectParametersTargetUser, "a", true, lTestFolderName, OrcasCoreIntegrationTest.DEFAULT_EXCLUDE, "dd.mm.yyyy", false );
 
     resetUser( _connectParametersTargetUser );
     executeScript( _connectParametersTargetUser, "testspool/tests/" + testName + "/" + "b.sql", orcasCoreIntegrationConfig.getAlternateTablespace1(), orcasCoreIntegrationConfig.getAlternateTablespace2() );
-    OrcasCoreIntegrationTest.asserSchemaEqual( "a", "b", true, lTestFolderName, OrcasCoreIntegrationTest.DEFAULT_EXCLUDE, "dd.mm.yyyy", _connectParametersTargetUser );
+    OrcasCoreIntegrationTest.asserSchemaEqual( "a", "b", true, lTestFolderName, OrcasCoreIntegrationTest.DEFAULT_EXCLUDE, "dd.mm.yyyy", _connectParametersTargetUser, false );
   }
 }

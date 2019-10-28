@@ -186,7 +186,7 @@ ColumnIdentity:
  "generated" ( always="always"|"by" by_default="default" ("on" on_null="null")? ) "as" "identity" ( "(" ("increment" "by" increment_by=INT)? ("maxvalue" maxvalue=INT)? ("minvalue" minvalue=INT)? (cycle=CycleType)? ("cache" cache=INT)? (order=OrderType)? ")" )?;
 
 Mview:
- "create" "materialized" "view" mview_name=DBNAME_WITH_SCHEMA ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (parallel=ParallelType (parallel_degree=INT)? )? (buildMode=BuildModeType)? (refreshMethod=RefreshMethodType ("on" refreshMode=RefreshModeType)? ("with" ((refreshWithPrimaryKey="primary" "key") | (refreshWithPrimaryKey="rowid")))? )? (queryRewrite=EnableType "query" "rewrite")? ("as" viewSelectCLOB=STRING) ";";
+ "create" "materialized" "view" mview_name=DBNAME_WITH_SCHEMA ("(" (mview_columns+=ColumnRef)+ ")")? ("tablespace" tablespace=DBNAME)? ((compression=CompressType) ("for" compressionFor=CompressForType)?)? (parallel=ParallelType (parallel_degree=INT)? )? (buildMode=BuildModeType)? (refreshMethod=RefreshMethodType ("on" refreshMode=RefreshModeType)? ("with" ((refreshWithPrimaryKey="primary" "key") | (refreshWithPrimaryKey="rowid")))? )? (queryRewrite=EnableType "query" "rewrite")? ("as" viewSelectCLOB=STRING) ";";
 
 enum NewValuesType :
   including="including"|excluding="excluding";

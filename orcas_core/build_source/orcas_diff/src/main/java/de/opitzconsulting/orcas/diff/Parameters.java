@@ -344,6 +344,10 @@ public abstract class Parameters {
         return checkNull(_viewExtractMode);
     }
 
+    public boolean isViewExtractModeFull() {
+        return "full".equals( getViewExtractMode() );
+    }
+
     public boolean getScriptfolderrecursive() {
         return checkNull(_scriptfolderrecursive);
     }

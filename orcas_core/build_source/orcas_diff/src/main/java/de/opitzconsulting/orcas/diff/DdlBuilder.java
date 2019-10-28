@@ -1647,6 +1647,12 @@ public abstract class DdlBuilder
     p.stmtStart( "create materialized view" );
     p.stmtAppend( pMviewDiff.mview_nameNew );
 
+    if (getColumnList(pMviewDiff.mview_columnsDiff) != null) {
+      p.stmtAppend("(");
+      p.stmtAppend(getColumnList(pMviewDiff.mview_columnsDiff));
+      p.stmtAppend(")");
+    }
+
     if( pMviewDiff.buildModeNew == BuildModeType.PREBUILT )
     {
       p.stmtAppend( "on prebuilt table" );
