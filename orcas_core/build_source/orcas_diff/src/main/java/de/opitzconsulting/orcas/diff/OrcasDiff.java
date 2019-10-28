@@ -396,6 +396,7 @@ public class OrcasDiff
       .ifDifferentName( MVIEW__MVIEW_NAME, oldObjectNames, lMviewDiff.mview_nameNew, lMviewDiff.mview_nameOld, databaseHandler.isRenameMView() )//
       .ifDifferent( MVIEW__TABLESPACE )//
       .ifDifferent( MVIEW__BUILD_MODE )//
+      .ifDifferent( MVIEW__MVIEW_COLUMNS, ddlBuilder.getColumnList( lMviewDiff.mview_columnsDiff ) != null )//
       .ifX( p ->
       {
         if( !replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBNew ).equals( replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBOld ) ) )
