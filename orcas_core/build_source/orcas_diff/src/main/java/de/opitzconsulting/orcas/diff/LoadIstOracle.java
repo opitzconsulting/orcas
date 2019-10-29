@@ -1692,10 +1692,10 @@ public class LoadIstOracle extends LoadIst
            "        deferrable," + //
            "        deferred," + //
            "        constraints.status," + //
-           "        constraints.generated," + //
            "        search_condition" + //
            "   from " + getDataDictionaryView( "constraints" ) + //
-           " where constraint_type = 'C'" + //
+           "  where constraint_type = 'C'" + //
+           "    and constraints.generated != 'GENERATED NAME'" + //
            "  order by table_name," + //
            "           constraint_name" + //
            "";
@@ -1713,24 +1713,19 @@ public class LoadIstOracle extends LoadIst
 
           DeferrType lDeferrType = getDeferrType( pResultSet );
 
-          boolean lGeneratedName = isGeneratedName( pResultSet.getString( "generated" ) );
-
           logLoading( "constraint-C", pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ) );
 
-          if( !lGeneratedName )
-          {
-            Constraint lConstraint = new ConstraintImpl();
+          Constraint lConstraint = new ConstraintImpl();
 
-            lConstraint.setConsName( pResultSet.getString( "constraint_name" ) );
+          lConstraint.setConsName( pResultSet.getString( "constraint_name" ) );
 
-            lConstraint.setStatus( lEnableType );
+          lConstraint.setStatus( lEnableType );
 
-            lConstraint.setDeferrtype( lDeferrType );
+          lConstraint.setDeferrtype( lDeferrType );
 
-            lConstraint.setRule( pResultSet.getString( "search_condition" ) );
+          lConstraint.setRule( pResultSet.getString( "search_condition" ) );
 
-            lTable.getConstraints().add( lConstraint );
-          }
+          lTable.getConstraints().add( lConstraint );
         }
       }
 
