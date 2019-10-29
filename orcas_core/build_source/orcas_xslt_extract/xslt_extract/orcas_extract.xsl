@@ -254,6 +254,7 @@
       <text>,</text>
     </if>
     <text>
+
   </text>
     <if test="consName != ''">
       <text>constraint </text>
