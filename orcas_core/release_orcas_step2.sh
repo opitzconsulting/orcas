@@ -1,6 +1,6 @@
 #!/bin/sh
 
-new_orcas_snapshot_version=7.2.2-SNAPSHOT
+new_orcas_snapshot_version=7.2.3-SNAPSHOT
 
 cd ..
 
