@@ -1581,7 +1581,7 @@ public class LoadIstOracle extends LoadIst
         {
           Table lTable = findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) );
 
-          if( lTable.getObject_type() != null ){
+          if( lTable.getObject_type() != null && pResultSet.getString( "constraint_name" ).startsWith("SYS_")){
             return;
           }
 

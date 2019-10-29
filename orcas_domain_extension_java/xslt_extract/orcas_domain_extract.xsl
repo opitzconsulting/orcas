@@ -22,7 +22,7 @@
       <apply-templates select="alias" />
       <apply-templates select="domain" />
       <apply-templates select="object_type" />
-      <if test="columns">
+      <if test="columns or primary_key or constraints or ind_uks or foreign_keys or comments">
       <text>
 (</text>
       </if>
@@ -32,7 +32,7 @@
       <apply-templates select="ind_uks" />
       <apply-templates select="foreign_keys" />
       <apply-templates select="comments" />
-      <if test="columns">
+      <if test="columns or primary_key or constraints or ind_uks or foreign_keys or comments">
       <text>
 )</text>
       </if>

@@ -140,7 +140,7 @@
       <text> table </text>
       <apply-templates select="name" />
       <apply-templates select="object_type" />
-      <if test="columns">
+      <if test="columns or primary_key or constraints or ind_uks or foreign_keys or comments">
       <text>
 (</text>
       </if>
@@ -150,7 +150,7 @@
       <apply-templates select="ind_uks" />
       <apply-templates select="foreign_keys" />
       <apply-templates select="comments" />
-      <if test="columns">
+      <if test="columns or primary_key or constraints or ind_uks or foreign_keys or comments">
       <text>
 )</text>
       </if>
@@ -176,8 +176,38 @@
     </redirect:write>
   </template>
 
-  <template match="constraints | ind_uks | foreign_keys | comments">
-    <text>,
+  <template match="constraints">
+    <if test="../columns or ../primary_key">
+      <text>,</text>
+    </if>
+    <text>
+</text>
+    <apply-templates />
+  </template>
+
+  <template match="ind_uks">
+    <if test="../columns or ../primary_key or ../constraints">
+      <text>,</text>
+    </if>
+    <text>
+</text>
+    <apply-templates />
+  </template>
+
+  <template match="foreign_keys">
+    <if test="../columns or ../primary_key or ../constraints or ../ind_uks">
+      <text>,</text>
+    </if>
+    <text>
+</text>
+    <apply-templates />
+  </template>
+
+  <template match="comments">
+    <if test="../columns or ../primary_key or ../constraints or ../ind_uks or ../foreign_keys">
+      <text>,</text>
+    </if>
+    <text>
 </text>
     <apply-templates />
   </template>
@@ -220,8 +250,10 @@
   </template>
 
   <template match="PrimaryKey">
-    <text>,
-
+    <if test="../../columns">
+      <text>,</text>
+    </if>
+    <text>
   </text>
     <if test="consName != ''">
       <text>constraint </text>
