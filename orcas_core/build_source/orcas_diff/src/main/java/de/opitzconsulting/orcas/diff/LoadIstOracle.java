@@ -497,7 +497,11 @@ public class LoadIstOracle extends LoadIst
 
   private void logLoading( String pType, String pName )
   {
-    _log.debug( "loading: " + pType + " " + pName );
+    String lMessage = "loading: " + pType + " " + pName;
+    if ("debug".equals(_parameters.getloglevel())) {
+      _parameters.getInfoLogHandler().logInfo(lMessage);
+    }
+    _log.debug(lMessage);
   }
 
   private void logLoading( String pType, String pName, String pDetailName )

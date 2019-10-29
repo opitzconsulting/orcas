@@ -382,7 +382,7 @@ public abstract class Parameters {
 
     private static <T> T checkNull(T pValue) {
         if (pValue == null) {
-            throw new IllegalArgumentException("Parameter not set");
+            //throw new IllegalArgumentException("Parameter not set");
         }
 
         return pValue;
