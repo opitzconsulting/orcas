@@ -14,8 +14,18 @@ import org.eclipse.emf.ecore.EObject;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 
 public abstract class Parameters {
+    public void setExtractViewCommnets(boolean pExtractViewCommnets) {
+        isExtractViewCommnets = pExtractViewCommnets;
+    }
+
+    private boolean isExtractViewCommnets = ParameterDefaults.isExtractViewCommnets;
+
     public Consumer<CallableStatementProvider> getConnectionInitializer() {
         return connectionInitializer;
+    }
+
+    public boolean isExtractViewCommnets() {
+        return isExtractViewCommnets;
     }
 
     public static class JdbcConnectParameters {
