@@ -971,6 +971,14 @@ public class LoadIstOracle extends LoadIst
             lColumn.setData_type( DataType.NUMBER );
             lColumn.setPrecision( pResultSet.getInt( "data_precision" ) );
             lColumn.setScale( pResultSet.getInt( "data_scale" ) );
+
+            if( lColumn.getPrecision() == 0 && lColumn.getScale() == 0 )
+            {
+              if (pResultSet.getInt("data_length") != 0 && pResultSet.getBigDecimal("data_scale") != null )
+              {
+                lColumn.setPrecision( pResultSet.getInt( "data_length" ) );
+              }
+            }
           }
           if( "BLOB".equals( pResultSet.getString( "data_type" ) ) )
           {
