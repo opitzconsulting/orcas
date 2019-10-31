@@ -75,7 +75,11 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setMultiSchemaDbaViews( project.orcasconfiguration.multischemadbaviews );
     lParametersCall.setMultiSchemaExcludewhereowner( project.orcasconfiguration.multischemaexcludewhereowner );
     lParametersCall.setViewExtractMode( project.orcasconfiguration.viewextractmode );
-    lParametersCall.setExtractViewCommnets( project.orcasconfiguration.isExtractViewCommnets );
+    if (project.orcasconfiguration.isExtractViewCommnets == true) {
+      lParametersCall.setExtractViewCommnets(true);
+    } else {
+      lParametersCall.setExtractViewCommnets(project.orcasconfiguration.isExtractViewCommnents);
+    }
 
     lParametersCall.setUpdateEnabledStatus( project.orcasconfiguration.updateEnabledStatus );
 

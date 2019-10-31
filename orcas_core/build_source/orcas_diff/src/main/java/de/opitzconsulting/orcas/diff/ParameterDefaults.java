@@ -75,5 +75,6 @@ public class ParameterDefaults {
         };
     public static boolean updateEnabledStatus = false;
     public static int staticsSpoolMaxLineLength = 2000;
-    public static boolean isExtractViewCommnets = false;
+    public static boolean isExtractViewCommnents = false;
+    public static boolean isExtractViewCommnets = isExtractViewCommnents ;
 }

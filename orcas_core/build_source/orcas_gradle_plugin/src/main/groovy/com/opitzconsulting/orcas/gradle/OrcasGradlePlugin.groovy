@@ -107,7 +107,8 @@ class OrcasGradlePluginExtension {
   def boolean extractremovedefaultvaluesfrommodel = ParameterDefaults.extractremovedefaultvaluesfrommodel;
   def String extractreplaceablesoutfolder;
   def String viewextractmode = ParameterDefaults.viewextractmode;
-  def boolean isExtractViewCommnets = ParameterDefaults.isExtractViewCommnets;
+  def boolean isExtractViewCommnets;
+  def boolean isExtractViewCommnents = ParameterDefaults.isExtractViewCommnents;
 
   def String srcjdbcurl;
   def String srcusername;

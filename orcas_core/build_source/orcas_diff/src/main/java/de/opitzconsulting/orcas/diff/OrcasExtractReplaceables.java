@@ -70,7 +70,7 @@ public class OrcasExtractReplaceables extends Orcas {
                 extract(pCallableStatementProvider, "functions", null, "FUNCTION", getParameters().getExcludewherefunction());
                 extract(pCallableStatementProvider, "procedures", null, "PROCEDURE", getParameters().getExcludewhereprocedure());
 
-                boolean lIsExtractViewCommnets = getParameters().isExtractViewCommnets();
+                boolean lIsExtractViewCommnets = getParameters().isExtractViewCommnents();
 
                 Map<String, List<String>> lCommentMap = new HashMap<>();
 
