@@ -56,7 +56,7 @@ create table tab_datatypes
   col_float_2 float(2),
   col_float_def float,
   col_with_num_# number,
-  col_integer number(22)
+  col_integer int
 );
 
 create table tab_long

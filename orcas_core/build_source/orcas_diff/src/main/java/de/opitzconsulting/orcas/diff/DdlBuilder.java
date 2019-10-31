@@ -2025,7 +2025,16 @@ public abstract class DdlBuilder
 
   protected String getDatatypeName( DataType pData_typeNew )
   {
-    return pData_typeNew.name().toUpperCase();
+    switch (pData_typeNew) {
+    case INT:
+    case SMALLINT:
+    case TINYINT:
+    case MEDIUMINT:
+    case BIGINT:
+      return "integer";
+    default:
+      return pData_typeNew.name().toUpperCase();
+    }
   }
 
   public void createColumn( StatementBuilder p, TableDiff pTableDiff, ColumnDiff pColumnDiff )
