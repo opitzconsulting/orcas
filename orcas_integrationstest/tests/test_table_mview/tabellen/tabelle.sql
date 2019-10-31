@@ -88,6 +88,15 @@ create materialized view tab_add_mview_with_pk_refresh_pk refresh_fast on demand
 
 create materialized view tab_add_mview_without_pk_refresh_rowid refresh_fast on commit with rowid as "select col_add_ix_1, col_add_ix_2 from tab_add_mview_without_pk";
 
+create table tab_mod_mview_column
+(
+  col_add_ix_1 number(15) not null,
+  col_add_ix_2 number(15) not null
+);
+
+create materialized view tab_mod_mview_column prebuilt refresh_complete on demand enable query rewrite as "select col_add_ix_1, col_add_ix_2 from tab_view";
+
+
 
 
 

@@ -30,6 +30,12 @@ create materialized view mview_mod_tabspace noparallel  build immediate as selec
 
 create materialized view mview_mod_tabspace_reverse tablespace SYSTEM noparallel build immediate as select col_add_ix_1, col_add_ix_2 from tab_view;
 
+create table tab_mod_mview_column
+(
+  col_add_ix_1 number(16),
+  col_add_ix_2 number(15) not null
+);
 
+create materialized view tab_mod_mview_column on prebuilt table refresh complete on demand enable query rewrite as select cast (col_add_ix_1 AS number(16)) as col_add_ix_1, col_add_ix_2 from tab_view;
 
 

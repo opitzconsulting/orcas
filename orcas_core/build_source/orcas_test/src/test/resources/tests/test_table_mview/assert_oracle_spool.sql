@@ -1,3 +1,7 @@
+drop materialized view MVIEW_MOD_SELECT;
+drop materialized view MVIEW_MOD_BUILD_MODE;
+drop materialized view MVIEW_MOD_TABSPACE;
+drop materialized view MVIEW_MOD_TABSPACE_REVERSE;
 create table TAB_ADD_MVIEW (  COL_ADD_IX_1 NUMBER(15) not null, COL_ADD_IX_2 NUMBER(15) not null   )  ;
 create materialized view MVIEW_ADD_CLOB_VIEWSELECT as select col_add_ix_1, col_add_ix_2, rpad('111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111', 150, '1') as col_3,
 rpad('111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111', 150, '1') as col_4,
@@ -19,17 +23,13 @@ from tab_view;
 create materialized view TAB_ADD_MVIEW on prebuilt table  refresh complete enable query rewrite as select col_add_ix_1, col_add_ix_2 from tab_view;
 alter materialized view TAB_MOD_MVIEW never refresh;
 alter materialized view TAB_MOD_REWRITE disable query rewrite;
-drop materialized view MVIEW_MOD_SELECT;
 create materialized view MVIEW_MOD_SELECT as select col_add_ix_1, col_add_ix_2 from tab_view;
-drop materialized view MVIEW_MOD_BUILD_MODE;
 create materialized view MVIEW_MOD_BUILD_MODE as select col_add_ix_1, col_add_ix_2 from tab_view;
 alter materialized view MVIEW_MOD_COMPRESS compress;
 alter materialized view MVIEW_MOD_PARALLEL parallel;
 alter materialized view MVIEW_MOD_PARALLEL_4 parallel 4;
 alter materialized view MVIEW_MOD_NOPARALLEL noparallel;
-drop materialized view MVIEW_MOD_TABSPACE;
 create materialized view MVIEW_MOD_TABSPACE tablespace SYSTEM as select col_add_ix_1, col_add_ix_2 from tab_view;
-drop materialized view MVIEW_MOD_TABSPACE_REVERSE;
 create materialized view MVIEW_MOD_TABSPACE_REVERSE tablespace USERS as select col_add_ix_1, col_add_ix_2 from tab_view;
 create materialized view MVIEW_ADD_IMMEDIATE  refresh complete as select col_add_ix_1, col_add_ix_2 from tab_view;
 create materialized view MVIEW_ADD_DEFERRED build deferred  refresh complete as select col_add_ix_1, col_add_ix_2 from tab_view;

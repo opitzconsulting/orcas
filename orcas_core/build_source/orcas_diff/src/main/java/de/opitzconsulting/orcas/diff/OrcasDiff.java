@@ -241,6 +241,8 @@ public class OrcasDiff
 
   private void updateIsRecreateNeeded( ModelDiff pModelDiff )
   {
+    Map<String,List<DiffActionReason>> recreateMviewMap = new HashMap<>();
+
     for( TableDiff lTableDiff : pModelDiff.model_elementsTableDiff )
     {
       if( lTableDiff.isMatched )
@@ -249,6 +251,10 @@ public class OrcasDiff
         .ifDifferent( TABLE__PERMANENTNESS )//
         .ifDifferent( TABLE__TRANSACTION_CONTROL )//
         .calculate();
+
+        if( recreateNeededRegistry.isRecreateNeeded(lTableDiff) ){
+          recreateMviewMap.computeIfAbsent(lTableDiff.nameNew, p->new ArrayList<>()).addAll(recreateNeededRegistry.getRecreateNeededReasons(lTableDiff));
+        }
 
         Map<String, List<DiffActionReason>> lRecreateColumnNames = new HashMap<>();
 
@@ -280,6 +286,22 @@ public class OrcasDiff
             }
           } )//
           .calculate();
+
+          if( recreateNeededRegistry.isRecreateNeeded(lColumnDiff) ){
+            recreateMviewMap.computeIfAbsent(lTableDiff.nameNew, p->new ArrayList<>()).addAll(recreateNeededRegistry.getRecreateNeededReasons(lColumnDiff));
+          }
+
+          if( !lColumnDiff.isMatched) {
+            if (lColumnDiff.isNew) {
+              recreateMviewMap
+                  .computeIfAbsent(lTableDiff.nameNew, p -> new ArrayList<>())
+                  .addAll(Collections.singletonList(new DiffActionReasonMissing(diffReasonKeyRegistry.getDiffReasonKey(lColumnDiff))));
+            } else {
+              recreateMviewMap
+                  .computeIfAbsent(lTableDiff.nameNew, p -> new ArrayList<>())
+                  .addAll(Collections.singletonList(new DiffActionReasonSurplus(diffReasonKeyRegistry.getDiffReasonKey(lColumnDiff))));
+            }
+          }
         }
 
         setRecreateNeededFor( lTableDiff.primary_keyDiff )//
@@ -402,6 +424,13 @@ public class OrcasDiff
         if( !replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBNew ).equals( replaceLinefeedBySpace( lMviewDiff.viewSelectCLOBOld ) ) )
         {
           p.setRecreateNeededDifferent( Collections.singletonList( new DifferenceImpl( MVIEW__VIEW_SELECT_CLOB, lMviewDiff ) ) );
+        }
+      } )//
+      .ifX( p ->
+      {
+        if( recreateMviewMap.containsKey( lMviewDiff.mview_nameNew ) )
+        {
+          p.setRecreateNeededDependsOn( recreateMviewMap.get( lMviewDiff.mview_nameNew ) );
         }
       } )//
       .calculate();
@@ -529,6 +558,9 @@ public class OrcasDiff
       updateImplicitDropList( lModelDiff );
     }
 
+    _log.debug( "handle all mviews drop" );
+    handleAllMviews( lModelDiff, true );
+
     _log.debug( "handle all tables" );
     handleAllTables( lModelDiff );
 
@@ -536,7 +568,7 @@ public class OrcasDiff
     handleAllSequences( lModelDiff );
 
     _log.debug( "handle all mviews" );
-    handleAllMviews( lModelDiff );
+    handleAllMviews( lModelDiff, false );
 
     if( _parameters.isAdditionsOnly() )
     {
@@ -1144,15 +1176,17 @@ public class OrcasDiff
     }
   }
 
-  private void handleAllMviews( ModelDiff pModelDiff )
+  private void handleAllMviews( ModelDiff pModelDiff, boolean pDrop )
   {
-    for( MviewDiff lMviewDiff : pModelDiff.model_elementsMviewDiff )
-    {
-      dropIfNeeded( lMviewDiff, p -> ddlBuilder.dropMview( p, lMviewDiff ) );
-
-      createIfNeededOrAlter( lMviewDiff, //
-      p2 -> ddlBuilder.createMview( p2, lMviewDiff ), //
-      p1 -> ddlBuilder.alterMviewIfNeeded( p1, lMviewDiff ) );
+    for (MviewDiff lMviewDiff : pModelDiff.model_elementsMviewDiff) {
+      if (pDrop) {
+        dropIfNeeded(lMviewDiff, p -> ddlBuilder.dropMview(p, lMviewDiff));
+      } else {
+        createIfNeededOrAlter(
+            lMviewDiff, //
+            p2 -> ddlBuilder.createMview(p2, lMviewDiff), //
+            p1 -> ddlBuilder.alterMviewIfNeeded(p1, lMviewDiff));
+      }
     }
   }
 
