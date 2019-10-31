@@ -224,7 +224,13 @@ public abstract class DdlBuilder
 
   public void dropPrimaryKey( StatementBuilder p, TableDiff pTableDiff, PrimaryKeyDiff pPrimaryKeyDiff )
   {
-    dropTableConstraintByName( p, pTableDiff, pPrimaryKeyDiff.consNameOld, false );
+    if (pPrimaryKeyDiff.consNameOld == null) {
+      p.stmtStartAlterTableNoCombine(pTableDiff);
+      p.stmtAppend( "drop primary key");
+      p.stmtDone(false);
+    } else {
+      dropTableConstraintByName(p, pTableDiff, pPrimaryKeyDiff.consNameOld, false);
+    }
   }
 
   public void dropConstraint( StatementBuilder p, TableDiff pTableDiff, ConstraintDiff pConstraintDiff )

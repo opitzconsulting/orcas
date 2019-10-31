@@ -42,3 +42,9 @@ create table tab_old_enable
 	constraint tab_old_enable_cc primary key (id) disable
 );
 
+create table tab_noname_pk_drop
+(
+  id1 number(15) not null,
+  primary key (id1)
+);
+
