@@ -972,9 +972,9 @@ public class LoadIstOracle extends LoadIst
             lColumn.setPrecision( pResultSet.getInt( "data_precision" ) );
             lColumn.setScale( pResultSet.getInt( "data_scale" ) );
 
-            if( lColumn.getPrecision() == 0 && lColumn.getScale() == 0 )
+            if( pResultSet.getBigDecimal("data_precision") == null && pResultSet.getBigDecimal("data_scale") != null  )
             {
-              if (pResultSet.getInt("data_length") != 0 && pResultSet.getBigDecimal("data_scale") != null )
+              if (pResultSet.getBigDecimal("data_length") != null )
               {
                 lColumn.setPrecision( pResultSet.getInt( "data_length" ) );
               }
