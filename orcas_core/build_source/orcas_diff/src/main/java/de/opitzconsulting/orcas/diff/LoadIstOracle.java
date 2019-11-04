@@ -1482,7 +1482,7 @@ public class LoadIstOracle extends LoadIst
         .getColumns()
         .stream()
         .anyMatch(p -> p.getName_string().equals(lIndexColumnRef.getColumn_name_string()))) {
-      lIndexColumnRef.setColumn_name_string(pExpression.replace("\"", "").replace(" ", ""));
+      lIndexColumnRef.setColumn_name_string(pExpression.replace("\"", ""));
     }
 
     if( pColumnPosition == pMaxColumnPositionForInd ) {
@@ -1519,9 +1519,9 @@ public class LoadIstOracle extends LoadIst
                   "        indexes.table_owner," + //
                   "        ind_expressions.index_name," + //
                   "        ind_expressions.owner," + //
-                  "        column_position," + //
-                  "        column_expression," + //
-                  "        max (column_position)" + //
+                  "        ind_expressions.column_position," + //
+                  "        ind_expressions.column_expression," + //
+                  "        max (ind_expressions.column_position)" + //
                   "        over" + //
                   "        (" + //
                   "          partition by" + //
@@ -1529,15 +1529,20 @@ public class LoadIstOracle extends LoadIst
                   "            ind_expressions.index_name," + //
                   "            ind_expressions.owner," + //
                   "            indexes.owner" + //
-                  "        ) as max_column_position_for_index" + //
+                  "        ) as max_column_position_for_index," + //
+                  "        ind_columns.descend" + //
                   "   from " + getDataDictionaryView( "ind_expressions" ) + "," + //
-                  "        " + getDataDictionaryView( "indexes" ) + //
-                  "  where generated = 'N'" + //
+                  "        " + getDataDictionaryView( "indexes" ) + "," + //
+                  "        " + getDataDictionaryView( "ind_columns" ) + //
+                  "  where indexes.generated = 'N'" + //
                   "    and ind_expressions.index_name = indexes.index_name" + //
                   "    and ind_expressions.owner = indexes.owner" + //
-                  "  order by table_name," + //
-                  "           index_name," + //
-                  "           column_position" + //
+                  "    and ind_columns.owner = indexes.owner" + //
+                  "    and ind_columns.index_name = indexes.index_name" + //
+                  "    and ind_columns.column_position = ind_expressions.column_position" + //
+                  "  order by indexes.table_name," + //
+                  "           indexes.index_name," + //
+                  "           ind_expressions.column_position" + //
                   "";
 
     new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
@@ -1547,7 +1552,14 @@ public class LoadIstOracle extends LoadIst
       {
         if( !isIgnoredIndex( pResultSet.getString( "table_name" ), pResultSet.getString( "index_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "owner" ) ) )
         {
-          setIndexColumnExpression( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ), pResultSet.getInt( "column_position" ), pResultSet.getString( "column_expression" ), pResultSet.getInt( "max_column_position_for_index" ) );
+          String lColumnExpression = pResultSet.getString("column_expression");
+
+          if( "DESC".equals( pResultSet.getString("descend") ) ){
+            lColumnExpression += " DESC";
+          }
+
+          setIndexColumnExpression( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "table_owner" ), pResultSet.getString( "index_name" ), pResultSet.getString( "owner" ), pResultSet.getInt( "column_position" ),
+              lColumnExpression, pResultSet.getInt( "max_column_position_for_index" ) );
         }
       }
     }.execute();

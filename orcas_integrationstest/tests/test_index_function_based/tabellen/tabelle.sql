@@ -20,5 +20,6 @@ create table tab_index_inline
   index inline_add_2_ix "COL_1,COL_2,NVL(COL_1,1)",
   index inline_add_3_ix "NVL(COL_1,1),COL_2",
   index inline_add_4_ix "NVL(TO_CHAR(COL_1),'test')",
-  index inline_mod_1_ix "NVL(TO_CHAR(COL_2),'klein')"
+  index inline_mod_1_ix "NVL(TO_CHAR(COL_2),'klein')",
+  index inline_desc_ix "COL_2 DESC,COL_1"
 );

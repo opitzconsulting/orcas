@@ -22,3 +22,4 @@ create index inline_add_2_ix on tab_index_inline (col_1,col_2,nvl(col_1,1));
 create index inline_add_3_ix on tab_index_inline (nvl(col_1,1),col_2);
 create index inline_add_4_ix on tab_index_inline (nvl(to_char(col_1),'test'));
 create index inline_mod_1_ix on tab_index_inline (nvl(to_char(col_2),'klein'));
+create index inline_desc_ix  on tab_index_inline (col_2 desc, col_1 asc);
