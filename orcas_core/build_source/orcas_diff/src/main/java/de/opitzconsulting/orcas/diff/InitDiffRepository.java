@@ -848,14 +848,19 @@ public class InitDiffRepository
           }
         }
 
-          pValue.getLobStorages().removeAll(
-              pValue.getLobStorages().stream().filter(
-                  p -> p.getLobStorageType() == null
-                      && p.getLobStorageParameters().getCompressType() == null
-                      && p.getLobStorageParameters().getLobCompressForType() == null
-                      && p.getLobStorageParameters().getLobDeduplicateType() == null
-                      && p.getLobStorageParameters().getTablespace() == null
-              ).collect(Collectors.toList()));
+        pValue.getLobStorages().removeAll(
+            pValue.getLobStorages().stream().filter(
+                p -> p.getLobStorageType() == null
+                    &&
+                    (p.getLobStorageParameters() == null ||
+                        (
+                            p.getLobStorageParameters().getCompressType() == null
+                                && p.getLobStorageParameters().getLobCompressForType() == null
+                                && p.getLobStorageParameters().getLobDeduplicateType() == null
+                                && p.getLobStorageParameters().getTablespace() == null
+                        )
+                    )
+            ).collect(Collectors.toList()));
       }
     } );
     DiffRepository.getTableMerge().compressionDefaultValue = CompressType.NOCOMPRESS;
