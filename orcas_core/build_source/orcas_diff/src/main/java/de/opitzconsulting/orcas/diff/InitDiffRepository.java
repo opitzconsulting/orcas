@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import de.opitzconsulting.orcas.orig.diff.*;
 import de.opitzconsulting.origOrcasDsl.*;
@@ -171,7 +172,13 @@ public class InitDiffRepository
       @Override
       public String tablespaceCleanValueIfNeeded( String pValue, LobStorageParameters pObject )
       {
-        return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded( pValue, pObject ), (Table)pObject.eContainer().eContainer() );
+          Table lTable = (Table) pObject.eContainer().eContainer();
+
+          if (lTable.getTablespace() != null && lTable.getTablespace().equalsIgnoreCase(pValue)) {
+              return null;
+          }
+
+          return handleDefaultTablespace(defaultTablespaceProviderForSchema.get(), super.tablespaceCleanValueIfNeeded(pValue, pObject), lTable);
       }
     } );
     DiffRepository.getLobStorageParametersMerge().tablespaceIsConvertToUpperCase = true;
@@ -840,6 +847,15 @@ public class InitDiffRepository
             }
           }
         }
+
+          pValue.getLobStorages().removeAll(
+              pValue.getLobStorages().stream().filter(
+                  p -> p.getLobStorageType() == null
+                      && p.getLobStorageParameters().getCompressType() == null
+                      && p.getLobStorageParameters().getLobCompressForType() == null
+                      && p.getLobStorageParameters().getLobDeduplicateType() == null
+                      && p.getLobStorageParameters().getTablespace() == null
+              ).collect(Collectors.toList()));
       }
     } );
     DiffRepository.getTableMerge().compressionDefaultValue = CompressType.NOCOMPRESS;
