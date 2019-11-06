@@ -16,17 +16,16 @@ Declarations in square brackets are optional details. Values enclosed in quotati
 
 ## Deviations from SQL Standard
 
-- Only compact notations will be supported, in which all constraints and further specifications are included in the create table statement.
-- Keywords will only be supported in lower case.
-- Indizes will be expected in a create table statement, too. In this process, <code>create index index_name on tabellen_name ...</code><br/> will be transformed to <code>index index_name ...</code>
+- Only compact notations are be supported, in which all constraints and further specifications are included in the create table statement.
+- Keywords are only be supported in lower case.
+- Indizes are expected in a create table statement, too. So, <code>create index index_name on tabellen_name ...</code><br/> should be transformed to <code>index index_name ...</code>
 - 
 - The order of constraints is defined as follows:
   1. primary key
   2. check constraint
   3. unique key
   4. foreign key
-<br/> Index statements can be mixed with unique keys (e.g. to create a unique key which uses an explicitly created index).
-  5. More reserved terms: quite every static term from the SQL syntax is reserved (e.g. "table", "create", "varchar2"). All reserved terms are not allowed to occur as a name. E.g. A column called timestamp is possible in SQl, but not in Orcas. You can easily avoid this limitation, by capitalize these terms (e.g. "TIMESTAMP"). Of course, terms reserved by SQL are not possible with this.
+- More reserved terms: quite every static term from the SQL syntax is reserved (e.g. "table", "create", "varchar2"). All reserved terms are not allowed to occur as a name. E.g. A column called timestamp is possible in SQl, but not in Orcas. You can easily avoid this limitation, by capitalize these terms (e.g. "TIMESTAMP"). Of course, terms reserved by SQL are not possible with this.
 
 ### Syntax
 
@@ -42,7 +41,7 @@ create {permanent|global temporary} table table_name [alias table_alias](
 );
 {% endhighlight %}
 
-### Beispiel
+### Example
 
 {% highlight sql %}
 create table order_items
@@ -109,7 +108,7 @@ Nothing special
 
 ## Index
 
-An index can be specified within a table (recommended) or outside of the table definition (like SQL Standard). Column-indizes should not be mixed with function-based-indizes. Error are possible.
+An index can be specified within a table (recommended) or outside of the table definition (like SQL Standard). Column-indizes should not be mixed with function-based-indizes.
 
 ### Index example (internally)
 
@@ -132,7 +131,7 @@ index name_lastname_ix "upper(lastname),upper(name)"
 index such_ix (orde_clob) domain_index "indextype is CTXSYS.CONTEXT PARAMETERS (''Wordlist GERMAN_STEM_PREF'')"
 {% endhighlight %}
 
-### Index Beispiel (extern)
+### Index Example (extern)
 
 {% highlight sql %}
 create unique index orit_price_ix on order_items (price)
@@ -140,11 +139,11 @@ create unique index orit_price_ix on order_items (price)
 
 ## Foreign Key
 
-With foreign keys you have the opportunity to simplify the syntax by using [Extensions]({{site.baseurl}}/docs/extensions/) (e.g. omit a column specification, if you can define it by name conventions).
+Nothing special. With foreign keys you have the opportunity to simplify the syntax by using [Extensions]({{site.baseurl}}/docs/extensions/) (e.g. omit a column specification, if you can define it by name conventions).
 
 ## Sequence
 
-With sequences you can only specify the sequence name. In addition to this you can use a select, which return the highest value. A check on which value the sequence currently is will be performed and the sequence will be incremented if necessary.
+Nothing special. In addition to this you can use a select, which return the highest value. A check on which value the sequence currently is will be performed and the sequence will be incremented if necessary.
 
 ### Syntax
 
@@ -152,7 +151,7 @@ With sequences you can only specify the sequence name. In addition to this you c
 create sequence sequence_name [orcas_ext_max_value_select 'select-statement']
 {% endhighlight %}
 
-### Sequence Beispiel
+### Sequence Example
 
 {% highlight sql %}
 create sequence order_items_seq;
