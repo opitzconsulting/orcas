@@ -2,6 +2,8 @@
 
 allowmixing
 
+skinparam backgroundcolor transparent
+
 database Oracle {
   class categories << (T,red) >> {
     #""ctgr_id        number(15)                  not null""

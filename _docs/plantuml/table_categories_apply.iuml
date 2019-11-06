@@ -2,6 +2,8 @@
 
 allowmixing
 
+skinparam backgroundcolor transparent
+
 folder Source {
   file create_table_categories.sql
 
