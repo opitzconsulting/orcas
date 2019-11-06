@@ -4,7 +4,7 @@ allowmixing
 
 skinparam backgroundcolor transparent
 
-  file create_table_categories.sql
+  file categories.sql
 
   note bottom of create_table_categories.sql
     ""create table categories""
