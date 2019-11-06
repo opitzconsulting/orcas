@@ -25,6 +25,8 @@ The task of Orcas is to read these files, compare them with an existing database
 
 For example in the orderentry example there is a table named "categories". 
 
+![system overview](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.github.com/opitzconsulting/orcas/gh-pages/_docs/plantuml/table_categories_intial.iuml)
+
 It is defined in a file called "categories.sql":
 {% highlight sql %}
 create table categories
