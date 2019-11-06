@@ -11,11 +11,9 @@ This documentation describes how to work with Orcas.
 
 For this documentation, the Orderentry example is used, for information on how to install and run orcas refre to the correspponding instructions of your favorite build-tool:
 
-- [Orcas for maven]({{site.baseurl}}/docs/getting-started-maven/)
-
 - [Orcas for gradle]({{site.baseurl}}/docs/getting-started-gradle/)
 
-- [Orcas for ant]({{site.baseurl}}/docs/examples/)
+- [Orcas for maven]({{site.baseurl}}/docs/getting-started-maven/)
 
 ## Orcas
 
@@ -36,6 +34,8 @@ If the new column "image_location" is inserted:
 Orcas will add the new column to the database:
 
 ![system overview]({{site.plantumlbaseurl}}/table_categories_apply.iuml)
+
+So finally the database looks like:
 
 ![system overview]({{site.plantumlbaseurl}}/table_categories_applied.iuml)
 
