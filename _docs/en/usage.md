@@ -25,39 +25,20 @@ The task of Orcas is to read these files, compare them with an existing database
 
 For example in the orderentry example there is a table named "categories". 
 
-![system overview]({{site.plantumlbaseurl}}/table_categories_intial.iuml)
-
 It is defined in a file called "categories.sql":
-{% highlight sql %}
-create table categories
-(
-  ctgr_id      number(15)                  not null,
-  version      number(15)      default "0" not null,
-  name         varchar2(30)                not null,
-  description  varchar2(1000)              not null,
 
-  constraint ctgr_pk primary key (ctgr_id),
-  constraint ctgr_uc unique (name)
-);
-{% endhighlight %}
+![system overview]({{site.plantumlbaseurl}}/table_categories_intial.iuml)
 
 If the new column "image_location" is inserted:
 
-{% highlight sql %}
-create table categories
-(
-  ctgr_id        number(15)                  not null,
-  version        number(15)      default "0" not null,
-  name           varchar2(30)                not null,
-  description    varchar2(1000)              not null,
-  image_location varchar2(1000),
+![system overview]({{site.plantumlbaseurl}}/table_categories_added_column.iuml)
 
-  constraint ctgr_pk primary key (ctgr_id),
-  constraint ctgr_uc unique (name)
-);
-{% endhighlight %}
+Orcas will add the new column to the database:
 
-Orcas will add the new column to the database.
+![system overview]({{site.plantumlbaseurl}}/table_categories_apply.iuml)
+
+![system overview]({{site.plantumlbaseurl}}/table_categories_applied.iuml)
+
 
 In the same way you would perform other changes like:
 

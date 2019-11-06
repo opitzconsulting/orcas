@@ -1,0 +1,21 @@
+@startuml
+
+allowmixing
+
+  file create_table_categories.sql
+
+  note bottom of create_table_categories.sql
+    ""create table categories""
+    ""(""
+    ""  ctgr_id        number(15)                  not null,""
+    ""  version        number(15)      default "0" not null,""
+    ""  name           varchar2(30)                not null,""
+    ""  description    varchar2(1000)              not null,""
+    ""  <back:LightBlue>image_location varchar2(1000),</back> ""
+    """"
+    ""  constraint ctgr_pk primary key (ctgr_id),""
+    ""  constraint ctgr_uc unique (name)""
+    "");""
+  end note
+
+@enduml
