@@ -102,6 +102,8 @@ The complete List of available parameters can be found here: [OrcasGradlePluginE
 ##  Obtain orcas
 Download and extract [orcas](https://github.com/opitzconsulting/orcas/archive/master.zip).
 
+Note: only [gradle_simple](https://github.com/opitzconsulting/orcas/tree/master/examples/gradle_simple) is used here, but github does not provide a comfortable download for subfolders.
+
 ##  Configure Orderentry example
 Edit examples/gradle_simple/build.gradle and setup your database connection.
 
