@@ -53,6 +53,42 @@ buildscript {
 }
 ```
 
+## The Orcas-Gradle-Plugin
+
+Orcas provides a plugin for gradle which assumes a default project layout.
+This plugin is suitable for simple Orcas usages.
+
+Note that you are free to use Orcas much more flexible if you set up your gradle-project yourself (see: examples/gradle_custom_build).
+
+### Tasks
+
+- databaseDeplyoyment
+
+- extract
+
+### project layout
+
+.
+├── buidl.gradle
+└── src
+    └── main
+      ├── scripts
+      └── sql
+
+## Configure Orcas
+
+Orcas uses the "orcasconfiguration" object to provide access to various parameters.
+The most basic configuration is used to set up the database connection:
+
+```
+orcasconfiguration {
+          jdbcurl = "jdbc:oracle:thin:@localhost:1521:XE"
+          username = "orcas_orderentry"
+          password = "orcas_orderentry"
+}
+
+```
+
 ## The orderentry example
 
 ##  Obtain orcas
