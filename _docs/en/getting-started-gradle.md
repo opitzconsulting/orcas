@@ -10,32 +10,48 @@ categories:
 
 ### Java
 
-Java 8 (1.8) needed at least. 
+Java 8 needed at least. 
 
 ### Gradle
 
-Use the gradle wrapper (type gradlew or ./gradlew instead of gradle).
+Use the gradle wrapper (type gradlew.bat [on Windows] or ./gradlew [on Unix] instead of gradle).
 
-Otherwise download and install gradle from [gradle.org](https://gradle.org/). Until further notice you can use the newest version. Orcas rquires at least gradle 3.3.
+Otherwise download and install gradle from [gradle.org](https://gradle.org/).
 
-### Orcale jdbc driver
+## Using Orcas
 
-You need to provide the oracle jdbc driver.
-			  please make sure you find a way that works with the oracle license terms.
+Provide a buildscript dependency for Orcas:
 
-- add to local maven-repository (yes maven-repository although this is the gradle guide):
 
-  Execute the following command, make sure you replace the location of the ojdbc6.jar.
-  `mvn install:install-file "-Dfile=C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar" -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.1.0.7 -Dpackaging=jar`
+```
+buildscript {
+    repositories {
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
+                  version: '7.5.2'
+    }
+}
+```
 
-- direct path in build.gradle:
+## Orcale jdbc driver
 
-  add direct classpath to the dependencies-section of your build.gradle (see next section on wherer to find the build.gradle for the orderentry example):
-  `classpath files('C:\oracle\product\11.1.0\client_32\jdbc\lib\ojdbc6.jar')`
+Add the Oracle jdbc driver:
 
-- form maven.oracle.com:
+```
+buildscript {
+    repositories {
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
+                  version: '7.5.2'
 
-  The driver is also accessible via http://maven.oracle.com, note that this requires a login-configuration
+        classpath group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
+    }
+}
+```
 
 ## The orderentry example
 
@@ -43,19 +59,16 @@ You need to provide the oracle jdbc driver.
 Download and extract [orcas](https://github.com/opitzconsulting/orcas/archive/master.zip).
 
 ##  Configure Orderentry example
-Edit examples\gradle\build.gradle and setup your database connection (and additionally the jdbc-driver setup if needed).
+Edit examples/gradle_simple/build.gradle and setup your database connection.
 
-The default database user is created like this:
+The default database user needs to be cretaed created like this:
 
 ```
 create user orcas_orderentry identified by orcas_orderentry;
 grant connect to orcas_orderentry;
 grant resource to orcas_orderentry;
-grant create sequence to orcas_orderentry;
-grant create view to orcas_orderentry;
 ```
 
 ## Start orcas
-Exceute `gradle databaseDeployment` at a command line located at `examples\gradle`.
+Exceute `gradlew databaseDeployment` at a command line located at `examples/gradle_simple`.
 
-For gradle wrapper use `gradlew databaseDeployment` or `./gradlew databaseDeployment` instead.

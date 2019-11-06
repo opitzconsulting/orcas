@@ -47,7 +47,6 @@ In the same way you would perform other changes like:
 - set "not null" or remove it
 - Create tables
 - Create foreign keys
-- Change data type/length.
 
 ## Data loss protection
 
