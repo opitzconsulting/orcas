@@ -7,7 +7,7 @@ skinparam backgroundcolor transparent
 folder Source {
   file categories.sql
 
-  note bottom of create_table_categories.sql
+  note bottom of categories.sql
     ""create table categories""
     ""(""
     ""  ctgr_id        number(15)                  not null,""
