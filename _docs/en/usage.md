@@ -49,39 +49,29 @@ In the same way you would perform other changes like:
 - Create foreign keys
 - Change data type/length.
 
-## Deleting parts of the data model
+## Data loss protection
 
 There are two changes that are blocked by default:
 
 - Delete Column (unless the column is empty)
 - Delete Table (unless the table is empty)
 
-Both changes run through, if the table is empty (or in columns although if only null values are present). In the Orderentry example it will work for now (because all the tables are empty initially). But if you write data into the tables, then this leads to an error message.
+Both changes are applied, if the table is empty (or if the column only conatins null values). In the Orderentry example it will initially runwithout errors (because all the tables are empty initially). But if you write data into the tables, then this leads to an error message.
 
-*Notices*: If an error occurred no changes are made to the schema, thus it can't happen that a transfer was only "half" performed.
+*Notices*: If an error like this occurres no changes are made to the schema, thus it can't happen that a transfer was only "half" performed.
 
 This lock can be avoided with the so-called "dropmode". In the Orderentry example you need to change the entry *dropmode="false"* into *dropmode="true"* in the build.xml.
 
-**It's generally not recommended to activate the "dropmode", because in some instances (import of an old version/ Merge error / renaming) it can lead to data loss. Therefore "dropmode" should at least not be enabled on production databases.**
+**It's generally not recommended to activate the "dropmode", because in some instances (import of an old version/ Merge error / renaming) it can lead to data loss. 
 
 ## Extension of the data model
-In typical products 90-95% of the changes to the data model are extensions, which can usually be easily implemented with Orcas.
+In typical products 90-95% of the changes to the data model are extensions, which can simply be handled by Orcas.
 
 ## Modification of the data model
-Changes that do not directly refer to data (eg to expand the Index by a column) are usually also easily to handle with Orcas.
+Changes that do not directly refer to data (eg to expand the Index by a column) are usually also handled by Orcas.
 
-But as soon as a **data migration** is required, Orcas can no longer recognize the necessary changes by a simple adjustment. These include the use cases **Rename a table** and **Rename a column**.
+But as soon as a **data migration** is required, Orcas can no longer recognize the necessary changes by a simple comparison. These include the use cases **Rename a table** and **Rename a column**.
 
-Orcas offers two ways to perform such changes to the data model.
+Orcas provides one-time-scripts for these scenarios. These are scripts which are only executed once on any database schema.
 
-### 1. one_time_scripts
-In this possibility SQLPlus scripts on any database schema only be executed exactly once. The Orderentry example is so arranged, that all scripts under orderentry\db\skripte are handled like this.
 
-### 2. liquibase
-With [liquibase](http://www.liquibase.org/) a change statement in the database change log is usually necessary for any change to a scheme. Orcas offers the possibility to reduce  these change instructions to a minimum.
-
-With both variants you have to mind, there is a possibility developers **forget** to create a specificone-time-script or database-change-log-entry. In these cases the **dropmode** is very important to **prevent** a loss of data.
-
-Furthermore you always have to change the table scripts, too.
-
-[So why don't we take liquibase (without Orcas)?]({{site.baseurl}}/docs/liquibase/)
