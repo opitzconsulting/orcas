@@ -68,12 +68,14 @@ Note that you are free to use Orcas much more flexible if you set up your gradle
 
 ### project layout
 
+```
 .
 ├── buidl.gradle
 └── src
     └── main
       ├── scripts
       └── sql
+```
 
 ## Configure Orcas
 
