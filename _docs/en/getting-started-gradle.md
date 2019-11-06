@@ -74,8 +74,8 @@ Note that you are free to use Orcas much more flexible if you set up your gradle
 └── src
     └── main
       ├── scripts
-      /   ├── post-compile
-      /   └── pre-statics
+      |   ├── post-compile
+      |   └── pre-statics
       └── sql
           ├── replaceables
           └── statics
@@ -95,7 +95,7 @@ orcasconfiguration {
 
 ```
 
-The complete List of available parameters can be found here: [OrcasGradlePluginExtension](http://www.orcasdb.org/orcas_gradle_plugin/groovydoc/com/opitzconsulting/orcas/gradle/OrcasGradlePluginExtension.html)
+The complete List of available parameters can be found here: [OrcasGradlePluginExtension]({{site.baseurl}}/orcas_gradle_plugin/groovydoc/com/opitzconsulting/orcas/gradle/OrcasGradlePluginExtension.html)
 
 ## The orderentry example
 
