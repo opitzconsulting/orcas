@@ -3,15 +3,9 @@
   {% if page.categories %}
     {% for language in page.categories %}
 
-      {% if language == 'de' %}
-        {% unless page.navigation-de == false %}
-            {% include navigation-de.html %}
-        {% endunless %}
-      {% else %}
         {% unless page.navigation == false %}
             {% include navigation-en.html %}
         {% endunless %}
-      {% endif %}
     {% endfor %}
   {% else %}
     {% unless page.navigation == false %}
