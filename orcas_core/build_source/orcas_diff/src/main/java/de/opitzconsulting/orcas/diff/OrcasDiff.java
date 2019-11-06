@@ -468,6 +468,14 @@ public class OrcasDiff
     .findAny();
   }
 
+  private Optional<TableDiff> findTableDiffByNewName( ModelDiff pModelDiff, String pTableName )
+  {
+    return pModelDiff.model_elementsTableDiff.stream()//
+                                             .filter( p -> p.isNew )//
+                                             .filter( p -> p.nameNew.equals( pTableName ) )//
+                                             .findAny();
+  }
+
   private List<DiffActionReason> getRefConstraintRecreate( ModelDiff pModelDiff, String pDestTableName, List<ColumnRefDiff> pDestColumnsDiff )
   {
     List<DiffActionReason> lReturn = new ArrayList<>();
@@ -841,11 +849,15 @@ public class OrcasDiff
               {
                 if( lForeignKeyDiff.isOld == false  )
                 {
-                  DiffAction lDiffAction = new DiffAction( new DiffReasonKey(lTableDiff,"references"), DiffReasonType.CREATE );
+                  Optional<TableDiff> lDestTableDiff = findTableDiffByNewName(pModelDiff, lForeignKeyDiff.destTableNew);
 
-                  doInDiffAction( lDiffAction, Collections.singletonList( new DiffActionReasonMissing( diffReasonKeyRegistry.getDiffReasonKey(
-                      lForeignKeyDiff) ) ),
-                      (DiffActionRunnable) p -> ddlBuilder.createForeignKeyGrantIfNeeded(p, lTableDiff, lForeignKeyDiff), createStatementBuilder() );
+                  if (lDestTableDiff.isPresent()) {
+                    DiffAction lDiffAction = new DiffAction(new DiffReasonKey(lDestTableDiff.get(), "references"), DiffReasonType.CREATE);
+
+                    doInDiffAction(lDiffAction, Collections.singletonList(new DiffActionReasonMissing(diffReasonKeyRegistry.getDiffReasonKey(
+                        lForeignKeyDiff))),
+                        (DiffActionRunnable) p -> ddlBuilder.createForeignKeyGrantIfNeeded(p, lTableDiff, lForeignKeyDiff), createStatementBuilder());
+                  }
                 }
               }
             }
