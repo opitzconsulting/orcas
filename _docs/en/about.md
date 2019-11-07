@@ -52,18 +52,17 @@ categories:
                 <a href="{{site.baseurl}}/docs/usage/">How to work with Orcas?</a>
             </li>
             <li>
-                <a href="{{site.baseurl}}/docs/installation/">Installation</a> What to do to get Orcas working within my own project
+                <a href="{{site.baseurl}}/docs/getting-started-gradle//">Gradle setup</a> What to do to get Orcas working with gradle
             </li>
             <li>
-                <a href="{{site.baseurl}}/docs/de/statics-syntax/">Table  syntax</a> What do table scripts look like?
+                <a href="{{site.baseurl}}/docs/getting-started-maven//">Maven setup</a> What to do to get Orcas working with maven
+            </li>
+            <li>
+                <a href="{{site.baseurl}}/docs/de/statics-syntax/">Table syntax</a> What do table scripts look like?
             </li>
             <li>
                 <a href="{{site.baseurl}}/docs/de/domain-extension/">Domain extensions </a> 
                 How to integrate project specific extensions
-            </li>
-            <li>
-                <a href="{{site.baseurl}}/docs/de/extensions/">Extensions</a>
-                How to integrate special project specific extensions?
             </li>
         </ul>
     </div>

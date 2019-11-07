@@ -9,7 +9,7 @@ categories:
 
 This documentation describes how to work with Orcas. 
 
-For this documentation, the Orderentry example is used, for information on how to install and run orcas refre to the correspponding instructions of your favorite build-tool:
+For this documentation, the simple-example is used, for information on how to install and run orcas refre to the correspponding instructions of your favorite build-tool:
 
 - [Orcas for gradle]({{site.baseurl}}/docs/getting-started-gradle/)
 
@@ -17,11 +17,11 @@ For this documentation, the Orderentry example is used, for information on how t
 
 ## Orcas
 
-With Orcas all tables (and other database objects) are stored in plain text files. These then place typically be placed in a version control along with the other sources of a project.
+With Orcas all tables (and other database objects) are stored in plain text files. These can be placed in any version control along with the other sources of the project.
 
-The task of Orcas is to read these files, compare them with an existing database schema and execute the necessary schema changes.
+The task of Orcas is to read these files, compare them with an existing database schema and execute the necessary database changes.
 
-For example in the orderentry example there is a table named "categories". 
+For example in the examplethere is a table named "categories". 
 
 It is defined in a file called "categories.sql":
 
@@ -55,11 +55,11 @@ There are two changes that are blocked by default:
 - Delete Column (unless the column is empty)
 - Delete Table (unless the table is empty)
 
-Both changes are applied, if the table is empty (or if the column only conatins null values). In the Orderentry example it will initially runwithout errors (because all the tables are empty initially). But if you write data into the tables, then this leads to an error message.
+Both changes are applied, if the table is empty (or if the column only conatins null values). In the simple-example example it will initially runwithout errors (because all the tables are empty initially). But if you write data into the tables, then this leads to an error message.
 
 *Notices*: If an error like this occurres no changes are made to the schema, thus it can't happen that a transfer was only "half" performed.
 
-This lock can be avoided with the so-called "dropmode". In the Orderentry example you need to change the entry *dropmode="false"* into *dropmode="true"* in the build.xml.
+This lock can be avoided with the so-called "dropmode". In the simple-example example you need to change the entry *dropmode="false"* into *dropmode="true"* in the build.xml.
 
 **It's generally not recommended to activate the "dropmode", because in some instances (import of an old version/ Merge error / renaming) it can lead to data loss. 
 
