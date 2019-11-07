@@ -23,6 +23,7 @@ categories:
         <img  src="./assets/osi_keyhole.png">
         <h4>OPEN SOURCE</h4>
     </div>
+<br></br>
     <h2>INTRODUCTION</h2>
     <div >
         Orcas is a deployment framework for transforming an existing database schema into a target state. The state of the existing schema is irrelevant in most cases. If needed, unnecessary indexes, constraints, columns and tables will be deleted and necessary tables and columns will be added.
