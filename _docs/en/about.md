@@ -10,7 +10,7 @@ categories:
 
 <div id="titlepage-title"><h1>About Orcas</h1></div>
 <div>
-<div class="clearfix" id="short-description-container">
+<div class="clearfix" >
     <div>
         <img src="./assets/db_icon.png">
         <h4>DEPLOYMENT FRAMEWORK</h4>
