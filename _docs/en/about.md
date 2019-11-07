@@ -12,6 +12,7 @@ categories:
 <div>
 <div class="clearfix" id="short-description-container">
     <div>
+    <div>
         <img src="./assets/db_icon.png">
         <h4>DATABASE DEPLOYMENT</h4>
     </div>
@@ -22,6 +23,7 @@ categories:
     <div>
         <img  src="./assets/osi_keyhole.png">
         <h4>OPEN SOURCE</h4>
+    </div>
     </div>
     <div >
     <h2>INTRODUCTION</h2>
