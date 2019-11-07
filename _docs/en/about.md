@@ -9,6 +9,7 @@ categories:
 ---
 
 <div id="titlepage-title"><h1>About Orcas</h1></div>
+<div>
 <div class="clearfix" id="short-description-container">
     <div>
         <img src="./assets/db_icon.png">
@@ -80,4 +81,5 @@ categories:
             <li>Project associates need to know how to work with Orcas.</li>
         </ul>
     </div>
+</div>
 </div>
