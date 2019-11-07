@@ -17,13 +17,7 @@
 
     <div class="page-content">
       <div class="wrapper">
-          {% unless page.navigation == false %}
-          {% if page.title != 'Was ist Orcas?' %}
-          {% if page.title != 'About Orcas' %}
             {% include navigation.html %}
-            {% endif %}
-            {% endif %}
-          {% endunless %}
         {{ content }}
       </div>
     </div>
