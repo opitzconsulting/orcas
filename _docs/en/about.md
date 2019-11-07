@@ -2,7 +2,7 @@
 layout: index
 title: About Orcas
 permalink: /
-navigation: true
+navigation: false
 titlepage: true 
 categories: 
 - en
