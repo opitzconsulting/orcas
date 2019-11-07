@@ -95,7 +95,7 @@ orcasconfiguration {
 
 ```
 
-The complete List of available parameters can be found here: [OrcasGradlePluginExtension]({{site.baseurl}}/orcas_gradle_plugin/groovydoc/com/opitzconsulting/orcas/gradle/OrcasGradlePluginExtension.html)
+The complete List of available parameters can be found here: [OrcasGradlePluginExtension](https://javadoc.io/doc/com.opitzconsulting.orcas/orcas-gradle-plugin/latest/com/opitzconsulting/orcas/gradle/OrcasGradlePluginExtension.html)
 
 ## The orderentry example
 
