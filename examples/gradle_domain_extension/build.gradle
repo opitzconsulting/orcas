@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'com.opitzconsulting.orcas', name: 'orcas-domainextension-gradle-plugin',
-                  version: '7.5.3'
+                  version: '7.5.4'
 
         classpath group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
     }

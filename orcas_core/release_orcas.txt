@@ -14,7 +14,6 @@ run this in orcas_core/build_source:
 
 in orcas_maven_plugin:
 mvn clean install
-mvn site install
 
 run this in upload_maven_central:
 ./gradlew clean publish
@@ -38,10 +37,5 @@ orcas_maven_plugin/pom.xml (4 entries)
 
 git commit/push
 
-in branch gh-pages:
-replace orcas_gradle_plugin\groovydoc with orcas_core\build_source\.gradle\_orcas_gradle_plugin\docs\groovydoc
-replace orcas_maven_plugin\site with orcas_maven_plugin\target\site
-
-git commit/push
 
 
