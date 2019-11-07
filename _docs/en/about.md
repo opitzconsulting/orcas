@@ -27,35 +27,6 @@ categories:
     </div>
 </div>
 
-<div class="clearfix" id="container">
-<h2>WHERE USING ORCAS CAN BE HELPFUL</h2>
-    <div><h1>Development</h1></div>
-    <div>
-        <div id="container-first-child">
-            <ul>
-                <li>Differences in size of columns in testing environment and development database</li>
-                <li>Questions on SVN/Git version compatibility of the development database</li>
-                <li>Index mistakes in the production database</li>
-                <li>Less complex syntax</li>
-                <li>Primary key errors</li>
-                <li>Tracking changes</li>
-            </ul>
-        </div>
-    </div>
-    <div><h1>Go-live date</h1></div>
-    <div>
-        <div id="container-second-child">
-            <ul>
-                <li>Synchronized versions of development, test and productive databases</li>
-                <li>Versioning, branching and merging of databases</li>
-                <li>Implementing uniform database conventions</li>
-                <li>Parallel access on the development database</li>
-                <li>Operating agile datanases </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
 <div class="clearfix" id="description-panel">
     <h2>INTRODUCTION</h2>
     <div class="description-pt1">
