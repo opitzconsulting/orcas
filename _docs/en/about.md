@@ -13,7 +13,7 @@ categories:
 <div class="clearfix" id="short-description-container">
     <div>
         <img src="./assets/db_icon.png">
-        <h4>DEPLOYMENT FRAMEWORK</h4>
+        <h4>DATABASE DEPLOYMENT</h4>
     </div>
     <div>
         <img src="./assets/script_icon.png"/>
