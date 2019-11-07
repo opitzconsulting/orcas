@@ -13,17 +13,14 @@ categories:
     <div>
         <img src="./assets/db_icon.png">
         <h4>DEPLOYMENT FRAMEWORK</h4>
-        <p>Transformation of existing database scheme into target state</p>
     </div>
     <div>
         <img src="./assets/script_icon.png"/>
         <h4>VERSION CONTROL</h4>
-        <p>Simplified maintenance and integration into existing projects via text files</p>
     </div>
     <div>
         <img  src="./assets/osi_keyhole.png">
-        <h4>open source initiative</h4>
-        <p>Oracle Adaptive Systems is free and compatible with Oracle RDBMS</p>
+        <h4>OPEN SOURCE</h4>
     </div>
 </div>
 
