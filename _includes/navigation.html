@@ -1,16 +1,5 @@
 <div class="site-navigation no-list-style">
 
-  {% if page.categories %}
-    {% for language in page.categories %}
-
-        {% unless page.navigation == false %}
-            {% include navigation-en.html %}
-        {% endunless %}
-    {% endfor %}
-  {% else %}
-    {% unless page.navigation == false %}
         {% include navigation-en.html %}
-    {% endunless %}
-  {% endif %}
 
 </div>
