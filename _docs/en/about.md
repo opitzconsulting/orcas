@@ -55,13 +55,7 @@ categories:
                 <a href="{{site.baseurl}}/docs/installation/">Installation</a> What to do to get Orcas working within my own project
             </li>
             <li>
-                <a href="{{site.baseurl}}/docs/de/examples/">Examples</a> Example projects
-            </li>
-            <li>
-                <a href="{{site.baseurl}}/docs/de/ant-tasks/">ant tasks</a> How to setup the necessary ant processes
-            </li>
-            <li>
-                <a href="{{site.baseurl}}/docs/de/statics-syntax/">Table  syntax</a> What do table creation / alteration scripts look like?
+                <a href="{{site.baseurl}}/docs/de/statics-syntax/">Table  syntax</a> What do table scripts look like?
             </li>
             <li>
                 <a href="{{site.baseurl}}/docs/de/domain-extension/">Domain extensions </a> 
@@ -70,10 +64,6 @@ categories:
             <li>
                 <a href="{{site.baseurl}}/docs/de/extensions/">Extensions</a>
                 How to integrate special project specific extensions?
-            </li>
-            <li>
-                <a href="{{site.baseurl}}/docs/de/how-it-works/">Functionality of Orcas</a>   
-                How does Orcas work
             </li>
         </ul>
     </div>
