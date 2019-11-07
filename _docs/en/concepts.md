@@ -27,7 +27,6 @@ So what about oracle database objects like:
 * triggers
 * packages
 * views
-* object-types
 
 These are considered "replaceables" because they can be handled wit "create or replace" statements (not completely true for object-types though).
 
@@ -53,6 +52,17 @@ However this is not mandatory and can be skipped.
 There are several times when little "tweaks" are needed to deploy to a database in a fully automated way.
 
 Orcas tracks where those one-time-scripts have been executed already and only executes each of them once on every target database.
+
+
+## What about object-types?
+
+Oracle object-types can be used to bring obejct-oriented programming features to the PL/SQL world.
+Used this way objects-types can be handled as replaceables, which is the default in Orcas.
+
+But if object-types are used as column or table types, they cannot be replaced anymore.
+The object-types used this way should be handled solely with one-time-scripts, they must be ignored for drop-tasks with the "excludewhereobjecttype" parameter.
+
+
 
 
 
