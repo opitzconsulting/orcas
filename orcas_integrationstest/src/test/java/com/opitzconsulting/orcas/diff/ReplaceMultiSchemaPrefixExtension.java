@@ -60,7 +60,12 @@ public class ReplaceMultiSchemaPrefixExtension {
                         if (lIndex instanceof UniqueKey) {
                             UniqueKey lUniqueKey = (UniqueKey) lIndex;
                             if (lUniqueKey.getIndexname() != null) {
-                                lUniqueKey.setIndexname(handleOwner(lUniqueKey.getIndexname(), lOwner));
+                                String lIndexOwner = lOwner;
+                                int j = lUniqueKey.getIndexname().indexOf('.');
+                                if (j >= 0) {
+                                    lIndexOwner = lUniqueKey.getIndexname().substring(0, j + 1);
+                                }
+                                lUniqueKey.setIndexname(handleOwner(lUniqueKey.getIndexname(), lIndexOwner));
                             }
                         }
                     }
