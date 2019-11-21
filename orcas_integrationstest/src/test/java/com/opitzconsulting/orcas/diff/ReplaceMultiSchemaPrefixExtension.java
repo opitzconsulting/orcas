@@ -30,13 +30,18 @@ public class ReplaceMultiSchemaPrefixExtension {
                     lTable.setName(handleOwner(lTable.getName(), lOwner));
 
                     if (lTable.getPrimary_key() != null && lTable.getPrimary_key().getIndexname() != null) {
-                        lTable.getPrimary_key().setIndexname(handleOwner(lTable.getPrimary_key().getIndexname(), lOwner));
+                        String lIndexOwner = lOwner;
+                        int j = lTable.getPrimary_key().getIndexname().indexOf('.');
+                        if (j >= 0) {
+                            lIndexOwner = lTable.getPrimary_key().getIndexname().substring(0, j + 1);
+                        }
+                        lTable.getPrimary_key().setIndexname(handleOwner(lTable.getPrimary_key().getIndexname(), lIndexOwner));
                     }
 
                     for (ForeignKey lForeign_key : lTable.getForeign_keys()) {
                         String lDestOwner = lOwner;
                         int j = lForeign_key.getDestTable().indexOf('.');
-                        if (i >= 0) {
+                        if (j >= 0) {
                             lDestOwner = lForeign_key.getDestTable().substring(0, j + 1);
                         }
                         lForeign_key.setDestTable(handleOwner(lForeign_key.getDestTable(), lDestOwner));
@@ -44,7 +49,12 @@ public class ReplaceMultiSchemaPrefixExtension {
 
                     for (IndexOrUniqueKey lIndex : lTable.getInd_uks()) {
                         if (lIndex instanceof Index) {
-                            lIndex.setConsName(handleOwner(lIndex.getConsName(), lOwner));
+                            String lIndexOwner = lOwner;
+                            int j = lIndex.getConsName().indexOf('.');
+                            if (j >= 0) {
+                                lIndexOwner = lIndex.getConsName().substring(0, j + 1);
+                            }
+                            lIndex.setConsName(handleOwner(lIndex.getConsName(), lIndexOwner));
                         }
 
                         if (lIndex instanceof UniqueKey) {
