@@ -465,6 +465,13 @@ class OrcasGradlePluginExtension {
    * default: false
    */
   def boolean dbdocPlantuml = ParameterDefaults.dbdocPlantuml;
+
+  /**
+   * If set to true, orcas will mark one-time-scripts as executed without executing them.
+   *
+   * default: false
+   */
+  def boolean isOneTimeScriptLogonlyMode = ParameterDefaults.isOneTimeScriptLogonlyMode;
 }
 
 

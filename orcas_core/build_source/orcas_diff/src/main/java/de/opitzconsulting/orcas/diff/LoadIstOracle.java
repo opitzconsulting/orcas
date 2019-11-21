@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.logging.Log;
@@ -155,8 +156,8 @@ public class LoadIstOracle extends LoadIst
 
   private void registerConstarintForFK( String pUkConstraintname, Table pTable, String pTableOwner, Object pConstarint )
   {
-    constraintMapForFK.put( getNameWithOwner( pUkConstraintname, pTableOwner ), pConstarint );
-    constraintTableMapForFK.put( getNameWithOwner( pUkConstraintname, pTableOwner ), pTable );
+    constraintMapForFK.put( getNameForFkRefConstraint( pUkConstraintname, pTableOwner ), pConstarint );
+    constraintTableMapForFK.put( getNameForFkRefConstraint( pUkConstraintname, pTableOwner ), pTable );
   }
 
   @Override
@@ -741,7 +742,19 @@ public class LoadIstOracle extends LoadIst
   {
     if( _parameters.getMultiSchema() && pOwner != null )
     {
-      return pOwner.toString() + "." + pObjectName;
+      return pOwner + "." + pObjectName;
+    }
+    else
+    {
+      return pObjectName;
+    }
+  }
+
+  private String getNameForFkRefConstraint( String pObjectName, String pOwner )
+  {
+    if( pOwner != null )
+    {
+      return pOwner + "." + pObjectName;
     }
     else
     {
@@ -1679,7 +1692,7 @@ public class LoadIstOracle extends LoadIst
 
             // in desttable wird der ref-constraintname zwischengespeichert,
             // wird durch update_foreignkey_srcdata dann korrekt aktualisiert
-            lForeignKey.setDestTable( getNameWithOwner( pResultSet.getString( "r_constraint_name" ), pResultSet.getString( "r_owner" ) ) );
+            lForeignKey.setDestTable( getNameForFkRefConstraint( pResultSet.getString( "r_constraint_name" ), pResultSet.getString( "r_owner" ) ) );
 
             if( "NO ACTION".equals( pResultSet.getString( "delete_rule" ) ) )
             {
@@ -2036,34 +2049,67 @@ public class LoadIstOracle extends LoadIst
         {
           String lRefConstraintName = lForeignKey.getDestTable();
 
-          lForeignKey.setDestTable( constraintTableMapForFK.get( lRefConstraintName ).getName() );
+          Table lDestTable = constraintTableMapForFK.get(lRefConstraintName);
+          if (lDestTable != null) {
+              lForeignKey.setDestTable(lDestTable.getName());
 
-          Object lConstraint = constraintMapForFK.get( lRefConstraintName );
+              Object lConstraint = constraintMapForFK.get(lRefConstraintName);
 
-          EList<ColumnRef> lColumns = null;
+              EList<ColumnRef> lColumns = null;
 
-          if( lConstraint instanceof PrimaryKey )
-          {
-            lColumns = ((PrimaryKey) lConstraint).getPk_columns();
-          }
+              if (lConstraint instanceof PrimaryKey) {
+                  lColumns = ((PrimaryKey) lConstraint).getPk_columns();
+              }
 
-          if( lConstraint instanceof UniqueKey )
-          {
-            lColumns = ((UniqueKey) lConstraint).getUk_columns();
-          }
+              if (lConstraint instanceof UniqueKey) {
+                  lColumns = ((UniqueKey) lConstraint).getUk_columns();
+              }
 
-          for( ColumnRef lColumnRef : lColumns )
-          {
-            ColumnRef lNewColumnRef = new ColumnRefImpl();
+              for (ColumnRef lColumnRef : lColumns) {
+                  ColumnRef lNewColumnRef = new ColumnRefImpl();
 
-            lNewColumnRef.setColumn_name_string( lColumnRef.getColumn_name_string() );
+                  lNewColumnRef.setColumn_name_string(lColumnRef.getColumn_name_string());
 
-            lForeignKey.getDestColumns().add( lNewColumnRef );
+                  lForeignKey.getDestColumns().add(lNewColumnRef);
+              }
+          } else {
+            int lIndexOfDot = lRefConstraintName.indexOf(".");
+
+            if (lIndexOfDot > 0) {
+              String lOwner = lRefConstraintName.substring(0, lIndexOfDot);
+              String lConstraintName = lRefConstraintName.substring(lIndexOfDot + 1);
+
+              String lSql = "" + //
+                  " select table_name," + //
+                  "        owner," + //
+                  "        column_name," + //
+                  "        position," + //
+                  "        constraint_name" + //
+                  "   from all_cons_columns" + //
+                  "  where constraint_name = ?" + //
+                  "    and owner = ?" + //
+                  "  order by table_name," + //
+                  "           constraint_name," + //
+                  "           position" + //
+                  "";
+
+              new WrapperIteratorResultSet(lSql, getCallableStatementProvider(), Stream.of(lConstraintName, lOwner).collect(Collectors.toList())) {
+                @Override
+                protected void useResultSetRow(ResultSet pResultSet) throws SQLException {
+                    ColumnRef lColumnRef = new ColumnRefImpl();
+
+                    lColumnRef.setColumn_name_string(pResultSet.getString("column_name"));
+
+                    lForeignKey.getDestColumns().add(lColumnRef);
+                    lForeignKey.setDestTable( pResultSet.getString("owner") + "." + pResultSet.getString("table_name") );
+                  }
+                }.execute();
+              }
+            }
           }
         }
       }
     }
-  }
 
   private void loadTablesIntoModel( final Model pModel )
   {

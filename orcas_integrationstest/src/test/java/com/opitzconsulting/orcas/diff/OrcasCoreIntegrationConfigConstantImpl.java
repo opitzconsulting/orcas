@@ -12,7 +12,7 @@ public class OrcasCoreIntegrationConfigConstantImpl extends OrcasCoreIntegration
   private boolean _withSecondRunEmptyTest = true;
   private boolean _withRunWithSpoolTest = true;
   private boolean _withRunWithExtractTest = true;
-  private String _executeTests = ".*column";
+  private String _executeTests = ".*multischema.*";
 
   private int _parallelThreads = 1;
   private boolean _withFirstRunTest = true;

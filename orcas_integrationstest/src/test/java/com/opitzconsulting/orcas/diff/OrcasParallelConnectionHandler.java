@@ -4,86 +4,95 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.opitzconsulting.orcas.diff.ExecuteSqlErrorHandler;
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
+import de.opitzconsulting.orcas.diff.Parameters;
 import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
 import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 import de.opitzconsulting.orcas.diff.ParametersCall;
+import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 
-public class OrcasParallelConnectionHandler
-{
-  private static JdbcConnectParameters _connectParametersDba;
-  private static OrcasCoreIntegrationConfig _orcasCoreIntegrationConfig;
+public class OrcasParallelConnectionHandler {
+    static JdbcConnectParameters _connectParametersDba;
+    private static OrcasCoreIntegrationConfig _orcasCoreIntegrationConfig;
 
-  private static List<String> _usedUsernames = new ArrayList<String>();
+    private static List<String> _usedUsernames = new ArrayList<String>();
 
-  private static void initIfNeeded()
-  {
-    if( _orcasCoreIntegrationConfig == null )
-    {
-      _orcasCoreIntegrationConfig = OrcasCoreIntegrationConfigSystemProperties.getOrcasCoreIntegrationConfig();
+    private static void initIfNeeded() {
+        if (_orcasCoreIntegrationConfig == null) {
+            _orcasCoreIntegrationConfig = OrcasCoreIntegrationConfigSystemProperties.getOrcasCoreIntegrationConfig();
 
-      _connectParametersDba = new JdbcConnectParameters();
-      _connectParametersDba.setJdbcUrl( _orcasCoreIntegrationConfig.getJdbcUrl() );
-      _connectParametersDba.setJdbcUser( _orcasCoreIntegrationConfig.getJdbcUser() );
-      _connectParametersDba.setJdbcPassword( _orcasCoreIntegrationConfig.getJdbcPassword() );
-    }
-  }
-
-  private static String getFreeUserName()
-  {
-    String lUsernamePrefix = _orcasCoreIntegrationConfig.getUsernamePrefix() + "target";
-
-    String lUsername = lUsernamePrefix;
-
-    int lIndex = 0;
-
-    while( _usedUsernames.contains( lUsername ) )
-    {
-      lUsername = lUsernamePrefix + "_" + lIndex;
-      lIndex++;
+            _connectParametersDba = new JdbcConnectParameters();
+            _connectParametersDba.setJdbcUrl(_orcasCoreIntegrationConfig.getJdbcUrl());
+            _connectParametersDba.setJdbcUser(_orcasCoreIntegrationConfig.getJdbcUser());
+            _connectParametersDba.setJdbcPassword(_orcasCoreIntegrationConfig.getJdbcPassword());
+        }
     }
 
-    _usedUsernames.add( lUsername );
+    private static String getFreeUserName() {
+        String lUsernamePrefix = _orcasCoreIntegrationConfig.getUsernamePrefix() + "target";
 
-    return lUsername;
-  }
+        String lUsername = lUsernamePrefix;
 
-  public static synchronized JdbcConnectParameters createConnectionParametersForTargetUser()
-  {
-    initIfNeeded();
+        int lIndex = 0;
 
-    JdbcConnectParameters lJdbcConnectParameters = new JdbcConnectParameters();
-    copyConnectionParameters( _connectParametersDba, lJdbcConnectParameters );
-    lJdbcConnectParameters.setJdbcUser( getFreeUserName() );
-    lJdbcConnectParameters.setJdbcPassword( lJdbcConnectParameters.getJdbcUser() );
-    return lJdbcConnectParameters;
-  }
+        while (_usedUsernames.contains(lUsername)) {
+            lUsername = lUsernamePrefix + "_" + lIndex;
+            lIndex++;
+        }
 
-  public static synchronized void returnConnectionParametersForTargetUser( JdbcConnectParameters pJdbcConnectParameters )
-  {
-    _usedUsernames.remove( pJdbcConnectParameters.getJdbcUser() );
-  }
+        _usedUsernames.add(lUsername);
 
-  public static synchronized void resetUser( JdbcConnectParameters pJdbcConnectParameters )
-  {
-    ParametersCall lParametersCall = new ParametersCall();
+        return lUsername;
+    }
 
-    copyConnectionParameters( _connectParametersDba, lParametersCall.getJdbcConnectParameters() );
+    public static synchronized JdbcConnectParameters createConnectionParametersForTargetUser() {
+        initIfNeeded();
 
-    lParametersCall.setAdditionalParameters( Arrays.asList( new String[] { pJdbcConnectParameters.getJdbcUser(), pJdbcConnectParameters.getJdbcPassword(), _orcasCoreIntegrationConfig.getTablespace() } ) );
-    lParametersCall.setIsOneTimeScriptMode( false );
-    lParametersCall.setFailOnErrorMode( FailOnErrorMode.IGNORE_DROP );
+        JdbcConnectParameters lJdbcConnectParameters = new JdbcConnectParameters();
+        copyConnectionParameters(_connectParametersDba, lJdbcConnectParameters);
+        lJdbcConnectParameters.setJdbcUser(getFreeUserName());
+        lJdbcConnectParameters.setJdbcPassword(lJdbcConnectParameters.getJdbcUser());
+        return lJdbcConnectParameters;
+    }
 
-    lParametersCall.setModelFile( _orcasCoreIntegrationConfig.getBaseDir() + "reset_user.sql" );
+    public static synchronized void returnConnectionParametersForTargetUser(JdbcConnectParameters pJdbcConnectParameters) {
+        _usedUsernames.remove(pJdbcConnectParameters.getJdbcUser());
+    }
 
-    new OrcasScriptRunner().mainRun( lParametersCall );
-  }
+    public static synchronized void resetUser(JdbcConnectParameters pJdbcConnectParameters) {
+        ParametersCall lParametersCall = new ParametersCall();
 
-  private static void copyConnectionParameters( JdbcConnectParameters pSourceConnectParameters, JdbcConnectParameters pDestConnectParameters )
-  {
-    pDestConnectParameters.setJdbcDriver( pSourceConnectParameters.getJdbcDriver() );
-    pDestConnectParameters.setJdbcUrl( pSourceConnectParameters.getJdbcUrl() );
-    pDestConnectParameters.setJdbcUser( pSourceConnectParameters.getJdbcUser() );
-    pDestConnectParameters.setJdbcPassword( pSourceConnectParameters.getJdbcPassword() );
-  }
+        copyConnectionParameters(_connectParametersDba, lParametersCall.getJdbcConnectParameters());
+
+        lParametersCall.setAdditionalParameters(Arrays.asList(new String[] {
+            pJdbcConnectParameters.getJdbcUser(),
+            pJdbcConnectParameters.getJdbcPassword(),
+            _orcasCoreIntegrationConfig.getTablespace() }));
+        lParametersCall.setIsOneTimeScriptMode(false);
+        lParametersCall.setExecuteSqlErrorHandler(new ExecuteSqlErrorHandler() {
+            @Override
+            public void handleExecutionError(
+                RuntimeException e,
+                String pSql,
+                CallableStatementProvider pCallableStatementProvider,
+                Parameters pParameters,
+                ExecuteSqlErrorHandlerCallback pExecuteSqlErrorHandlerCallback) {
+                if (!e.getMessage().contains("ORA-01918")) {
+                    pExecuteSqlErrorHandlerCallback.rethrow();
+                }
+            }
+        });
+
+        lParametersCall.setModelFile(_orcasCoreIntegrationConfig.getBaseDir() + "reset_user.sql");
+
+        new OrcasScriptRunner().mainRun(lParametersCall);
+    }
+
+    private static void copyConnectionParameters(JdbcConnectParameters pSourceConnectParameters, JdbcConnectParameters pDestConnectParameters) {
+        pDestConnectParameters.setJdbcDriver(pSourceConnectParameters.getJdbcDriver());
+        pDestConnectParameters.setJdbcUrl(pSourceConnectParameters.getJdbcUrl());
+        pDestConnectParameters.setJdbcUser(pSourceConnectParameters.getJdbcUser());
+        pDestConnectParameters.setJdbcPassword(pSourceConnectParameters.getJdbcPassword());
+    }
 }

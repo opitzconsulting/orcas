@@ -18,7 +18,6 @@ public abstract class BaseOrcasOneTimeScriptsTask extends BaseOrcasTask
       pParameters.setModelFile( getScriptfolder().toString() );
       pParameters.setIsOneTimeScriptMode( true );
       pParameters.setAdditionalParameters( null );
-      pParameters.setIsOneTimeScriptLogonlyMode( false );
 
       new OrcasScriptRunner().mainRun( modifyParameters( pParameters ) );
     }

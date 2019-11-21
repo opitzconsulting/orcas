@@ -46,6 +46,7 @@ public class ParameterDefaults {
     public static final String viewextractmode = "text";
     public static final boolean sqlplustable = false;
     public static final boolean orderColumnsByName = false;
+    public static final boolean isOneTimeScriptLogonlyMode = false;
 
     public static final boolean dbdocPlantuml = false;
 
