@@ -59,8 +59,8 @@ public class OrcasCoreIntegrationTest {
 
     private static OrcasCoreIntegrationConfig orcasCoreIntegrationConfig = OrcasCoreIntegrationConfigSystemProperties.getOrcasCoreIntegrationConfig();
 
-    private static final String EXTRACT_FOLDER_NAME = "extract";
-    private static final String REFERENCE_NAME = "reference";
+    private static final String EXTRACT_FOLDER_NAME = "00_extract";
+    private static final String REFERENCE_NAME = "00_schema";
     static final String DEFAULT_EXCLUDE = "object_name like '%$%'";
 
     @Parameters(name = "{0}")
@@ -84,7 +84,7 @@ public class OrcasCoreIntegrationTest {
 
     private TestSetup _testSetup;
 
-    private String _lognameFirstRun = "first_run";
+    private String _lognameFirstRun = "01_statics";
 
     private static final Map<String, Map<String, JdbcConnectParameters>> _connectParametersTargetUserMap = new HashMap<>();
 
@@ -131,6 +131,7 @@ public class OrcasCoreIntegrationTest {
     }
 
     private static class TestSetup {
+        private final boolean _testWithData;
         private String testName;
 
         private boolean _dropmode;
@@ -287,6 +288,7 @@ public class OrcasCoreIntegrationTest {
                     lTestProperties.load(new FileInputStream(lTestPropertiesFileName));
                 }
 
+                _testWithData = getBooleanProperty("test_with_data", lDefaultProperties, lTestProperties);
                 _dropmode = getBooleanProperty("dropmode", lDefaultProperties, lTestProperties);
                 _indexparallelcreate = getBooleanProperty("indexparallelcreate", lDefaultProperties, lTestProperties);
                 _createmissingfkindexes = getBooleanProperty("createmissingfkindexes", lDefaultProperties, lTestProperties);
@@ -583,7 +585,7 @@ public class OrcasCoreIntegrationTest {
         String pSchemaFilePostfix) {
         return getWorkfolderFilename(
             pTestName,
-            pString + (pOrcas ? "_orcas" : "_spool" + (pIncludeData ? "_data" : "_nodata")) + pSchemaFilePostfix + ".txt");
+            pString + (pOrcas ? "_orcas" : "_spool" + (pIncludeData ? "_data" : "")) + pSchemaFilePostfix + (pOrcas ? ".xml" : ".txt"));
     }
 
     private static String getWorkfolderFilename(String pTestName, String pFilename) {
@@ -791,10 +793,12 @@ public class OrcasCoreIntegrationTest {
                         orcasCoreIntegrationConfig.getAlternateTablespace1(),
                         orcasCoreIntegrationConfig.getAlternateTablespace2())));
 
-            extractSchemas(REFERENCE_NAME, true);
+            extractSchemas(REFERENCE_NAME, _testSetup._testWithData);
 
             if (orcasCoreIntegrationConfig.isWithRunWithExtractTest()) {
-                extractSchemas(REFERENCE_NAME, false);
+                if (_testSetup._testWithData) {
+                    extractSchemas(REFERENCE_NAME, false);
+                }
                 orcasExtract(EXTRACT_FOLDER_NAME);
             }
         }
@@ -822,7 +826,7 @@ public class OrcasCoreIntegrationTest {
         executeOrcasStatics(getConnectParametersTargetUser(), _lognameFirstRun, true);
 
         if (!isExpectfailure()) {
-            asserSchemasEqual("orcas_run", true);
+            asserSchemasEqual("01_schema", _testSetup._testWithData);
         }
 
         String lReferenceXmlFile = getBasedirFilename("reference_log.xml");
@@ -846,7 +850,7 @@ public class OrcasCoreIntegrationTest {
     public void test_02_second_run_empty() {
         assumeTestNotSkipped(orcasCoreIntegrationConfig.isWithSecondRunEmptyTest() && !isXmlInputFileExists() && !isExpectfailure());
 
-        String lLognameSecondRun = "spool_second_run";
+        String lLognameSecondRun = "02_statics";
         executeOrcasStatics(getConnectParametersTargetUser(), lLognameSecondRun, false);
         assertFalse("second run not empty", new File(getSpoolFolder(lLognameSecondRun)).exists());
     }
@@ -861,7 +865,7 @@ public class OrcasCoreIntegrationTest {
             orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + _lognameFirstRun + "/",
             _testSetup.isMultiSchema() ? OrcasParallelConnectionHandler._connectParametersDba : getConnectParametersTargetUser(),
             "master_install.sql");
-        asserSchemasEqual("protocol_run", true);
+        asserSchemasEqual("03_schema", _testSetup._testWithData);
     }
 
     @Test
@@ -881,11 +885,11 @@ public class OrcasCoreIntegrationTest {
             }
             executeOrcasStatics(
                 getConnectParametersTargetUser(),
-                "spool_extract",
+                "04_statics",
                 orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + EXTRACT_FOLDER_NAME,
                 true,
                 null);
-            asserSchemasEqual("extract_run", false);
+            asserSchemasEqual("04_schema", false);
         } finally {
             afterAllTests();
         }
