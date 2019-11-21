@@ -434,13 +434,15 @@ public class OrcasCoreIntegrationTest {
             getSchemaExtarctFileName(pName, false, true, testName, ""),
             pIncludeData);
 
-        _testSetup.runMultiSchemaSetup(p -> {
-            assertFilesEqual(
-                pName,
-                getSchemaExtarctFileName(REFERENCE_NAME, pIncludeData, false, testName, p.getFilePostfix()),
-                getSchemaExtarctFileName(pName, pIncludeData, false, testName, p.getFilePostfix()),
-                pIncludeData);
-        });
+        if (pIncludeData) {
+            _testSetup.runMultiSchemaSetup(p -> {
+                assertFilesEqual(
+                    pName,
+                    getSchemaExtarctFileName(REFERENCE_NAME, pIncludeData, false, testName, p.getFilePostfix()),
+                    getSchemaExtarctFileName(pName, pIncludeData, false, testName, p.getFilePostfix()),
+                    pIncludeData);
+            });
+        }
     }
 
     static void asserSchemaEqual(
@@ -496,9 +498,11 @@ public class OrcasCoreIntegrationTest {
     }
 
     private void extractSchemas(String pName, boolean pIncludeData) {
-        _testSetup.runMultiSchemaSetup(p -> {
-            extractSchemaSpool(p.getJdbcConnectParameters(), pName, pIncludeData, testName, p.getFilePostfix());
-        });
+        if (pIncludeData) {
+            _testSetup.runMultiSchemaSetup(p -> {
+                extractSchemaSpool(p.getJdbcConnectParameters(), pName, pIncludeData, testName, p.getFilePostfix());
+            });
+        }
 
         extractSchemaOrcas(
             getConnectParametersTargetUser(),
@@ -585,7 +589,7 @@ public class OrcasCoreIntegrationTest {
         String pSchemaFilePostfix) {
         return getWorkfolderFilename(
             pTestName,
-            pString + (pOrcas ? "_orcas" : "_spool" + (pIncludeData ? "_data" : "")) + pSchemaFilePostfix + (pOrcas ? ".xml" : ".txt"));
+            pString + (pOrcas ? "_orcas" : "_spool" + (pIncludeData ? "data" : "")) + pSchemaFilePostfix + (pOrcas ? ".xml" : ".txt"));
     }
 
     private static String getWorkfolderFilename(String pTestName, String pFilename) {
@@ -780,7 +784,9 @@ public class OrcasCoreIntegrationTest {
 
     @Test
     public void test_00_setup_reference() {
-        deleteRecursive(new File(orcasCoreIntegrationConfig.getWorkfolder() + testName));
+        File lFile = new File(orcasCoreIntegrationConfig.getWorkfolder() + testName);
+        deleteRecursive(lFile);
+        lFile.mkdirs();
 
         resetUsers();
 
