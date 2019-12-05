@@ -80,7 +80,7 @@ public abstract class XtextFileLoader<T extends EObject>
           if( pParameters.getRelevantModelFiles().contains(lFile) ) {
             pParameters.getRelevantTables().addAll(getTableNames(lLoadModelDslFile));
             pParameters.getRelevantSequences().addAll(getSequenceNames(lLoadModelDslFile));
-            pParameters.getRelevantSequences().addAll(getMviewNames(lLoadModelDslFile));
+            pParameters.getRelevantMviews().addAll(getMviewNames(lLoadModelDslFile));
           }
         }
         combinModelResults( lReturn, lLoadModelDslFile );
