@@ -24,7 +24,7 @@ public class ExecuteOrcasScriptTask extends BaseOrcasTask
   @Override
   protected void executeOrcasTaskWithParameters( ParametersCall pParameters )
   {
-    pParameters.setModelFile( project.file(scriptfile) );
+    pParameters.setModelFile( scriptfile);
     pParameters.setIsOneTimeScriptMode( false );
 
     pParameters.setAdditionalParameters( scriptParameters );
