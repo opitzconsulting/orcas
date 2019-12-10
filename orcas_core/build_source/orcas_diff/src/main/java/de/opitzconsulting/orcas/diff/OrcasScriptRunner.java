@@ -595,7 +595,7 @@ public class OrcasScriptRunner extends Orcas {
         }
 
         public void handleCommand(String pLine, File pCurrentFile) throws Exception {
-            String lTrimedLine = pLine.toLowerCase().trim();
+            String lTrimedLine = pLine.trim();
             String lFileName = doReplace(lTrimedLine.substring("spool ".length()), parameters).trim();
 
             lFileName = lFileName.replace(";", "");
