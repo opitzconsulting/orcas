@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EObject;
 import org.junit.Assume;
@@ -143,6 +145,7 @@ public class OrcasCoreIntegrationTest {
         private String _extensionfolder;
         private String _required_feature_list;
         private String _dateformat;
+        private String relevantFiles;
         private String _excludewheresequence;
         private boolean _customExtensionFolder;
         private boolean _availableFeatureRequirementMatched = true;
@@ -307,6 +310,7 @@ public class OrcasCoreIntegrationTest {
                 _minimizeStatementCount = getBooleanProperty("minimizestatementcount", lDefaultProperties, lTestProperties);
                 _cleanupfkvaluesondropmode = getBooleanProperty("cleanupfkvaluesondropmode", lDefaultProperties, lTestProperties);
                 _mviewsWithColumns = getBooleanProperty("mviewswithcolumns", lDefaultProperties, lTestProperties);
+                relevantFiles = getProperty("relevantFiles", lDefaultProperties, lTestProperties);
 
                 if (_expectfailure != null && _expectfailure.trim().length() == 0) {
                     _expectfailure = null;
@@ -686,6 +690,13 @@ public class OrcasCoreIntegrationTest {
         lParametersCall.setMinimizeStatementCount(_testSetup._minimizeStatementCount);
         lParametersCall.setCleanupFkValuesOnDropmode(_testSetup._cleanupfkvaluesondropmode);
         lParametersCall.setViewExtractMode(_testSetup.isMviewsWithColumns() ? "full" : ParameterDefaults.viewextractmode);
+        List<File> lRelevantFileList = Stream.of(_testSetup.relevantFiles.split(","))
+                                             .filter(it -> !it.isEmpty())
+                                             .map(it -> new File(pModelFolder + "/" + it))
+                                             .collect(Collectors.toList());
+        if (!lRelevantFileList.isEmpty()) {
+            lParametersCall.setRelevantModelFiles(lRelevantFileList);
+        }
 
         multiSchemaSetup(lParametersCall);
 

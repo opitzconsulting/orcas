@@ -1,17 +1,16 @@
 package de.opitzconsulting.orcas.diff;
 
+import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Struct;
 import java.util.List;
-import java.net.URL;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import com.opitzconsulting.orcas.xslt.XsltExtractDirAccessClass;
-
 import org.apache.commons.logging.Log;
 
+import com.opitzconsulting.orcas.xslt.XsltExtractDirAccessClass;
 import de.opitzconsulting.OrcasDslStandaloneSetup;
 import de.opitzconsulting.orcas.diff.JdbcConnectionHandler.RunWithCallableStatementProvider;
 import de.opitzconsulting.orcas.extensions.AllExtensions;
@@ -22,12 +21,12 @@ import de.opitzconsulting.orcas.syex.load.DataReader;
 import de.opitzconsulting.orcas.syex.trans.TransformOrigSyex;
 import de.opitzconsulting.orcas.syex.trans.TransformSyexOrig;
 import de.opitzconsulting.orcas.syex.xml.XmlExport;
+import de.opitzconsulting.orcasDsl.Mview;
 import de.opitzconsulting.orcasDsl.OrcasDslPackage;
 import de.opitzconsulting.orcasDsl.Sequence;
 import de.opitzconsulting.orcasDsl.Table;
 import de.opitzconsulting.orcasDsl.impl.ModelImpl;
 import de.opitzconsulting.origOrcasDsl.Model;
-import de.opitzconsulting.origOrcasDsl.Mview;
 
 public class ExtensionHandlerImpl extends BaseExtensionHandlerImpl<de.opitzconsulting.orcasDsl.Model> {
     protected de.opitzconsulting.orcasDsl.Model loadModelFromSqlplusTable() throws Exception {
