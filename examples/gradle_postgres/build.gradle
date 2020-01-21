@@ -1,0 +1,23 @@
+buildscript {
+    repositories {
+       mavenLocal()
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
+                  version: '7.6.5-SNAPSHOT'
+
+        classpath group: 'org.postgresql', name: 'postgresql', version: '42.2.9'
+    }
+}
+
+apply plugin: 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+               
+orcasconfiguration {
+          jdbcurl = "jdbc:postgresql://localhost:8432/postgres"
+          jdbcdriver = ""
+          username = "postgres"
+          password = "my-secret-pw-xy"
+          loglevel = "info"
+}
+

@@ -341,6 +341,9 @@ public class LoadIstPostgres extends LoadIst {
                     if (pResultSet.getString("data_type").startsWith("timestamp")) {
                         lColumn.setData_type(DataType.TIMESTAMP);
                     }
+                    if (pResultSet.getString("data_type").startsWith("bool")) {
+                        lColumn.setData_type(DataType.BOOLEAN);
+                    }
 
                     if (pResultSet.getBoolean("is_generated")) {
                         ColumnIdentity lColumnIdentity = new ColumnIdentityImpl();
