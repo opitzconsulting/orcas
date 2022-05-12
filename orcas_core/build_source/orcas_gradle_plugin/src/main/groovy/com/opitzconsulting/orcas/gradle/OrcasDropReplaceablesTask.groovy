@@ -1,4 +1,6 @@
-package com.opitzconsulting.orcas.gradle;
+package com.opitzconsulting.orcas.gradle
+
+import org.gradle.api.tasks.Internal;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -57,6 +59,7 @@ public class OrcasDropReplaceablesTask extends BaseOrcasTask
     }
   }
 
+  @Internal
   protected boolean isRunOnlyIfReplaceablesExists()
   {
     return false;

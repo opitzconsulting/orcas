@@ -1,7 +1,8 @@
 package com.opitzconsulting.orcas.gradle
 
 import de.opitzconsulting.orcas.diff.OrcasCompileAllInvalid
-import de.opitzconsulting.orcas.diff.Parameters;
+import de.opitzconsulting.orcas.diff.Parameters
+import org.gradle.api.tasks.Internal;
 
 import java.nio.charset.StandardCharsets;
 import de.opitzconsulting.orcas.diff.ParametersCall;
@@ -9,10 +10,15 @@ import com.opitzconsulting.orcas.dbobjects.SqlplusDirAccessDbobjects
 
 public class OrcasCompileAllInvalidTask extends BaseOrcasTask
 {
+  @Internal
   def logname = "compile-all-invalid";
+  @Internal
   def dontFailOnErrors = false;
+  @Internal
   @Deprecated
   def boolean getCompileInfos = false;
+
+  @Internal
   def List<OrcasCompileAllInvalid.CompileInfo> compileInfos;
 
   @Override
@@ -47,6 +53,7 @@ public class OrcasCompileAllInvalidTask extends BaseOrcasTask
     }
   }
 
+  @Internal
   protected boolean isRunOnlyIfReplaceablesExists()
   {
     return false;

@@ -2,6 +2,7 @@ package com.opitzconsulting.orcas.gradle
 
 import de.opitzconsulting.orcas.diff.ParameterDefaults
 import de.opitzconsulting.orcas.diff.Parameters
+import org.gradle.api.tasks.Internal
 
 import java.io.File;
 
@@ -27,10 +28,12 @@ public abstract class BaseOrcasOneTimeScriptsTask extends BaseOrcasTask
     }
   }
 
+  @Internal
   protected boolean isCheckFolderExists()
   {
     return true;
   }
 
+  @Internal
   protected abstract File getScriptfolder();
 }

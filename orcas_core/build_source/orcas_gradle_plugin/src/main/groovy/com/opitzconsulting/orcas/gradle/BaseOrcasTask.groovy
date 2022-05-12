@@ -1,6 +1,7 @@
 package com.opitzconsulting.orcas.gradle
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
 
@@ -12,10 +13,17 @@ import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
 
 public abstract class BaseOrcasTask extends DefaultTask 
 {
+  @Internal
   FailOnErrorMode failOnErrorMode
+  @Internal
   ExecuteSqlErrorHandler executeSqlErrorHandler
   private def parameterModifier;
+  @Internal
   def boolean nologging;
+
+  BaseOrcasTask() {
+    outputs.upToDateWhen { false }
+  }
 
   @TaskAction
   def executeOrcasTask()
@@ -138,6 +146,7 @@ public abstract class BaseOrcasTask extends DefaultTask
     executeOrcasTaskWithParameters( lParametersCall );
   }
 
+  @Internal
   protected boolean isMariadb()
   {
     return project.orcasconfiguration.jdbcurl.startsWith( "jdbc:mysql" ) || project.orcasconfiguration.jdbcurl.startsWith( "jdbc:mariadb" );
@@ -149,6 +158,7 @@ public abstract class BaseOrcasTask extends DefaultTask
     logger.log( lLogLevel, getLogname() + ": " + pLogMessage );
   }
 
+  @Internal
   protected abstract String getLogname();
 
   protected abstract void executeOrcasTaskWithParameters( ParametersCall pParameters );

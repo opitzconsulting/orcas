@@ -1,11 +1,15 @@
-package com.opitzconsulting.orcas.gradle;
+package com.opitzconsulting.orcas.gradle
+
+import org.gradle.api.tasks.Internal;
 
 import java.io.File;
 
 public class ExecuteOrcasOneTimeScriptsTask extends BaseOrcasOneTimeScriptsTask
 {
+  @Internal
   def scriptfolder;
 
+  @Internal
   def logname;
 
   protected String getLogname()

@@ -2,16 +2,21 @@ package com.opitzconsulting.orcas.gradle
 
 import de.opitzconsulting.orcas.diff.OrcasMain;
 import de.opitzconsulting.orcas.diff.ParametersCall;
-import org.gradle.api.file.FileCollection;
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Internal;
 
 public class OrcasUpdateStaticsTask extends BaseOrcasTask
 {
+  @Internal
   public String logname = "update-statics";
 
+  @Internal
   FileCollection scriptFiles;
 
+  @Internal
   FileCollection relevantScriptFiles;
 
+  @Internal
   FileCollection schemaFiles;
 
   @Override

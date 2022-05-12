@@ -2,12 +2,15 @@ package com.opitzconsulting.orcas.gradle;
 
 import de.opitzconsulting.orcas.diff.OrcasScriptRunner;
 import de.opitzconsulting.orcas.diff.ParametersCall;
-import org.gradle.api.file.FileCollection;
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Internal;
 
 public class OrcasInstallReplaceablesTask extends BaseOrcasTask
 {
+  @Internal
   def logname = "install-replaceables";
 
+  @Internal
   FileCollection scriptFiles;
 
   protected String getLogname()

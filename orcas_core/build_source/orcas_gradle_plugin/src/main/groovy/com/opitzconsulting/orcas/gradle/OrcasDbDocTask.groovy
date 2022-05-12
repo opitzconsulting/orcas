@@ -2,7 +2,8 @@ package com.opitzconsulting.orcas.gradle
 
 import de.oc.dbdoc.ant.*;
 import de.opitzconsulting.orcas.diff.ParametersCall
-import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputDirectory;
 
 public class OrcasDbDocTask extends BaseOrcasTask
@@ -38,6 +39,7 @@ public class OrcasDbDocTask extends BaseOrcasTask
     callClosure( pClosure, orcasDbDoc.getDiagram() );
   }
 
+  @Internal
   public OrcasDbDoc getOrcasDbDoc() {
     return orcasDbDoc;
   }
@@ -56,6 +58,7 @@ public class OrcasDbDocTask extends BaseOrcasTask
     callClosure( pClosure, this );
   }
 
+  @Internal
   public Tableregistry getTableregistry() {
     return orcasDbDoc.tableregistry;
   }

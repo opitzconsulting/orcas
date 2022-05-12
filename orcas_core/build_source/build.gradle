@@ -73,6 +73,11 @@ subprojects
   }
 
   project.buildDir = project.ext.tmp_folder + "/" + project.path.replaceAll( ":", "_" )
+
+      tasks.withType(JavaCompile.class) {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
 }
 
 

@@ -2,10 +2,12 @@ package com.opitzconsulting.orcas.gradle
 
 import de.opitzconsulting.orcas.diff.OrcasMain;
 import de.opitzconsulting.orcas.diff.Parameters.JdbcConnectParameters;
-import de.opitzconsulting.orcas.diff.ParametersCall;
+import de.opitzconsulting.orcas.diff.ParametersCall
+import org.gradle.api.tasks.Internal;
 
 public class OrcasSchemaSyncStaticsTask extends BaseOrcasTask
 {
+  @Internal
   private String logname = "sync-statics";
 
   @Override
