@@ -16,7 +16,8 @@ dependencies
 {
   generatorRunPath project(':orcas')
   compile project(':orcas')
-  compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.1'
+  compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+  compile group: 'com.google.guava', name: 'guava', version: '31.1-jre'
 }
 
 task(createGenDirs) 

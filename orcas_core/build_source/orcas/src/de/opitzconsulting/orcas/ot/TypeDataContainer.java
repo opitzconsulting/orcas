@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
@@ -12,6 +15,7 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 
 public class TypeDataContainer
 {
+  final String ORCAS_DSL = "../orcas/src/de/opitzconsulting/OrcasDsl.xtext";
   private Map<Class,ClassData> _typeMap = new HashMap<Class,ClassData>();
 
   public void addClassData( Class pClass, ClassData pClassData )
@@ -21,34 +25,46 @@ public class TypeDataContainer
 
   private List<Class> _getClasses( Package pPackage, List<Class> pUsedInterfaces )
   {
-    try
-    {
-      ClassLoader lClassLoader = Thread.currentThread().getContextClassLoader();
-      ImmutableSet<ClassInfo> lClasseInfosInPackage = ClassPath.from( lClassLoader ).getTopLevelClasses( pPackage.getName() );
-      List<Class> lReturn = new ArrayList<Class>();
+    List<String> classNames = new ArrayList<String>();
+    List<Class> lReturn = new ArrayList<Class>();
 
-      for(ClassInfo lClassInfo : lClasseInfosInPackage)
-      {
-        Class lClass = Class.forName( lClassInfo.getName() );
-        if( lClass.isInterface() )
-        {
-          boolean lUse = false;
-
-          for( Class lInterface : lClass.getInterfaces() )
-          {
-            if( pUsedInterfaces.contains( lInterface ) )
-            {
-              lUse = true;
-            }
+    try{
+      BufferedReader reader;
+      try {
+        reader = new BufferedReader(new FileReader(ORCAS_DSL));
+        String line = reader.readLine();
+        while(line != null){
+          if(line.contains(":")) {
+            String className = line.substring(0, line.indexOf(":")).trim();
+            classNames.add(className);
           }
-
-          if( lUse )
-          {
-            lReturn.add( lClass );
-          }
+          line = reader.readLine();
         }
+        reader.close();
+      }catch(IOException e){
+        e.printStackTrace();
       }
 
+      for (String className : classNames) {
+        try {
+          Class lClass = Class.forName(pPackage.getName() + "." + className);
+          if (lClass.isInterface()) {
+            boolean lUse = false;
+
+            for (Class lInterface : lClass.getInterfaces()) {
+              if (pUsedInterfaces.contains(lInterface)) {
+                lUse = true;
+              }
+            }
+
+            if (lUse) {
+              lReturn.add(lClass);
+            }
+          }
+        }catch(Exception e){
+          continue;
+        }
+      }
       return lReturn;
     }
     catch( Exception e )

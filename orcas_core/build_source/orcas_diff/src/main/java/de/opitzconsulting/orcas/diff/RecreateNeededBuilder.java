@@ -12,7 +12,6 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import de.opitzconsulting.orcas.diff.DiffReasonKey.DiffReasonKeyRegistry;
 import de.opitzconsulting.orcas.orig.diff.AbstractDiff;
 import de.opitzconsulting.orcas.orig.diff.ColumnRefDiff;
-import sun.util.resources.th.CalendarData_th;
 
 class RecreateNeededBuilder<T extends AbstractDiff> implements RecreateNeededBuilderHandler<T> {
     interface RecreateNeededBuilderRunnable<T extends AbstractDiff> extends Consumer<RecreateNeededBuilderHandler<T>> {

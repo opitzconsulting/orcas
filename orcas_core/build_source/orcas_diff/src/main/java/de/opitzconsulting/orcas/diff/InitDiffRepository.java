@@ -374,6 +374,7 @@ public class InitDiffRepository
     DiffRepository.getPrimaryKeyMerge().consNameIsConvertToUpperCase = true;
     DiffRepository.getPrimaryKeyMerge().indexnameIsConvertToUpperCase = true;
     DiffRepository.getPrimaryKeyMerge().statusDefaultValue = EnableType.ENABLE;
+    DiffRepository.getPrimaryKeyMerge().tablespaceIsConvertToUpperCase = true;
 
     DiffRepository.setMviewLogMerge( new MviewLogMerge()
     {
