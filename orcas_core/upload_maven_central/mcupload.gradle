@@ -29,19 +29,20 @@ publishing {
   }
 }
 
+afterEvaluate {
 // The generatePom-Tasks are genearted by the maven-publish-plugin, they are modified here
-tasks.withType(GenerateMavenPom) { Task generatePom ->
-  def artifactId = getName().replace("generatePomFileFor","").replace("Publication","").toLowerCase()
-  
-  generatePom.doLast {        
-    //overwrite the generated pom with the pom from maven-local
-    copyFile file("${project.ext.folder}/"+artifactId+"-"+project.version+".pom"), getDestination()
+  tasks.withType(GenerateMavenPom) { Task generatePom ->
+    def artifactId = getName().replace("generatePomFileFor", "").replace("Publication", "").toLowerCase()
+
+    generatePom.doLast {
+      //overwrite the generated pom with the pom from maven-local
+      copyFile file("${project.ext.folder}/" + artifactId + "-" + project.version + ".pom"), getDestination()
+    }
+
+    //set dependency for the sign task, just to make sure it is executed (isnt needed for the generatePomFileFor.. task itself). Note, taht the pom is signed before it is generated, that is no problem, because the generated pom is ignored anyways
+    dependsOn tasks.getByName("sign-" + artifactId)
   }
-
-  //set dependency for the sign task, just to make sure it is executed (isnt needed for the generatePomFileFor.. task itself). Note, taht the pom is signed before it is generated, that is no problem, because the generated pom is ignored anyways
-  dependsOn tasks.getByName("sign-"+artifactId)
 }
-
 project.ext.mcupload = new CallMe(project)
 
 class CallMe {
