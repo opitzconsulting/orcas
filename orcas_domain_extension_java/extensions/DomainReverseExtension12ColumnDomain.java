@@ -209,6 +209,11 @@ public class DomainReverseExtension12ColumnDomain extends OrcasBaseExtensionWith
           return null;
         }
 
+        if( lForeignKey.getDelete_rule() != pColumnDomain.getGenerateFk().getDelete_rule() )
+        {
+          return null;
+        }
+
         String lExpectedPkColumnName;
         try
         {
