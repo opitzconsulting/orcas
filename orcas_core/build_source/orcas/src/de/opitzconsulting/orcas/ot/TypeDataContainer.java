@@ -16,6 +16,8 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 public class TypeDataContainer
 {
   final String ORCAS_DSL = "../orcas/src/de/opitzconsulting/OrcasDsl.xtext";
+
+  final String ORCAS_SYSEX_DSL = "../.gradle/_orcas_syex/orcassyex/orcas_original/src/de/opitzconsulting/OrcasDsl.xtext";
   private Map<Class,ClassData> _typeMap = new HashMap<Class,ClassData>();
 
   public void addClassData( Class pClass, ClassData pClassData )
@@ -31,7 +33,7 @@ public class TypeDataContainer
     try{
       BufferedReader reader;
       try {
-        reader = new BufferedReader(new FileReader(ORCAS_DSL));
+        reader = new BufferedReader(new FileReader(ClassDataType.getTypePrefix().equals( "syex" ) ? ORCAS_SYSEX_DSL : ORCAS_DSL));
         String line = reader.readLine();
         while(line != null){
           if(line.contains(":")) {
