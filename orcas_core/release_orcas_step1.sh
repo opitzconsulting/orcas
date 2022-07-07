@@ -1,6 +1,6 @@
 #!/bin/sh
 
-new_orcas_version=7.8.0
+new_orcas_version=7.8.1
 
 cd ..
 
@@ -18,7 +18,7 @@ cd orcas_core/build_source
 
 #./mvnw clean install
 
-cd ../orcas_core/upload_maven_central
+cd ../upload_maven_central
 
 ./gradlew clean publish
 
