@@ -1,16 +1,17 @@
 package de.opitzconsulting.orcas.diff;
 
-import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
+import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
+import de.opitzconsulting.orcas.orig.diff.IndexDiff;
+import de.opitzconsulting.orcas.orig.diff.TableDiff;
+import de.opitzconsulting.orcas.orig.diff.UniqueKeyDiff;
+import de.opitzconsulting.origOrcasDsl.CompressType;
+import de.opitzconsulting.origOrcasDsl.DataType;
+import de.opitzconsulting.origOrcasDsl.ParallelType;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
-import de.opitzconsulting.orcas.orig.diff.IndexDiff;
-import de.opitzconsulting.orcas.orig.diff.TableDiff;
-import de.opitzconsulting.origOrcasDsl.CompressType;
-import de.opitzconsulting.origOrcasDsl.DataType;
-import de.opitzconsulting.origOrcasDsl.ParallelType;
+import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
 
 public class DdlBuilderPostgres extends DdlBuilder {
     public DdlBuilderPostgres(Parameters pParameters, DatabaseHandler pDatabaseHandler) {
@@ -108,7 +109,7 @@ public class DdlBuilderPostgres extends DdlBuilder {
 
     @Override
     public void createIndex(
-        StatementBuilder p, TableDiff pTableDiff, IndexDiff pIndexDiff, boolean pIsIndexParallelCreate) {
+            StatementBuilder p, TableDiff pTableDiff, IndexDiff pIndexDiff, boolean pIsIndexParallelCreate) {
         p.stmtStart("create");
         if (pIndexDiff.uniqueNew != null) {
             p.stmtAppend(pIndexDiff.uniqueNew);
@@ -155,25 +156,25 @@ public class DdlBuilderPostgres extends DdlBuilder {
             }
         }
 
-        boolean lIgnoreIfAdditionsOnly = pTableDiff.isOld && pIndexDiff.uniqueNew != null && !isAllColumnsOnlyNew( pTableDiff, pIndexDiff.index_columnsDiff );
-        p.stmtDone( lIgnoreIfAdditionsOnly );
+        boolean lIgnoreIfAdditionsOnly = pTableDiff.isOld && pIndexDiff.uniqueNew != null && !isAllColumnsOnlyNew(pTableDiff, pIndexDiff.index_columnsDiff);
+        p.stmtDone(lIgnoreIfAdditionsOnly);
     }
 
     @Override
     public Runnable getColumnDropHandler(
-        StatementBuilder p, TableDiff pTableDiff, List<ColumnDiff> pColumnDiffList) {
+            StatementBuilder p, TableDiff pTableDiff, List<ColumnDiff> pColumnDiffList) {
         Runnable lAdditionsOnlyAlternativeHandler = () ->
         {
             pColumnDiffList.stream()//
-                           .filter(pColumnDiff -> pColumnDiff.notnullOld && pColumnDiff.default_valueOld == null)//
-                           .forEach(pColumnDiff ->
-                           {
-                               p.stmtStartAlterTable(pTableDiff);
-                               p.stmtAppend("alter column");
-                               p.stmtAppend(pColumnDiff.nameOld);
-                               p.stmtAppend("drop not null");
-                               p.stmtDone(StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT);
-                           });
+                    .filter(pColumnDiff -> pColumnDiff.notnullOld && pColumnDiff.default_valueOld == null)//
+                    .forEach(pColumnDiff ->
+                    {
+                        p.stmtStartAlterTable(pTableDiff);
+                        p.stmtAppend("alter column");
+                        p.stmtAppend(pColumnDiff.nameOld);
+                        p.stmtAppend("drop not null");
+                        p.stmtDone(StatementBuilder.ADDITIONSONLY_ALTERNATIVE_COMMENT);
+                    });
         };
 
         return () ->
@@ -190,61 +191,90 @@ public class DdlBuilderPostgres extends DdlBuilder {
     @Override
     public void alterColumnIfNeeded(StatementBuilderAlter p1, TableDiff pTableDiff, ColumnDiff pColumnDiff) {
         p1.handleAlterBuilder()//
-          .ifDifferent(COLUMN__BYTEORCHAR)//
-          .ifDifferent(COLUMN__PRECISION)//
-          .ifDifferent(COLUMN__SCALE)//
-          .handle(p ->
-          {
-              p.stmtStartAlterTable(pTableDiff.nameNew);
-              p.stmtAppend("alter column");
-              p.stmtAppend(pColumnDiff.nameNew + " type " + getColumnDatatype(pColumnDiff));
-              p.stmtDone();
-          });
+                .ifDifferent(COLUMN__BYTEORCHAR)//
+                .ifDifferent(COLUMN__PRECISION)//
+                .ifDifferent(COLUMN__SCALE)//
+                .handle(p ->
+                {
+                    p.stmtStartAlterTable(pTableDiff.nameNew);
+                    p.stmtAppend("alter column");
+                    p.stmtAppend(pColumnDiff.nameNew + " type " + getColumnDatatype(pColumnDiff));
+                    p.stmtDone();
+                });
 
         p1.handleAlterBuilder()//
-          .ifDifferent(COLUMN__VIRTUAL)
-          .failIfAdditionsOnly("virtual".equals(pColumnDiff.virtualNew), "can't make existing column virtual")
-          .failIfAdditionsOnly(!"virtual".equals(pColumnDiff.virtualNew), "can't materialize virtual column")
-          .handle(p ->
-          {
+                .ifDifferent(COLUMN__VIRTUAL)
+                .failIfAdditionsOnly("virtual".equals(pColumnDiff.virtualNew), "can't make existing column virtual")
+                .failIfAdditionsOnly(!"virtual".equals(pColumnDiff.virtualNew), "can't materialize virtual column")
+                .handle(p ->
+                {
 
-          });
-
-        p1.handleAlterBuilder()//
-          .ifDifferent(
-              COLUMN__DEFAULT_VALUE,
-              getDatabaseHandler().isExpressionDifferent(pColumnDiff.default_valueNew, pColumnDiff.default_valueOld))//
-          .ignoreIfAdditionsOnly(pColumnDiff.default_valueNew == null)//
-          .failIfAdditionsOnly(pColumnDiff.default_valueOld != null, "can't change default")//
-          .handle(p ->
-          {
-              p.stmtStartAlterTable(pTableDiff);
-              p.stmtAppend(" alter " + pColumnDiff.nameNew);
-
-              if (pColumnDiff.default_valueNew == null) {
-                  p.stmtAppend("drop default");
-              } else {
-                  p.stmtAppend("set default");
-                  p.stmtAppend(pColumnDiff.default_valueNew);
-              }
-
-              p.stmtDone();
-          });
+                });
 
         p1.handleAlterBuilder()//
-          .ifDifferent(COLUMN__NOTNULL)//
-          .ignoreIfAdditionsOnly(pColumnDiff.notnullNew)//
-          .handle(p ->
-          {
-              p.stmtStartAlterTable(pTableDiff);
-              p.stmtAppend("alter column");
-              p.stmtAppend(pColumnDiff.nameNew);
-              if (pColumnDiff.notnullNew == false) {
-                  p.stmtAppend("drop not null");
-              } else {
-                  p.stmtAppend("set not null");
-              }
-              p.stmtDone();
-          });
+                .ifDifferent(
+                        COLUMN__DEFAULT_VALUE,
+                        getDatabaseHandler().isExpressionDifferent(pColumnDiff.default_valueNew, pColumnDiff.default_valueOld))//
+                .ignoreIfAdditionsOnly(pColumnDiff.default_valueNew == null)//
+                .failIfAdditionsOnly(pColumnDiff.default_valueOld != null, "can't change default")//
+                .handle(p ->
+                {
+                    p.stmtStartAlterTable(pTableDiff);
+                    p.stmtAppend(" alter " + pColumnDiff.nameNew);
+
+                    if (pColumnDiff.default_valueNew == null) {
+                        p.stmtAppend("drop default");
+                    } else {
+                        p.stmtAppend("set default");
+                        p.stmtAppend(pColumnDiff.default_valueNew);
+                    }
+
+                    p.stmtDone();
+                });
+
+        p1.handleAlterBuilder()//
+                .ifDifferent(COLUMN__NOTNULL)//
+                .ignoreIfAdditionsOnly(pColumnDiff.notnullNew)//
+                .handle(p ->
+                {
+                    p.stmtStartAlterTable(pTableDiff);
+                    p.stmtAppend("alter column");
+                    p.stmtAppend(pColumnDiff.nameNew);
+                    if (pColumnDiff.notnullNew == false) {
+                        p.stmtAppend("drop not null");
+                    } else {
+                        p.stmtAppend("set not null");
+                    }
+                    p.stmtDone();
+                });
+    }
+
+    @Override
+    public void createUniqueKey(StatementBuilder p, TableDiff pTableDiff, UniqueKeyDiff pUniqueKeyDiff) {
+        boolean lHasTablespace = pUniqueKeyDiff.tablespaceNew != null;
+        boolean lHasIndex = pUniqueKeyDiff.indexnameNew != null && !pUniqueKeyDiff.indexnameNew.equals(pUniqueKeyDiff.consNameNew);
+
+        if (lHasTablespace || lHasIndex) {
+            p.stmtStartAlterTableNoCombine(pTableDiff);
+        } else {
+            p.stmtStartAlterTable(pTableDiff);
+        }
+
+        p.stmtAppend("add constraint " + pUniqueKeyDiff.consNameNew + " unique ");
+        if (lHasTablespace || !lHasIndex) {
+            p.stmtAppend("(" + getColumnList(pUniqueKeyDiff.uk_columnsDiff) + ")");
+        }
+        if (lHasTablespace) {
+            p.stmtAppend("using index tablespace " + pUniqueKeyDiff.tablespaceNew);
+        } else {
+            if (lHasIndex) {
+                p.stmtAppend("using index " + pUniqueKeyDiff.indexnameNew);
+            }
+        }
+        if (pUniqueKeyDiff.statusNew != null) {
+            p.stmtAppend(pUniqueKeyDiff.statusNew.getName());
+        }
+
+        p.stmtDone(pTableDiff.isOld && !isAllColumnsOnlyNew(pTableDiff, pUniqueKeyDiff.uk_columnsDiff));
     }
 }
