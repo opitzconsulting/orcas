@@ -73,10 +73,10 @@ public class LoadIstPostgres extends LoadIst {
 
         Model pModel = new ModelImpl();
 
-        loadSequencesIntoModel(pModel, true);
-
         loadTablesIntoModel(pModel);
         loadTableColumnsIntoModel(pModel);
+
+        loadSequencesIntoModel(pModel, true);
 
         /*
          * loadLobstorageIntoModel( pModel );
@@ -160,8 +160,14 @@ public class LoadIstPostgres extends LoadIst {
         return isIgnored(pString, pOwner, _parameters.getExcludewheretable(), "TABLE");
     }
 
-    private boolean isIgnoredSequence(String pString, String pOwner) {
-        return false;
+    private boolean isIgnoredSequence(String pString, String pOwner, Model pModel) {
+        return pModel.getModel_elements()
+                .stream()
+                .filter(it->it instanceof Table)
+                .anyMatch(it->((Table) it).getColumns()
+                        .stream()
+                        .filter(col->pString.equalsIgnoreCase(((Table) it).getName()+"_"+col.getName()+"_seq"))
+                        .anyMatch(col->col.getIdentity()!=null));
     }
 
     private int toInt(BigDecimal pBigDecimal) {
@@ -557,7 +563,7 @@ public class LoadIstPostgres extends LoadIst {
         new WrapperIteratorResultSet(lSql, getCallableStatementProvider()) {
             @Override
             protected void useResultSetRow(ResultSet pResultSet) throws SQLException {
-                if (!isIgnoredSequence(pResultSet.getString("relname"), null)) {
+                if (!isIgnoredSequence(pResultSet.getString("relname"), null, pModel)) {
                     Sequence lSequence = new SequenceImpl();
 
                     lSequence.setSequence_name(getNameWithOwner(pResultSet.getString("relname"), null));
