@@ -19,7 +19,7 @@ public class FolderHandler
       return pParameters.getModelFiles();
     }
 
-    return getModelFilesRecursive( new File( pParameters.getModelFile() ), pParameters );
+    return getModelFilesRecursive( new File( pParameters.getModelFile() ), pParameters ).stream().sorted().collect(java.util.stream.Collectors.toList());
   }
 
   private static List<File> getModelFilesRecursive( File pFolder, Parameters pParameters )

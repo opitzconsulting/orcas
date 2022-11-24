@@ -161,7 +161,7 @@ public class LoadIstPostgres extends LoadIst {
     }
 
     private boolean isIgnoredSequence(String pString, String pOwner) {
-        return isIgnored(pString, pOwner, _parameters.getExcludewheretable(), "SEQUENCE");
+        return false;
     }
 
     private int toInt(BigDecimal pBigDecimal) {
