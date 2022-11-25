@@ -161,12 +161,16 @@ public class LoadIstPostgres extends LoadIst {
     }
 
     private boolean isIgnoredSequence(String pString, String pOwner, Model pModel) {
+        if (pString.toLowerCase().startsWith(OrcasScriptRunner.ORCAS_UPDATES_TABLE.toLowerCase())) {
+            return true;
+        }
+
         return pModel.getModel_elements()
                 .stream()
                 .filter(it->it instanceof Table)
                 .anyMatch(it->((Table) it).getColumns()
                         .stream()
-                        .filter(col->pString.equalsIgnoreCase(((Table) it).getName()+"_"+col.getName()+"_seq"))
+                        .filter(col-> pString.equalsIgnoreCase(((Table) it).getName() + "_" + col.getName() + "_seq"))
                         .anyMatch(col->col.getIdentity()!=null));
     }
 
