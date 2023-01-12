@@ -21,6 +21,10 @@ public abstract class DatabaseHandler
 
   public abstract boolean isRenamePrimaryKey();
 
+  public boolean isCanDiffFunctionBasedIndexExpression() {
+    return true;
+  }
+
   public abstract boolean isRenameIndex();
 
   public abstract boolean isRenameMView();

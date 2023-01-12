@@ -157,4 +157,9 @@ public class DatabaseHandlerPostgres extends DatabaseHandler {
     protected boolean isExpressionDifferentNotNull(String pExpression1, String pExpression2) {
         return super.isExpressionDifferentNotNull(cleanupExpression(pExpression1), cleanupExpression(pExpression2));
     }
+
+    @Override
+    public boolean isCanDiffFunctionBasedIndexExpression() {
+        return false;
+    }
 }

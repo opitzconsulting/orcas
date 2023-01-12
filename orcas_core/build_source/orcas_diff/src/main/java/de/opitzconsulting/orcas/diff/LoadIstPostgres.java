@@ -364,7 +364,7 @@ public class LoadIstPostgres extends LoadIst {
                         lColumn.setIdentity(lColumnIdentity);
                     } else {
                         if (null != pResultSet.getString("column_default")) {
-                            lColumn.setDefault_value(pResultSet.getString("column_default"));
+                            lColumn.setDefault_value(pResultSet.getString("column_default").replace("::character varying",""));
                         }
                     }
 
@@ -688,9 +688,7 @@ public class LoadIstPostgres extends LoadIst {
             + "       pg_attribute a,\n"
             + "       pg_constraint c\n"
             + " where c.conrelid = ct.oid\n"
-            + "   and a.attnum > 0\n"
-            + "   and a.attnum=ANY(c.conkey)\n"
-            + "   and a.attrelid = ct.oid\n"
+            + "   and a.attrelid = c.conindid\n"
             + "   and contype != 'c'\n"
             + "   and contype != 'f'\n"
             + " order by ct.relname, a.attnum";

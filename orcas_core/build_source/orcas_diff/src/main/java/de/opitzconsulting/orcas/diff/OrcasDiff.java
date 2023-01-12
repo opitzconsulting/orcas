@@ -323,8 +323,8 @@ public class OrcasDiff
 
           setRecreateNeededFor( lIndexDiff )//
           .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldObjectNames, lIndexDiff.consNameNew, lIndexDiff.consNameOld, databaseHandler.isRenameIndex() )//
-          .ifDifferent( INDEX__INDEX_COLUMNS, lNoDomainIndex && lExpressionDifferent )//
-          .ifDifferent( INDEX__FUNCTION_BASED_EXPRESSION, lNoDomainIndex && lExpressionDifferent )//
+          .ifDifferent( INDEX__INDEX_COLUMNS, lNoDomainIndex && lExpressionDifferent && (databaseHandler.isCanDiffFunctionBasedIndexExpression() || lIndexDiff.function_based_expressionNew == null) )//
+          .ifDifferent( INDEX__FUNCTION_BASED_EXPRESSION, lNoDomainIndex && lExpressionDifferent && databaseHandler.isCanDiffFunctionBasedIndexExpression() )//
           .ifDifferent( INDEX__DOMAIN_INDEX_EXPRESSION, lNoDomainIndex )//
           .ifDifferent( INDEX__UNIQUE )//
           .ifDifferent( INDEX__BITMAP )//
