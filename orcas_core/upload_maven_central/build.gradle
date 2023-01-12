@@ -3,7 +3,7 @@ project.buildDir = ".gradle/build"
 apply from: 'mcupload.gradle'
 
 project.group = "com.opitzconsulting.orcas"
-project.version = "7.8.6"  
+project.version = "7.8.7"  
 
 project.ext.mcupload.publish("orcas-db-objects")
 project.ext.mcupload.publish("orcas-orig")
