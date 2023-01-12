@@ -339,7 +339,7 @@ public class OrcasDiff
           setRecreateNeededFor( lUniqueKeyDiff )//
           .ifDifferentName( INDEX_OR_UNIQUE_KEY__CONS_NAME, oldContraintNames, lUniqueKeyDiff.consNameNew, lUniqueKeyDiff.consNameOld, databaseHandler.isRenameUniqueKey() )//
           .ifDifferent( UNIQUE_KEY__UK_COLUMNS )//
-          .ifDifferent( UNIQUE_KEY__INDEXNAME )//
+          .ifDifferent( UNIQUE_KEY__INDEXNAME, databaseHandler.isCanDiffUniqueKeyIndex() )//
           .ifDifferent( INDEX_OR_UNIQUE_KEY__TABLESPACE, _parameters.isIndexmovetablespace() )//
           .ifColumnDependentRecreate( lRecreateColumnNames, lUniqueKeyDiff.uk_columnsDiff )//
           .ifX( p ->

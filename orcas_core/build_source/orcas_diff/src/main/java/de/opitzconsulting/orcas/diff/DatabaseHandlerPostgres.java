@@ -162,4 +162,9 @@ public class DatabaseHandlerPostgres extends DatabaseHandler {
     public boolean isCanDiffFunctionBasedIndexExpression() {
         return false;
     }
+
+    @Override
+    public boolean isCanDiffUniqueKeyIndex() {
+        return false;
+    }
 }

@@ -25,6 +25,10 @@ public abstract class DatabaseHandler
     return true;
   }
 
+  public boolean isCanDiffUniqueKeyIndex() {
+    return true;
+  }
+
   public abstract boolean isRenameIndex();
 
   public abstract boolean isRenameMView();
