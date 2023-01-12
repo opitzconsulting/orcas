@@ -276,7 +276,7 @@ public class LoadIstPostgres extends LoadIst {
             + "           else (atttypmod - 4) & 65535\n"
             + "           end              as scale,\n"
             + "       pg_get_serial_sequence(a.attrelid::regclass::text, a.attname) is not null as is_generated,\n"
-            + "       (select adsrc\n"
+            + "       (select pg_get_expr(ad.adbin, ad.adrelid) as adsrc\n"
             + "          from pg_attrdef ad\n"
             + "         where ad.adrelid = c.oid\n"
             + "           and ad.adnum = a.attnum\n"
@@ -389,10 +389,10 @@ public class LoadIstPostgres extends LoadIst {
 
         if (lViewName.equals("pg_class")) {
             return "(select "
-                + lViewName
-                + ".oid, "
-                + lViewName
-                + ".*, user as owner from "
+                + "oid, "
+                + "relname, relnamespace, relowner," +
+                    " relkind," +
+                    " user as owner from "
                 + lViewName
                 + " where relnamespace in (select oid from pg_namespace where nspname = 'public' or nspname = user) and relowner = (select usesysid from pg_user where usename = user) ) "
                 + pAliasName;
@@ -602,7 +602,7 @@ public class LoadIstPostgres extends LoadIst {
             + "       contype as constraint_type,\n"
             + "       confdeltype as delete_rule,\n"
             + "       condeferred,\n"
-            + "       consrc\n"
+            + "       pg_get_constraintdef(c.oid) as consrc\n"
             + "  from pg_constraint co,\n"
             + "       " + getDataDictionaryView("pg_class", "c") + "\n"
             + " where co.conrelid = c.oid\n"
