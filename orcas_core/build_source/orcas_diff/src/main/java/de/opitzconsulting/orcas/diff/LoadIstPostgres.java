@@ -602,7 +602,7 @@ public class LoadIstPostgres extends LoadIst {
             + "       contype as constraint_type,\n"
             + "       confdeltype as delete_rule,\n"
             + "       condeferred,\n"
-            + "       pg_get_constraintdef(c.oid) as consrc\n"
+            + "       pg_get_constraintdef(co.oid) as consrc\n"
             + "  from pg_constraint co,\n"
             + "       " + getDataDictionaryView("pg_class", "c") + "\n"
             + " where co.conrelid = c.oid\n"
@@ -666,7 +666,9 @@ public class LoadIstPostgres extends LoadIst {
                         lConstraint.setConsName(pResultSet.getString("constraint_name"));
 
                         String lConsrc = pResultSet.getString("consrc");
-                        lConstraint.setRule(lConsrc.substring(1, lConsrc.length() - 1));
+                        if(lConsrc.startsWith("CHECK (")) {
+                          lConstraint.setRule(lConsrc.substring("CHECK (".length(), lConsrc.length()-1));
+                        }
 
                         if (pResultSet.getBoolean("condeferred")) {
                             lConstraint.setDeferrtype(DeferrType.DEFERRED);

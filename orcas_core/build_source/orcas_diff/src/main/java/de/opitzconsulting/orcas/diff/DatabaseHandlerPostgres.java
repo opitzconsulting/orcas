@@ -129,6 +129,8 @@ public class DatabaseHandlerPostgres extends DatabaseHandler {
         lReturn = lReturn.replace("=anyarray", "in");
         lReturn = lReturn.replace("::charactervarying", "");
         lReturn = lReturn.replace("::text", "");
+        lReturn = lReturn.replace("::numeric", "");
+        lReturn = lReturn.replace("!=", "<>");
 
         return lReturn;
     }
