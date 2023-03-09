@@ -24,7 +24,9 @@ public class DomainReverseExtension02SetAlias extends OrcasBaseExtensionWithPara
           }
           else
           {
-            lTable.setAlias( lTable.getPrimary_key().getPk_columns().get( 0 ).getColumn_name().substring( 0, 4 ) );
+            if( lTable.getPrimary_key().getPk_columns().get( 0 ).getColumn_name().length() >= 4 ) {
+              lTable.setAlias(lTable.getPrimary_key().getPk_columns().get(0).getColumn_name().substring(0, 4));
+            }
           }
         }
       }
