@@ -96,7 +96,7 @@ enum LobDeduplicateType :
   deduplicate="deduplicate"|keep_duplicates="keep_duplicates";  
   
 Column :
-  (name=DBNAME | name_string=STRING) data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (unsigned?="unsigned")? (with_time_zone="with_time_zone")? ("type" object_type=STRING)? ("default" default_value=STRING | "as" "(" default_value=STRING ")" virtual="virtual")? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
+  (name=DBNAME | name_string=STRING) data_type=DataType ("(" precision=INT ("," scale=INT )? (byteorchar=CharType)? ")" )? (unsigned?="unsigned")? (with_time_zone="with_time_zone")? ("type" object_type=STRING)? ("default" default_value=STRING | "as" "(" default_value=STRING ")" virtual="virtual")? ("defaultname" default_name=DBNAME)? (identity=ColumnIdentity)? (notnull?="not" "null")? (",")?;
   
 enum DataType :
   number="number"|blob="blob"|clob="clob"|nclob="nclob"|varchar2="varchar2"|nvarchar2="nvarchar2"|char="char"|date="date"|xmltype="xmltype"|timestamp="timestamp"|rowid="rowid"|raw="raw"|long_raw="long_raw"|float="float"|long="long"|object="object"|tinyint="tinyint"|smallint="smallint"|mediumint="mediumint"|int="int"|bigint="bigint"|bit="bit"|urowid="urowid"|boolean="boolean";

@@ -117,6 +117,11 @@ public abstract class Orcas
       return new DatabaseHandlerPostgres();
     }
 
+    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:sqlserver" ) )
+    {
+      return new DatabaseHandlerAzureSql();
+    }
+
     return new DatabaseHandlerOracle();
   }
 

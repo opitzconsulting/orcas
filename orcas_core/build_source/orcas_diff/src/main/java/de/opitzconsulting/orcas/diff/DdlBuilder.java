@@ -612,7 +612,7 @@ public abstract class DdlBuilder
     return Arrays.asList( pRule.toUpperCase().split( "[^\\w]+" ) );
   }
 
-  private boolean getConstraintIgnoreIfAdditionsOnly( TableDiff pTableDiff, String pRuleNew )
+  protected boolean getConstraintIgnoreIfAdditionsOnly( TableDiff pTableDiff, String pRuleNew )
   {
     if( !pTableDiff.isOld )
     {
