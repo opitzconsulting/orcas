@@ -25,8 +25,8 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
                 "        )" + //
                 " values (" + //
                 "        ?," + //
-                "        curtime()," + //
-                "        database()," + //
+                "        getutcdate()," + //
+                "        schema_name()," + //
                 "        ?" + //
                 "        )" + //
                 "";
