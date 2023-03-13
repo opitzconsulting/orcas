@@ -16,6 +16,7 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
 
     @Override
     public void insertIntoOrcasUpdatesTable(String pOrcasUpdatesTableName, CallableStatementProvider pOrcasCallableStatementProvider, String pFilePart, String pLogname) {
+        new WrapperExecutePreparedStatement("begin transaction", pOrcasCallableStatementProvider).execute();
         String lSql = "" + //
                 " insert into " + pOrcasUpdatesTableName + "(" + //
                 "        scup_script_name," + //
