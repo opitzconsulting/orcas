@@ -16,11 +16,17 @@ public class DdlBuilderAzureSql extends DdlBuilder {
 
     @Override
     protected String getDatatypeName(DataType pData_typeNew) {
-        if (pData_typeNew == DataType.VARCHAR2) {
+        if (pData_typeNew == DataType.VARCHAR2 || pData_typeNew == DataType.NVARCHAR2) {
             return "VARCHAR";
         }
         if (pData_typeNew == DataType.NUMBER) {
             return "NUMERIC";
+        }
+        if (pData_typeNew == DataType.XMLTYPE) {
+            return "XML";
+        }
+        if (pData_typeNew == DataType.RAW) {
+            return "VARBINARY";
         }
 
         return super.getDatatypeName(pData_typeNew);
@@ -56,16 +62,30 @@ public class DdlBuilderAzureSql extends DdlBuilder {
     public void recreateColumn(StatementBuilder pP, TableDiff pTableDiff, ColumnDiff pColumnDiff) {
         pP.failIfAdditionsOnly("can't recreate columns");
 
-        pP.addStmt("alter table " + pTableDiff.nameNew + " modify column " + createColumnCreatePart(pColumnDiff, false));
+        pP.addStmt("alter table " + pTableDiff.nameNew + " alter column " + createColumnCreatePart(pColumnDiff, false));
     }
 
     @Override
     protected String getColumnDatatype(ColumnDiff pColumnDiff) {
-        if (pColumnDiff.data_typeNew == DataType.CLOB) {
+        if (pColumnDiff.data_typeNew == DataType.CLOB || pColumnDiff.data_typeNew == DataType.NCLOB) {
             return "varchar(max)";
         }
+        if (pColumnDiff.data_typeNew == DataType.BLOB) {
+            return "varbinary(max)";
+        }
         if (pColumnDiff.data_typeNew == DataType.TIMESTAMP) {
-            return "datetime";
+            String type;
+            if ("with_time_zone".equals(pColumnDiff.with_time_zoneNew)) {
+                type = "datetimeoffset";
+            } else {
+                type = "datetime2";
+            }
+
+            if (pColumnDiff.precisionNew != null) {
+                return type + "(" + pColumnDiff.precisionNew + ")";
+            } else {
+                return type;
+            }
         }
         return super.getColumnDatatype(pColumnDiff);
     }
@@ -75,6 +95,9 @@ public class DdlBuilderAzureSql extends DdlBuilder {
         String lReturn = pColumnDiff.nameNew + " " + getColumnDatatype(pColumnDiff);
 
         if (pColumnDiff.default_valueNew != null) {
+            if (pColumnDiff.default_nameNew != null) {
+                lReturn = lReturn + " constraint " + pColumnDiff.default_nameNew;
+            }
             lReturn = lReturn + " default " + pColumnDiff.default_valueNew;
         }
 
@@ -168,7 +191,7 @@ public class DdlBuilderAzureSql extends DdlBuilder {
         {
             pP.stmtStartAlterTableNoCombine(pTableDiff);
 
-            pP.stmtAppend(pColumnDiffList.stream().map(pColumnDiff -> " drop " + pColumnDiff.nameOld).collect(Collectors.joining(",")));
+            pP.stmtAppend(pColumnDiffList.stream().map(pColumnDiff -> " drop column " + pColumnDiff.nameOld).collect(Collectors.joining(",")));
             pP.stmtDone(lAdditionsOnlyAlternativeHandler);
         };
     }
@@ -183,7 +206,8 @@ public class DdlBuilderAzureSql extends DdlBuilder {
                 {
                     p.stmtStartAlterTable(pTableDiff.nameNew);
                     p.stmtAppend("alter column");
-                    p.stmtAppend(pColumnDiff.nameNew + " type " + getColumnDatatype(pColumnDiff));
+                    p.stmtAppend(pColumnDiff.nameNew);
+                    p.stmtAppend(getColumnDatatype(pColumnDiff));
                     p.stmtDone();
                 });
 
@@ -235,10 +259,11 @@ public class DdlBuilderAzureSql extends DdlBuilder {
                     p.stmtStartAlterTable(pTableDiff);
                     p.stmtAppend("alter column");
                     p.stmtAppend(pColumnDiff.nameNew);
+                    p.stmtAppend(getColumnDatatype(pColumnDiff));
                     if (pColumnDiff.notnullNew == false) {
-                        p.stmtAppend("drop not null");
+                        p.stmtAppend("null");
                     } else {
-                        p.stmtAppend("set not null");
+                        p.stmtAppend("not null");
                     }
                     p.stmtDone();
                 });

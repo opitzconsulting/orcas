@@ -19,6 +19,7 @@ import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 
 public class InitDiffRepository
 {
+  private static boolean cleanForExport = false;
   private static ThreadLocal<Function<String,String>> defaultTablespaceProviderForSchema = new ThreadLocal<>();
   private static ThreadLocal<Map<String,String>> defaultTablespaceCache = new ThreadLocal<>();
 
@@ -46,8 +47,9 @@ public class InitDiffRepository
     return pTablespaceValue == null || pTablespaceValue.equals( lDefaultTablespace ) ? null : pTablespaceValue;
   }
 
-  public static void init( CallableStatementProvider pCallableStatementProvider, DatabaseHandler pDatabaseHandler, Parameters pParameters )
+  public static void init( CallableStatementProvider pCallableStatementProvider, DatabaseHandler pDatabaseHandler, Parameters pParameters, boolean pCleanForExport )
   {
+    cleanForExport = pCleanForExport;
     CharType lDefaultCharType = pDatabaseHandler.getDefaultCharType( pCallableStatementProvider );
 
     defaultTablespaceCache.set(new HashMap<>());
@@ -712,7 +714,7 @@ public class InitDiffRepository
         {
           if( pValue.getData_type() == DataType.FLOAT )
           {
-            pValue.setPrecision( 126 );
+            pValue.setPrecision( pDatabaseHandler.getDefaultFloatPrecision() );
           }
           if( pValue.getData_type() == DataType.TIMESTAMP )
           {
@@ -722,6 +724,14 @@ public class InitDiffRepository
           {
             pValue.setPrecision( 1 );
           }
+          if( pValue.getData_type() == DataType.NUMBER && pDatabaseHandler.getDefaultNumberPrecision() != null )
+          {
+            pValue.setPrecision( pDatabaseHandler.getDefaultNumberPrecision() );
+          }
+        }
+
+        if(cleanForExport){
+          pValue.setDefault_name(null);
         }
       }
 

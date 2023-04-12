@@ -29,7 +29,7 @@ public class OrcasMain extends Orcas {
             doSchemaSync(getParameters());
         } else {
             Consumer<CallableStatementProvider> lStaticsHandler = (CallableStatementProvider pCallableStatementProvider) -> {
-                InitDiffRepository.init(pCallableStatementProvider, getDatabaseHandler(), getParameters());
+                InitDiffRepository.init(pCallableStatementProvider, getDatabaseHandler(), getParameters(), false);
 
                 logInfo("starting orcas statics");
 
@@ -268,7 +268,7 @@ public class OrcasMain extends Orcas {
             new RunWithCallableStatementProvider() {
                 public void run(CallableStatementProvider pCallableStatementProvider) throws Exception {
                     CallableStatementProvider lSrcCallableStatementProvider = pCallableStatementProvider;
-                    InitDiffRepository.init(lSrcCallableStatementProvider, getDatabaseHandler(), getParameters());
+                    InitDiffRepository.init(lSrcCallableStatementProvider, getDatabaseHandler(), getParameters(), false);
                     lSrcModel[0] = getDatabaseHandler().createLoadIst(lSrcCallableStatementProvider, getParameters()).loadModel(false);
                     DiffRepository.getModelMerge().cleanupValues(lSrcModel[0]);
                     getParameters().getMultiSchemaConnectionManager().releaseAllConnections();
@@ -279,7 +279,7 @@ public class OrcasMain extends Orcas {
         JdbcConnectionHandler.runWithCallableStatementProvider(getParameters(), new RunWithCallableStatementProvider() {
             public void run(CallableStatementProvider pCallableStatementProvider) throws Exception {
                 CallableStatementProvider lDestCallableStatementProvider = pCallableStatementProvider;
-                InitDiffRepository.init(lDestCallableStatementProvider, getDatabaseHandler(), getParameters());
+                InitDiffRepository.init(lDestCallableStatementProvider, getDatabaseHandler(), getParameters(), false);
                 de.opitzconsulting.origOrcasDsl.Model
                     lDstModel =
                     getDatabaseHandler().createLoadIst(lDestCallableStatementProvider, getParameters()).loadModel(true);

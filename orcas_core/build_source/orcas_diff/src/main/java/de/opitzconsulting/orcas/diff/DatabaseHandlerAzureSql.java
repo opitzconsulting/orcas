@@ -101,6 +101,16 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
         return super.isExpressionDifferentNotNull(cleanupExpression(pExpression1), cleanupExpression(pExpression2));
     }
 
+    @Override
+    public int getDefaultFloatPrecision() {
+        return 53;
+    }
+
+    @Override
+    public Integer getDefaultNumberPrecision() {
+        return 18;
+    }
+
     private String cleanupSubExpression(String pExpression) {
         String lReturn = pExpression;
 

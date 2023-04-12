@@ -276,8 +276,10 @@ public class LoadIstAzureSql extends LoadIst {
 
                     lColumn.setName(pResultSet.getString("column_name"));
 
-                    lColumn.setDefault_value(pResultSet.getString("column_default"));
-                    lColumn.setDefault_name(pResultSet.getString("column_default_name"));
+                    if (!"(NULL)".equals(pResultSet.getString("column_default"))) {
+                        lColumn.setDefault_value(pResultSet.getString("column_default"));
+                        lColumn.setDefault_name(pResultSet.getString("column_default_name"));
+                    }
 
                     lColumn.setNotnull(!pResultSet.getBoolean("is_nullable"));
 
@@ -320,6 +322,24 @@ public class LoadIstAzureSql extends LoadIst {
                         lColumn.setData_type(DataType.CHAR);
                         lColumn.setPrecision(pResultSet.getInt("max_length"));
                     }
+                   if (pResultSet.getString("data_type").equals("varbinary")) {
+                        int max_length = pResultSet.getInt("max_length");
+                        if (max_length != -1) {
+                            lColumn.setData_type(DataType.RAW);
+                            lColumn.setPrecision(max_length);
+                        } else {
+                            lColumn.setData_type(DataType.BLOB);
+                        }
+                    }
+                    if (pResultSet.getString("data_type").startsWith("float")) {
+                        lColumn.setData_type(DataType.FLOAT);
+                    }
+                    if (pResultSet.getString("data_type").startsWith("real")) {
+                        lColumn.setData_type(DataType.FLOAT);
+                    }
+                    if (pResultSet.getString("data_type").startsWith("date")) {
+                        lColumn.setData_type(DataType.DATE);
+                    }
                     if (pResultSet.getString("data_type").startsWith("datetime")) {
                         lColumn.setData_type(DataType.TIMESTAMP);
                     }
@@ -327,9 +347,16 @@ public class LoadIstAzureSql extends LoadIst {
                         lColumn.setData_type(DataType.TIMESTAMP);
                         lColumn.setPrecision(pResultSet.getInt("precision"));
                     }
+                    if (pResultSet.getString("data_type").startsWith("xml")) {
+                        lColumn.setData_type(DataType.XMLTYPE);
+                    }
 
                     if (pResultSet.getString("data_type").endsWith("unsigned")) {
                         lColumn.setUnsigned(true);
+                    }
+
+                    if (lColumn.getData_type() == null) {
+                        throw new RuntimeException("datatype unknown: " + pResultSet.getString("table_name") + "." + pResultSet.getString("column_name") + " " + pResultSet.getString("data_type"));
                     }
 
           /*if( pResultSet.getString( "extra" ) != null && pResultSet.getString( "extra" ).contains( "auto_increment" ) )
