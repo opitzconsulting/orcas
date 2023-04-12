@@ -17,6 +17,11 @@ public class OrcasCoreIntegrationConfigConstantImpl extends OrcasCoreIntegration
   private int _parallelThreads = 1;
   private boolean _withFirstRunTest = true;
 
+  @Override
+  public String getDialect() {
+    return "oracle";
+  }
+
   public String getWorkfolder()
   {
     return _workfolder;

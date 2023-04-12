@@ -65,26 +65,26 @@ public class OrcasParallelConnectionHandler {
 
         copyConnectionParameters(_connectParametersDba, lParametersCall.getJdbcConnectParameters());
 
-        lParametersCall.setAdditionalParameters(Arrays.asList(new String[] {
-            pJdbcConnectParameters.getJdbcUser(),
-            pJdbcConnectParameters.getJdbcPassword(),
-            _orcasCoreIntegrationConfig.getTablespace() }));
+        lParametersCall.setAdditionalParameters(Arrays.asList(new String[]{
+                pJdbcConnectParameters.getJdbcUser(),
+                pJdbcConnectParameters.getJdbcPassword(),
+                _orcasCoreIntegrationConfig.getTablespace()}));
         lParametersCall.setIsOneTimeScriptMode(false);
         lParametersCall.setExecuteSqlErrorHandler(new ExecuteSqlErrorHandler() {
             @Override
             public void handleExecutionError(
-                RuntimeException e,
-                String pSql,
-                CallableStatementProvider pCallableStatementProvider,
-                Parameters pParameters,
-                ExecuteSqlErrorHandlerCallback pExecuteSqlErrorHandlerCallback) {
-                if (!e.getMessage().contains("ORA-01918")) {
+                    RuntimeException e,
+                    String pSql,
+                    CallableStatementProvider pCallableStatementProvider,
+                    Parameters pParameters,
+                    ExecuteSqlErrorHandlerCallback pExecuteSqlErrorHandlerCallback) {
+                if (!e.getMessage().contains("ORA-01918") && !e.getMessage().contains("because it does not exist")) {
                     pExecuteSqlErrorHandlerCallback.rethrow();
                 }
             }
         });
 
-        lParametersCall.setModelFile(_orcasCoreIntegrationConfig.getBaseDir() + "reset_user.sql");
+        lParametersCall.setModelFile(_orcasCoreIntegrationConfig.getBaseDir() + "reset_user_" + _orcasCoreIntegrationConfig.getDialect() + ".sql");
 
         new OrcasScriptRunner().mainRun(lParametersCall);
     }

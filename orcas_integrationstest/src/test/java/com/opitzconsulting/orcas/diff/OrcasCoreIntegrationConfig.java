@@ -6,6 +6,8 @@ public interface OrcasCoreIntegrationConfig
 
   String getTablespace();
 
+  String getDialect();
+
   String getWorkfolder();
 
   String getBaseDir();

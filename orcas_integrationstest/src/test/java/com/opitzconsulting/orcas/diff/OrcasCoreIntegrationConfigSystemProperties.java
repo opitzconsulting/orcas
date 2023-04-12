@@ -35,6 +35,10 @@ public class OrcasCoreIntegrationConfigSystemProperties extends OrcasCoreIntegra
     return getStringProperty( pString ).equals( "true" );
   }
 
+  public String getDialect() {
+    return getStringProperty( "orcas.integrationtest.dialect" );
+  }
+
   public String getWorkfolder()
   {
     return getStringProperty( "orcas.integrationtest.workfolder" );

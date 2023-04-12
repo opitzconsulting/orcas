@@ -73,7 +73,7 @@ public class OrcasCoreIntegrationTest {
             String lTestName = lFile.getName();
             if (lTestName.startsWith("test_")) {
                 if (lTestName.matches(orcasCoreIntegrationConfig.getExecuteTests())) {
-                    lReturn.add(new Object[] { lTestName });
+                    lReturn.add(new Object[]{lTestName});
                 }
             }
         }
@@ -134,6 +134,7 @@ public class OrcasCoreIntegrationTest {
 
     private static class TestSetup {
         private final boolean _testWithData;
+        private final String _dialect;
         private String testName;
 
         private boolean _dropmode;
@@ -292,6 +293,7 @@ public class OrcasCoreIntegrationTest {
                 }
 
                 _testWithData = getBooleanProperty("test_with_data", lDefaultProperties, lTestProperties);
+                _dialect = getProperty("dialect", lDefaultProperties, lTestProperties);
                 _dropmode = getBooleanProperty("dropmode", lDefaultProperties, lTestProperties);
                 _indexparallelcreate = getBooleanProperty("indexparallelcreate", lDefaultProperties, lTestProperties);
                 _createmissingfkindexes = getBooleanProperty("createmissingfkindexes", lDefaultProperties, lTestProperties);
@@ -336,12 +338,16 @@ public class OrcasCoreIntegrationTest {
         private void assumeShouldExecuteTestcase() {
             Assume.assumeTrue("testcase ignored custom extensionfolder not supported yet " + _extensionfolder, !_customExtensionFolder);
             Assume.assumeTrue(
-                "testcase ignored: " + testName + " " + orcasCoreIntegrationConfig.getExecuteTests(),
-                testName.matches(orcasCoreIntegrationConfig.getExecuteTests()));
+                    "testcase ignored: " + testName + " " + orcasCoreIntegrationConfig.getExecuteTests(),
+                    testName.matches(orcasCoreIntegrationConfig.getExecuteTests()));
             Assume.assumeTrue("testcase skipped, required features not available: required: "
-                + _required_feature_list
-                + " available: "
-                + orcasCoreIntegrationConfig.getAvailableFeatureList(), _availableFeatureRequirementMatched);
+                    + _required_feature_list
+                    + " available: "
+                    + orcasCoreIntegrationConfig.getAvailableFeatureList(), _availableFeatureRequirementMatched);
+            Assume.assumeTrue("testcase skipped, dialect missmatch: "
+                    + _dialect
+                    + " "
+                    + orcasCoreIntegrationConfig.getDialect(), _dialect.contains(orcasCoreIntegrationConfig.getDialect()));
         }
 
         private boolean getBooleanProperty(String pKey, Properties pDefaultProperties, Properties pTestProperties) {
@@ -433,52 +439,52 @@ public class OrcasCoreIntegrationTest {
         extractSchemas(pName, pIncludeData);
 
         assertFilesEqual(
-            pName,
-            getSchemaExtarctFileName(REFERENCE_NAME, false, true, testName, ""),
-            getSchemaExtarctFileName(pName, false, true, testName, ""),
-            pIncludeData);
+                pName,
+                getSchemaExtarctFileName(REFERENCE_NAME, false, true, testName, ""),
+                getSchemaExtarctFileName(pName, false, true, testName, ""),
+                pIncludeData);
 
         if (pIncludeData) {
             _testSetup.runMultiSchemaSetup(p -> {
                 assertFilesEqual(
-                    pName,
-                    getSchemaExtarctFileName(REFERENCE_NAME, pIncludeData, false, testName, p.getFilePostfix()),
-                    getSchemaExtarctFileName(pName, pIncludeData, false, testName, p.getFilePostfix()),
-                    pIncludeData);
+                        pName,
+                        getSchemaExtarctFileName(REFERENCE_NAME, pIncludeData, false, testName, p.getFilePostfix()),
+                        getSchemaExtarctFileName(pName, pIncludeData, false, testName, p.getFilePostfix()),
+                        pIncludeData);
             });
         }
     }
 
     static void asserSchemaEqual(
-        String pNameExpected,
-        String pNameActual,
-        boolean pIncludeData,
-        String pTestName,
-        String pExcludeWhereSequence,
-        String pDateformat,
-        JdbcConnectParameters pJdbcConnectParameters,
-        boolean pIsMviewsWithColumns) {
+            String pNameExpected,
+            String pNameActual,
+            boolean pIncludeData,
+            String pTestName,
+            String pExcludeWhereSequence,
+            String pDateformat,
+            JdbcConnectParameters pJdbcConnectParameters,
+            boolean pIsMviewsWithColumns) {
 
         extractSchema(
-            pJdbcConnectParameters,
-            pNameActual,
-            pIncludeData,
-            pTestName,
-            pExcludeWhereSequence,
-            pDateformat,
-            pIsMviewsWithColumns,
-            "");
+                pJdbcConnectParameters,
+                pNameActual,
+                pIncludeData,
+                pTestName,
+                pExcludeWhereSequence,
+                pDateformat,
+                pIsMviewsWithColumns,
+                "");
 
         assertFilesEqual(
-            pNameActual,
-            getSchemaExtarctFileName(pNameExpected, pIncludeData, true, pTestName, ""),
-            getSchemaExtarctFileName(pNameActual, pIncludeData, true, pTestName, ""),
-            pIncludeData);
+                pNameActual,
+                getSchemaExtarctFileName(pNameExpected, pIncludeData, true, pTestName, ""),
+                getSchemaExtarctFileName(pNameActual, pIncludeData, true, pTestName, ""),
+                pIncludeData);
         assertFilesEqual(
-            pNameActual,
-            getSchemaExtarctFileName(pNameExpected, pIncludeData, false, pTestName, ""),
-            getSchemaExtarctFileName(pNameActual, pIncludeData, false, pTestName, ""),
-            pIncludeData);
+                pNameActual,
+                getSchemaExtarctFileName(pNameExpected, pIncludeData, false, pTestName, ""),
+                getSchemaExtarctFileName(pNameActual, pIncludeData, false, pTestName, ""),
+                pIncludeData);
     }
 
     private static void assertFilesEqual(String pName, String pExpectedFile, String pActualFile) {
@@ -509,61 +515,61 @@ public class OrcasCoreIntegrationTest {
         }
 
         extractSchemaOrcas(
-            getConnectParametersTargetUser(),
-            pName,
-            testName,
-            _testSetup._excludewheresequence,
-            _testSetup._dateformat,
-            _testSetup.isMviewsWithColumns(),
-            this::multiSchemaSetup);
+                getConnectParametersTargetUser(),
+                pName,
+                testName,
+                _testSetup._excludewheresequence,
+                _testSetup._dateformat,
+                _testSetup.isMviewsWithColumns(),
+                this::multiSchemaSetup);
 
     }
 
     static void extractSchema(
-        JdbcConnectParameters pConnectParametersTargetUser,
-        String pName,
-        boolean pIncludeData,
-        String pTestName,
-        String pExcludeWhereSequence,
-        String pDateformat,
-        boolean pIsMviewsWithColumns,
-        String pSchemaFilePostfix) {
+            JdbcConnectParameters pConnectParametersTargetUser,
+            String pName,
+            boolean pIncludeData,
+            String pTestName,
+            String pExcludeWhereSequence,
+            String pDateformat,
+            boolean pIsMviewsWithColumns,
+            String pSchemaFilePostfix) {
 
         extractSchemaSpool(pConnectParametersTargetUser, pName, pIncludeData, pTestName, pSchemaFilePostfix);
 
         extractSchemaOrcas(
-            pConnectParametersTargetUser,
-            pName,
-            pTestName,
-            pExcludeWhereSequence,
-            pDateformat,
-            pIsMviewsWithColumns,
-            p -> {
-            });
+                pConnectParametersTargetUser,
+                pName,
+                pTestName,
+                pExcludeWhereSequence,
+                pDateformat,
+                pIsMviewsWithColumns,
+                p -> {
+                });
     }
 
     private static void extractSchemaSpool(
-        JdbcConnectParameters pConnectParametersTargetUser,
-        String pName,
-        boolean pIncludeData,
-        String pTestName,
-        String pSchemaFilePostfix) {
+            JdbcConnectParameters pConnectParametersTargetUser,
+            String pName,
+            boolean pIncludeData,
+            String pTestName,
+            String pSchemaFilePostfix) {
         executeScript(
-            pConnectParametersTargetUser,
-            "spool.sql",
-            getSchemaExtarctFileName(pName, pIncludeData, false, pTestName, pSchemaFilePostfix),
-            orcasCoreIntegrationConfig.getWorkfolder() + pTestName + "/tmp_data.log",
-            pIncludeData ? "1=1" : "1=2");
+                pConnectParametersTargetUser,
+                "spool_" + orcasCoreIntegrationConfig.getDialect() + ".sql",
+                getSchemaExtarctFileName(pName, pIncludeData, false, pTestName, pSchemaFilePostfix),
+                orcasCoreIntegrationConfig.getWorkfolder() + pTestName + "/tmp_data.log",
+                pIncludeData ? "1=1" : "1=2");
     }
 
     private static void extractSchemaOrcas(
-        JdbcConnectParameters pConnectParametersTargetUser,
-        String pName,
-        String pTestName,
-        String pExcludeWhereSequence,
-        String pDateformat,
-        boolean pIsMviewsWithColumns,
-        Consumer<ParametersCall> pParameterModifier) {
+            JdbcConnectParameters pConnectParametersTargetUser,
+            String pName,
+            String pTestName,
+            String pExcludeWhereSequence,
+            String pDateformat,
+            boolean pIsMviewsWithColumns,
+            Consumer<ParametersCall> pParameterModifier) {
         ParametersCall lParametersCall = new ParametersCall();
 
         copyConnectionParameters(pConnectParametersTargetUser, lParametersCall.getJdbcConnectParameters());
@@ -577,7 +583,7 @@ public class OrcasCoreIntegrationTest {
         lParametersCall.setScriptprefix(null);
         lParametersCall.setScriptpostfix(null);
         lParametersCall.setOrderColumnsByName(true);
-        lParametersCall.setRemoveDefaultValuesFromModel(false);
+        lParametersCall.setRemoveDefaultValuesFromModel(true);
         lParametersCall.setViewExtractMode(pIsMviewsWithColumns ? "full" : ParameterDefaults.viewextractmode);
 
         pParameterModifier.accept(lParametersCall);
@@ -586,14 +592,14 @@ public class OrcasCoreIntegrationTest {
     }
 
     private static String getSchemaExtarctFileName(
-        String pString,
-        boolean pIncludeData,
-        boolean pOrcas,
-        String pTestName,
-        String pSchemaFilePostfix) {
+            String pString,
+            boolean pIncludeData,
+            boolean pOrcas,
+            String pTestName,
+            String pSchemaFilePostfix) {
         return getWorkfolderFilename(
-            pTestName,
-            pString + (pOrcas ? "_orcas" : "_spool" + (pIncludeData ? "data" : "")) + pSchemaFilePostfix + (pOrcas ? ".xml" : ".txt"));
+                pTestName,
+                pString + (pOrcas ? "_orcas" : "_spool" + (pIncludeData ? "data" : "")) + pSchemaFilePostfix + (pOrcas ? ".xml" : ".txt"));
     }
 
     private static String getWorkfolderFilename(String pTestName, String pFilename) {
@@ -631,11 +637,11 @@ public class OrcasCoreIntegrationTest {
         }
 
         executeOrcasStatics(
-            pJdbcConnectParameters,
-            pSpoolName,
-            orcasCoreIntegrationConfig.getBaseDir() + "tests/" + testName + "/tabellen",
-            pLogIgnoredStatements,
-            lXmlInputFile);
+                pJdbcConnectParameters,
+                pSpoolName,
+                orcasCoreIntegrationConfig.getBaseDir() + "tests/" + testName + "/tabellen",
+                pLogIgnoredStatements,
+                lXmlInputFile);
     }
 
     private boolean isXmlInputFileExists() {
@@ -651,11 +657,11 @@ public class OrcasCoreIntegrationTest {
     }
 
     private void executeOrcasStatics(
-        JdbcConnectParameters pJdbcConnectParameters,
-        String pSpoolName,
-        String pModelFolder,
-        boolean pLogIgnoredStatements,
-        String pXmlInputFile) {
+            JdbcConnectParameters pJdbcConnectParameters,
+            String pSpoolName,
+            String pModelFolder,
+            boolean pLogIgnoredStatements,
+            String pXmlInputFile) {
         ParametersCall lParametersCall = new ParametersCall();
 
         copyConnectionParameters(pJdbcConnectParameters, lParametersCall.getJdbcConnectParameters());
@@ -691,9 +697,9 @@ public class OrcasCoreIntegrationTest {
         lParametersCall.setCleanupFkValuesOnDropmode(_testSetup._cleanupfkvaluesondropmode);
         lParametersCall.setViewExtractMode(_testSetup.isMviewsWithColumns() ? "full" : ParameterDefaults.viewextractmode);
         List<File> lRelevantFileList = Stream.of(_testSetup.relevantFiles.split(","))
-                                             .filter(it -> !it.isEmpty())
-                                             .map(it -> new File(pModelFolder + "/" + it))
-                                             .collect(Collectors.toList());
+                .filter(it -> !it.isEmpty())
+                .map(it -> new File(pModelFolder + "/" + it))
+                .collect(Collectors.toList());
         if (!lRelevantFileList.isEmpty()) {
             lParametersCall.setRelevantModelFiles(lRelevantFileList);
         }
@@ -705,8 +711,8 @@ public class OrcasCoreIntegrationTest {
             @Override
             public <T extends EObject> List<UnaryOperator<T>> getAdditionalExtensions(Class<T> pModelClass, boolean pReverseMode) {
                 List<UnaryOperator<T>> lList = new ArrayList<>(Collections.singletonList(p -> (T) new TablespaceRemapperExtension(
-                    orcasCoreIntegrationConfig.getAlternateTablespace1(),
-                    orcasCoreIntegrationConfig.getAlternateTablespace2()).transformModel((Model) p)));
+                        orcasCoreIntegrationConfig.getAlternateTablespace1(),
+                        orcasCoreIntegrationConfig.getAlternateTablespace2()).transformModel((Model) p)));
 
                 if (_testSetup.isMultiSchema()) {
                     lList.add(p -> {
@@ -749,9 +755,9 @@ public class OrcasCoreIntegrationTest {
             pParametersCall.setMultiSchema(true);
             pParametersCall.setMultiSchemaExcludewhereowner("owner not in (','");
             _testSetup.runMultiSchemaSetup(p ->
-                pParametersCall.setMultiSchemaExcludewhereowner(pParametersCall.getMultiSchemaExcludewhereowner() + ",'" + p
-                    .getSchemaName()
-                    .toUpperCase() + "'"));
+                    pParametersCall.setMultiSchemaExcludewhereowner(pParametersCall.getMultiSchemaExcludewhereowner() + ",'" + p
+                            .getSchemaName()
+                            .toUpperCase() + "'"));
             pParametersCall.setMultiSchemaExcludewhereowner(pParametersCall.getMultiSchemaExcludewhereowner() + ")");
 
             copyConnectionParameters(OrcasParallelConnectionHandler._connectParametersDba, pParametersCall.getJdbcConnectParameters());
@@ -759,8 +765,8 @@ public class OrcasCoreIntegrationTest {
             pParametersCall.setMultiSchemaConnectionManager(new BaseMultiSchemaConnectionManager() {
                 @Override
                 protected JdbcConnectParameters getJdbcConnectParametersForSchema(
-                    String pSchemaName,
-                    de.opitzconsulting.orcas.diff.Parameters pParameters) {
+                        String pSchemaName,
+                        de.opitzconsulting.orcas.diff.Parameters pParameters) {
                     JdbcConnectParameters lJdbcConnectParameters = new JdbcConnectParameters();
                     copyConnectionParameters(OrcasParallelConnectionHandler._connectParametersDba, lJdbcConnectParameters);
                     lJdbcConnectParameters.setJdbcUser(pSchemaName);
@@ -803,12 +809,12 @@ public class OrcasCoreIntegrationTest {
 
         if (!isExpectfailure()) {
             _testSetup.runMultiSchemaSetupWithDbaSetup(p ->
-                executeScriptIfExists(
-                    p.getJdbcConnectParameters(),
-                    "tests/" + testName + "/" + "erzeuge_zielzustand" + p.getFilePostfix() + ".sql",
-                    p.getParameters(
-                        orcasCoreIntegrationConfig.getAlternateTablespace1(),
-                        orcasCoreIntegrationConfig.getAlternateTablespace2())));
+                    executeScriptIfExists(
+                            p.getJdbcConnectParameters(),
+                            "tests/" + testName + "/" + "erzeuge_zielzustand" + p.getFilePostfix() + ".sql",
+                            p.getParameters(
+                                    orcasCoreIntegrationConfig.getAlternateTablespace1(),
+                                    orcasCoreIntegrationConfig.getAlternateTablespace2())));
 
             extractSchemas(REFERENCE_NAME, _testSetup._testWithData);
 
@@ -824,9 +830,9 @@ public class OrcasCoreIntegrationTest {
     private void resetUsers() {
         synchronized (_connectParametersTargetUserMap) {
             _connectParametersTargetUserMap
-                .get(testName)
-                .values()
-                .forEach(OrcasParallelConnectionHandler::resetUser);
+                    .get(testName)
+                    .values()
+                    .forEach(OrcasParallelConnectionHandler::resetUser);
         }
     }
 
@@ -855,12 +861,12 @@ public class OrcasCoreIntegrationTest {
 
     private void setupInitialState() {
         _testSetup.runMultiSchemaSetupWithDbaSetup(p ->
-            executeScriptIfExists(
-                getConnectParametersTargetUser(),
-                "tests/" + testName + "/" + "erzeuge_ausgangszustand" + p.getFilePostfix() + ".sql",
-                p.getParameters(
-                    orcasCoreIntegrationConfig.getAlternateTablespace1(),
-                    orcasCoreIntegrationConfig.getAlternateTablespace2())));
+                executeScriptIfExists(
+                        getConnectParametersTargetUser(),
+                        "tests/" + testName + "/" + "erzeuge_ausgangszustand" + p.getFilePostfix() + ".sql",
+                        p.getParameters(
+                                orcasCoreIntegrationConfig.getAlternateTablespace1(),
+                                orcasCoreIntegrationConfig.getAlternateTablespace2())));
     }
 
     @Test
@@ -879,9 +885,9 @@ public class OrcasCoreIntegrationTest {
         resetUsers();
         setupInitialState();
         executeScript(
-            orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + _lognameFirstRun + "/",
-            _testSetup.isMultiSchema() ? OrcasParallelConnectionHandler._connectParametersDba : getConnectParametersTargetUser(),
-            "master_install.sql");
+                orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + _lognameFirstRun + "/",
+                _testSetup.isMultiSchema() ? OrcasParallelConnectionHandler._connectParametersDba : getConnectParametersTargetUser(),
+                "master_install.sql");
         asserSchemasEqual("03_schema", _testSetup._testWithData);
     }
 
@@ -895,17 +901,17 @@ public class OrcasCoreIntegrationTest {
             String lErzeugeAusgangszustandExtractFile = getBasedirFilename("erzeuge_ausgangszustand_extract.sql");
             if (new File(lErzeugeAusgangszustandExtractFile).exists()) {
                 executeScript(
-                    getConnectParametersTargetUser(),
-                    lErzeugeAusgangszustandExtractFile,
-                    orcasCoreIntegrationConfig.getAlternateTablespace1(),
-                    orcasCoreIntegrationConfig.getAlternateTablespace2());
+                        getConnectParametersTargetUser(),
+                        lErzeugeAusgangszustandExtractFile,
+                        orcasCoreIntegrationConfig.getAlternateTablespace1(),
+                        orcasCoreIntegrationConfig.getAlternateTablespace2());
             }
             executeOrcasStatics(
-                getConnectParametersTargetUser(),
-                "04_statics",
-                orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + EXTRACT_FOLDER_NAME,
-                true,
-                null);
+                    getConnectParametersTargetUser(),
+                    "04_statics",
+                    orcasCoreIntegrationConfig.getWorkfolder() + testName + "/" + EXTRACT_FOLDER_NAME,
+                    true,
+                    null);
             asserSchemasEqual("04_schema", false);
         } finally {
             afterAllTests();

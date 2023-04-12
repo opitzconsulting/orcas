@@ -9,9 +9,10 @@ dependencies
 {
   compile 'junit:junit:4.12'
   compile group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler',
-                  version: '8.0.3'
+                  version: '8.0.4-SNAPSHOT'
 
   compile group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
+  compile "com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre8"
 }
 
 
@@ -37,6 +38,7 @@ test {
     systemProperty "orcas.integrationtest.with_run_with_extract_test",   with_run_with_extract_test
     systemProperty "orcas.integrationtest.with_first_run_test",          with_first_run_test
     systemProperty "orcas.integrationtest.execute_tests",                execute_tests
+    systemProperty "orcas.integrationtest.dialect",                      dialect
 
     systemProperty "orcas.integrationtest.available_feature_list",       available_feature_list
     systemProperty "orcas.integrationtest.jdbc_url",                     default_jdbcurl
