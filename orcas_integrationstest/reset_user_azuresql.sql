@@ -1,3 +1,16 @@
+spool build/tmp/drop_all_sequences.sql
+
+SELECT 'drop sequence '
+    + (OBJECT_SCHEMA_NAME(object_id))
+    + '.'
+    +  QUOTENAME(OBJECT_NAME(object_id)) + ';'
+FROM sys.sequences
+where upper(OBJECT_SCHEMA_NAME(object_id)) = upper('&1');
+
+spool off;
+
+@build/tmp/drop_all_sequences.sql
+
 spool build/tmp/drop_all_fks.sql
 
 SELECT 'ALTER TABLE '

@@ -91,6 +91,16 @@ public class DdlBuilderAzureSql extends DdlBuilder {
     }
 
     @Override
+    public void dropPrimaryKey(StatementBuilder p, TableDiff pTableDiff, PrimaryKeyDiff pPrimaryKeyDiff) {
+        if (pPrimaryKeyDiff.consNameOld == null) {
+            p.stmtStart("begin declare @CONS_NAME sysname = (select indexes.name from sys.indexes, sys.tables where tables.object_id = indexes.object_id and tables.name = '" + pTableDiff.nameOld + "' and OBJECT_SCHEMA_NAME(tables.object_id) = schema_name() and is_primary_key = 1 ) exec('alter table " + pTableDiff.nameOld + " drop constraint '+ @CONS_NAME) end");
+            p.stmtDone(false);
+        } else {
+            dropTableConstraintByName(p, pTableDiff, pPrimaryKeyDiff.consNameOld, false);
+        }
+    }
+
+    @Override
     protected String createColumnCreatePart(ColumnDiff pColumnDiff, boolean pWithoutNotNull) {
         String lReturn = pColumnDiff.nameNew + " " + getColumnDatatype(pColumnDiff);
 

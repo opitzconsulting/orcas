@@ -16,4 +16,6 @@ dependencies
   testCompile group: 'org.assertj', name: 'assertj-core', version: '3.13.2'
 }
 
-
+test {
+    useJUnitPlatform()
+}

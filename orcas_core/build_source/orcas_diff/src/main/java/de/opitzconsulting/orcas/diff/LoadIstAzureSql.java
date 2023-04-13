@@ -88,10 +88,18 @@ public class LoadIstAzureSql extends LoadIst {
 
             if (pType.equals("TABLE")) {
                 lSql = "select name, owner, 0 is_exclude from " + getDataDictionaryView("tables");
+
+                if (!ParameterDefaults.excludewheretable.equals(_parameters.getExcludewheretable())) {
+                    lSql += " where not (" + _parameters.getExcludewheretable() + ")";
+                }
             }
 
             if (pType.equals("SEQUENCE")) {
                 lSql = "select name, owner, 0 is_exclude from " + getDataDictionaryView("sequences");
+
+                if (!ParameterDefaults.excludewheresequence.equals(_parameters.getExcludewheresequence())) {
+                    lSql += " where not (" + _parameters.getExcludewheresequence() + ")";
+                }
             }
 
             new WrapperIteratorResultSet(lSql, getCallableStatementProvider()) {
@@ -274,7 +282,12 @@ public class LoadIstAzureSql extends LoadIst {
                 if (!isIgnoredTable(pResultSet.getString("table_name"), pResultSet.getString("owner"))) {
                     Column lColumn = new ColumnImpl();
 
-                    lColumn.setName(pResultSet.getString("column_name"));
+                    String column_name = pResultSet.getString("column_name");
+                    if (isStringName(column_name)) {
+                        lColumn.setName_string(column_name);
+                    } else {
+                        lColumn.setName(column_name);
+                    }
 
                     if (!"(NULL)".equals(pResultSet.getString("column_default"))) {
                         lColumn.setDefault_value(pResultSet.getString("column_default"));
@@ -322,7 +335,7 @@ public class LoadIstAzureSql extends LoadIst {
                         lColumn.setData_type(DataType.CHAR);
                         lColumn.setPrecision(pResultSet.getInt("max_length"));
                     }
-                   if (pResultSet.getString("data_type").equals("varbinary")) {
+                    if (pResultSet.getString("data_type").equals("varbinary")) {
                         int max_length = pResultSet.getInt("max_length");
                         if (max_length != -1) {
                             lColumn.setData_type(DataType.RAW);
@@ -356,7 +369,7 @@ public class LoadIstAzureSql extends LoadIst {
                     }
 
                     if (lColumn.getData_type() == null) {
-                        throw new RuntimeException("datatype unknown: " + pResultSet.getString("table_name") + "." + pResultSet.getString("column_name") + " " + pResultSet.getString("data_type"));
+                        throw new RuntimeException("datatype unknown: " + pResultSet.getString("table_name") + "." + column_name + " " + pResultSet.getString("data_type"));
                     }
 
           /*if( pResultSet.getString( "extra" ) != null && pResultSet.getString( "extra" ).contains( "auto_increment" ) )
@@ -408,7 +421,7 @@ public class LoadIstAzureSql extends LoadIst {
                     if (pResultSet.getBoolean("is_primary_key")) {
                         PrimaryKey primaryKey = new PrimaryKeyImpl();
                         table.setPrimary_key(primaryKey);
-                        primaryKey.setConsName(pResultSet.getString("index_name"));
+                        primaryKey.setConsName(returnNullIfGenerated(pResultSet.getString("index_name")));
                     } else {
                         if (pResultSet.getString("index_name") != null) {
                             if (pResultSet.getBoolean("is_unique_constraint")) {
@@ -451,7 +464,7 @@ public class LoadIstAzureSql extends LoadIst {
                 "  where tables.object_id = indexes.object_id and index_columns.object_id = indexes.object_id and index_columns.index_id = indexes.index_id and columns.object_id = tables.object_id and columns.column_id = index_columns.column_id" +//
                 "   order by tables.name," + //
                 "            indexes.name," + //
-                "            index_column_id" + //
+                "            key_ordinal" + //
                 "";
 
         new WrapperIteratorResultSet(lSql, getCallableStatementProvider()) {
@@ -460,7 +473,12 @@ public class LoadIstAzureSql extends LoadIst {
                 if (!isIgnoredTable(pResultSet.getString("table_name"), pResultSet.getString("owner"))) {
                     ColumnRef lColumnRef = new ColumnRefImpl();
 
-                    lColumnRef.setColumn_name(pResultSet.getString("column_name"));
+                    String column_name = pResultSet.getString("column_name");
+                    if (isStringName(column_name)) {
+                        lColumnRef.setColumn_name_string(column_name);
+                    } else {
+                        lColumnRef.setColumn_name(column_name);
+                    }
 
                     if (pResultSet.getBoolean("is_primary_key")) {
                         findTable(pModel, pResultSet.getString("table_name"), pResultSet.getString("table_owner")).getPrimary_key().getPk_columns().add(lColumnRef);
@@ -618,6 +636,20 @@ public class LoadIstAzureSql extends LoadIst {
         }.execute();
     }
 
+    private String returnNullIfGenerated(String pName) {
+        if (pName.matches(".*__.*__.*")) {
+            return null;
+        }
+        return pName;
+    }
+
+    private boolean isStringName(String pName) {
+        if (pName.contains(" ")) {
+            return true;
+        }
+        return false;
+    }
+
 
     private void loadTableForeignKeysIntoModel(final Model pModel) {
         String lSql = "" + //
@@ -651,6 +683,9 @@ public class LoadIstAzureSql extends LoadIst {
                         }
                         if (pResultSet.getString("delete_referential_action_desc").equals("CASCADE")) {
                             lForeignKey.setDelete_rule(FkDeleteRuleType.CASCADE);
+                        }
+                        if (pResultSet.getString("delete_referential_action_desc").equals("SET_NULL")) {
+                            lForeignKey.setDelete_rule(FkDeleteRuleType.SET_NULL);
                         }
                     }
 
@@ -692,11 +727,21 @@ public class LoadIstAzureSql extends LoadIst {
                     ForeignKey foreignKey = findForeignKey(pModel, pResultSet.getString("table_name"), pResultSet.getString("owner"), pResultSet.getString("constraint_name"));
 
                     ColumnRef lColumnRef = new ColumnRefImpl();
-                    lColumnRef.setColumn_name(pResultSet.getString("column_name"));
+                    String column_name = pResultSet.getString("column_name");
+                    if (isStringName(column_name)) {
+                        lColumnRef.setColumn_name_string(column_name);
+                    } else {
+                        lColumnRef.setColumn_name(column_name);
+                    }
                     foreignKey.getSrcColumns().add(lColumnRef);
 
                     ColumnRef lRefColumnRef = new ColumnRefImpl();
-                    lRefColumnRef.setColumn_name(pResultSet.getString("ref_column_name"));
+                    String ref_column_name = pResultSet.getString("ref_column_name");
+                    if (isStringName(ref_column_name)) {
+                        lRefColumnRef.setColumn_name_string(ref_column_name);
+                    } else {
+                        lRefColumnRef.setColumn_name(ref_column_name);
+                    }
                     foreignKey.getDestColumns().add(lRefColumnRef);
                 }
             }
