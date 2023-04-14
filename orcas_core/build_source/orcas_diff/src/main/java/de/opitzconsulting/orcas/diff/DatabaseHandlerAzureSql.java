@@ -187,11 +187,11 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
             List<Token> lReturn = new ArrayList<>();
 
             do {
-                lReturn.add(new UnparsedToken(lRemaining.substring(0, lRemaining.indexOf(pSplit)).trim()));
+                lReturn.add(new UnparsedToken(lRemaining.substring(0, lRemaining.indexOf(pSplit))));
                 lRemaining = lRemaining.substring(lRemaining.indexOf(pSplit) + pSplit.length());
             } while (lRemaining.contains(pSplit));
 
-            lReturn.add(new UnparsedToken(lRemaining.trim()));
+            lReturn.add(new UnparsedToken(lRemaining));
 
             return lReturn;
         }
@@ -208,7 +208,18 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
 
         @Override
         public String toString() {
-            return tokens.stream().map(Object::toString).collect(Collectors.joining(logicAnd ? "and" : (logicOr ? "or" : "")));
+            String lLogicCombine = "";
+
+            if (logicAnd) {
+                lLogicCombine = "and";
+            }
+            if (logicOr) {
+                lLogicCombine = "or";
+            }
+
+            return (lLogicCombine.isEmpty() ? "" : "(")
+                    + tokens.stream().map(Object::toString).collect(Collectors.joining(lLogicCombine))
+                    + (lLogicCombine.isEmpty() ? "" : ")");
         }
 
         public void convertBetweenRecursive() {
@@ -227,14 +238,15 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
         public void convertInRecursive() {
             boolean lConverted = false;
 
-            if (tokens.size() == 2) {
-                if (tokens.get(0) instanceof UnparsedToken) {
+            List<Token> filteredTokenList = tokens.stream().filter(it -> (!(it instanceof UnparsedToken)) || !((UnparsedToken) it).token.isEmpty()).collect(Collectors.toList());
+            if (filteredTokenList.size() == 2) {
+                if (filteredTokenList.get(0) instanceof UnparsedToken) {
                     Pattern pattern = Pattern.compile("(.+) in");
-                    Matcher matcher = pattern.matcher(((UnparsedToken) tokens.get(0)).token.toLowerCase().trim());
+                    Matcher matcher = pattern.matcher(((UnparsedToken) filteredTokenList.get(0)).token.toLowerCase().trim());
 
                     if (matcher.matches()) {
-                        if (tokens.get(1) instanceof SubListToken) {
-                            List<Token> lSubTokenList = ((SubListToken) tokens.get(1)).tokens;
+                        if (filteredTokenList.get(1) instanceof SubListToken) {
+                            List<Token> lSubTokenList = ((SubListToken) filteredTokenList.get(1)).tokens;
                             if (lSubTokenList.size() > 0) {
                                 lConverted = true;
 
@@ -264,8 +276,10 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
         }
 
         public void convertLogicRecursive() {
-            handleLogic(true);
             handleLogic(false);
+            if (!logicOr) {
+                handleLogic(true);
+            }
 
             for (Token lToken : tokens) {
                 if (lToken instanceof SubListToken) {
@@ -273,8 +287,28 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
                 }
             }
 
+            tokens = tokens
+                    .stream()
+                    .filter(it -> !it.toString().isEmpty())
+                    .collect(Collectors.toList());
+
             if (logicOr || logicAnd) {
-                tokens = tokens.stream().sorted(Comparator.comparing(Objects::toString)).collect(Collectors.toList());
+                tokens = tokens
+                        .stream()
+                        .flatMap(it -> {
+                            if (it instanceof SubListToken) {
+                                SubListToken lSubListToken = (SubListToken) it;
+                                if ((lSubListToken.tokens.size() < 2) ||
+                                        lSubListToken.logicOr == logicOr && lSubListToken.logicAnd == logicAnd
+                                ) {
+                                    return lSubListToken.tokens.stream();
+                                }
+                            }
+
+                            return Stream.of(it);
+                        })
+                        .sorted(Comparator.comparing(Objects::toString))
+                        .collect(Collectors.toList());
             }
         }
 
@@ -323,11 +357,7 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
                 tokens.clear();
                 lNewTokens.forEach(it -> {
                     if (it.size() > 0) {
-                        if (it.size() == 1) {
-                            tokens.add(it.get(0));
-                        } else {
-                            tokens.add(new SubListToken(it));
-                        }
+                        tokens.add(new SubListToken(it));
                     }
                 });
             }
@@ -379,6 +409,7 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
         SubListToken subListToken = new SubListToken(handleBraces(lList));
 
         subListToken.convertBetweenRecursive();
+        subListToken.convertLogicRecursive();
         subListToken.convertInRecursive();
 
         subListToken.convertLogicRecursive();

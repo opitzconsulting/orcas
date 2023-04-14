@@ -20,12 +20,19 @@ public class TestDatabaseHandlerAzureSql {
     @Test
     public void testIsExpressionDifferentNotNullStatics_OrLogic() {
         assertEqual("id = 0 or id = 1", "id = 1 or id = 0");
-        assertNotEqual("id = 0 and id = 1", "id = 1 or id = 0");
     }
 
     @Test
     public void testIsExpressionDifferentNotNullStatics_AndLogic() {
         assertEqual("id != 0 and id != 1", "id != 1 and id != 0");
+    }
+
+    @Test
+    public void testIsExpressionDifferentNotNullStatics_Logic() {
+        assertNotEqual("id = 0 and id = 1", "id = 1 or id = 0");
+        assertNotEqual("(id = 0 or id = 1) and id2 = 5", "id = 0 or id = 1 and id2 = 5");
+        assertEqual("id = 0 or (id = 1 and id2 = 5)", "id = 0 or id = 1 and id2 = 5");
+        assertEqual("id = 0 or (id = 1 or id2 = 5)", "id = 0 or id = 1 or id2 = 5");
     }
 
     @Test
@@ -41,6 +48,16 @@ public class TestDatabaseHandlerAzureSql {
     public void testIsExpressionDifferentNotNullStatics_InList() {
         assertEqual("([id] = (0) or [id] = (6))", "id in (0,6)");
         assertEqual("([id] = '0' or [id] = ('6'))", "id in ('0','6')");
+    }
+
+    @Test
+    public void testIsExpressionDifferentNotNullStatics_Complex() {
+        assertEqual("([csps_dest_id] IS NULL AND [csps_isoc_id] IS NOT NULL OR [csps_dest_id] IS NOT NULL AND [csps_isoc_id] IS NULL)"
+                , "(csps_dest_id is null and csps_isoc_id is not null) or (csps_dest_id is not null and csps_isoc_id is null)");
+        assertEqual("([benu_extern_knz]=(0) AND [benu_passwort] IS NOT NULL OR [benu_extern_knz]=(1) AND [benu_passwort] IS NULL)"
+                , "(benu_extern_knz = 0 and benu_passwort is not null) or (benu_extern_knz = 1 and benu_passwort is null)");
+        assertEqual("([eisc_zusatzfunktion]='SFA' OR [eisc_zusatzfunktion]='TK' OR [eisc_zusatzfunktion] IS NULL)"
+                , "eisc_zusatzfunktion in ('TK','SFA') or eisc_zusatzfunktion is null");
     }
 
     private static void assertEqual(String pExpression1, String pExpression2) {
