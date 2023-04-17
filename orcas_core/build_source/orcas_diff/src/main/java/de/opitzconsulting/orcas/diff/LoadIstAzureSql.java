@@ -262,6 +262,8 @@ public class LoadIstAzureSql extends LoadIst {
                 "        columns.precision as precision," + //
                 "        columns.scale as scale," + //
                 "        columns.is_nullable as is_nullable," + //
+                "        columns.is_computed," + //
+                "        (select definition from " + getDataDictionaryView("computed_columns") + " where computed_columns.object_id = columns.object_id and computed_columns.column_id = columns.column_id) as column_virtual_definition," + //
                 "        (select definition from " + getDataDictionaryView("default_constraints") + " where default_constraints.object_id = columns.default_object_id) as column_default," + //
                 "        (select default_constraints.name from " + getDataDictionaryView("default_constraints") + " where default_constraints.object_id = columns.default_object_id) as column_default_name" + //
                 "   from " + getDataDictionaryView("columns") + //
@@ -292,6 +294,11 @@ public class LoadIstAzureSql extends LoadIst {
                     if (!"(NULL)".equals(pResultSet.getString("column_default"))) {
                         lColumn.setDefault_value(pResultSet.getString("column_default"));
                         lColumn.setDefault_name(pResultSet.getString("column_default_name"));
+                    }
+
+                    if (pResultSet.getBoolean("is_computed")) {
+                        lColumn.setVirtual("virtual");
+                        lColumn.setDefault_value(pResultSet.getString("column_virtual_definition"));
                     }
 
                     lColumn.setNotnull(!pResultSet.getBoolean("is_nullable"));

@@ -97,57 +97,7 @@ public class OrcasDiff
 
   private List<Difference> isRecreateColumn( ColumnDiff pColumnDiff )
   {
-    List<Difference> lReturn = new ArrayList<>();
-
-    if( pColumnDiff.data_typeNew != null && pColumnDiff.data_typeOld != null )
-    {
-      if( !pColumnDiff.data_typeIsEqual )
-      {
-        lReturn.add(new DifferenceImpl(COLUMN__DATA_TYPE, pColumnDiff));
-      }
-
-      if( isLessTahnOrNull( pColumnDiff.precisionNew, pColumnDiff.precisionOld ) )
-      {
-        lReturn.add(new DifferenceImpl(COLUMN__PRECISION, pColumnDiff));
-      }
-
-      if( isLessTahnOrNull( pColumnDiff.scaleNew, pColumnDiff.scaleOld ) )
-      {
-        lReturn.add(new DifferenceImpl(COLUMN__SCALE, pColumnDiff));
-      }
-    }
-
-    if( !pColumnDiff.object_typeIsEqual )
-    {
-      lReturn.add(new DifferenceImpl(COLUMN__OBJECT_TYPE, pColumnDiff));
-    }
-
-    if( !pColumnDiff.unsignedIsEqual )
-    {
-      lReturn.add(new DifferenceImpl(COLUMN__UNSIGNED, pColumnDiff));
-    }
-
-    if( !pColumnDiff.virtualIsEqual )
-    {
-      lReturn.add(new DifferenceImpl(COLUMN__VIRTUAL, pColumnDiff));
-    }
-
-    return lReturn;
-  }
-
-  private boolean isLessTahnOrNull( Integer pValue1, Integer pValue2 )
-  {
-    if( pValue1 == null && pValue2 == null )
-    {
-      return false;
-    }
-
-    if( pValue1 == null || pValue2 == null )
-    {
-      return true;
-    }
-
-    return pValue1 < pValue2;
+    return databaseHandler.isRecreateColumn(pColumnDiff);
   }
 
   private void loadNames( ModelDiff pModelDiff, boolean pIsNew )
@@ -270,10 +220,16 @@ public class OrcasDiff
               lRecreateColumnNames.put( lColumnDiff.nameOld, recreateNeededRegistry.getRecreateNeededReasons( lColumnDiff ) );
             }
             else {
-              List<Difference>
-                  lChangeVirtualColumn =
-                  RecreateNeededBuilder.getDifferentEAttributes(lColumnDiff, Stream.of(COLUMN__IDENTITY, COLUMN__DEFAULT_VALUE).collect(
-                      Collectors.toList()));
+              List<Difference> lChangeVirtualColumn = new ArrayList<>();
+
+              if (!lColumnDiff.isFieldEqual(COLUMN__IDENTITY)) {
+                  lChangeVirtualColumn.add(new DifferenceImpl(COLUMN__IDENTITY, lColumnDiff));
+              }
+
+              if (databaseHandler.isExpressionDifferent(lColumnDiff.default_valueOld, lColumnDiff.default_valueNew)) {
+                  lChangeVirtualColumn.add(new DifferenceImpl(COLUMN__DEFAULT_VALUE, lColumnDiff));
+              }
+
               if (lColumnDiff.isOld && (lColumnDiff.virtualOld != null || !lColumnDiff.virtualIsEqual) && !lChangeVirtualColumn.isEmpty()) {
                 DiffActionReasonDifferent
                     lDiffActionReasonDifferent =

@@ -1,5 +1,6 @@
 package de.opitzconsulting.orcas.diff;
 
+import de.opitzconsulting.orcas.orig.diff.ColumnDiff;
 import de.opitzconsulting.orcas.sql.CallableStatementProvider;
 import de.opitzconsulting.orcas.sql.WrapperExecutePreparedStatement;
 import de.opitzconsulting.origOrcasDsl.CharType;
@@ -10,6 +11,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.COLUMN__DEFAULT_VALUE;
 
 public class DatabaseHandlerAzureSql extends DatabaseHandler {
     @Override
@@ -195,6 +198,25 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
 
             return lReturn;
         }
+    }
+
+    @Override
+    public boolean isCanDiffFunctionBasedIndexExpression() {
+        return false;
+    }
+
+
+    @Override
+    public List<RecreateNeededBuilder.Difference> isRecreateColumn(ColumnDiff pColumnDiff) {
+        List<RecreateNeededBuilder.Difference> lReturn = super.isRecreateColumn(pColumnDiff);
+
+        if ("virtual".equals(pColumnDiff.virtualNew) && !pColumnDiff.default_valueIsEqual) {
+            if (isExpressionDifferent(pColumnDiff.default_valueNew, pColumnDiff.default_valueOld)) {
+                lReturn.add(new RecreateNeededBuilder.DifferenceImpl(COLUMN__DEFAULT_VALUE, pColumnDiff));
+            }
+        }
+
+        return lReturn;
     }
 
     private static class SubListToken extends Token {

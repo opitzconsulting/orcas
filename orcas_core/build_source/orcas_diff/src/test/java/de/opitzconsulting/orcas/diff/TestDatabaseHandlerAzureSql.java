@@ -58,6 +58,7 @@ public class TestDatabaseHandlerAzureSql {
                 , "(benu_extern_knz = 0 and benu_passwort is not null) or (benu_extern_knz = 1 and benu_passwort is null)");
         assertEqual("([eisc_zusatzfunktion]='SFA' OR [eisc_zusatzfunktion]='TK' OR [eisc_zusatzfunktion] IS NULL)"
                 , "eisc_zusatzfunktion in ('TK','SFA') or eisc_zusatzfunktion is null");
+        assertEqual("(CONVERT([varchar](10),[C_COL1])+'y')", "CONVERT(VARCHAR(10),C_COL1)+'y'");
     }
 
     private static void assertEqual(String pExpression1, String pExpression2) {
