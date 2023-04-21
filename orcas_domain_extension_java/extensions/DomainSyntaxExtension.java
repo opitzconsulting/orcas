@@ -166,6 +166,19 @@ public class DomainSyntaxExtension extends BaseSyntaxExtension
     }
 
     {
+      RuleNormal lRuleNormal = createRuleNormal( "GenerateIndex" );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( "generate-index" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( "index-name" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( "(" ) );
+      lRuleNormal.getRule_entries().add( createMultiValueRuleEntry( "indexNameRules", "GenNameRule" ) );
+      lRuleNormal.getRule_entries().add( createMarkerRuleEntry( ")*" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( ")" ) );
+      lRuleNormal.getRule_entries().add( createConstantRuleEntry( ")" ) );
+    }
+
+    {
       RuleNormal lRuleNormal = createRuleNormal( "GenerateCc" );
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( "generate-check-constraint" ) );
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( "(" ) );
@@ -243,6 +256,7 @@ public class DomainSyntaxExtension extends BaseSyntaxExtension
       addField( lRuleNormal, new NewFieldDataIdentifierWithoutKeyword( "name", true ) );
       addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "generatePk", "GeneratePk", false ) );
       addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "generateUk", "GenerateUk", false ) );
+      addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "generateIndex", "GenerateIndex", false ) );
       addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "generateCc", "GenerateCc", false ) );
       addField( lRuleNormal, new NewFieldDataTypeWithoutKeyword( "generateFk", "GenerateFk", false ) );
       lRuleNormal.getRule_entries().add( createConstantRuleEntry( "(" ) );

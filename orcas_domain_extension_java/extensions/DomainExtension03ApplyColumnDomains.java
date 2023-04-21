@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.EcoreUtil2;
 
-import de.opitzconsulting.orcasDsl.Column;
+import de.opitzconsulting.orcasDsl.*;
 import de.opitzconsulting.orcasDsl.ColumnDomain;
 import de.opitzconsulting.orcasDsl.ColumnRef;
 import de.opitzconsulting.orcasDsl.Constraint;
@@ -18,7 +18,7 @@ import de.opitzconsulting.orcasDsl.PrimaryKey;
 import de.opitzconsulting.orcasDsl.Sequence;
 import de.opitzconsulting.orcasDsl.Table;
 import de.opitzconsulting.orcasDsl.UniqueKey;
-import de.opitzconsulting.orcasDsl.impl.ColumnRefImpl;
+import de.opitzconsulting.orcasDsl.impl.*;
 import de.opitzconsulting.orcasDsl.impl.ConstraintImpl;
 import de.opitzconsulting.orcasDsl.impl.ForeignKeyImpl;
 import de.opitzconsulting.orcasDsl.impl.PrimaryKeyImpl;
@@ -137,14 +137,36 @@ public class DomainExtension03ApplyColumnDomains extends OrcasBaseExtensionWithP
 
         if( lColumnDomain.getGenerateUk() != null )
         {
-          UniqueKey lUniqueKey = new UniqueKeyImpl();
+          String lName = DomainExtensionHelper.getGeneratedNameColumn(lColumnDomain.getGenerateUk().getConstraintNameRules(), lColumn.getName(), pTable.getName(), pTable.getAlias());
+
+          UniqueKey lUniqueKey = (UniqueKey) pTable.getInd_uks().stream().filter(it -> lName.equals(it.getConsName())).findFirst().orElse(null);
+
+          if (lUniqueKey == null) {
+            lUniqueKey = new UniqueKeyImpl();
+            lUniqueKey.setConsName(lName);
+            pTable.getInd_uks().add(lUniqueKey);
+          }
 
           ColumnRef lColumnRef = new ColumnRefImpl();
-          lUniqueKey.getUk_columns().add( lColumnRef );
-          lColumnRef.setColumn_name( lColumn.getName() );
-          lUniqueKey.setConsName( DomainExtensionHelper.getGeneratedNameColumn( lColumnDomain.getGenerateUk().getConstraintNameRules(), lColumn.getName(), pTable.getName(), pTable.getAlias() ) );
+          lUniqueKey.getUk_columns().add(lColumnRef);
+          lColumnRef.setColumn_name(lColumn.getName());
+        }
 
-          pTable.getInd_uks().add( lUniqueKey );
+        if( lColumnDomain.getGenerateIndex() != null )
+        {
+          String lName = DomainExtensionHelper.getGeneratedNameColumn(lColumnDomain.getGenerateIndex().getIndexNameRules(), lColumn.getName(), pTable.getName(), pTable.getAlias());
+
+          Index lIndex = (Index) pTable.getInd_uks().stream().filter(it -> lName.equals(it.getConsName())).findFirst().orElse(null);
+
+          if (lIndex == null) {
+            lIndex = new IndexImpl();
+            lIndex.setConsName(lName);
+            pTable.getInd_uks().add(lIndex);
+          }
+
+          ColumnRef lColumnRef = new ColumnRefImpl();
+          lIndex.getIndex_columns().add(lColumnRef);
+          lColumnRef.setColumn_name(lColumn.getName());
         }
 
         if( lColumnDomain.getGenerateCc() != null )
