@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
-                  version: '8.2.0'
+                  version: '8.3.0'
         classpath group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '1.1.7'
     }
 }

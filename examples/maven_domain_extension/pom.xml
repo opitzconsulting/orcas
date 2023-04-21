@@ -13,14 +13,14 @@
       <plugin>
         <groupId>com.opitzconsulting.orcas</groupId>
         <artifactId>orcas-maven-plugin</artifactId>
-        <version>8.2.0</version>
+        <version>8.3.0</version>
         <extensions>true</extensions>
 
         <dependencies>
           <dependency>
             <groupId>com.opitzconsulting.orcas</groupId>
             <artifactId>orcas-domainextension-main-extensionhandler</artifactId>
-            <version>8.2.0</version>
+            <version>8.3.0</version>
           </dependency>
 
 		<dependency>
