@@ -159,6 +159,9 @@ public class LoadIstAzureSql extends LoadIst {
         if (pString.equalsIgnoreCase("SPT_FALLBACK_USG")) {
             return true;
         }
+        if (pString.equalsIgnoreCase("SYSDIAGRAMS")) {
+            return true;
+        }
 
         return isIgnored(pString, pOwner, _parameters.getExcludewheretable(), "TABLE");
     }
