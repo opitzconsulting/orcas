@@ -16,7 +16,7 @@
       <plugin>
         <groupId>com.opitzconsulting.orcas</groupId>
         <artifactId>orcas-maven-plugin</artifactId>
-        <version>8.3.0</version>
+        <version>8.3.1</version>
         <extensions>true</extensions>
 
  
