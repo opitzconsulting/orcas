@@ -130,6 +130,7 @@ public class DomainExtension03ApplyColumnDomains extends OrcasBaseExtensionWithP
 
             lSequence.setSequence_name( DomainExtensionHelper.getGeneratedNameColumn( lColumnDomain.getGeneratePk().getSequenceNameRules(), lColumn.getName(), pTable.getName(), pTable.getAlias() ) );
             lSequence.setMax_value_select( "select max(" + lColumn.getName() + ") from " + pTable.getName() );
+            lSequence.setStartwith(java.math.BigInteger.ONE);
 
             pModel.getModel_elements().add( lSequence );
           }
