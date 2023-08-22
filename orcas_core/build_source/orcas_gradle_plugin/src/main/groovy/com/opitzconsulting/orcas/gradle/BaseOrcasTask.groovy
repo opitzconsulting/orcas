@@ -85,8 +85,8 @@ public abstract class BaseOrcasTask extends DefaultTask
     lParametersCall.setMultiSchemaExcludewhereowner( orcasconfiguration.multischemaexcludewhereowner );
     lParametersCall.setViewExtractMode( orcasconfiguration.viewextractmode );
     lParametersCall.setIsOneTimeScriptLogonlyMode( orcasconfiguration.isOneTimeScriptLogonlyMode );
-    orcasconfiguration.extensions.forEach{lParametersCall.addExtension(it)};
-    orcasconfiguration.reverseExtensions.forEach{lParametersCall.addReverseExtension(it)};
+    orcasconfiguration.orcasExtensions.forEach{lParametersCall.addExtension(it)};
+    orcasconfiguration.orcasReverseExtensions.forEach{lParametersCall.addReverseExtension(it)};
     if (orcasconfiguration.isExtractViewCommnets == true) {
       lParametersCall.setExtractViewCommnets(true);
     } else {

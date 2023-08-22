@@ -481,13 +481,13 @@ class OrcasGradlePluginExtension {
    *
    * default: empty list
    */
-  def List<UnaryOperator<Model>> extensions = new ArrayList<>();
+  def List<UnaryOperator<Model>> orcasExtensions = new ArrayList<>();
   /**
    * List of Reverse-Extensions.
    *
    * default: empty list
    */
-  def List<UnaryOperator<Model>> reverseExtensions = new ArrayList<>();
+  def List<UnaryOperator<Model>> orcasReverseExtensions = new ArrayList<>();
 }
 
 
