@@ -34,6 +34,14 @@ public abstract class DatabaseHandler {
         return true;
     }
 
+    public String getSequenceDefaultMaxValueString() {
+        return "9999999999999999999999999999";
+    }
+
+    public String getSequenceDefaultMinValueString() {
+        return "1";
+    }
+
     public abstract boolean isRenameIndex();
 
     public abstract boolean isRenameMView();

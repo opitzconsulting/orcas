@@ -33,10 +33,6 @@ public class DdlBuilderAzureSql extends DdlBuilder {
     }
 
     @Override
-    public void alterSequenceIfNeeded(StatementBuilderAlter pP1, SequenceDiff pSequenceDiff, DataHandler pDataHandler) {
-    }
-
-    @Override
     public void setComment(StatementBuilder p, TableDiff pTableDiff, InlineCommentDiff pInlineCommentDiff) {
         if (pInlineCommentDiff.column_nameNew == null) {
             p.stmtStart("alter table");

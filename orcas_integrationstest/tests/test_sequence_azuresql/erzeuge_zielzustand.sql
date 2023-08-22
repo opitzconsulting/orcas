@@ -10,9 +10,9 @@ create sequence seq_test_default increment by 1;
 create sequence seq_ignore;
 
 /* 4 ist eigentlich egal, wird aber durch das update erzeugt */
-create sequence seq_test_update increment by 10 start with 4; 
+create sequence seq_test_update increment by 10 start with 1;
 
-create sequence seq_test_update_lv start with 13;
+create sequence seq_test_update_lv start with 4;
 
 create sequence seq_test_invalid_update start with 1;
 

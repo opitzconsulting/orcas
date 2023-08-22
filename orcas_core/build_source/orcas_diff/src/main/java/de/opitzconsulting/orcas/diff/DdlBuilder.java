@@ -300,7 +300,7 @@ public abstract class DdlBuilder
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__MAXVALUE )//
     .failIfAdditionsOnly()//
-    .handle(p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + nvl( pSequenceDiff.maxvalueNew, "9999999999999999999999999999" )));
+    .handle(p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " maxvalue " + nvl( pSequenceDiff.maxvalueNew, databaseHandler.getSequenceDefaultMaxValueString() )));
 
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__MINVALUE )//

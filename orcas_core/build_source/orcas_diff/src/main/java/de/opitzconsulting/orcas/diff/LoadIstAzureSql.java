@@ -8,6 +8,7 @@ import de.opitzconsulting.origOrcasDsl.impl.*;
 import org.eclipse.emf.common.util.EList;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class LoadIstAzureSql extends LoadIst {
 
         Model pModel = new ModelImpl();
 
-        loadSequencesIntoModel(pModel, true);
+        loadSequencesIntoModel(pModel, pWithSequeneceMayValueSelect);
 
         loadTablesIntoModel(pModel);
         loadTableColumnsIntoModel(pModel);
@@ -575,9 +576,23 @@ public class LoadIstAzureSql extends LoadIst {
         }.execute();
     }
 
+    private BigInteger toBigInt(BigDecimal pBigDecimal) {
+        if (pBigDecimal == null) {
+            return null;
+        }
+        return pBigDecimal.toBigInteger();
+    }
+
     private void loadSequencesIntoModel(final Model pModel, final boolean pWithSequeneceMayValueSelect) {
         String lSql = "" + //
                 " select name," + //
+                "        current_value," + //
+                "        increment," + //
+                "        start_value," + //
+                "        minimum_value," + //
+                "        maximum_value," + //
+                "        is_cycling," + //
+                "        cache_size," + //
                 "        owner" + //
                 "   from " + getDataDictionaryView("sequences") + //
                 "  order by name" + //
@@ -591,23 +606,15 @@ public class LoadIstAzureSql extends LoadIst {
 
                     lSequence.setSequence_name(getNameWithOwner(pResultSet.getString("name"), pResultSet.getString("owner")));
 
-                    /*
-                     * lSequence.setIncrement_by( toInt( pResultSet.getBigDecimal(
-                     * "increment_by" ) ) ); if( pWithSequeneceMayValueSelect ) {
-                     * lSequence.setMax_value_select( pResultSet.getString( "last_number"
-                     * ) ); } lSequence.setCache( toInt( pResultSet.getBigDecimal(
-                     * "cache_size" ) ) ); lSequence.setMinvalue( toInt(
-                     * pResultSet.getBigDecimal( "min_value" ) ) ); lSequence.setMaxvalue(
-                     * toInt( pResultSet.getBigDecimal( "max_value" ) ) );
-                     *
-                     * if( "Y".equals( pResultSet.getString( "cycle_flag" ) ) ) {
-                     * lSequence.setCycle( CycleType.CYCLE ); } else { lSequence.setCycle(
-                     * CycleType.NOCYCLE ); }
-                     *
-                     * if( "Y".equals( pResultSet.getString( "order_flag" ) ) ) {
-                     * lSequence.setOrder( OrderType.ORDER ); } else { lSequence.setOrder(
-                     * OrderType.NOORDER ); }
-                     */
+                    lSequence.setIncrement_by(toBigInt(pResultSet.getBigDecimal("increment")));
+                    lSequence.setStartwith(toBigInt(pResultSet.getBigDecimal("start_value")));
+                    lSequence.setMinvalue(toBigInt(pResultSet.getBigDecimal("minimum_value")));
+                    lSequence.setMaxvalue(toBigInt(pResultSet.getBigDecimal("maximum_value")));
+                    lSequence.setCycle(pResultSet.getBoolean("is_cycling") == Boolean.TRUE ? CycleType.CYCLE : CycleType.NOCYCLE);
+                    lSequence.setCache(toBigInt(pResultSet.getBigDecimal("cache_size")));
+                    if (pWithSequeneceMayValueSelect) {
+                        lSequence.setMax_value_select(pResultSet.getString("current_value"));
+                    }
 
                     pModel.getModel_elements().add(lSequence);
                 }

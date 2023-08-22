@@ -489,7 +489,7 @@ public class InitDiffRepository
 
       public BigInteger maxvalueCleanValueIfNeeded( BigInteger pValue )
       {
-        if(Objects.equals(pValue, new BigInteger("9999999999999999999999999999")))
+        if(Objects.equals(pValue, new BigInteger(Orcas.getDatabaseHandler(pParameters).getSequenceDefaultMaxValueString())))
         {
           return null;
         }
@@ -499,7 +499,7 @@ public class InitDiffRepository
 
       public BigInteger minvalueCleanValueIfNeeded( BigInteger pValue )
       {
-        if(Objects.equals(pValue, BigInteger.ONE))
+        if(Objects.equals(pValue, new BigInteger(Orcas.getDatabaseHandler(pParameters).getSequenceDefaultMinValueString())))
         {
           return null;
         }

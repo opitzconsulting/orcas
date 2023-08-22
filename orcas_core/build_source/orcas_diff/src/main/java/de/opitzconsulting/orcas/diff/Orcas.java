@@ -97,27 +97,32 @@ public abstract class Orcas
 
   protected DatabaseHandler getDatabaseHandler()
   {
-    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:mysql" ) || getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:mariadb" ) )
+    return getDatabaseHandler(getParameters());
+  }
+
+  public static DatabaseHandler getDatabaseHandler(Parameters parameters)
+  {
+    if( parameters.getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:mysql" ) || parameters.getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:mariadb" ) )
     {
       return new DatabaseHandlerMySql();
     }
 
-    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:hsqldb" ) )
+    if( parameters.getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:hsqldb" ) )
     {
       return new DatabaseHandlerHsqlDb();
     }
 
-    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:h2" ) )
+    if( parameters.getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:h2" ) )
     {
       return new DatabaseHandlerH2();
     }
 
-    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:postgresql" ) )
+    if( parameters.getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:postgresql" ) )
     {
       return new DatabaseHandlerPostgres();
     }
 
-    if( getParameters().getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:sqlserver" ) )
+    if( parameters.getJdbcConnectParameters().getJdbcUrl().startsWith( "jdbc:sqlserver" ) )
     {
       return new DatabaseHandlerAzureSql();
     }

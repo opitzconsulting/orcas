@@ -22,6 +22,16 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
     }
 
     @Override
+    public String getSequenceDefaultMaxValueString() {
+        return "9223372036854775807";
+    }
+
+    @Override
+    public String getSequenceDefaultMinValueString() {
+        return "-9223372036854775808";
+    }
+
+    @Override
     public void insertIntoOrcasUpdatesTable(String pOrcasUpdatesTableName, CallableStatementProvider pOrcasCallableStatementProvider, String pFilePart, String pLogname) {
         String lSql = "" + //
                 " insert into " + pOrcasUpdatesTableName + "(" + //
