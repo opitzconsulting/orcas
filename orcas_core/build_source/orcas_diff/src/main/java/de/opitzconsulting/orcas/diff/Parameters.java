@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -278,11 +279,22 @@ public abstract class Parameters {
         updateEnabledStatus = pUpdateEnabledStatus;
     }
 
+    private final List<UnaryOperator<?>> extensions = new ArrayList<>();
+    private final List<UnaryOperator<?>> reverseExtensions = new ArrayList<>();
+
+    public <T extends EObject> void addExtension( UnaryOperator<T> pExtension ) {
+      extensions.add(pExtension);
+    }
+
+    public <T extends EObject> void addReverseExtension( UnaryOperator<T> pExtension ) {
+      reverseExtensions.add(pExtension);
+    }
+
     private AdditionalExtensionFactory _additionalExtensionFactory = new AdditionalExtensionFactory() {
         @SuppressWarnings("unchecked")
         @Override
         public <T extends EObject> List<UnaryOperator<T>> getAdditionalExtensions(Class<T> pModelClass, boolean pReverseMode) {
-            return Collections.EMPTY_LIST;
+            return (List<UnaryOperator<T>>)(List<?>)(pReverseMode ? reverseExtensions : extensions);
         }
     };
 

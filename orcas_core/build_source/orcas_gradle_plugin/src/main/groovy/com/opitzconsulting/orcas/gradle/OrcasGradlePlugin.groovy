@@ -2,10 +2,13 @@ package com.opitzconsulting.orcas.gradle
 
 import de.opitzconsulting.orcas.diff.ExecuteSqlErrorHandler
 import de.opitzconsulting.orcas.diff.ParameterDefaults
+import de.opitzconsulting.orcasDsl.Model
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 
-import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode;
+import de.opitzconsulting.orcas.diff.Parameters.FailOnErrorMode
+
+import java.util.function.UnaryOperator;
 
 class OrcasGradlePlugin implements Plugin<Project> {
     void apply(Project pProject) {
@@ -472,6 +475,19 @@ class OrcasGradlePluginExtension {
    * default: false
    */
   def boolean isOneTimeScriptLogonlyMode = ParameterDefaults.isOneTimeScriptLogonlyMode;
+
+  /**
+   * List of Extensions.
+   *
+   * default: empty list
+   */
+  def List<UnaryOperator<Model>> extensions = new ArrayList<>();
+  /**
+   * List of Reverse-Extensions.
+   *
+   * default: empty list
+   */
+  def List<UnaryOperator<Model>> reverseExtensions = new ArrayList<>();
 }
 
 

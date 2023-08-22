@@ -30,98 +30,101 @@ public abstract class BaseOrcasTask extends DefaultTask
   {
     ParametersCall lParametersCall = new ParametersCall();
 
-    lParametersCall.getJdbcConnectParameters().setJdbcDriver( project.orcasconfiguration.jdbcdriver );
-    lParametersCall.getJdbcConnectParameters().setJdbcUrl( project.orcasconfiguration.jdbcurl );
-    lParametersCall.getJdbcConnectParameters().setJdbcUser( project.orcasconfiguration.username );
-    lParametersCall.getJdbcConnectParameters().setJdbcPassword( project.orcasconfiguration.password );
+    OrcasGradlePluginExtension orcasconfiguration = project.orcasconfiguration
+    lParametersCall.getJdbcConnectParameters().setJdbcDriver( orcasconfiguration.jdbcdriver );
+    lParametersCall.getJdbcConnectParameters().setJdbcUrl( orcasconfiguration.jdbcurl );
+    lParametersCall.getJdbcConnectParameters().setJdbcUser( orcasconfiguration.username );
+    lParametersCall.getJdbcConnectParameters().setJdbcPassword( orcasconfiguration.password );
 
-    lParametersCall.setTargetplsql( project.orcasconfiguration.targetplsql );
+    lParametersCall.setTargetplsql( orcasconfiguration.targetplsql );
 
-    lParametersCall.setScriptprefix( project.orcasconfiguration.scriptfolderPrefix );
-    lParametersCall.setScriptpostfix( project.orcasconfiguration.scriptfolderPostfix );
-    lParametersCall.setScriptfolderrecursive( project.orcasconfiguration.scriptfolderrecursive );
+    lParametersCall.setScriptprefix( orcasconfiguration.scriptfolderPrefix );
+    lParametersCall.setScriptpostfix( orcasconfiguration.scriptfolderPostfix );
+    lParametersCall.setScriptfolderrecursive( orcasconfiguration.scriptfolderrecursive );
 
-    lParametersCall.setSpoolfile( convertOutFile(project.orcasconfiguration.spoolfile) );
-    lParametersCall.setSpoolfolder( convertOutFile(project.orcasconfiguration.spoolfolder) );
+    lParametersCall.setSpoolfile( convertOutFile(orcasconfiguration.spoolfile) );
+    lParametersCall.setSpoolfolder( convertOutFile(orcasconfiguration.spoolfolder) );
     lParametersCall.setLogname( getLogname() );
-    lParametersCall.setLoglevel( project.orcasconfiguration.loglevel );
+    lParametersCall.setLoglevel( orcasconfiguration.loglevel );
 
-    lParametersCall.setFailOnErrorMode( failOnErrorMode != null ? failOnErrorMode : project.orcasconfiguration.failOnErrorMode );
-    lParametersCall.setExecuteSqlErrorHandler( executeSqlErrorHandler != null ? executeSqlErrorHandler : project.orcasconfiguration.executeSqlErrorHandler );
+    lParametersCall.setFailOnErrorMode( failOnErrorMode != null ? failOnErrorMode : orcasconfiguration.failOnErrorMode );
+    lParametersCall.setExecuteSqlErrorHandler( executeSqlErrorHandler != null ? executeSqlErrorHandler : orcasconfiguration.executeSqlErrorHandler );
 
-    lParametersCall.setLogCompileErrors( project.orcasconfiguration.logCompileErrors );
+    lParametersCall.setLogCompileErrors( orcasconfiguration.logCompileErrors );
 
-    lParametersCall.setExcludewhereview( project.orcasconfiguration.excludewhereview );
-    lParametersCall.setExcludewhereobjecttype( project.orcasconfiguration.excludewhereobjecttype );
-    lParametersCall.setExcludewherepackage( project.orcasconfiguration.excludewherepackage );
-    lParametersCall.setExcludewheretrigger( project.orcasconfiguration.excludewheretrigger );
-    lParametersCall.setExcludewherefunction( project.orcasconfiguration.excludewherefunction );
-    lParametersCall.setExcludewhereprocedure( project.orcasconfiguration.excludewhereprocedure );
+    lParametersCall.setExcludewhereview( orcasconfiguration.excludewhereview );
+    lParametersCall.setExcludewhereobjecttype( orcasconfiguration.excludewhereobjecttype );
+    lParametersCall.setExcludewherepackage( orcasconfiguration.excludewherepackage );
+    lParametersCall.setExcludewheretrigger( orcasconfiguration.excludewheretrigger );
+    lParametersCall.setExcludewherefunction( orcasconfiguration.excludewherefunction );
+    lParametersCall.setExcludewhereprocedure( orcasconfiguration.excludewhereprocedure );
 
-    lParametersCall.setLogonly( project.orcasconfiguration.logonly );
-    lParametersCall.setDropmode( project.orcasconfiguration.dropmode );
-    lParametersCall.setIndexparallelcreate( project.orcasconfiguration.indexparallelcreate );
-    lParametersCall.setIndexmovetablespace( project.orcasconfiguration.indexmovetablespace );
-    lParametersCall.setTablemovetablespace( project.orcasconfiguration.tablemovetablespace );
-    lParametersCall.setMviewlogmovetablespace( project.orcasconfiguration.mviewlogmovetablespace );
-    lParametersCall.setCreatemissingfkindexes( project.orcasconfiguration.createmissingfkindexes );
-    lParametersCall.setExcludewheretable( project.orcasconfiguration.excludewheretable );
-    lParametersCall.setExcludewheresequence( project.orcasconfiguration.excludewheresequence );
-    lParametersCall.setExcludewheremview( project.orcasconfiguration.excludewheremview );
-    lParametersCall.setDateformat( project.orcasconfiguration.dateformat );
-    lParametersCall.setExtensionParameter( project.orcasconfiguration.extensionparameter );
-    lParametersCall.setAdditionsOnly( project.orcasconfiguration.additionsonly );
-    lParametersCall.setLogIgnoredStatements( project.orcasconfiguration.logignoredstatements );
-    lParametersCall.setXmlLogFile( convertOutFile( project.orcasconfiguration.xmllogfile ) );
-    lParametersCall.setXmlInputFile( project.orcasconfiguration.xmlinputfile );
-    lParametersCall.setSetUnusedInsteadOfDropColumn( project.orcasconfiguration.setunusedinsteadofdropcolumn );
-    lParametersCall.setCreateIndexOnline( project.orcasconfiguration.indexonlinecreate );
-    lParametersCall.setMinimizeStatementCount( project.orcasconfiguration.minimizestatementcount );
-    lParametersCall.setCharsetName( project.orcasconfiguration.charsetname );
-    lParametersCall.setCharsetNameSqlLog( project.orcasconfiguration.charsetnamesqllog );
-    lParametersCall.setMultiSchema( project.orcasconfiguration.multischema );
-    lParametersCall.setMultiSchemaDbaViews( project.orcasconfiguration.multischemadbaviews );
-    lParametersCall.setMultiSchemaExcludewhereowner( project.orcasconfiguration.multischemaexcludewhereowner );
-    lParametersCall.setViewExtractMode( project.orcasconfiguration.viewextractmode );
-    lParametersCall.setIsOneTimeScriptLogonlyMode( project.orcasconfiguration.isOneTimeScriptLogonlyMode );
-    if (project.orcasconfiguration.isExtractViewCommnets == true) {
+    lParametersCall.setLogonly( orcasconfiguration.logonly );
+    lParametersCall.setDropmode( orcasconfiguration.dropmode );
+    lParametersCall.setIndexparallelcreate( orcasconfiguration.indexparallelcreate );
+    lParametersCall.setIndexmovetablespace( orcasconfiguration.indexmovetablespace );
+    lParametersCall.setTablemovetablespace( orcasconfiguration.tablemovetablespace );
+    lParametersCall.setMviewlogmovetablespace( orcasconfiguration.mviewlogmovetablespace );
+    lParametersCall.setCreatemissingfkindexes( orcasconfiguration.createmissingfkindexes );
+    lParametersCall.setExcludewheretable( orcasconfiguration.excludewheretable );
+    lParametersCall.setExcludewheresequence( orcasconfiguration.excludewheresequence );
+    lParametersCall.setExcludewheremview( orcasconfiguration.excludewheremview );
+    lParametersCall.setDateformat( orcasconfiguration.dateformat );
+    lParametersCall.setExtensionParameter( orcasconfiguration.extensionparameter );
+    lParametersCall.setAdditionsOnly( orcasconfiguration.additionsonly );
+    lParametersCall.setLogIgnoredStatements( orcasconfiguration.logignoredstatements );
+    lParametersCall.setXmlLogFile( convertOutFile( orcasconfiguration.xmllogfile ) );
+    lParametersCall.setXmlInputFile( orcasconfiguration.xmlinputfile );
+    lParametersCall.setSetUnusedInsteadOfDropColumn( orcasconfiguration.setunusedinsteadofdropcolumn );
+    lParametersCall.setCreateIndexOnline( orcasconfiguration.indexonlinecreate );
+    lParametersCall.setMinimizeStatementCount( orcasconfiguration.minimizestatementcount );
+    lParametersCall.setCharsetName( orcasconfiguration.charsetname );
+    lParametersCall.setCharsetNameSqlLog( orcasconfiguration.charsetnamesqllog );
+    lParametersCall.setMultiSchema( orcasconfiguration.multischema );
+    lParametersCall.setMultiSchemaDbaViews( orcasconfiguration.multischemadbaviews );
+    lParametersCall.setMultiSchemaExcludewhereowner( orcasconfiguration.multischemaexcludewhereowner );
+    lParametersCall.setViewExtractMode( orcasconfiguration.viewextractmode );
+    lParametersCall.setIsOneTimeScriptLogonlyMode( orcasconfiguration.isOneTimeScriptLogonlyMode );
+    orcasconfiguration.extensions.forEach{lParametersCall.addExtension(it)};
+    orcasconfiguration.reverseExtensions.forEach{lParametersCall.addReverseExtension(it)};
+    if (orcasconfiguration.isExtractViewCommnets == true) {
       lParametersCall.setExtractViewCommnets(true);
     } else {
-      lParametersCall.setExtractViewCommnets(project.orcasconfiguration.isExtractViewCommnents);
+      lParametersCall.setExtractViewCommnets(orcasconfiguration.isExtractViewCommnents);
     }
 
-    lParametersCall.setUpdateEnabledStatus( project.orcasconfiguration.updateEnabledStatus );
+    lParametersCall.setUpdateEnabledStatus( orcasconfiguration.updateEnabledStatus );
 
-    lParametersCall.setDbdocPlantuml( project.orcasconfiguration.dbdocPlantuml );
+    lParametersCall.setDbdocPlantuml( orcasconfiguration.dbdocPlantuml );
 
-    if( project.orcasconfiguration.extensionHandler != null )
+    if( orcasconfiguration.extensionHandler != null )
     {
-      lParametersCall.setExtensionHandler( project.orcasconfiguration.extensionHandler );
+      lParametersCall.setExtensionHandler( orcasconfiguration.extensionHandler );
     }
 
-    if( !project.orcasconfiguration.usernameorcas.equals( "" ) )
+    if( !orcasconfiguration.usernameorcas.equals( "" ) )
     {
-      lParametersCall.setOrcasDbUser( project.orcasconfiguration.usernameorcas );
+      lParametersCall.setOrcasDbUser( orcasconfiguration.usernameorcas );
     }
     else
     {
-      if( project.orcasconfiguration.orcasusername != null )
+      if( orcasconfiguration.orcasusername != null )
       {
-        lParametersCall.setOrcasDbUser( project.orcasconfiguration.orcasusername );
+        lParametersCall.setOrcasDbUser( orcasconfiguration.orcasusername );
       }
       else
       {
-        lParametersCall.setOrcasDbUser( project.orcasconfiguration.username );
+        lParametersCall.setOrcasDbUser( orcasconfiguration.username );
       }
     }
 
-    if( project.orcasconfiguration.orcasusername != null )
+    if( orcasconfiguration.orcasusername != null )
     {
       JdbcConnectParameters lOrcasJdbcConnectParameters = new JdbcConnectParameters();
-      lOrcasJdbcConnectParameters.setJdbcDriver( project.orcasconfiguration.orcasjdbcdriver );
-      lOrcasJdbcConnectParameters.setJdbcUrl( project.orcasconfiguration.orcasjdbcurl == null ? pParameters.getJdbcConnectParameters().getJdbcUrl() : project.orcasconfiguration.orcasjdbcurl );
-      lOrcasJdbcConnectParameters.setJdbcUser( project.orcasconfiguration.orcasusername );
-      lOrcasJdbcConnectParameters.setJdbcPassword( project.orcasconfiguration.orcaspassword );
+      lOrcasJdbcConnectParameters.setJdbcDriver( orcasconfiguration.orcasjdbcdriver );
+      lOrcasJdbcConnectParameters.setJdbcUrl( orcasconfiguration.orcasjdbcurl == null ? pParameters.getJdbcConnectParameters().getJdbcUrl() : orcasconfiguration.orcasjdbcurl );
+      lOrcasJdbcConnectParameters.setJdbcUser( orcasconfiguration.orcasusername );
+      lOrcasJdbcConnectParameters.setJdbcPassword( orcasconfiguration.orcaspassword );
       lParametersCall.setOrcasJdbcConnectParameters( lOrcasJdbcConnectParameters );
     }
     else
