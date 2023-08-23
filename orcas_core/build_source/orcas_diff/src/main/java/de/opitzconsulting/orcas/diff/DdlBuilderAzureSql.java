@@ -4,6 +4,7 @@ import de.opitzconsulting.orcas.diff.OrcasDiff.DataHandler;
 import de.opitzconsulting.orcas.orig.diff.*;
 import de.opitzconsulting.origOrcasDsl.DataType;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,15 @@ import static de.opitzconsulting.origOrcasDsl.OrigOrcasDslPackage.Literals.*;
 public class DdlBuilderAzureSql extends DdlBuilder {
     public DdlBuilderAzureSql(Parameters pParameters, DatabaseHandler pDatabaseHandler) {
         super(pParameters, pDatabaseHandler);
+    }
+
+    @Override
+    protected void updateSeqquenceCurrentValue(SequenceDiff pSequenceDiff, BigDecimal lMaxValueSelectValue, BigDecimal lIstValue, StatementBuilder p) {
+        // if the sequence is new, it needs to be queried for initialization
+        p.addStmt("declare\n @v_dummy numeric;\n begin\n select @v_dummy = NEXT VALUE FOR " + pSequenceDiff.sequence_nameNew + ";\n end;");
+        p.addStmt("alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lMaxValueSelectValue.longValue() - lIstValue.longValue()));
+        p.addStmt("declare\n @v_dummy numeric;\n begin\n select @v_dummy = NEXT VALUE FOR " + pSequenceDiff.sequence_nameNew + ";\n end;");
+        p.addStmt("alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl(pSequenceDiff.increment_byNew, 1));
     }
 
     @Override

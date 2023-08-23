@@ -284,9 +284,7 @@ public abstract class DdlBuilder
       .forceDifferent( SEQUENCE__MAX_VALUE_SELECT )//
       .handle( p ->
       {
-        p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lMaxValueSelectValue.longValue() - lIstValue.longValue()) );
-        p.addStmt( "declare\n v_dummy number;\n begin\n select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual;\n end;" );
-        p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl( pSequenceDiff.increment_byNew, 1 ) );
+        updateSeqquenceCurrentValue(pSequenceDiff, lMaxValueSelectValue, lIstValue, p);
       } );
     }
     else
@@ -321,6 +319,12 @@ public abstract class DdlBuilder
     .ifDifferent( SEQUENCE__ORDER )//
     .failIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.orderNew.getLiteral() ) );
+  }
+
+  protected void updateSeqquenceCurrentValue(SequenceDiff pSequenceDiff, BigDecimal lMaxValueSelectValue, BigDecimal lIstValue, StatementBuilder p) {
+    p.addStmt("alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + (lMaxValueSelectValue.longValue() - lIstValue.longValue()));
+    p.addStmt("declare\n v_dummy number;\n begin\n select " + pSequenceDiff.sequence_nameNew + ".nextval into v_dummy from dual;\n end;");
+    p.addStmt("alter sequence " + pSequenceDiff.sequence_nameNew + " increment by " + nvl(pSequenceDiff.increment_byNew, 1));
   }
 
   public void createSequnece( StatementBuilder p, SequenceDiff pSequenceDiff, DataHandler pDataHandler )
@@ -1714,7 +1718,7 @@ public abstract class DdlBuilder
     p.stmtDone();
   }
 
-  private <T> T nvl( T pObject, T pDefault )
+  protected  <T> T nvl( T pObject, T pDefault )
   {
     return pObject == null ? pDefault : pObject;
   }

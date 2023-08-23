@@ -1262,13 +1262,20 @@ public class OrcasDiff
       {
         if( pSequenceDiff.max_value_selectNew != null )
         {
-          lSollStartValue = (BigDecimal) new WrapperReturnFirstValue( pSequenceDiff.max_value_selectNew, _callableStatementProvider ).executeForValue();
+          Object result = new WrapperReturnFirstValue(pSequenceDiff.max_value_selectNew, _callableStatementProvider).executeForValue();
+
+          if(result instanceof Integer) {
+            lSollStartValue = new BigDecimal((Integer) result);
+          } else {
+            lSollStartValue = (BigDecimal) result;
+          }
 
           lSollStartValue = lSollStartValue.add( BigDecimal.valueOf( 1 ) );
         }
       }
       catch( Exception e )
       {
+        Orcas.logError("cant execute " + pSequenceDiff.max_value_selectNew + " : " + e, _parameters);
         // kann vorkommen, wenn fuer das select benoetigte Tabellen nicht
         // exisitieren. kann erst richtig korrigiert werden, wenn auch der
         // Tabellenabgleich auf dieses Package umgestellt wurde
