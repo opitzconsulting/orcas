@@ -1264,7 +1264,11 @@ public class OrcasDiff
         {
           Object result = new WrapperReturnFirstValue(pSequenceDiff.max_value_selectNew, _callableStatementProvider).executeForValue();
 
-          if(result instanceof Integer) {
+          if (result == null) {
+            return null;
+          }
+
+          if (result instanceof Integer) {
             lSollStartValue = new BigDecimal((Integer) result);
           } else {
             lSollStartValue = (BigDecimal) result;
