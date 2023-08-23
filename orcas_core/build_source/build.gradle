@@ -3,7 +3,7 @@ subprojects
   project.ext.xtext_version = "2.6.1"
 
   project.group = "com.opitzconsulting.orcas"
-  project.version = "8.4.2"  
+  project.version = "8.4.3-SNAPSHOT"  
 
   repositories 
   {
