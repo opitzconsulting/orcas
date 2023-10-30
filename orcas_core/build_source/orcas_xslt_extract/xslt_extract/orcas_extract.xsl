@@ -380,6 +380,10 @@
 
   <template match="notnull">
     <if test=". = 'true'">
+      <if test="../not_null_constraint_name != ''">
+        <text> constraint </text>
+        <value-of select="../not_null_constraint_name" />
+      </if>
       <text> not null</text>
     </if>  
   </template>

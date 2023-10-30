@@ -1721,40 +1721,63 @@ public class LoadIstOracle extends LoadIst
            "        deferrable," + //
            "        deferred," + //
            "        constraints.status," + //
+           "        constraints.generated," + //
            "        search_condition" + //
            "   from " + getDataDictionaryView( "constraints" ) + //
            "  where constraint_type = 'C'" + //
-           "    and constraints.generated != 'GENERATED NAME'" + //
            "  order by table_name," + //
+           "           constraints.generated," + //
            "           constraint_name" + //
            "";
+
+    List<Column> columnsWithGeneratedNotNullConstraint = new ArrayList<>();
 
     new WrapperIteratorResultSet( lSql, getCallableStatementProvider() )
     {
       @Override
       protected void useResultSetRow( ResultSet pResultSet ) throws SQLException
       {
-        if( !isIgnoredTable( pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) ) )
-        {
-          Table lTable = findTable( pModel, pResultSet.getString( "table_name" ), pResultSet.getString( "owner" ) );
+        if (!isIgnoredTable(pResultSet.getString("table_name"), pResultSet.getString("owner"))) {
+          Table lTable = findTable(pModel, pResultSet.getString("table_name"), pResultSet.getString("owner"));
 
-          EnableType lEnableType = getEnableType( pResultSet );
+          String searchCondition = pResultSet.getString("search_condition");
+          boolean isGenerated = "GENERATED NAME".equals(pResultSet.getString("generated"));
 
-          DeferrType lDeferrType = getDeferrType( pResultSet );
+          Stream<Column> columnStream = ((List<Column>) lTable.getColumns())
+                  .stream()
+                  .filter(Column::isNotnull)
+                  .filter(it -> ("\"" + it.getName_string() + "\" IS NOT NULL").equals(searchCondition));
+          if (isGenerated) {
+            columnStream
+                    .forEach(columnsWithGeneratedNotNullConstraint::add);
+          } else {
+            Optional<Column> owningNotNullColumn = columnStream
+                    .filter(it -> !columnsWithGeneratedNotNullConstraint.contains(it))
+                    .findFirst();
 
-          logLoading( "constraint-C", pResultSet.getString( "table_name" ), pResultSet.getString( "constraint_name" ) );
+            if (owningNotNullColumn.isPresent()) {
+              owningNotNullColumn.get().setNot_null_constraint_name(pResultSet.getString("constraint_name"));
+              columnsWithGeneratedNotNullConstraint.add(owningNotNullColumn.get());
+            } else {
+              EnableType lEnableType = getEnableType(pResultSet);
 
-          Constraint lConstraint = new ConstraintImpl();
+              DeferrType lDeferrType = getDeferrType(pResultSet);
 
-          lConstraint.setConsName( pResultSet.getString( "constraint_name" ) );
+              logLoading("constraint-C", pResultSet.getString("table_name"), pResultSet.getString("constraint_name"));
 
-          lConstraint.setStatus( lEnableType );
+              Constraint lConstraint = new ConstraintImpl();
 
-          lConstraint.setDeferrtype( lDeferrType );
+              lConstraint.setConsName(pResultSet.getString("constraint_name"));
 
-          lConstraint.setRule( pResultSet.getString( "search_condition" ) );
+              lConstraint.setStatus(lEnableType);
 
-          lTable.getConstraints().add( lConstraint );
+              lConstraint.setDeferrtype(lDeferrType);
+
+              lConstraint.setRule(searchCondition);
+
+              lTable.getConstraints().add(lConstraint);
+            }
+          }
         }
       }
 

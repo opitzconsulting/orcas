@@ -309,7 +309,7 @@ public abstract class DdlBuilder
     .ifDifferent( SEQUENCE__CYCLE )//
     .failIfAdditionsOnly()//
     .handle( p -> p.addStmt( "alter sequence " + pSequenceDiff.sequence_nameNew + " " + pSequenceDiff.cycleNew.getLiteral() ) );
-    
+
     p1.handleAlterBuilder()//
     .ifDifferent( SEQUENCE__CACHE )//
     .ignoreIfAdditionsOnly()//
@@ -368,11 +368,11 @@ public abstract class DdlBuilder
     if( pSequenceDiff.cacheNew != null )
     {
       if ( pSequenceDiff.cacheNew.compareTo(BigInteger.ONE) > 0  ) {
-    	  p.stmtAppend( "cache " + pSequenceDiff.cacheNew );  
+    	  p.stmtAppend( "cache " + pSequenceDiff.cacheNew );
       } else {
     	  p.stmtAppend( "nocache ");
       }
-      
+
     }
 
     if( pSequenceDiff.orderNew != null )
@@ -419,6 +419,10 @@ public abstract class DdlBuilder
     if( pColumnDiff.notnullNew )
     {
       p.stmtStart( "alter table " + pTableDiff.nameNew + " modify ( " + pColumnDiff.nameNew );
+      if(pColumnDiff.not_null_constraint_nameNew != null) {
+        p.stmtAppend( "constraint" );
+        p.stmtAppend( pColumnDiff.not_null_constraint_nameNew );
+      }
       p.stmtAppend( "not null" );
       p.stmtAppend( ")" );
       p.stmtDone();
@@ -513,22 +517,32 @@ public abstract class DdlBuilder
 
     p1.handleAlterBuilder()//
     .ifDifferent( COLUMN__NOTNULL )//
+    .ifDifferent( COLUMN__NOT_NULL_CONSTRAINT_NAME )//
     .ignoreIfAdditionsOnly( pColumnDiff.notnullNew )//
     .handle( p ->
     {
-      p.stmtStartAlterTable( pTableDiff );
-      p.stmtAppend( "modify ( " + pColumnDiff.nameNew );
-      if( pColumnDiff.notnullNew == false )
-      {
-        p.stmtAppend( "null" );
-      }
-      else
-      {
-        p.stmtAppend( "not null" );
-      }
-      p.stmtAppend( ")" );
-      p.stmtDone();
-    } );
+        if (pColumnDiff.notnullIsEqual) {
+            p.stmtStartAlterTable(pTableDiff);
+            p.stmtAppend("modify ( " + pColumnDiff.nameNew);
+            p.stmtAppend("null");
+            p.stmtAppend(")");
+            p.stmtDone();
+        }
+
+        p.stmtStartAlterTable(pTableDiff);
+        p.stmtAppend("modify ( " + pColumnDiff.nameNew);
+        if (pColumnDiff.notnullNew == false) {
+            p.stmtAppend("null");
+        } else {
+            if (pColumnDiff.not_null_constraint_nameNew != null) {
+                p.stmtAppend("constraint");
+                p.stmtAppend(pColumnDiff.not_null_constraint_nameNew);
+            }
+            p.stmtAppend("not null");
+        }
+        p.stmtAppend(")");
+        p.stmtDone();
+    });
   }
 
   public void createPrimarykey( StatementBuilder p, TableDiff pTableDiff )
@@ -2268,9 +2282,12 @@ public abstract class DdlBuilder
 
     if( pColumnDiff.notnullNew )
     {
-      if( !pWithoutNotNull )
-      {
-        lReturn = lReturn + " not null";
+      if( !pWithoutNotNull ) {
+        if (pColumnDiff.not_null_constraint_nameNew != null) {
+          lReturn = lReturn + " constraint " + pColumnDiff.not_null_constraint_nameNew + " not null";
+        } else {
+          lReturn = lReturn + " not null";
+        }
       }
     }
 

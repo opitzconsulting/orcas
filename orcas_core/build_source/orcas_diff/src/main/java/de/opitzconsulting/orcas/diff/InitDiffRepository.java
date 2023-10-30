@@ -752,6 +752,7 @@ public class InitDiffRepository
     } );
     DiffRepository.getColumnMerge().byteorcharDefaultValue = lDefaultCharType;
     DiffRepository.getColumnMerge().nameIsConvertToUpperCase = true;
+    DiffRepository.getColumnMerge().not_null_constraint_nameIsConvertToUpperCase = true;
     DiffRepository.getColumnMerge().object_typeIsConvertToUpperCase = true;
 
     DiffRepository.setTableMerge( new TableMerge()
