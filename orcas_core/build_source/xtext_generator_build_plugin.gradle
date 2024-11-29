@@ -18,6 +18,11 @@ dependencies
 {
   compile "org.eclipse.xtext:org.eclipse.xtext.builder.standalone:${project.ext.xtext_version}"
   compile "org.eclipse.xtext:org.eclipse.xtext.xtext:${project.ext.xtext_version}"
+  compile "org.eclipse.emf:org.eclipse.emf.ecore:${project.ext.emf_version}"
+  compile "org.eclipse.emf:org.eclipse.emf.common:${project.ext.emf_version}"
+  compile "org.eclipse.emf:org.eclipse.emf.ecore.xmi:${project.ext.emf_version}"
+  compile "org.eclipse.emf:org.eclipse.emf.codegen.ecore:${project.ext.emf_version}"
+  compile "org.eclipse.emf:org.eclipse.emf.codegen:${project.ext.emf_version}"
 }
 
 task(copyFilesToBuild, type: Copy)

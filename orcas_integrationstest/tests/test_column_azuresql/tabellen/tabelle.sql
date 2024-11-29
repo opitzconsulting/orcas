@@ -25,7 +25,8 @@ create table tab_mod_cols
   col_chg_default       number(15)         default "7",
   col_set_no_default    number(15),
   col_set_byte          varchar2(15)  not null,
-  col_set_char          varchar2(15)  not null
+  col_set_char          varchar2(15)  not null,
+  col_inc_precision_def number(5,2)   default "0"
 );
 
 create table tab_datatypes

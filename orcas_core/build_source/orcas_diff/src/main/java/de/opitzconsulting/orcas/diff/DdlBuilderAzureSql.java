@@ -72,7 +72,7 @@ public class DdlBuilderAzureSql extends DdlBuilder {
             pP.addStmt("alter table " + pTableDiff.nameNew + " drop column " + pColumnDiff.nameOld);
             pP.addStmt("alter table " + pTableDiff.nameNew + " add " + createColumnCreatePart(pColumnDiff, false));
         } else {
-            pP.addStmt("alter table " + pTableDiff.nameNew + " alter column " + createColumnCreatePart(pColumnDiff, false));
+            pP.addStmt("alter table " + pTableDiff.nameNew + " alter column " + createColumnCreatePart(pColumnDiff, false, true));
         }
     }
 
@@ -113,11 +113,15 @@ public class DdlBuilderAzureSql extends DdlBuilder {
 
     @Override
     protected String createColumnCreatePart(ColumnDiff pColumnDiff, boolean pWithoutNotNull) {
+        return createColumnCreatePart(pColumnDiff, pWithoutNotNull, false);
+    }
+
+    private String createColumnCreatePart(ColumnDiff pColumnDiff, boolean pWithoutNotNull, boolean pWithoutDefault) {
         boolean isVirtual = "virtual".equals(pColumnDiff.virtualNew);
 
         String lReturn = pColumnDiff.nameNew + (isVirtual ? "" : (" " + getColumnDatatype(pColumnDiff)));
 
-        if (pColumnDiff.default_valueNew != null) {
+        if (pColumnDiff.default_valueNew != null && !pWithoutDefault) {
             if (isVirtual) {
                 lReturn = lReturn + " as (" + pColumnDiff.default_valueNew + ")";
             } else {

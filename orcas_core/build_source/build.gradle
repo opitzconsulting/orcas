@@ -1,6 +1,7 @@
 subprojects 
 {
   project.ext.xtext_version = "2.6.1"
+  project.ext.emf_version = "2.11.+"
 
   project.group = "com.opitzconsulting.orcas"
   project.version = "8.5.2-SNAPSHOT"  
