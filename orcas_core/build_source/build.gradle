@@ -1,10 +1,14 @@
 subprojects 
 {
   project.ext.xtext_version = "2.6.1"
-  project.ext.emf_version = "2.11.+"
+  project.ext.emf_ecore_version = "2.11.2"
+  project.ext.emf_common_version = "2.11.0"
+  project.ext.emf_ecore_xmi_version = "2.11.1"
+  project.ext.emf_codegen_ecore_version = "2.11.0"
+  project.ext.emf_codegen_version = "2.11.0"
 
   project.group = "com.opitzconsulting.orcas"
-  project.version = "8.5.2-SNAPSHOT"  
+  project.version = "8.6.4"  
 
   repositories 
   {
