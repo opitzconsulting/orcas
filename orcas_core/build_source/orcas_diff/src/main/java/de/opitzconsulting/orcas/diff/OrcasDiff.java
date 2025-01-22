@@ -238,6 +238,12 @@ public class OrcasDiff
                 lRecreateColumnNames.put(
                     lColumnDiff.nameOld,
                     Collections.singletonList(lDiffActionReasonDifferent));
+              } else {
+                  if (databaseHandler.isRecreateDependenciesForColumn(lColumnDiff)) {
+                      lRecreateColumnNames.put(
+                              lColumnDiff.nameOld,
+                              Collections.singletonList(new DiffActionReasonDifferent(diffReasonKeyRegistry.getDiffReasonKey(lColumnDiff))));
+                  }
               }
             }
           } )//

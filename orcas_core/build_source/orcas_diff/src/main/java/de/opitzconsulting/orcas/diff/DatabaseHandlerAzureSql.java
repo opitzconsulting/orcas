@@ -215,6 +215,14 @@ public class DatabaseHandlerAzureSql extends DatabaseHandler {
         return false;
     }
 
+    @Override
+    public boolean isRecreateDependenciesForColumn(ColumnDiff pColumnDiff) {
+        return (!pColumnDiff.notnullIsEqual
+                || !pColumnDiff.byteorcharIsEqual
+                || !pColumnDiff.scaleIsEqual
+                || !pColumnDiff.precisionIsEqual
+        ) && pColumnDiff.isOld && pColumnDiff.isNew;
+    }
 
     @Override
     public List<RecreateNeededBuilder.Difference> isRecreateColumn(ColumnDiff pColumnDiff) {

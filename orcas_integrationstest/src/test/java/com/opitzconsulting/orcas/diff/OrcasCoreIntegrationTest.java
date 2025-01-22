@@ -141,6 +141,7 @@ public class OrcasCoreIntegrationTest {
         private boolean _indexparallelcreate;
         private boolean _createmissingfkindexes;
         private boolean _test_extract;
+        private boolean _test_spool;
         private boolean _tablemovetablespace;
         private boolean _indexmovetablespace;
         private String _extensionfolder;
@@ -298,6 +299,7 @@ public class OrcasCoreIntegrationTest {
                 _indexparallelcreate = getBooleanProperty("indexparallelcreate", lDefaultProperties, lTestProperties);
                 _createmissingfkindexes = getBooleanProperty("createmissingfkindexes", lDefaultProperties, lTestProperties);
                 _test_extract = getBooleanProperty("test_extract", lDefaultProperties, lTestProperties);
+                _test_spool = getBooleanProperty("test_spool", lDefaultProperties, lTestProperties);
                 _tablemovetablespace = getBooleanProperty("tablemovetablespace", lDefaultProperties, lTestProperties);
                 _indexmovetablespace = getBooleanProperty("indexmovetablespace", lDefaultProperties, lTestProperties);
                 _extensionfolder = getProperty("extensionfolder", lDefaultProperties, lTestProperties);
@@ -881,6 +883,7 @@ public class OrcasCoreIntegrationTest {
     @Test
     public void test_03_run_with_spool() {
         assumeTestNotSkipped(orcasCoreIntegrationConfig.isWithRunWithSpoolTest() && !isExpectfailure());
+        Assume.assumeTrue("spool test not possible for testcase", _testSetup._test_spool);
 
         resetUsers();
         setupInitialState();

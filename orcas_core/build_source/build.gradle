@@ -8,7 +8,7 @@ subprojects
   project.ext.emf_codegen_version = "2.11.0"
 
   project.group = "com.opitzconsulting.orcas"
-  project.version = "8.6.5-SNAPSHOT"  
+  project.version = "8.6.5"  
 
   repositories 
   {

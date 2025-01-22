@@ -64,6 +64,10 @@ public abstract class DatabaseHandler {
         return isExpressionDifferentNotNull(pExpression1, pExpression2);
     }
 
+    public boolean isRecreateDependenciesForColumn(ColumnDiff pColumnDiff) {
+        return false;
+    }
+
     public List<RecreateNeededBuilder.Difference> isRecreateColumn(ColumnDiff pColumnDiff) {
         List<RecreateNeededBuilder.Difference> lReturn = new ArrayList<>();
 
