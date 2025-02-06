@@ -612,8 +612,8 @@ public class LoadIstAzureSql extends LoadIst {
                     lSequence.setMaxvalue(toBigInt(pResultSet.getBigDecimal("maximum_value")));
                     lSequence.setCycle(pResultSet.getBoolean("is_cycling") == Boolean.TRUE ? CycleType.CYCLE : CycleType.NOCYCLE);
                     lSequence.setCache(toBigInt(pResultSet.getBigDecimal("cache_size")));
-                    if (pWithSequeneceMayValueSelect) {
-                        lSequence.setMax_value_select(pResultSet.getString("current_value"));
+                    if (pWithSequeneceMayValueSelect && pResultSet.getBigDecimal("current_value") != null) {
+                        lSequence.setMax_value_select(pResultSet.getBigDecimal("current_value").add(BigDecimal.ONE).toString());
                     }
 
                     pModel.getModel_elements().add(lSequence);
