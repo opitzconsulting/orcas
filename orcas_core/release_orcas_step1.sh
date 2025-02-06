@@ -2,7 +2,7 @@
 
 export JAVA_HOME=C:\\Program\ Files\\Java\\jdk1.8.0_301
 
-new_orcas_version=8.6.5
+new_orcas_version=8.7.1
 
 cd ..
 
