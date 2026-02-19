@@ -117,10 +117,10 @@ UniqueKey :
   "constraint" consName=DBNAME "unique" "(" (uk_columns+=ColumnRef)+ ")" ("using" "index" ("tablespace" tablespace=DBNAME)? (indexname=DBNAME_WITH_SCHEMA)?)? (status=EnableType)? (",")?;
   
 Index :
-  "index" consName=DBNAME_WITH_SCHEMA ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? (",")?;  
+  "index" consName=DBNAME_WITH_SCHEMA ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (bitmap="bitmap")? (unique="unique")? (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? ("where" where=STRING)? (",")?;
   
 IndexExTable:
- "create" (uniqueness="unique"|uniqueness="nonunique")? (bitmap="bitmap")? "index" index_name=DBNAME_WITH_SCHEMA ("on")? table_name=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? ";";
+ "create" (uniqueness="unique"|uniqueness="nonunique")? (bitmap="bitmap")? "index" index_name=DBNAME_WITH_SCHEMA ("on")? table_name=DBNAME ("("(index_columns+=ColumnRef)+")" ("domain_index" domain_index_expression=STRING)?|function_based_expression=STRING) (logging=LoggingType)? ("tablespace" tablespace=DBNAME)? (compression=CompressType)? (parallel=ParallelType (parallel_degree=INT)? )? (global=IndexGlobalType)? ("where" where=STRING)? ";";
 
 enum FkDeleteRuleType :
   cascade="cascade"|no_action="no_action"|set_null="set_null";  

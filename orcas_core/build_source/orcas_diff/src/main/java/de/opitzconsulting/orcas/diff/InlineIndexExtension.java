@@ -36,6 +36,7 @@ public class InlineIndexExtension
         lIndex.setParallel_degree( lIndexExTable.getParallel_degree() );
         lIndex.setTablespace( lIndexExTable.getTablespace() );
         lIndex.setUnique( lIndexExTable.getUniqueness() );
+        lIndex.setWhere( lIndexExTable.getWhere() );
         lIndex.getIndex_columns().addAll( ModelUtil.copyColumnRefs( lIndexExTable.getIndex_columns() ) );
 
         findTable( lCacheTableMap, pModel, lIndexExTable.getTable_name() ).getInd_uks().add( lIndex );

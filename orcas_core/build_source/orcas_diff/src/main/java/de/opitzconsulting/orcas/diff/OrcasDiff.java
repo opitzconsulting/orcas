@@ -292,6 +292,7 @@ public class OrcasDiff
           .ifDifferent( INDEX__BITMAP )//
           .ifDifferent( INDEX__GLOBAL )//
           .ifDifferent( INDEX__COMPRESSION )//
+          .ifDifferent( INDEX__WHERE, databaseHandler.isExpressionDifferent(lIndexDiff.whereNew,lIndexDiff.whereOld) )//
           .ifColumnDependentRecreate( lRecreateColumnNames, lIndexDiff.index_columnsDiff )//
           .calculate();
         }

@@ -1,8 +1,10 @@
 package de.opitzconsulting.orcas.diff;
 
-import de.opitzconsulting.orcas.diff.OrcasDiff.DataHandler;
 import de.opitzconsulting.orcas.orig.diff.*;
+import de.opitzconsulting.origOrcasDsl.CompressType;
 import de.opitzconsulting.origOrcasDsl.DataType;
+import de.opitzconsulting.origOrcasDsl.ParallelType;
+import de.opitzconsulting.origOrcasDsl.PermanentnessType;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -189,7 +191,68 @@ public class DdlBuilderAzureSql extends DdlBuilder {
 
     @Override
     public void createIndex(StatementBuilder pP, TableDiff pTableDiff, IndexDiff pIndexDiff, boolean pIsIndexParallelCreate) {
-        super.createIndex(pP, pTableDiff, pIndexDiff, false);
+        pP.stmtStart( "create" );
+        if( pIndexDiff.uniqueNew != null )
+        {
+          pP.stmtAppend( pIndexDiff.uniqueNew );
+        }
+        if( pIndexDiff.bitmapNew != null )
+        {
+          pP.stmtAppend( "bitmap" );
+        }
+        pP.stmtAppend( "index" );
+        pP.stmtAppend( pIndexDiff.consNameNew );
+        pP.stmtAppend( "on" );
+        pP.stmtAppend( pTableDiff.nameNew );
+        pP.stmtAppend( "(" );
+        pP.stmtAppend( getIndexExpression(pIndexDiff, true ) );
+        pP.stmtAppend( ")" );
+        if( pIndexDiff.domain_index_expressionNew != null )
+        {
+          pP.stmtAppend( pIndexDiff.domain_index_expressionNew );
+        }
+        else
+        {
+          if( pIndexDiff.loggingNew != null )
+          {
+            pP.stmtAppend( pIndexDiff.loggingNew.getLiteral() );
+          }
+        }
+        if( pIndexDiff.tablespaceNew != null )
+        {
+          pP.stmtAppend( "tablespace" );
+          pP.stmtAppend( pIndexDiff.tablespaceNew );
+        }
+        if( pIndexDiff.globalNew != null )
+        {
+          pP.stmtAppend( pIndexDiff.globalNew.getLiteral() );
+        }
+        if( pIndexDiff.bitmapNew == null && pIndexDiff.compressionNew == CompressType.COMPRESS )
+        {
+          pP.stmtAppend( "compress" );
+        }
+        if( pIndexDiff.compressionNew == CompressType.NOCOMPRESS )
+        {
+          pP.stmtAppend( "nocompress" );
+        }
+
+        if( pIndexDiff.parallelNew == ParallelType.PARALLEL )
+        {
+          pP.stmtAppend( "parallel" );
+          if( pIndexDiff.parallel_degreeNew != null && pIndexDiff.parallel_degreeNew > 1 )
+          {
+            pP.stmtAppend( " " + pIndexDiff.parallel_degreeNew );
+          }
+        }
+
+        if( pIndexDiff.whereNew != null )
+        {
+            pP.stmtAppend( "where" );
+            pP.stmtAppend( pIndexDiff.whereNew );
+        }
+
+        boolean lIgnoreIfAdditionsOnly = pTableDiff.isOld && pIndexDiff.uniqueNew != null && !isAllColumnsOnlyNew(pTableDiff, pIndexDiff.index_columnsDiff );
+        pP.stmtDone( lIgnoreIfAdditionsOnly );
     }
 
     @Override

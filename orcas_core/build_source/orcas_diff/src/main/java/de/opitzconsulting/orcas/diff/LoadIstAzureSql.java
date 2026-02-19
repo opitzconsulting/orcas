@@ -415,6 +415,7 @@ public class LoadIstAzureSql extends LoadIst {
                 "        schema_name() as table_owner," + //
                 "        indexes.is_primary_key as is_primary_key," + //
                 "        indexes.is_unique_constraint as is_unique_constraint," + //
+                "        indexes.filter_definition as filter_definition," + //
                 "        is_unique" + //
                 "   from " + getDataDictionaryView("indexes") + //
                 "      , " + getDataDictionaryView("tables") + //
@@ -448,6 +449,9 @@ public class LoadIstAzureSql extends LoadIst {
 
                                 if (pResultSet.getBoolean("is_unique")) {
                                     lIndex.setUnique("unique");
+                                }
+                                if (pResultSet.getString("filter_definition") != null) {
+                                    lIndex.setWhere(pResultSet.getString("filter_definition"));
                                 }
 
                                 table.getInd_uks().add(lIndex);

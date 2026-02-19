@@ -445,6 +445,7 @@
     <apply-templates select="compression" />
     <apply-templates select="parallel" />
     <apply-templates select="global" />
+    <apply-templates select="where" />
     <if test="position() != last()">
       <text>,</text>
     </if>
@@ -498,6 +499,12 @@
     <if test=". = 'global_temporary'">
       <text> global temporary</text>
     </if>
+  </template>
+
+  <template match="where">
+    <text> where "</text>
+    <value-of select="." />
+    <text>"</text>
   </template>
 
   <template match="transactionControl[parent::Table]">
