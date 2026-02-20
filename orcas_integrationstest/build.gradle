@@ -9,7 +9,7 @@ dependencies
 {
   compile 'junit:junit:4.12'
   compile group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler',
-                  version: '8.7.1'
+                  version: '8.8.1'
 
   compile group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
   compile "com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre8"

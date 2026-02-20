@@ -1,8 +1,9 @@
 #!/bin/sh
 
-export JAVA_HOME=C:\\Program\ Files\\Java\\jdk1.8.0_301
+#export JAVA_HOME=C:\\Program\ Files\\Java\\jdk1.8.0_301
+export JAVA_HOME=C:\\Users\\fsa\\.jdks\\corretto-1.8.0_472
 
-new_orcas_version=8.7.1
+new_orcas_version=8.8.1
 
 cd ..
 

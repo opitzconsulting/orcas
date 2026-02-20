@@ -18,8 +18,12 @@ mvn clean install
 run this in upload_maven_central:
 ./gradlew clean publish
 
-close repository on https://oss.sonatype.org/#stagingRepositories
-release repository on https://oss.sonatype.org/#stagingRepositories
+https://ossrh-staging-api.central.sonatype.com/swagger-ui/#/default/manual_upload_default_repository
+repo in  https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.opitzconsulting?publishing_type=user_managed
+https://central.sonatype.com/publishing/deployments
+
+#close repository on https://oss.sonatype.org/#stagingRepositories
+#release repository on https://oss.sonatype.org/#stagingRepositories
 
 change version of examples to released version:
 examples/gradle*/build.gradle
